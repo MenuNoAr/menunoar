@@ -616,6 +616,52 @@ document.getElementById('saveTextBtn').onclick = () => {
 };
 
 
+// --- QR CODE ---
+let qrCode = null;
+
+window.openQrModal = () => {
+    document.getElementById('qrModal').classList.add('open');
+
+    // Generate QR if not exists or update it
+    const url = `${window.location.origin}/menu.html?id=${currentData.slug}`;
+
+    if (!qrCode) {
+        // Wait for library to be ready if loaded async
+        if (typeof QRCodeStyling === 'undefined') {
+            alert("QR Code library loading... Try again in a second.");
+            return;
+        }
+
+        qrCode = new QRCodeStyling({
+            width: 300,
+            height: 300,
+            type: "svg",
+            data: url,
+            image: "assets/images/logo.svg",
+            dotsOptions: {
+                color: "#00B2FF",
+                type: "rounded"
+            },
+            backgroundOptions: {
+                color: "#ffffff",
+            },
+            imageOptions: {
+                crossOrigin: "anonymous",
+                margin: 10
+            }
+        });
+        const container = document.getElementById('qr-code-container');
+        container.innerHTML = '';
+        qrCode.append(container);
+    } else {
+        qrCode.update({ data: url });
+    }
+}
+
+window.downloadQr = () => {
+    if (qrCode) qrCode.download({ name: `menu-${currentData.slug}-qr`, extension: "png" });
+}
+
 // Settings Modal
 window.openSettingsModal = () => {
     document.getElementById('modalSlug').value = currentData.slug || '';
