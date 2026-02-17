@@ -202,6 +202,7 @@ h1#restName {
     width: 100%;
     overflow: hidden;
     /* Ensure content fits */
+    transition: height 0.3s ease;
 }
 
 .slider-track {

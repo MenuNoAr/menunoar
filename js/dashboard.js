@@ -6,6 +6,7 @@ let currentUser;
 let restaurantId;
 let currentData = {}; // Store restaurant data
 let menuItems = [];   // Store items
+let currentSlideIndex = 0; // Store active slide
 
 // Function to initialize everything
 async function init() {
@@ -252,7 +253,13 @@ function renderMenu(items) {
     addCatBtn.className = 'tab-btn btn-add-cat';
     addCatBtn.onclick = addNewCategory;
     nav.appendChild(addCatBtn);
+
+    // Initialize height for active slide
+    setTimeout(() => scrollToSlide(currentSlideIndex), 50);
 }
+
+// Global observer for dynamic height
+let slideObserver = null;
 
 // --- DRAG AND DROP LOGIC ---
 function addDragEvents(item, allCats) {
@@ -333,13 +340,53 @@ async function saveCategoryOrder(order) {
 // Slider Navigation
 window.scrollToSlide = (index) => {
     const track = document.getElementById('editorTrack');
+    if (!track || !track.children.length) return;
+
+    // Clamp index
+    if (index >= track.children.length) index = track.children.length - 1;
+    if (index < 0) index = 0;
+
+    currentSlideIndex = index; // Save state
+
     track.style.transform = `translateX(-${index * 100}%)`;
 
     // Update active tab
     document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+        // Warning: tab-btn includes the "add new" button which is last
+        // and might not match track.children indices 1:1 if we count the btn-add-cat
+        // But in renderMenu we add btn-add-cat to nav.
+        // The track has N sections. Nav has N+1 buttons.
+        // We only want to highlight the first N buttons.
         if (i === index) btn.classList.add('active');
         else btn.classList.remove('active');
     });
+
+    // Precise Tab Activation
+    const tabs = document.querySelectorAll('.draggable-tab');
+    tabs.forEach((t, i) => {
+        if (i === index) t.classList.add('active');
+        else t.classList.remove('active');
+    });
+
+    // --- Dynamic Height Logic ---
+    const container = document.getElementById('menuContainer');
+    const currentSlide = track.children[index];
+
+    if (currentSlide) {
+        // 1. Immediate set
+        container.style.height = currentSlide.offsetHeight + 'px';
+
+        // 2. Continuous watch (for images loading, added items, etc)
+        if (slideObserver) slideObserver.disconnect();
+
+        slideObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                container.style.height = entry.target.offsetHeight + 'px';
+            }
+        });
+
+        slideObserver.observe(currentSlide);
+    }
 };
 
 function createItemCard(item) {
