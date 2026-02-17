@@ -274,7 +274,7 @@ function renderMenu(items) {
 
     // "Add Category" button in Nav
     const addCatBtn = document.createElement('button');
-    addCatBtn.innerHTML = '<i class="fa-solid fa-folder-plus"></i>';
+    addCatBtn.innerHTML = '<i class="fa-solid fa-plus"></i> <span style="margin-left: 5px;">Nova Categoria</span>';
     addCatBtn.className = 'tab-btn btn-add-cat';
     addCatBtn.onclick = addNewCategory;
     nav.appendChild(addCatBtn);
