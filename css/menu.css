@@ -50,13 +50,17 @@ body {
 
 /* === MOBILE VIEW CONTAINER === */
 #mobile-view {
-    max-width: 430px;
-    margin: 40px auto;
+    max-width: 100%;
+    /* Full Width */
+    margin: 0;
+    /* No margin */
     background: var(--bg-mobile);
-    min-height: calc(100vh - 80px);
+    min-height: 100vh;
     position: relative;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
-    border-radius: 40px;
+    box-shadow: none;
+    /* No shadow */
+    border-radius: 0;
+    /* No rounded corners */
     overflow: hidden;
     padding-bottom: 80px;
 }
@@ -80,7 +84,8 @@ header#heroHeader {
 
 .cover-image {
     width: 100%;
-    height: 300px;
+    height: 350px;
+    /* Increased height for desktop feel */
     background-size: cover;
     background-position: center;
     position: relative;
@@ -97,9 +102,13 @@ header#heroHeader {
 .header-content {
     padding: 20px 24px;
     text-align: center;
-    margin-top: -60px;
+    margin-top: -80px;
+    /* Overlap cover */
     position: relative;
     z-index: 10;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 h1#restName {
@@ -164,6 +173,10 @@ h1#restName {
     /* Force minimum height */
     align-items: center;
     /* Center items vertically */
+    max-width: 800px;
+    /* Centered Width */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .category-tabs::-webkit-scrollbar {
@@ -229,6 +242,8 @@ h1#restName {
 
 .slide-content {
     /* Optional wrapper */
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .slide-title {
