@@ -31,9 +31,10 @@ async function initSupabase() {
 initSupabase();
 
 // Scroll Handling for Navbar Animation
+// Scroll Handling for Navbar Animation (Desktop Only)
 window.addEventListener('scroll', () => {
-    // Ignore scroll effect on mobile to keep navbar static/compact
-    if (window.innerWidth <= 768) return;
+    // Only run on desktop
+    if (!window.matchMedia("(min-width: 769px)").matches) return;
 
     // Se passarmos dos 50px de scroll, ativa o modo "scrolled" (encolhe)
     if (window.scrollY > 50) {

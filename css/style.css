@@ -585,17 +585,32 @@ footer {
 
     /* Conventional Full Width Navbar for Mobile */
     .glass-nav {
-        top: 0;
-        left: 0;
-        transform: none;
-        width: 100%;
-        max-width: 100%;
-        border-radius: 0;
-        border: none;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 0 !important;
+        border: none !important;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        padding: 1rem 1.5rem;
-        background: rgba(255, 255, 255, 0.98);
-        /* Less transparent for readability */
+        padding: 0.8rem 1.5rem;
+        background: #ffffff !important;
+        /* Solid background for stability */
+        backdrop-filter: none !important;
+        /* Avoid rendering bugs */
+        z-index: 99999 !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 70px;
+        /* Fixed height */
+    }
+
+    .nav-content {
+        width: 100%;
+        /* Ensure content spreads */
     }
 
     .nav-logo {
