@@ -167,24 +167,22 @@
 /* Editor Canvas (Mimics #mobile-view from menu.css) */
 .editor-canvas {
     margin: 90px auto 40px auto;
-    /* 90px top for nav spacing + gap, 40px bottom */
     min-height: calc(100vh - 130px);
     background: var(--bg-card);
-    /* White card */
     max-width: 600px;
-    /* Match menu.css default */
     width: 100%;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-    /* Lifted card look */
-    border-radius: 0 0 20px 20px;
-    /* Slight rounding at bottom */
+    /* Exact match to menu.css #mobile-view defaults */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
+    border-radius: 0;
     position: relative;
+    padding-bottom: 80px;
 }
 
-/* On mobile, remove margins/shadows to fill screen */
+/* On mobile, fill the screen */
 @media (max-width: 600px) {
     .editor-canvas {
         margin-top: 70px;
+        /* Just clear navbar */
         margin-bottom: 0;
         box-shadow: none;
         border-radius: 0;
@@ -192,24 +190,18 @@
     }
 }
 
-/* Overriding old mobile emulator styles */
-#mobile-view {
-    max-width: 800px !important;
-    /* Limit width like desktop menu */
-    width: 100%;
-    margin: 0 auto !important;
-    /* Center it */
-    border: none !important;
-    /* No phone border */
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.05) !important;
-    /* Subtle page shadow */
-    border-radius: 0 0 16px 16px !important;
-    background: var(--bg-card) !important;
-    min-height: 100vh !important;
-    position: relative;
-    box-sizing: border-box;
-    padding-bottom: 100px;
-    /* Space for footer/scroll */
+/* Ensure scrollbars are handled nicely */
+html::-webkit-scrollbar {
+    width: 8px;
+}
+
+html::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
 }
 
 /* Ensure scrollbars are handled nicely */
