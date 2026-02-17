@@ -13,6 +13,10 @@ ALTER TABLE "restaurants" ADD COLUMN IF NOT EXISTS "owner_id" uuid REFERENCES au
 TRUNCATE TABLE "restaurants" CASCADE;
 TRUNCATE TABLE "menu_items" CASCADE;
 
+-- Remover dependências antigas
+ALTER TABLE "restaurants" DROP CONSTRAINT IF EXISTS "restaurants_owner_username_fkey";
+ALTER TABLE "restaurants" DROP COLUMN IF EXISTS "owner_username";
+
 -- A tabela antiga de users já não é necessária
 DROP TABLE IF EXISTS "app_users";
 

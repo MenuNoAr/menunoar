@@ -266,7 +266,13 @@
 
         document.getElementById('googleBtn').addEventListener('click', async () => {
             const { error } = await signInWithGoogle();
-            if (error) showError("Erro ao iniciar com Google: " + error.message);
+            if (error) {
+                if (error.message.includes("provider is not enabled")) {
+                    showError("O login com Google ainda não foi ativado no sistema (Supabase).");
+                } else {
+                    showError("Erro: " + error.message);
+                }
+            }
         });
     </script>
 </body>
