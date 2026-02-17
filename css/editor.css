@@ -368,33 +368,32 @@ html::-webkit-scrollbar-thumb {
     opacity: 1;
 }
 
-.btn-toggle {
-    background: var(--success);
-    color: white;
-    width: 28px;
-    height: 28px;
-    font-size: 0.8rem;
+/* Stronger Action Buttons */
+.action-btn.btn-toggle {
+    background: var(--success) !important;
+    color: white !important;
+    border: none !important;
 }
 
-.btn-toggle.off {
-    background: #ccc;
+.action-btn.btn-toggle.off {
+    background: #ccc !important;
 }
 
-.btn-edit {
-    background: var(--primary);
-    color: white;
-    width: 28px;
-    height: 28px;
-    font-size: 0.8rem;
+.action-btn.btn-edit {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
 }
 
-.btn-delete {
-    background: white;
-    border: 1px solid #fee2e2;
-    color: #ef4444;
-    width: 28px;
-    height: 28px;
-    font-size: 0.8rem;
+.action-btn.btn-delete {
+    background: white !important;
+    border: 2px solid #fee2e2 !important;
+    color: #ef4444 !important;
+}
+
+.action-btn.btn-delete:hover {
+    background: #fee2e2 !important;
+    color: #d32f2f !important;
 }
 
 /* === PREVIOUS STYLES BELOW === */
