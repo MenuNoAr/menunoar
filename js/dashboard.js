@@ -103,7 +103,10 @@ document.getElementById('setupForm').onsubmit = async (e) => {
         name: name,
         slug: slug,
         description: desc,
-        menu_type: "digital"
+        menu_type: "digital",
+        subscription_plan: 'pro',
+        subscription_status: 'trialing',
+        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
     };
 
     const { data: created, error } = await supabase.from('restaurants').insert([newRest]).select().single();
@@ -731,6 +734,33 @@ window.openSettingsModal = () => {
     const isPdf = currentData.menu_type === 'pdf';
     document.getElementById('pdfToggle').checked = isPdf;
     togglePdfDetails();
+
+    // Plan Logic
+    const planText = document.getElementById('currentPlanText');
+    if (planText) {
+        if (currentData.subscription_plan === 'pro') {
+            // Check status
+            if (currentData.subscription_status === 'trialing') {
+                const daysLeft = Math.ceil((new Date(currentData.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
+                if (daysLeft > 0) {
+                    planText.textContent = `Teste Grátis (${daysLeft} dias restantes)`;
+                    planText.style.color = "#16a34a"; // Green
+                } else {
+                    planText.textContent = "Teste Expirado";
+                    planText.style.color = "#ef4444"; // Red
+                }
+            } else if (currentData.subscription_status === 'active') {
+                planText.textContent = "Profissional (Ativo)";
+                planText.style.color = "#16a34a"; // Green
+            } else {
+                planText.textContent = "Profissional (" + currentData.subscription_status + ")";
+                planText.style.color = "#ef4444"; // Red
+            }
+        } else {
+            planText.textContent = "Sem Plano Ativo";
+            planText.style.color = "#6b7280"; // Gray
+        }
+    }
 
     document.getElementById('settingsModal').classList.add('open');
 }
