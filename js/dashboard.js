@@ -144,7 +144,7 @@ function renderHeader(data) {
     document.getElementById('restNameEditor').textContent = data.name || "Nome do Restaurante";
     document.getElementById('restDescEditor').textContent = data.description || "Descrição curta (clica para editar)";
 
-    // Cover (Match menu.css height of 350px)
+    // Cover
     const coverDiv = document.getElementById('coverEditor');
     if (data.cover_url) {
         coverDiv.style.backgroundImage = `url('${data.cover_url}')`;
@@ -152,7 +152,7 @@ function renderHeader(data) {
     } else {
         coverDiv.style.backgroundImage = 'none';
         coverDiv.style.backgroundColor = '#ddd';
-        coverDiv.style.height = '350px'; // Match real menu height even if empty
+        coverDiv.style.height = '120px'; // Reduced height for empty state
     }
 
     // Badges
@@ -209,8 +209,11 @@ function renderMenu(items) {
         btn.className = 'tab-btn draggable-tab';
         if (index === 0) btn.classList.add('active');
 
+        // Make whole button clickable
+        btn.onclick = () => scrollToSlide(index);
+
         btn.innerHTML = `
-            <span onclick="scrollToSlide(${index})">${cat}</span>
+            <span>${cat}</span>
             <i class="fa-solid fa-grip-lines-vertical handle" style="margin-left:8px; opacity:0.3; cursor:grab;"></i>
         `;
 
