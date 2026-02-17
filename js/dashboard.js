@@ -121,6 +121,30 @@ async function loadData() {
         // Keep it but maybe add a checkmark
     }
 
+    // --- TRIAL TIMER IN NAVBAR ---
+    const timerBadge = document.getElementById('trialTimer');
+    if (timerBadge) {
+        if (rest.subscription_status === 'trialing' && !rest.stripe_customer_id) {
+            const daysLeft = Math.ceil((new Date(rest.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
+            if (daysLeft > 0) {
+                timerBadge.textContent = `${daysLeft} dias`;
+                timerBadge.style.display = 'inline-block';
+            } else {
+                timerBadge.textContent = `Expirado`;
+                timerBadge.style.display = 'inline-block';
+                timerBadge.style.background = '#fee2e2';
+                timerBadge.style.color = '#ef4444';
+            }
+        } else if (rest.subscription_status === 'active' || rest.stripe_customer_id) {
+            timerBadge.textContent = `PRO`;
+            timerBadge.style.display = 'inline-block';
+            timerBadge.style.background = '#dcfce7';
+            timerBadge.style.color = '#16a34a';
+        } else {
+            timerBadge.style.display = 'none';
+        }
+    }
+
 
     // Fetch Items
     const { data: items } = await supabase.from('menu_items')

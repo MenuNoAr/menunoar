@@ -115,6 +115,23 @@
     color: var(--border);
 }
 
+.trial-timer-badge {
+    background: #fef9c3;
+    color: #854d0e;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    margin-left: 5px;
+    display: none;
+    /* Hidden by default */
+}
+
+body.dark-mode .trial-timer-badge {
+    background: #3f3f17;
+    color: #fef08a;
+}
+
 .nav-tools {
     display: flex;
     gap: 10px;
