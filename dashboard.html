@@ -30,85 +30,130 @@
 
 <body>
 
-    <div class="dashboard-header">
-        <div class="header-brand">
-            <img src="assets/images/logo.svg" alt="Logo" id="dashboardLogo">
-            <div class="header-text">
-                <h1>Editor Visual</h1>
-                <span id="userDisplay">...</span>
+    <!-- SETUP SCREEN (Visible only if no restaurant) -->
+    <div id="setup-screen" class="setup-container" style="display:none;">
+        <div class="setup-card">
+            <div class="setup-header">
+                <img src="assets/images/logo.svg" alt="Logo" class="setup-logo">
+                <h2>Bem-vindo</h2>
+                <p>Vamos configurar o teu restaurante.</p>
             </div>
-        </div>
 
-        <div class="header-actions">
-            <button class="btn-header-action" onclick="openSettingsModal()">
-                <i class="fa-solid fa-sliders"></i> Configurações
-            </button>
+            <form id="setupForm" class="setup-form">
+                <div class="form-group">
+                    <label>Nome do Restaurante</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-store"></i>
+                        <input type="text" id="setupName" placeholder="ex: O Tasco do Zé" required
+                            oninput="generateSlug(this.value)">
+                    </div>
+                </div>
 
-            <a id="liveLink" href="#" target="_blank" class="btn-header-link">
-                Ver ao Vivo <i class="fa-solid fa-rocket"></i>
-            </a>
+                <div class="form-group">
+                    <label>Link Personalizado</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-link"></i>
+                        <input type="text" id="setupSlug" placeholder="ex: o-tasco-do-ze" required>
+                    </div>
+                    <small>menunoar.com/menu.html?id=<b>slug</b></small>
+                </div>
 
-            <div class="header-separator"></div>
+                <div class="form-group">
+                    <label>Descrição Curta</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-align-left"></i>
+                        <textarea id="setupDesc" rows="2" placeholder="Descreve o teu espaço..."></textarea>
+                    </div>
+                </div>
 
-            <!-- Theme Icon Toggle -->
-            <button id="themeBtn" class="btn-icon-only" onclick="toggleDarkMode()" title="Alternar Tema">
-                <i class="fa-solid fa-moon"></i>
-            </button>
+                <div class="form-checkbox-group">
+                    <input type="checkbox" id="setupDemo" checked style="width: auto; margin-right: 10px;">
+                    <label for="setupDemo">
+                        <strong>Adicionar pratos de exemplo?</strong>
+                        <span>Cria categorias e pratos iniciais.</span>
+                    </label>
+                </div>
 
-            <button onclick="signOut()" class="btn-header-secondary">
-                <i class="fa-solid fa-right-from-bracket"></i> Include Sair
-            </button>
+                <button type="submit" class="btn-confirm btn-full">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Criar Menu
+                </button>
+            </form>
         </div>
     </div>
 
-    <!-- MAIN EDITOR AREA -->
-    <div class="editor-container">
+    <!-- MAIN DASHBOARD (Hidden by default until loaded) -->
+    <div id="main-dashboard" style="display:none;">
 
-        <!-- Mobile Preview / Editor Wrapper -->
-        <div id="mobile-view">
+        <div class="dashboard-navbar">
+            <div class="nav-brand">
+                <img src="assets/images/logo.svg" alt="MenuNoAr">
+                <span class="divider">|</span>
+                <span id="userDisplay">Chef</span>
+            </div>
 
-            <!-- HEADER (Editable) -->
-            <header id="heroHeader">
-                <div id="coverEditor" class="cover-image editable-container" onclick="triggerCoverUpload()">
-                    <div class="edit-icon-overlay"><i class="fa-solid fa-camera"></i>&nbsp; Alterar Capa</div>
+            <div class="nav-tools">
+                <button class="btn-nav" onclick="openQrModal()" title="QR Code">
+                    <i class="fa-solid fa-qrcode"></i> <span class="desktop-only">QR Code</span>
+                </button>
+                <button class="btn-nav" onclick="openSettingsModal()" title="Configurações">
+                    <i class="fa-solid fa-gear"></i> <span class="desktop-only">Configurar</span>
+                </button>
+                <a id="liveLink" href="#" target="_blank" class="btn-nav btn-live" title="Ver ao Vivo">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="desktop-only">Ver Menu</span>
+                </a>
+                <button class="btn-nav" onclick="toggleDarkMode()" title="Tema">
+                    <i class="fa-solid fa-moon" id="themeIcon"></i>
+                </button>
+                <button class="btn-nav btn-danger-soft" onclick="signOut()" title="Sair">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- EDITOR CANVAS (Mimics menu.html structure but editable) -->
+        <main class="editor-canvas">
+
+            <header id="heroHeader" class="menu-header">
+                <div id="coverEditor" class="cover-image editable-trigger" onclick="triggerCoverUpload()">
+                    <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
                     <input type="file" id="coverUpload" accept="image/*" style="display:none;">
                 </div>
 
-                <div class="header-content">
-                    <h1 id="restNameEditor" class="text-editable" onclick="editRestName()">Restaurante Nome</h1>
-                    <p id="restDescEditor" class="description text-editable" onclick="editRestDesc()">Descrição...</p>
+                <div class="header-content container">
+                    <h1 id="restNameEditor" class="editable-text" onclick="editRestName()">Restaurante</h1>
+                    <p id="restDescEditor" class="editable-text-sm" onclick="editRestDesc()">Descrição...</p>
 
                     <div class="info-badges">
-                        <span id="badgeWifi" class="editable-container" onclick="editWifi()">
+                        <span id="badgeWifi" class="badge editable-badge" onclick="editWifi()">
                             <i class="fa-solid fa-wifi"></i> <span id="textWifi">Wifi</span>
                         </span>
-                        <span id="badgePhone" class="editable-container" onclick="editPhone()">
+                        <span id="badgePhone" class="badge editable-badge" onclick="editPhone()">
                             <i class="fa-solid fa-phone"></i> <span id="textPhone">Tel</span>
                         </span>
-                        <span id="badgeAddress" class="editable-container" onclick="editAddress()">
+                        <span id="badgeAddress" class="badge editable-badge" onclick="editAddress()">
                             <i class="fa-solid fa-location-dot"></i> <span id="textAddress">Morada</span>
                         </span>
                     </div>
                 </div>
             </header>
 
-            <!-- TABS (Replica of menu.html categoryTabs) -->
-            <div id="categoryNav" class="category-tabs"
-                style="justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 15px; scrollbar-width: auto; -webkit-overflow-scrolling: touch;">
-                <!-- Categories injected here -->
+            <!-- CATEGORY NAV -->
+            <div id="categoryNav" class="category-scroll-nav sticky-nav">
+                <!-- Tabs Injected via JS -->
             </div>
 
-            <!-- MENU CONTENT -->
-            <div id="menuContainer" class="slider-window">
-                <!-- Items injected here as slides or vertical sections -->
+            <!-- MENU GRID -->
+            <div class="container menu-grid-layout">
+                <div id="menuContainer" class="menu-sections">
+                    <!-- Items Injected via JS -->
+                </div>
             </div>
 
-            <footer class="menu-footer">
-                <p>Menu digital por <b>Menu no Ar</b></p>
-                <p>Modo de Edição</p>
+            <footer class="app-footer">
+                <p>Menu no Ar &copy; 2026</p>
             </footer>
 
-        </div>
+        </main>
     </div>
 
     <!-- SETTINGS MODAL -->

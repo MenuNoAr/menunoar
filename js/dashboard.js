@@ -31,11 +31,9 @@ async function init() {
 
 window.signOut = () => signOut();
 
-// --- DATA LOADING ---
+// --- DATA LOADING & FLOW CONTROL ---
 async function loadData() {
-    if (!currentUser) return;
-
-    // Fetch Restaurant by OWNER ID (Supabase Auth ID)
+    // 1. Check for User Restaurant
     let { data: rest, error } = await supabase
         .from('restaurants')
         .select('*')
@@ -44,18 +42,23 @@ async function loadData() {
         .maybeSingle();
 
     if (error) {
-        console.error("Erro ao carregar restaurante:", error);
+        console.error("Erro ao carregar dados:", error);
         return;
     }
 
-    // NEW USER FLOW: Show Setup Wizard if no restaurant exists
+    // 2. Flow Control
     if (!rest) {
-        console.log("Nenhum restaurante encontrado. A iniciar Setup Wizard.");
-        document.getElementById('setupModal').classList.add('open');
+        // Show Setup Screen
+        document.getElementById('setup-screen').style.display = 'flex';
+        document.getElementById('main-dashboard').style.display = 'none';
         return;
+    } else {
+        // Show Dashboard
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('main-dashboard').style.display = 'block';
     }
 
-    // EXISTING USER FLOW
+    // 3. Load Dashboard Data
     restaurantId = rest.id;
     currentData = rest;
     renderHeader(rest);
@@ -72,21 +75,21 @@ async function loadData() {
     renderMenu(menuItems);
 }
 
-// SETUP WIZARD LOGIC
+// --- SETUP WIZARD LOGIC ---
 window.generateSlug = (name) => {
     const slug = name.toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
-        .replace(/[^\w\s-]/g, '') // Remove chars
-        .replace(/\s+/g, '-')     // Space to dash
-        .replace(/-+/g, '-');     // Collapse dashes
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
     document.getElementById('setupSlug').value = slug;
 }
 
 document.getElementById('setupForm').onsubmit = async (e) => {
     e.preventDefault();
     const btn = e.target.querySelector('button');
-    const originalText = btn.textContent;
-    btn.textContent = "A criar magia... ✨";
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A Criar...';
     btn.disabled = true;
 
     const name = document.getElementById('setupName').value;
@@ -107,12 +110,12 @@ document.getElementById('setupForm').onsubmit = async (e) => {
 
     if (error) {
         alert("Erro ao criar: " + (error.code === '23505' ? 'Este link já existe. Escolha outro.' : error.message));
-        btn.textContent = originalText;
+        btn.innerHTML = originalText;
         btn.disabled = false;
         return;
     }
 
-    // 2. Add Demo Content (Optional)
+    // 2. Add Demo Content
     if (withDemo && created) {
         const demoItems = [
             { restaurant_id: created.id, name: 'Bacalhau à Lagareiro', description: 'Lombo alto, batatas a murro e muito azeite.', price: 18.50, category: 'Pratos Principais', available: true },
@@ -123,10 +126,8 @@ document.getElementById('setupForm').onsubmit = async (e) => {
         await supabase.from('menu_items').insert(demoItems);
     }
 
-    // 3. Close & Load
-    document.getElementById('setupModal').classList.remove('open');
-    // await loadData(); // removed to force reload
-    window.location.reload(); // Refresh to ensure clean state
+    // 3. Reload to switch view
+    window.location.reload();
 };
 
 // --- RENDERING ---
