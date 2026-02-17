@@ -40,6 +40,7 @@ async function loadData() {
         .from('restaurants')
         .select('*')
         .eq('owner_id', currentUser.id)
+        .limit(1)
         .maybeSingle();
 
     if (error) {
