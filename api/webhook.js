@@ -82,7 +82,8 @@ async function handleCheckoutSessionCompleted(session) {
         .update({
             subscription_plan: 'pro',
             subscription_status: 'active',
-            stripe_customer_id: customerId
+            stripe_customer_id: customerId,
+            trial_ends_at: null // Disable trial immediately
         })
         .eq('owner_id', userId);
 

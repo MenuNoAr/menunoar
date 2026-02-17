@@ -93,7 +93,8 @@ export default async function handler(req, res) {
                 await supabase.from('restaurants').update({
                     stripe_customer_id: customerId,
                     subscription_status: 'active',
-                    subscription_plan: 'pro'
+                    subscription_plan: 'pro',
+                    trial_ends_at: null // Remove trial info
                 }).eq('id', currentDb.id);
 
                 return res.status(200).json({ status: 'active', updated: true });
