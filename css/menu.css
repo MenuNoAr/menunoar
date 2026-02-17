@@ -154,10 +154,16 @@ h1#restName {
     /* Prevent scroll, wrap instead */
     width: 100%;
     gap: 5px;
-    padding: 0 5px 0 5px;
-    margin-bottom: 15px;
+    padding: 0 5px 10px 5px;
+    /* Added bottom padding */
+    margin-bottom: 5px;
+    /* Reduced margin slightly to compensate */
     scrollbar-width: none;
     border-bottom: 1px solid var(--border);
+    min-height: 60px;
+    /* Force minimum height */
+    align-items: center;
+    /* Center items vertically */
 }
 
 .category-tabs::-webkit-scrollbar {
