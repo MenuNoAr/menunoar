@@ -951,7 +951,6 @@ document.getElementById('itemEditForm').onsubmit = async (e) => {
 window.closeModal = (id) => document.getElementById(id).classList.remove('open');
 
 // Dark Mode logic reused
-// Dark Mode logic reused
 window.toggleDarkMode = () => {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
@@ -964,7 +963,7 @@ window.toggleDarkMode = () => {
     }
 
     // Swap Icon
-    const btnIcon = document.querySelector('#themeBtn i');
+    const btnIcon = document.getElementById('themeIcon');
     if (btnIcon) {
         btnIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     }

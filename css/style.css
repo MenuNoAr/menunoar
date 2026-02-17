@@ -27,6 +27,40 @@
     --font-body: 'Plus Jakarta Sans', sans-serif;
 }
 
+/* Dark Mode Variables */
+body.dark-mode {
+    --bg-light: #0f172a;
+    --white: #1e293b;
+    --text-dark: #f8fafc;
+    --text-gray: #94a3b8;
+    --gradient-soft: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .glass-nav {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .nav-links a,
+body.dark-mode .btn-text {
+    color: #f8fafc;
+}
+
+body.dark-mode .feature-card,
+body.dark-mode .footer-brand img,
+body.dark-mode .cta-box {
+    background: #1e293b;
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode footer {
+    background: #0f172a;
+    border-top-color: rgba(255, 255, 255, 0.05);
+}
+
 /* Reset */
 * {
     margin: 0;
