@@ -753,3 +753,85 @@ a.btn-secondary {
 .text-center {
     text-align: center;
 }
+
+/* --- LOCKED OVERLAY --- */
+.locked-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.locked-content {
+    background: var(--bg-card);
+    padding: 40px;
+    border-radius: 24px;
+    max-width: 450px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.4s ease-out;
+}
+
+.locked-icon {
+    font-size: 3rem;
+    color: #ef4444;
+    margin-bottom: 20px;
+    animation: heartBeat 1.5s infinite;
+}
+
+.locked-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin: 25px 0;
+}
+
+.locked-features span {
+    background: #fee2e2;
+    color: #ef4444;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes heartBeat {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+body.dark-mode .locked-features span {
+    background: #7f1d1d;
+    color: #fecaca;
+}

@@ -269,8 +269,9 @@
                 if (data.session) {
                     window.location.href = 'dashboard.html';
                 } else {
-                    showMsg("Conta criada! Verifica o teu email para confirmar.", 'success');
-                    btn.textContent = "Verifica o Email";
+                    // Set flag and redirect to login
+                    localStorage.setItem('signupEmailPending', 'true');
+                    window.location.href = 'login.html';
                 }
             }
         });

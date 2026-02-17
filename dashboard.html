@@ -133,6 +133,33 @@
         </div>
     </div>
 
+    <!-- EXPIRED ACCOUNT BLOCKER -->
+    <div id="expiredBlocker" class="locked-overlay" style="display:none;">
+        <div class="locked-content">
+            <div class="locked-icon">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2>Acesso Bloqueado</h2>
+            <p>O teu período de teste gratuito terminou. Para continuares a gerir o teu menu e mantê-lo online para os
+                clientes, ativa o teu plano profissional agora.</p>
+
+            <div class="locked-features">
+                <span><i class="fa-solid fa-circle-xmark"></i> Edição de Itens</span>
+                <span><i class="fa-solid fa-circle-xmark"></i> Download de QR Code</span>
+                <span><i class="fa-solid fa-circle-xmark"></i> Personalização Visual</span>
+            </div>
+
+            <a href="subscription.html" class="btn-confirm btn-full"
+                style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 100%;">
+                <i class="fa-solid fa-rocket" style="margin-right: 10px;"></i> Ativar Premium Agora
+            </a>
+            <button onclick="signOut()" class="btn-nav"
+                style="margin-top: 15px; width: 100%; justify-content: center; border: 1px solid var(--border);">
+                Sair da Conta
+            </button>
+        </div>
+    </div>
+
     <!-- MAIN DASHBOARD (Hidden by default until loaded) -->
     <div id="main-dashboard" style="display:none;">
 

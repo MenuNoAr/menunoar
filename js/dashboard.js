@@ -125,9 +125,15 @@ async function loadData() {
         // Hide Upgrade Button completely
         const upgradeBtn = document.querySelector('a[href="subscription.html"]');
         if (upgradeBtn) upgradeBtn.style.display = 'none';
-
-        // Hide "Premium" in nav if we want (or keep it as status)
-        // Keep it but maybe add a checkmark
+    } else {
+        // User is NOT Premium (No active Stripe sub). Check internal trial.
+        const daysLeft = Math.ceil((new Date(rest.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
+        if (daysLeft <= 0) {
+            const blocker = document.getElementById('expiredBlocker');
+            if (blocker) blocker.style.display = 'flex';
+            // Optional: prevent fetching items if blocked
+            // return; 
+        }
     }
 
     // --- TRIAL TIMER IN NAVBAR ---

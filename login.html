@@ -222,9 +222,24 @@
         const form = document.getElementById('loginForm');
         const errorMsg = document.getElementById('error-msg');
 
-        function showError(msg) {
+        function showMsg(msg, isSuccess = false) {
             errorMsg.textContent = msg;
             errorMsg.style.display = 'block';
+            if (isSuccess) {
+                errorMsg.style.background = '#dcfce7';
+                errorMsg.style.color = '#15803d';
+                errorMsg.style.border = '1px solid #bbf7d0';
+            } else {
+                errorMsg.style.background = '#fee2e2';
+                errorMsg.style.color = '#b91c1c';
+                errorMsg.style.border = '1px solid #fecaca';
+            }
+        }
+
+        // Check for signup success
+        if (localStorage.getItem('signupEmailPending') === 'true') {
+            localStorage.removeItem('signupEmailPending');
+            showMsg("Conta criada! Verifica o teu email para confirmar.", true);
         }
 
         form.addEventListener('submit', async (e) => {
@@ -243,7 +258,7 @@
             const { data, error } = await signIn(email, password);
 
             if (error) {
-                showError("Email ou password incorretos.");
+                showMsg("Email ou password incorretos.");
                 btn.textContent = originalText;
                 btn.disabled = false;
             } else {
@@ -255,9 +270,9 @@
             const { error } = await signInWithGoogle();
             if (error) {
                 if (error.message.includes("provider is not enabled")) {
-                    showError("O login com Google ainda não foi ativado no sistema (Supabase).");
+                    showMsg("O login com Google ainda não foi ativado no sistema (Supabase).");
                 } else {
-                    showError("Erro: " + error.message);
+                    showMsg("Erro: " + error.message);
                 }
             }
         });
