@@ -174,16 +174,38 @@
 
 /* Overriding old mobile emulator styles */
 #mobile-view {
-    max-width: 100% !important;
+    max-width: 800px !important;
+    /* Limit width like desktop menu */
+    width: 100%;
+    margin: 0 auto !important;
+    /* Center it */
     border: none !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-    background: transparent !important;
-    min-height: auto !important;
+    /* No phone border */
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.05) !important;
+    /* Subtle page shadow */
+    border-radius: 0 0 16px 16px !important;
+    background: var(--bg-card) !important;
+    min-height: 100vh !important;
+    position: relative;
+    box-sizing: border-box;
+    padding-bottom: 100px;
+    /* Space for footer/scroll */
 }
 
-/* Editable Indicators */
+/* Ensure scrollbars are handled nicely */
+#mobile-view::-webkit-scrollbar {
+    width: 8px;
+}
+
+#mobile-view::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#mobile-view::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
 .editable-text:hover,
 .editable-text-sm:hover,
 .editable-badge:hover {
