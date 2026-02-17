@@ -227,7 +227,7 @@
 
             // Group Items
             let uniqueCats = [...new Set(items.map(i => i.category))];
-            
+
             // Apply Custom Order
             if (restaurant.category_order && Array.isArray(restaurant.category_order)) {
                 const savedOrder = restaurant.category_order;
@@ -291,6 +291,8 @@
                 track.appendChild(slide);
             });
 
+            let slideObserver = null;
+
             window.switchToCategory = (index) => {
                 currentCategoryIndex = index;
                 // Slide Logic
@@ -306,11 +308,30 @@
                     }
                 });
 
-                // Scroll to top of content (optional, but good UX)
-                // document.getElementById('menuSliderWindow').scrollTop = 0;
+                // --- Dynamic Height Logic ---
+                const container = document.getElementById('menuSliderWindow');
+                const currentSlide = track.children[index];
+
+                if (currentSlide) {
+                    // 1. Immediate set
+                    container.style.height = currentSlide.offsetHeight + 'px';
+
+                    // 2. Continuous watch (for images loading, etc)
+                    if (slideObserver) slideObserver.disconnect();
+
+                    slideObserver = new ResizeObserver(entries => {
+                        for (let entry of entries) {
+                            container.style.height = entry.target.offsetHeight + 'px';
+                        }
+                    });
+
+                    slideObserver.observe(currentSlide);
+                }
             };
 
             document.getElementById('loading').style.display = 'none';
+            // Init height
+            setTimeout(() => switchToCategory(0), 50);
         }
 
         init();
