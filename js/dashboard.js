@@ -83,13 +83,22 @@ async function loadData() {
     renderHeader(rest);
     updateLiveLink(rest.slug);
 
+
     // --- SUBSCRIPTION UI CHECK ---
-    // If Active, hide "Trial" badge and Upgrade buttons
-    if (rest.subscription_status === 'active') {
+    const hasStripeId = !!rest.stripe_customer_id;
+    const isStripeActive = rest.subscription_status === 'active';
+    const isStripeTrial = rest.subscription_status === 'trialing' && hasStripeId;
+
+    // If Active OR (Trialing AND Has Card Linked), we consider them "Premium Safe"
+    if (isStripeActive || isStripeTrial) {
         // Find the "Teu Plano" section and update it
         const planText = document.getElementById('currentPlanText');
         if (planText) {
-            planText.textContent = "Profissional (Membro Premium)";
+            if (isStripeActive) {
+                planText.textContent = "Profissional (Membro Premium)";
+            } else {
+                planText.textContent = "Profissional (Teste Confirmado)";
+            }
             planText.style.color = "#16a34a"; // Green check
         }
 
