@@ -50,17 +50,17 @@ body {
 
 /* === MOBILE VIEW CONTAINER === */
 #mobile-view {
-    max-width: 100%;
-    /* Full Width */
-    margin: 0;
-    /* No margin */
+    max-width: 600px;
+    /* Limit content width */
+    margin: 0 auto;
+    /* Center horizontally */
     background: var(--bg-mobile);
     min-height: 100vh;
     position: relative;
-    box-shadow: none;
-    /* No shadow */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
+    /* Subtle shadow */
     border-radius: 0;
-    /* No rounded corners */
+    /* Keep rectangular as requested */
     overflow: hidden;
     padding-bottom: 80px;
 }
