@@ -5,25 +5,35 @@
 let supabaseInstance = null;
 let configLoaded = false;
 
+let configPromise = null;
+
+// Shared config fetcher
+export async function getConfig() {
+    if (!configPromise) {
+        configPromise = fetch('/api/config').then(res => {
+            if (!res.ok) throw new Error('Failed to load config');
+            return res.json();
+        }).catch(err => {
+            console.error("Config Load Error:", err);
+            return null;
+        });
+    }
+    return configPromise;
+}
+
 // Initialize Supabase (Fetch config only once)
 async function getSupabase() {
     if (supabaseInstance) return supabaseInstance;
 
-    try {
-        const response = await fetch('/api/config');
-        if (!response.ok) throw new Error('Failed to load config');
-        const config = await response.json();
+    const config = await getConfig();
+    if (!config) return null;
 
-        if (window.supabase) {
-            supabaseInstance = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
-            configLoaded = true;
-            return supabaseInstance;
-        } else {
-            console.error("Supabase JS not loaded");
-            return null;
-        }
-    } catch (e) {
-        console.error("Auth Init Error:", e);
+    if (window.supabase) {
+        supabaseInstance = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+        configLoaded = true;
+        return supabaseInstance;
+    } else {
+        console.error("Supabase JS not loaded");
         return null;
     }
 }
