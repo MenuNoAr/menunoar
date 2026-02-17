@@ -423,21 +423,21 @@ function createItemCard(item) {
     const opacity = isAvail ? '1' : '0.5';
 
     return `
-        <div class="menu-item ${!isAvail ? 'unavailable' : ''} editable-container" style="position:relative; align-items:center;">
+        <div id="item-card-${item.id}" class="menu-item ${!isAvail ? 'unavailable' : ''} editable-container" style="position:relative; align-items:center;">
             
-            <!-- Visibility Toggle (Left Side) -->
-            <div class="item-status" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding-right:5px;">
-                <button class="btn-eye-toggle" onclick="toggleAvailability('${item.id}', ${isAvail})" title="Alterar Visibilidade" 
-                        style="border:none; background:transparent; font-size:1.2rem; color:${eyeColor}; cursor:pointer; padding:10px; transition:transform 0.2s;">
-                    <i class="fa-solid ${eyeIcon}"></i>
-                </button>
-                <span style="font-size:0.6rem; color:#999; margin-top:-5px;">${isAvail ? 'Visível' : 'Oculto'}</span>
-            </div>
-
             <div class="item-text" onclick="openEditItemModal('${item.id}')" style="cursor:pointer; flex:1;">
                 <h3 style="margin-bottom:5px;">${item.name}</h3>
                 <p class="item-desc" style="font-size:0.85rem; color:#666; margin-bottom:8px;">${item.description || ''}</p>
-                <div class="item-price" style="font-weight:700;">${Number(item.price).toFixed(2)}€</div>
+                
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div class="item-price" style="font-weight:700;">${Number(item.price).toFixed(2)}€</div>
+                    
+                    <!-- Toggle moved next to price -->
+                    <button class="btn-eye-toggle" onclick="toggleAvailability('${item.id}', ${isAvail}, this); event.stopPropagation();" title="Visibilidade" 
+                            style="border:none; background:transparent; font-size:1rem; color:${eyeColor}; cursor:pointer; padding:5px; transition:transform 0.2s;">
+                        <i class="fa-solid ${eyeIcon}"></i>
+                    </button>
+                </div>
             </div>
             
             <div class="item-img" onclick="openImageModal('${item.id}')" style="cursor:pointer;">
@@ -578,9 +578,37 @@ window.handleItemImageUpload = async (id, input) => {
     }
 }
 
-window.toggleAvailability = async (id, currentObj) => {
-    await supabase.from('menu_items').update({ available: !currentObj }).eq('id', id);
-    loadData();
+window.toggleAvailability = async (id, currentStatus, btn) => {
+    // Optimistic Update
+    const newStatus = !currentStatus;
+    const card = document.getElementById(`item-card-${id}`);
+
+    // Update Local State
+    const item = menuItems.find(i => i.id == id);
+    if (item) item.available = newStatus;
+
+    // UI Updates
+    if (card) {
+        if (newStatus) card.classList.remove('unavailable');
+        else card.classList.add('unavailable');
+    }
+
+    // Button Update
+    if (btn) {
+        const icon = btn.querySelector('i');
+        if (newStatus) {
+            icon.className = 'fa-solid fa-eye';
+            btn.style.color = 'var(--success)';
+            btn.setAttribute('onclick', `toggleAvailability('${id}', true, this); event.stopPropagation();`);
+        } else {
+            icon.className = 'fa-solid fa-eye-slash';
+            btn.style.color = '#ccc';
+            btn.setAttribute('onclick', `toggleAvailability('${id}', false, this); event.stopPropagation();`);
+        }
+    }
+
+    // Background DB Update
+    await supabase.from('menu_items').update({ available: newStatus }).eq('id', id);
 }
 
 window.deleteItem = async (id) => {
