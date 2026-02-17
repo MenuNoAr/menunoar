@@ -166,8 +166,8 @@
 
 /* Editor Canvas (Mimics #mobile-view from menu.css) */
 .editor-canvas {
-    margin: 90px auto 40px auto;
-    min-height: calc(100vh - 130px);
+    margin: 70px auto 0 auto;
+    min-height: calc(100vh - 70px);
     background: var(--bg-card);
     max-width: 600px;
     width: 100%;
@@ -247,6 +247,153 @@ html::-webkit-scrollbar-thumb {
 
 .editable-trigger:hover .edit-overlay {
     opacity: 1;
+}
+
+/* --- FIX LAYOUT & SLIDER --- */
+
+/* Tab Nav */
+.category-scroll-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding: 0 5px 15px 5px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+    /* Hide scrollbar */
+    align-items: center;
+    white-space: nowrap;
+}
+
+.category-scroll-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-btn {
+    flex: 0 0 auto;
+    padding: 10px 15px;
+    margin: 0;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #888;
+    cursor: pointer;
+    position: relative;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    background: #e0f2fe;
+    /* Light blue background for active */
+    font-weight: 700;
+}
+
+/* Remove underline style from menu.css if it conflicts, or just use pill style for editor */
+.tab-btn.active::after {
+    content: none;
+}
+
+/* Container for Slider */
+.menu-sections {
+    width: 100%;
+    overflow: hidden;
+    /* Hides horizontal overflow */
+    position: relative;
+}
+
+.slider-track {
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.menu-slide {
+    min-width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    /* Reduced padding */
+}
+
+/* Item Styling Force Fix */
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 15px;
+    gap: 15px;
+    margin-bottom: 15px;
+    align-items: flex-start;
+}
+
+.item-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-text {
+    flex: 1;
+    min-width: 0;
+    /* Text truncation fix */
+}
+
+/* Hide edit overlays by default */
+.item-actions {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    display: flex;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+}
+
+.menu-item:hover .item-actions {
+    opacity: 1;
+}
+
+/* Stronger Action Buttons */
+.action-btn.btn-toggle {
+    background: var(--success) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.action-btn.btn-toggle.off {
+    background: #ccc !important;
+}
+
+.action-btn.btn-edit {
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.action-btn.btn-delete {
+    background: white !important;
+    border: 2px solid #fee2e2 !important;
+    color: #ef4444 !important;
+}
+
+.action-btn.btn-delete:hover {
+    background: #fee2e2 !important;
+    color: #d32f2f !important;
 }
 
 /* === PREVIOUS STYLES BELOW === */
@@ -366,4 +513,91 @@ body.dark-mode {
     color: #666;
     font-size: 0.8rem;
     opacity: 0.5;
+}
+
+/* === MISSING BUTTON STYLES === */
+
+/* Reset */
+button {
+    font-family: inherit;
+}
+
+/* Cancel / Secondary Buttons */
+.btn-cancel,
+.btn-secondary {
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    /* For links */
+}
+
+a.btn-secondary {
+    display: inline-flex;
+    /* Ensure links behave like buttons */
+}
+
+.btn-cancel:hover,
+.btn-secondary:hover {
+    background: var(--bg-page) !important;
+    color: var(--text) !important;
+    border-color: #999 !important;
+}
+
+.small {
+    padding: 8px 16px !important;
+    font-size: 0.9rem !important;
+}
+
+/* Action Buttons (Edit/Delete icons) */
+.action-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: transform 0.2s, background 0.2s;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    color: var(--text-muted);
+}
+
+.action-btn:hover {
+    transform: scale(1.1);
+    color: var(--primary);
+}
+
+.btn-delete:hover {
+    color: #ef4444;
+}
+
+/* Add Category Button override */
+.btn-add-cat {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f9ff;
+    color: var(--primary);
+    border: 1px dashed var(--primary);
+    border-radius: 20px;
+    min-width: 150px;
+}
+
+.btn-add-cat:hover {
+    background: #e0f2fe;
 }
