@@ -416,30 +416,28 @@ window.scrollToSlide = (index) => {
 
 function createItemCard(item) {
     const isAvail = item.available;
+    const eyeIcon = isAvail ? 'fa-eye' : 'fa-eye-slash';
+    const eyeColor = isAvail ? 'var(--primary)' : '#999';
+
     return `
         <div class="menu-item ${!isAvail ? 'unavailable' : ''} editable-container" style="position:relative;">
             
-            <div class="item-actions">
-                <button class="action-btn btn-trigger ${isAvail ? 'btn-toggle' : 'btn-toggle off'}" onclick="toggleAvailability('${item.id}', ${isAvail})" title="Disponibilidade">
-                   ${isAvail ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>'}
-                </button>
-                <button class="action-btn btn-edit" onclick="openEditItemModal('${item.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
-                <button class="action-btn btn-delete" onclick="deleteItem('${item.id}')" title="Apagar"><i class="fa-solid fa-trash"></i></button>
-            </div>
+            <!-- Visibility Toggle (Always Visible) -->
+            <button class="btn-eye-toggle" onclick="toggleAvailability('${item.id}', ${isAvail})" title="Visibilidade" style="position:absolute; top:10px; right:10px; border:none; background:transparent; font-size:1.1rem; color:${eyeColor}; cursor:pointer; z-index:5; padding:5px;">
+                <i class="fa-solid ${eyeIcon}"></i>
+            </button>
 
-            <div class="item-text" onclick="openEditItemModal('${item.id}')">
-                <h3>${item.name}</h3>
-                <p class="item-desc">${item.description || ''}</p>
-                <div class="item-price">${Number(item.price).toFixed(2)}€</div>
+            <div class="item-text" onclick="openEditItemModal('${item.id}')" style="padding-right:30px; cursor:pointer;">
+                <h3 style="margin-bottom:5px;">${item.name}</h3>
+                <p class="item-desc" style="font-size:0.85rem; color:#666; margin-bottom:8px;">${item.description || ''}</p>
+                <div class="item-price" style="font-weight:700;">${Number(item.price).toFixed(2)}€</div>
             </div>
             
-            <div class="item-img" onclick="triggerItemImageUpload('${item.id}')">
+            <div class="item-img" onclick="openImageModal('${item.id}')" style="cursor:pointer;">
                 ${item.image_url
             ? `<img src="${item.image_url}">`
-            : `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#eee; color:#bbb; font-size:2rem;"><i class="fa-solid fa-image"></i></div>`
+            : `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#eee; color:#bbb; font-size:1.5rem;"><i class="fa-solid fa-image"></i></div>`
         }
-                <div class="edit-icon-overlay"><i class="fa-solid fa-camera"></i></div>
-                <input type="file" id="item-upload-${item.id}" onchange="handleItemImageUpload('${item.id}', this)" style="display:none;" accept="image/*">
             </div>
         </div>
     `;
@@ -615,6 +613,61 @@ document.getElementById('saveTextBtn').onclick = () => {
     closeModal('textModal');
 };
 
+
+
+/* --- IMAGE MODAL LOGIC --- */
+let currentImageItemId = null;
+
+window.openImageModal = (id) => {
+    currentImageItemId = id;
+    const item = menuItems.find(i => i.id == id);
+    if (!item) return;
+
+    const display = document.getElementById('imgPreviewDisplay');
+    const placeholder = document.getElementById('imgPreviewPlaceholder');
+
+    if (item.image_url) {
+        display.src = item.image_url;
+        display.style.display = 'block';
+        placeholder.style.display = 'none';
+        document.getElementById('btnRemoveImage').style.display = 'inline-flex';
+    } else {
+        display.style.display = 'none';
+        placeholder.style.display = 'block';
+        document.getElementById('btnRemoveImage').style.display = 'none';
+    }
+
+    document.getElementById('imageModal').classList.add('open');
+};
+
+document.getElementById('btnChangeImage').onclick = () => {
+    document.getElementById('modalImageUpload').click();
+};
+
+document.getElementById('modalImageUpload').onchange = async (e) => {
+    if (!e.target.files.length || !currentImageItemId) return;
+
+    const btn = document.getElementById('btnChangeImage');
+    const original = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    // Reuse existing upload handler logic
+    await handleItemImageUpload(currentImageItemId, e.target);
+
+    btn.innerHTML = original;
+    btn.disabled = false;
+    closeModal('imageModal');
+};
+
+document.getElementById('btnRemoveImage').onclick = async () => {
+    if (!currentImageItemId) return;
+    if (confirm("Remover imagem deste prato?")) {
+        await supabase.from('menu_items').update({ image_url: null }).eq('id', currentImageItemId);
+        closeModal('imageModal');
+        loadData();
+    }
+};
 
 // --- QR CODE ---
 let qrCode = null;
