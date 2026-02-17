@@ -482,7 +482,7 @@ body {
     background-color: var(--light-bg);
 }
 
-body.dark-mode {
+.dark-mode {
     --light-bg: #111;
     --bg-card: #1E1E1E;
     --text: #fff;

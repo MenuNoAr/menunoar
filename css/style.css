@@ -28,7 +28,7 @@
 }
 
 /* Dark Mode Variables */
-body.dark-mode {
+.dark-mode {
     --bg-light: #0f172a;
     --white: #1e293b;
     --text-dark: #f8fafc;
@@ -39,24 +39,24 @@ body.dark-mode {
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
 }
 
-body.dark-mode .glass-nav {
+.dark-mode .glass-nav {
     background: rgba(30, 41, 59, 0.8);
     border-color: rgba(255, 255, 255, 0.1);
 }
 
-body.dark-mode .nav-links a,
-body.dark-mode .btn-text {
+.dark-mode .nav-links a,
+.dark-mode .btn-text {
     color: #f8fafc;
 }
 
-body.dark-mode .feature-card,
-body.dark-mode .footer-brand img,
-body.dark-mode .cta-box {
+.dark-mode .feature-card,
+.dark-mode .footer-brand img,
+.dark-mode .cta-box {
     background: #1e293b;
     border-color: rgba(255, 255, 255, 0.05);
 }
 
-body.dark-mode footer {
+.dark-mode footer {
     background: #0f172a;
     border-top-color: rgba(255, 255, 255, 0.05);
 }

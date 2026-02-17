@@ -23,9 +23,23 @@
     <!-- Editor Styles (Overlays) -->
     <link rel="stylesheet" href="css/editor.css">
 
-    <!-- Defer non-critical scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js" defer></script>
+
+    <script>
+        // CRITICAL: Check theme BEFORE body renders to avoid white flash
+        (function () {
+            const savedTheme = localStorage.getItem('menu_theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark-mode');
+                // Also add it to body as soon as it exists
+                window.addEventListener('scroll', function initTheme() {
+                    document.body.classList.add('dark-mode');
+                    window.removeEventListener('scroll', initTheme);
+                });
+            }
+        })();
+    </script>
 </head>
 
 <body>
