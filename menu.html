@@ -226,7 +226,20 @@
             if (!items) items = [];
 
             // Group Items
-            const uniqueCats = [...new Set(items.map(i => i.category))];
+            let uniqueCats = [...new Set(items.map(i => i.category))];
+            
+            // Apply Custom Order
+            if (restaurant.category_order && Array.isArray(restaurant.category_order)) {
+                const savedOrder = restaurant.category_order;
+                uniqueCats.sort((a, b) => {
+                    const indexA = savedOrder.indexOf(a);
+                    const indexB = savedOrder.indexOf(b);
+                    const valA = indexA === -1 ? 999 : indexA;
+                    const valB = indexB === -1 ? 999 : indexB;
+                    return valA - valB;
+                });
+            }
+
             const groups = {};
             uniqueCats.forEach(c => groups[c] = items.filter(i => i.category === c));
 

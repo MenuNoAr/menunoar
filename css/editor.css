@@ -726,3 +726,22 @@ body.dark-mode .theme-toggle .fa-moon {
 .form-group textarea {
     transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
 }
+
+/* === DRAG AND DROP STYLES === */
+.dragging {
+    opacity: 0.5;
+    border: 2px dashed #ccc;
+    cursor: grabbing;
+}
+
+.draggable-tab {
+    cursor: grab;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.draggable-tab.active {
+    cursor: default; /* Active tab can still be dragged but feels solid */
+}

@@ -104,6 +104,8 @@ async function loadData() {
 
 // --- RENDERING ---
 
+// --- RENDERING ---
+
 function updateLiveLink(slug) {
     document.getElementById('liveLink').href = `${window.location.origin}/menu.html?id=${slug}`;
 }
@@ -145,28 +147,59 @@ function updateBadge(badgeId, textId, value, prefix) {
 function renderMenu(items) {
     const container = document.getElementById('menuContainer');
     const nav = document.getElementById('categoryNav');
-    container.innerHTML = '';
-    nav.innerHTML = ''; // We will rebuild nav
 
-    // Group items
-    const uniqueCats = [...new Set(items.map(i => i.category))];
+    // Clear previous content
+    container.innerHTML = '<div id="editorTrack" class="slider-track" style="transition: transform 0.3s ease;"></div>';
+    const track = document.getElementById('editorTrack');
+    nav.innerHTML = '';
+
+    // 1. Determine Category Order
+    let uniqueCats = [...new Set(items.map(i => i.category))];
+
+    // If we have a saved order, respect it
+    if (currentData.category_order && Array.isArray(currentData.category_order)) {
+        const savedOrder = currentData.category_order;
+        // Sort uniqueCats based on the index in savedOrder
+        // Categories not in savedOrder go to the end
+        uniqueCats.sort((a, b) => {
+            const indexA = savedOrder.indexOf(a);
+            const indexB = savedOrder.indexOf(b);
+            const valA = indexA === -1 ? 999 : indexA;
+            const valB = indexB === -1 ? 999 : indexB;
+            return valA - valB;
+        });
+    }
+
     const groups = {};
     uniqueCats.forEach(c => groups[c] = items.filter(i => i.category === c));
 
-    // Render Categories
-    uniqueCats.forEach(cat => {
-        // Nav Button (Tab Style)
-        const btn = document.createElement('button');
-        btn.textContent = cat;
-        btn.className = 'tab-btn'; // Match menu.css
-        btn.onclick = () => document.getElementById(`sec-${cat}`).scrollIntoView({ behavior: 'smooth' });
+    // 2. Render Categories (Tabs & Slides)
+    uniqueCats.forEach((cat, index) => {
+        // --- NAV TAB (Draggable) ---
+        const btn = document.createElement('div'); // Using div for drag convenience
+        btn.className = 'tab-btn draggable-tab';
+        if (index === 0) btn.classList.add('active');
+
+        btn.innerHTML = `
+            <span onclick="scrollToSlide(${index})">${cat}</span>
+            <i class="fa-solid fa-grip-lines-vertical handle" style="margin-left:8px; opacity:0.3; cursor:grab;"></i>
+        `;
+
+        // Drag Attributes
+        btn.setAttribute('draggable', 'true');
+        btn.dataset.category = cat;
+        btn.dataset.index = index;
+
+        // Drag Events
+        addDragEvents(btn, uniqueCats);
+
         nav.appendChild(btn);
 
-        // Section (Slide Style but Vertical)
+        // --- SECTION SLIDE ---
         const section = document.createElement('div');
         section.id = `sec-${cat}`;
         section.className = 'menu-slide'; // Match menu.css
-        section.style.borderBottom = '1px solid #f0f0f0'; // Visual separator for editor
+        section.style.minWidth = '100%'; // Force horizontal layout
 
         // Header (Editable)
         const catImages = currentData.category_images || {};
@@ -185,7 +218,6 @@ function renderMenu(items) {
                     <input type="file" id="upload-${cat.replace(/\s/g, '-')}" onchange="handleCatUpload('${cat}', this)" style="display:none;" accept="image/*">
                 </div>`;
         } else {
-            // Match menu.html slide-title but make it editable/uploadable
             headerHTML = `
                  <div class="slide-title" style="display:flex; justify-content:space-between; align-items:center;">
                     <span class="text-editable" onclick="renameCategory('${cat}')">${cat} <i class="fa-solid fa-pen" style="font-size:0.8rem; opacity:0.5;"></i></span>
@@ -211,16 +243,104 @@ function renderMenu(items) {
         `;
 
         section.innerHTML = headerHTML + `<div class="items-grid">${itemsHTML}</div>` + addItemBtn;
-        container.appendChild(section);
+        track.appendChild(section);
     });
 
     // "Add Category" button in Nav
     const addCatBtn = document.createElement('button');
-    addCatBtn.innerHTML = '<i class="fa-solid fa-folder-plus"></i> Categoria';
+    addCatBtn.innerHTML = '<i class="fa-solid fa-folder-plus"></i>';
     addCatBtn.className = 'tab-btn btn-add-cat';
     addCatBtn.onclick = addNewCategory;
     nav.appendChild(addCatBtn);
 }
+
+// --- DRAG AND DROP LOGIC ---
+function addDragEvents(item, allCats) {
+    item.addEventListener('dragstart', (e) => {
+        e.target.classList.add('dragging');
+        // Store the category name being dragged
+        e.dataTransfer.setData('text/plain', item.dataset.category);
+    });
+
+    item.addEventListener('dragend', async (e) => {
+        e.target.classList.remove('dragging');
+
+        // Save the new order
+        const nav = document.getElementById('categoryNav');
+        const newOrder = [];
+        // Only get the category tabs, ignore "add button"
+        nav.querySelectorAll('.draggable-tab').forEach(tab => {
+            newOrder.push(tab.dataset.category);
+        });
+
+        console.log("Saving new order:", newOrder);
+        await saveCategoryOrder(newOrder);
+    });
+
+    // Allow dropping on the navigation container
+    const nav = document.getElementById('categoryNav');
+    nav.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(nav, e.clientX);
+        const draggable = document.querySelector('.dragging');
+        if (!draggable) return;
+
+        // "Add Cat" button should always be last, so insert before it if possible
+        const addBtn = document.querySelector('.btn-add-cat');
+
+        if (afterElement == null) {
+            nav.insertBefore(draggable, addBtn);
+        } else {
+            nav.insertBefore(draggable, afterElement);
+        }
+    });
+}
+
+// Helper to calculate where to drop
+function getDragAfterElement(container, x) {
+    const draggableElements = [...container.querySelectorAll('.draggable-tab:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        // Check center point
+        const offset = x - box.left - box.width / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// Save Order to Supabase
+async function saveCategoryOrder(order) {
+    const { error } = await supabase.from('restaurants')
+        .update({ category_order: order })
+        .eq('id', restaurantId);
+
+    if (error) {
+        console.error("Error saving order:", error);
+    } else {
+        currentData.category_order = order;
+        // Re-render handled by drag event merely moving DOM, 
+        // but let's reload to ensure logic sync (simpler) or just update internal state
+        // Ideally we don't full reload to not jar functionality, but let's re-render
+        // to sync the SLIDER track order with the TABS order.
+        loadData();
+    }
+}
+
+// Slider Navigation
+window.scrollToSlide = (index) => {
+    const track = document.getElementById('editorTrack');
+    track.style.transform = `translateX(-${index * 100}%)`;
+
+    // Update active tab
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+        if (i === index) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+};
 
 function createItemCard(item) {
     const isAvail = item.available;
