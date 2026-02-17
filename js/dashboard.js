@@ -67,17 +67,24 @@ async function loadData() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: currentUser.email, userId: currentUser.id })
             });
+
+            if (!syncRes.ok) {
+                const errorText = await syncRes.text();
+                console.error("[SYNC ERROR SERVER]", syncRes.status, errorText);
+                throw new Error(`Erro no servidor (${syncRes.status})`);
+            }
+
             const syncData = await syncRes.json();
             console.log("[SYNC RESULT]", syncData);
 
             if (syncData.updated) {
                 console.log("[SYNC] Data was updated from Stripe. Reloading...");
-                // Reload data after sync to get fresh status
                 const { data: refreshed } = await supabase.from('restaurants').select('*').eq('owner_id', currentUser.id).maybeSingle();
                 if (refreshed) rest = refreshed;
             }
         } catch (e) {
-            console.error("Sync failed:", e);
+            console.warn("Sync temporarily unavailable or failed:", e);
+            // Don't alert() here to avoid spamming the user, but log it.
         }
     }
 

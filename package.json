@@ -1,0 +1,10 @@
+{
+  "name": "menunoar",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.3",
+    "stripe": "^14.14.0",
+    "micro": "^10.0.1"
+  }
+}
