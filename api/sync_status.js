@@ -9,112 +9,92 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
-
-    const { email, userId } = req.body;
-    if (!email || !userId) return res.status(400).json({ error: 'Missing Data' });
-
-    let debug = {
-        email_searched: email,
-        userId: userId,
-        stripe_customers_found: 0,
-        subs_found: 0,
-        errors: []
+    // Garantir que devolvemos sempre JSON, mesmo em erro
+    const sendError = (status, msg, debugData = {}) => {
+        return res.status(status).json({ success: false, error: msg, debug: debugData });
     };
 
-    try {
-        console.log(`[SYNC] Starting sync for ${email}`);
+    if (req.method !== 'POST') return sendError(405, 'Método não permitido');
 
-        // 1. Fetch current DB record
-        const { data: currentDb, error: dbError } = await supabase
+    const { email, userId } = req.body;
+    if (!email || !userId) return sendError(400, 'Dados em falta (email ou userId)');
+
+    try {
+        console.log(`[SYNC] Iniciando sincronização para: ${email}`);
+
+        // 1. Verificar se o utilizador existe na nossa DB
+        const { data: restaurant, error: dbError } = await supabase
             .from('restaurants')
             .select('id, stripe_customer_id, subscription_status')
             .eq('owner_id', userId)
-            .single();
+            .maybeSingle();
 
-        if (dbError) debug.errors.push("Supabase error: " + dbError.message);
+        if (dbError) return sendError(500, 'Erro na base de dados: ' + dbError.message);
+        if (!restaurant) return sendError(404, 'Restaurante não encontrado na base de dados.');
 
-        let stripeCustomerId = currentDb?.stripe_customer_id;
+        let stripeCustomerId = restaurant.stripe_customer_id;
         let foundSub = null;
 
-        // 2. SEARCH BY EMAIL (Fallback mais comum)
-        console.log(`[SYNC] Searching Stripe Customers by email: ${email}`);
-        const customers = await stripe.customers.list({
-            email: email,
-            limit: 5,
-            expand: ['data.subscriptions']
-        });
-
-        debug.stripe_customers_found = customers.data.length;
+        // 2. TENTAR ENCONTRAR PELO EMAIL (Caminho mais provável)
+        const customers = await stripe.customers.list({ email: email, limit: 1 });
 
         if (customers.data.length > 0) {
-            for (const customer of customers.data) {
-                const subs = customer.subscriptions?.data || [];
-                const active = subs.find(s => s.status === 'active' || s.status === 'trialing');
-                if (active) {
-                    foundSub = active;
-                    stripeCustomerId = customer.id;
-                    debug.subs_found++;
-                    break;
-                }
-            }
-        }
+            const customer = customers.data[0];
+            stripeCustomerId = customer.id;
 
-        // 3. SEARCH BY SESSIONS (Se o email falhou, tentamos o ID de referência)
-        if (!foundSub) {
-            console.log(`[SYNC] No sub found by email. Checking recent sessions for userId: ${userId}`);
-            const sessions = await stripe.checkout.sessions.list({
-                limit: 10,
-                expand: ['data.subscription']
+            // Listar subscrições deste cliente
+            const subs = await stripe.subscriptions.list({
+                customer: stripeCustomerId,
+                limit: 1,
+                status: 'all' // Vamos filtrar manualmente para ter controle
             });
 
-            const mySession = sessions.data.find(s => s.client_reference_id === userId && s.status === 'complete');
-            if (mySession && mySession.customer) {
-                stripeCustomerId = mySession.customer;
-                // Get the subscription from session
-                if (mySession.subscription) {
-                    foundSub = typeof mySession.subscription === 'string'
-                        ? await stripe.subscriptions.retrieve(mySession.subscription)
-                        : mySession.subscription;
-                    debug.subs_found++;
+            foundSub = subs.data.find(s => s.status === 'active' || s.status === 'trialing');
+        }
+
+        // 3. SE NÃO ENCONTROU PELO EMAIL, TENTAR PELO ID (client_reference_id)
+        if (!foundSub) {
+            console.log("[SYNC] Sem subscrição por email. Verificando Checkout Sessions...");
+            const sessions = await stripe.checkout.sessions.list({ limit: 20 });
+            const session = sessions.data.find(s => s.client_reference_id === userId && s.status === 'complete');
+
+            if (session && session.customer) {
+                stripeCustomerId = session.customer;
+                if (session.subscription) {
+                    foundSub = await stripe.subscriptions.retrieve(session.subscription);
                 }
             }
         }
 
-        // 4. FINAL DECISION
+        // 4. ATUALIZAR DB SE ENCONTROU
         if (foundSub && stripeCustomerId) {
-            console.log(`[SYNC] VALID SUB FOUND. Status: ${foundSub.status}`);
+            console.log(`[SYNC] ENCONTRADO! Status: ${foundSub.status}`);
 
             const { error: updateError } = await supabase.from('restaurants').update({
                 stripe_customer_id: stripeCustomerId,
                 subscription_status: foundSub.status,
                 subscription_plan: 'pro',
-                trial_ends_at: null // DISABLE TRIAL
+                trial_ends_at: null // Mata o countdown do trial
             }).eq('owner_id', userId);
 
-            if (updateError) debug.errors.push("Update error: " + updateError.message);
+            if (updateError) return sendError(500, 'Erro ao atualizar DB: ' + updateError.message);
 
             return res.status(200).json({
                 success: true,
                 updated: true,
-                status: foundSub.status,
-                debug: debug
+                status: foundSub.status
             });
         }
 
+        // 5. SE CHEGOU AQUI, NÃO ENCONTROU NADA NO STRIPE
         return res.status(200).json({
             success: true,
             updated: false,
-            message: "Nenhuma subscrição ativa encontrada no Stripe para este utilizador.",
-            debug: debug
+            message: 'Nenhum pagamento encontrado no Stripe.'
         });
 
     } catch (err) {
-        console.error("[SYNC] FATAL ERROR:", err);
-        return res.status(500).json({
-            success: false,
-            error: err.message,
-            debug: debug
-        });
+        console.error("[SYNC] Erro Fatal:", err);
+        return sendError(500, 'Erro interno no servidor: ' + err.message);
     }
 }
