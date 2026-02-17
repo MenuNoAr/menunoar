@@ -58,13 +58,49 @@ async function loadData() {
         // Show Dashboard
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('main-dashboard').style.display = 'block';
+
+        // 3. FORCE SYNC STATUS (Fixes Webhook Issues)
+        try {
+            console.log("Syncing subscription status...");
+            await fetch('/api/sync_status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: currentUser.email, userId: currentUser.id })
+            });
+
+            // Reload data after sync to get fresh status
+            const { data: refreshed } = await supabase.from('restaurants').select('*').eq('id', rest.id).maybeSingle();
+            if (refreshed) rest = refreshed;
+
+        } catch (e) {
+            console.error("Sync failed:", e);
+        }
     }
 
-    // 3. Load Dashboard Data
+    // 4. Load Dashboard Data
     restaurantId = rest.id;
     currentData = rest;
     renderHeader(rest);
     updateLiveLink(rest.slug);
+
+    // --- SUBSCRIPTION UI CHECK ---
+    // If Active, hide "Trial" badge and Upgrade buttons
+    if (rest.subscription_status === 'active') {
+        // Find the "Teu Plano" section and update it
+        const planText = document.getElementById('currentPlanText');
+        if (planText) {
+            planText.textContent = "Profissional (Membro Premium)";
+            planText.style.color = "#16a34a"; // Green check
+        }
+
+        // Hide Upgrade Button completely
+        const upgradeBtn = document.querySelector('a[href="subscription.html"]');
+        if (upgradeBtn) upgradeBtn.style.display = 'none';
+
+        // Hide "Premium" in nav if we want (or keep it as status)
+        // Keep it but maybe add a checkmark
+    }
+
 
     // Fetch Items
     const { data: items } = await supabase.from('menu_items')
