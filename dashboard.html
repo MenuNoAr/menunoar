@@ -333,6 +333,21 @@
         </div>
     </div>
 
+    <!-- QR CODE MODAL -->
+    <div id="qrModal" class="edit-modal">
+        <div class="edit-modal-content" style="text-align:center;">
+            <h2 style="margin-bottom:20px; color:var(--text);">O Teu QR Code</h2>
+            <div id="qr-code-container" style="margin: 0 auto 20px auto; display:flex; justify-content:center;"></div>
+            <p style="margin-bottom:20px; color:var(--text-muted);">Imprime este código e coloca-o nas mesas.</p>
+            <div class="modal-actions" style="justify-content:center;">
+                <button class="btn-cancel" onclick="closeModal('qrModal')">Fechar</button>
+                <button class="btn-confirm" onclick="downloadQr()">
+                    <i class="fa-solid fa-download" style="margin-right:8px;"></i> Baixar PNG
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script type="module" src="js/dashboard.js"></script>
     <script>
