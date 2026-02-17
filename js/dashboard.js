@@ -61,17 +61,21 @@ async function loadData() {
 
         // 3. FORCE SYNC STATUS (Fixes Webhook Issues)
         try {
-            console.log("Syncing subscription status...");
-            await fetch('/api/sync_status', {
+            console.log("Syncing subscription status for email:", currentUser.email);
+            const syncRes = await fetch('/api/sync_status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: currentUser.email, userId: currentUser.id })
             });
+            const syncData = await syncRes.json();
+            console.log("[SYNC RESULT]", syncData);
 
-            // Reload data after sync to get fresh status
-            const { data: refreshed } = await supabase.from('restaurants').select('*').eq('id', rest.id).maybeSingle();
-            if (refreshed) rest = refreshed;
-
+            if (syncData.updated) {
+                console.log("[SYNC] Data was updated from Stripe. Reloading...");
+                // Reload data after sync to get fresh status
+                const { data: refreshed } = await supabase.from('restaurants').select('*').eq('owner_id', currentUser.id).maybeSingle();
+                if (refreshed) rest = refreshed;
+            }
         } catch (e) {
             console.error("Sync failed:", e);
         }
@@ -837,27 +841,29 @@ window.openSettingsModal = () => {
     // Plan Logic
     const planText = document.getElementById('currentPlanText');
     if (planText) {
-        if (currentData.subscription_plan === 'pro') {
-            // Check status
-            if (currentData.subscription_status === 'trialing') {
-                const daysLeft = Math.ceil((new Date(currentData.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
-                if (daysLeft > 0) {
-                    planText.textContent = `Teste Grátis (${daysLeft} dias restantes)`;
-                    planText.style.color = "#16a34a"; // Green
-                } else {
-                    planText.textContent = "Teste Expirado";
-                    planText.style.color = "#ef4444"; // Red
-                }
-            } else if (currentData.subscription_status === 'active') {
-                planText.textContent = "Profissional (Ativo)";
+        const hasStripeId = !!currentData.stripe_customer_id;
+        const status = currentData.subscription_status;
+
+        if (hasStripeId && (status === 'active' || status === 'trialing')) {
+            // STRIPE PREMIUM (Card already added)
+            planText.textContent = "Profissional (Membro Premium)";
+            planText.style.color = "#16a34a"; // Green
+        } else if (status === 'trialing') {
+            // INTERNAL FREE TRIAL (No card)
+            const daysLeft = Math.ceil((new Date(currentData.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
+            if (daysLeft > 0) {
+                planText.textContent = `Teste Grátis (${daysLeft} dias restantes)`;
                 planText.style.color = "#16a34a"; // Green
             } else {
-                planText.textContent = "Profissional (" + currentData.subscription_status + ")";
+                planText.textContent = "Teste Expirado";
                 planText.style.color = "#ef4444"; // Red
             }
+        } else if (status === 'active') {
+            planText.textContent = "Profissional (Ativo)";
+            planText.style.color = "#16a34a";
         } else {
-            planText.textContent = "Sem Plano Ativo";
-            planText.style.color = "#6b7280"; // Gray
+            planText.textContent = currentData.subscription_plan === 'pro' ? "Profissional (" + status + ")" : "Sem Plano Ativo";
+            planText.style.color = status === 'active' ? "#16a34a" : "#6b7280";
         }
     }
 

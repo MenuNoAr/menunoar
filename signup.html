@@ -163,13 +163,23 @@
         }
 
         #error-msg {
-            color: #ef4444;
             font-size: 0.9rem;
             margin-bottom: 1rem;
             display: none;
-            background: #fee2e2;
             padding: 10px;
             border-radius: 8px;
+        }
+
+        #error-msg.error {
+            color: #ef4444;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+        }
+
+        #error-msg.success {
+            color: #16a34a;
+            background: #f0fdf4;
+            border: 1px solid #dcfce7;
         }
     </style>
 </head>
@@ -222,8 +232,9 @@
         const form = document.getElementById('signupForm');
         const errorMsg = document.getElementById('error-msg');
 
-        function showError(msg) {
+        function showMsg(msg, type = 'error') {
             errorMsg.textContent = msg;
+            errorMsg.className = type;
             errorMsg.style.display = 'block';
         }
 
@@ -235,7 +246,7 @@
             const password = document.getElementById('password').value;
 
             if (password.length < 6) {
-                showError("A password deve ter pelo menos 6 caracteres.");
+                showMsg("A password deve ter pelo menos 6 caracteres.", 'error');
                 return;
             }
 
@@ -248,7 +259,7 @@
             const { data, error } = await signUp(email, password);
 
             if (error) {
-                showError("Erro: " + error.message);
+                showMsg("Erro: " + error.message, 'error');
                 btn.textContent = originalText;
                 btn.disabled = false;
             } else {
@@ -258,7 +269,7 @@
                 if (data.session) {
                     window.location.href = 'dashboard.html';
                 } else {
-                    showError("Conta criada! Verifica o teu email para confirmar.");
+                    showMsg("Conta criada! Verifica o teu email para confirmar.", 'success');
                     btn.textContent = "Verifica o Email";
                 }
             }
@@ -268,9 +279,9 @@
             const { error } = await signInWithGoogle();
             if (error) {
                 if (error.message.includes("provider is not enabled")) {
-                    showError("O login com Google ainda não foi ativado no sistema (Supabase).");
+                    showMsg("O login com Google ainda não foi ativado no sistema (Supabase).", 'error');
                 } else {
-                    showError("Erro: " + error.message);
+                    showMsg("Erro: " + error.message, 'error');
                 }
             }
         });

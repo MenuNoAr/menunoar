@@ -20,7 +20,7 @@ export default async function handler(req, res) {
         // 1. Fetch current DB record
         const { data: currentDb, error: dbError } = await supabase
             .from('restaurants')
-            .select('id, stripe_customer_id, subscription_status, subscription_plan')
+            .select('id, stripe_customer_id, subscription_status, subscription_plan, trial_ends_at')
             .eq('owner_id', userId)
             .single();
 
@@ -29,34 +29,22 @@ export default async function handler(req, res) {
             return res.status(404).json({ error: 'Restaurant not found' });
         }
 
-        let customerId = currentDb.stripe_customer_id;
-        let activeSubscription = null;
+        let stripeCustomerId = currentDb.stripe_customer_id;
+        let stripeSubscription = null;
 
         // 2. CASE A: We already have a Stripe Customer ID -> Check directly
-        if (customerId) {
-            console.log(`[SYNC] Checking Stripe Customer ID: ${customerId}`);
+        if (stripeCustomerId) {
             const subs = await stripe.subscriptions.list({
-                customer: customerId,
-                status: 'active', // Only care about Active (paid) or Trialing externally
+                customer: stripeCustomerId,
                 limit: 1,
             });
-            if (subs.data.length > 0) activeSubscription = subs.data[0];
-
-            // Note: If none found, we might want to check 'trialing' explicitly if status param behaves strictly
-            if (!activeSubscription) {
-                const trialing = await stripe.subscriptions.list({
-                    customer: customerId,
-                    status: 'trialing',
-                    limit: 1,
-                });
-                if (trialing.data.length > 0) activeSubscription = trialing.data[0];
-            }
+            // We look for 'active' or 'trialing'
+            stripeSubscription = subs.data.find(s => s.status === 'active' || s.status === 'trialing');
         }
 
         // 3. CASE B: No Customer ID or No Active Sub found -> Search by Email Fallback
-        // This is crucial if Webhook failed to link the customer initially.
-        if (!activeSubscription) {
-            console.log(`[SYNC] No active sub found by ID. Searching by Email: ${email}`);
+        if (!stripeSubscription) {
+            console.log(`[SYNC] Searching by Email: ${email}`);
             const customers = await stripe.customers.list({
                 email: email,
                 limit: 1,
@@ -65,46 +53,41 @@ export default async function handler(req, res) {
 
             if (customers.data.length > 0) {
                 const customer = customers.data[0];
-                console.log(`[SYNC] Found customer by email: ${customer.id}`);
-
-                // Check subscriptions inside this customer object
                 const subs = customer.subscriptions?.data || [];
-                activeSubscription = subs.find(s => s.status === 'active' || s.status === 'trialing');
-
-                if (activeSubscription) {
-                    customerId = customer.id; // Assume this IS the correct customer now
+                stripeSubscription = subs.find(s => s.status === 'active' || s.status === 'trialing');
+                if (stripeSubscription) {
+                    stripeCustomerId = customer.id;
                 }
             }
         }
 
-        // 4. DECISION LOGIC
-        if (activeSubscription) {
-            console.log(`[SYNC] FOUND ACTIVE SUBSCRIPTION: ${activeSubscription.status}`);
+        // 4. UPDATE LOGIC
+        if (stripeSubscription) {
+            console.log(`[SYNC] FOUND STRIPE SUBSCRIPTION: ${stripeSubscription.status}`);
 
-            // Verify if DB needs update
-            const newStatus = activeSubscription.status; // 'active' or 'trialing'
+            const newStatus = stripeSubscription.status; // 'active' or 'trialing'
 
-            // Only update if inconsistent
-            // Special Case: DB says 'trialing' (Internal Trial) but Stripe says 'active'. Update immediately.
-            // Special Case: DB says 'trialing' (Internal) but Stripe says 'trialing'. Update trial_ends_at maybe?
+            // CRITICAL: If we found a Stripe subscription, the user is PRO.
+            // We must clear trial_ends_at (internal trial) because they now have a real Stripe link.
+            const updateData = {
+                stripe_customer_id: stripeCustomerId,
+                subscription_plan: 'pro',
+                subscription_status: newStatus,
+                trial_ends_at: null // DISABLE INTERNAL TRIAL - Stripe handles it now
+            };
 
-            if (currentDb.subscription_status !== 'active' && newStatus === 'active') {
-                console.log("[SYNC] Updating DB to ACTIVE PRO");
-                await supabase.from('restaurants').update({
-                    stripe_customer_id: customerId,
-                    subscription_status: 'active',
-                    subscription_plan: 'pro',
-                    trial_ends_at: null // Remove trial info
-                }).eq('id', currentDb.id);
-
-                return res.status(200).json({ status: 'active', updated: true });
+            // Only update if something changed
+            if (currentDb.subscription_status !== newStatus || currentDb.stripe_customer_id !== stripeCustomerId || currentDb.trial_ends_at !== null) {
+                console.log("[SYNC] Updating DB with Stripe Data...");
+                await supabase.from('restaurants').update(updateData).eq('id', currentDb.id);
+                return res.status(200).json({ status: newStatus, updated: true, source: 'stripe' });
             }
-        } else {
-            console.log("[SYNC] No active Stripe subscription found.");
-            // Do NOT touch DB if it's 'trialing' internally. Don't break the free trial.
-        }
 
-        return res.status(200).json({ status: currentDb.subscription_status, updated: false });
+            return res.status(200).json({ status: newStatus, updated: false, source: 'stripe' });
+        } else {
+            console.log("[SYNC] No active Stripe subscription found. Keeping internal status.");
+            return res.status(200).json({ status: currentDb.subscription_status, updated: false, source: 'internal' });
+        }
 
     } catch (err) {
         console.error("[SYNC] Error:", err);
