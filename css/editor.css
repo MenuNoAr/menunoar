@@ -358,3 +358,12 @@ body.dark-mode {
     border-radius: 50px;
     cursor: pointer;
 }
+
+/* Footer to match menu.css */
+.app-footer {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 0.8rem;
+    opacity: 0.5;
+}

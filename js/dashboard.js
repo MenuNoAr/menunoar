@@ -141,15 +141,15 @@ function renderHeader(data) {
     document.getElementById('restNameEditor').textContent = data.name || "Nome do Restaurante";
     document.getElementById('restDescEditor').textContent = data.description || "Descrição curta (clica para editar)";
 
-    // Cover
+    // Cover (Match menu.css height of 350px)
     const coverDiv = document.getElementById('coverEditor');
     if (data.cover_url) {
         coverDiv.style.backgroundImage = `url('${data.cover_url}')`;
-        coverDiv.style.height = '280px';
+        coverDiv.style.height = '350px';
     } else {
         coverDiv.style.backgroundImage = 'none';
         coverDiv.style.backgroundColor = '#ddd';
-        coverDiv.style.height = '150px'; // Smaller placeholder
+        coverDiv.style.height = '350px'; // Match real menu height even if empty
     }
 
     // Badges
