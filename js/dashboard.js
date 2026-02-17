@@ -40,75 +40,93 @@ async function loadData() {
         .from('restaurants')
         .select('*')
         .eq('owner_id', currentUser.id)
-        .single();
+        .maybeSingle();
 
-    // Auto-Create Restaurant if first time login
+    if (error) {
+        console.error("Erro ao carregar restaurante:", error);
+        return;
+    }
+
+    // NEW USER FLOW: Show Setup Wizard if no restaurant exists
     if (!rest) {
-        console.log("Utilizador novo, a criar restaurante...");
-        const newRest = {
-            owner_id: currentUser.id,
-            name: "O Meu Restaurante",
-            slug: "restaurante-" + Math.floor(Math.random() * 10000),
-            description: "Edita esta descrição...",
-            menu_type: "digital"
-        };
-
-        const { data: created, error: createError } = await supabase
-            .from('restaurants')
-            .insert([newRest])
-            .select()
-            .single();
-
-        if (createError) {
-            console.error("Erro ao criar restaurante inicial:", createError);
-            alert("Erro ao iniciar a tua conta. Recarrega a página.");
-            return;
-        }
-        rest = created;
+        console.log("Nenhum restaurante encontrado. A iniciar Setup Wizard.");
+        document.getElementById('setupModal').classList.add('open');
+        return;
     }
 
-    if (rest) {
-        restaurantId = rest.id;
-        currentData = rest;
-        renderHeader(rest);
-        updateLiveLink(rest.slug);
+    // EXISTING USER FLOW
+    restaurantId = rest.id;
+    currentData = rest;
+    renderHeader(rest);
+    updateLiveLink(rest.slug);
 
-        // Fetch Items
-        const { data: items } = await supabase.from('menu_items')
-            .select('*')
-            .eq('restaurant_id', restaurantId)
-            .order('category')
-            .order('name');
+    // Fetch Items
+    const { data: items } = await supabase.from('menu_items')
+        .select('*')
+        .eq('restaurant_id', restaurantId)
+        .order('category')
+        .order('name');
 
-        menuItems = items || [];
-
-        // --- SEEDING LOGIC ---
-        // Se a categoria "Pratos Principais" não existir, cria estes pratos automaticamente NA BASE DE DADOS
-        const hasPratosPrincipais = menuItems.some(i => i.category === 'Pratos Principais');
-
-        if (!hasPratosPrincipais && menuItems.length === 0) {
-            console.log("Seeding Pratos Principais...");
-            const demoItems = [
-                { restaurant_id: restaurantId, name: 'Bacalhau à Lagareiro', description: 'Lombo alto, batatas a murro e muito azeite.', price: 18.50, category: 'Pratos Principais', available: true },
-                { restaurant_id: restaurantId, name: 'Arroz de Marisco', description: 'Arroz malandrinho recheado de mar.', price: 22.00, category: 'Pratos Principais', available: true },
-                { restaurant_id: restaurantId, name: 'Cheesecake', description: 'Delicioso com frutos vermelhos.', price: 4.50, category: 'Sobremesas', available: true }
-            ];
-
-            const { error: insertError } = await supabase.from('menu_items').insert(demoItems);
-
-            if (!insertError) {
-                // Recarregar para ter os IDs reais
-                return loadData();
-            }
-        }
-
-        renderMenu(menuItems);
-    } else {
-        document.getElementById('restNameEditor').textContent = "Erro ao carregar";
-    }
+    menuItems = items || [];
+    renderMenu(menuItems);
 }
 
-// --- RENDERING ---
+// SETUP WIZARD LOGIC
+window.generateSlug = (name) => {
+    const slug = name.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
+        .replace(/[^\w\s-]/g, '') // Remove chars
+        .replace(/\s+/g, '-')     // Space to dash
+        .replace(/-+/g, '-');     // Collapse dashes
+    document.getElementById('setupSlug').value = slug;
+}
+
+document.getElementById('setupForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    const originalText = btn.textContent;
+    btn.textContent = "A criar magia... ✨";
+    btn.disabled = true;
+
+    const name = document.getElementById('setupName').value;
+    const slug = document.getElementById('setupSlug').value;
+    const desc = document.getElementById('setupDesc').value;
+    const withDemo = document.getElementById('setupDemo').checked;
+
+    // 1. Create Restaurant
+    const newRest = {
+        owner_id: currentUser.id,
+        name: name,
+        slug: slug,
+        description: desc,
+        menu_type: "digital"
+    };
+
+    const { data: created, error } = await supabase.from('restaurants').insert([newRest]).select().single();
+
+    if (error) {
+        alert("Erro ao criar: " + (error.code === '23505' ? 'Este link já existe. Escolha outro.' : error.message));
+        btn.textContent = originalText;
+        btn.disabled = false;
+        return;
+    }
+
+    // 2. Add Demo Content (Optional)
+    if (withDemo && created) {
+        const demoItems = [
+            { restaurant_id: created.id, name: 'Bacalhau à Lagareiro', description: 'Lombo alto, batatas a murro e muito azeite.', price: 18.50, category: 'Pratos Principais', available: true },
+            { restaurant_id: created.id, name: 'Arroz de Marisco', description: 'Arroz malandrinho recheado de mar.', price: 22.00, category: 'Pratos Principais', available: true },
+            { restaurant_id: created.id, name: 'Cheesecake', description: 'Delicioso com frutos vermelhos.', price: 4.50, category: 'Sobremesas', available: true },
+            { restaurant_id: created.id, name: 'Limonada Caseira', description: 'Feita com limões do nosso quintal.', price: 3.00, category: 'Bebidas', available: true }
+        ];
+        await supabase.from('menu_items').insert(demoItems);
+    }
+
+    // 3. Close & Load
+    document.getElementById('setupModal').classList.remove('open');
+    // await loadData(); // removed to force reload
+    window.location.reload(); // Refresh to ensure clean state
+};
 
 // --- RENDERING ---
 
