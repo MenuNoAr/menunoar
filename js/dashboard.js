@@ -25,6 +25,15 @@ async function init() {
 
         await loadData();
 
+        // Check if we just finished setup
+        if (localStorage.getItem('just_created_rest') === 'true') {
+            localStorage.removeItem('just_created_rest');
+            setTimeout(() => {
+                const modal = document.getElementById('trialSuccessModal');
+                if (modal) modal.classList.add('open');
+            }, 800);
+        }
+
     }, () => {
         // No Auth
         window.location.href = 'login.html';
@@ -124,22 +133,22 @@ async function loadData() {
     // --- TRIAL TIMER IN NAVBAR ---
     const timerBadge = document.getElementById('trialTimer');
     if (timerBadge) {
+        timerBadge.className = 'trial-timer-badge'; // Reset classes
         if (rest.subscription_status === 'trialing' && !rest.stripe_customer_id) {
             const daysLeft = Math.ceil((new Date(rest.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
             if (daysLeft > 0) {
-                timerBadge.textContent = `${daysLeft} dias`;
-                timerBadge.style.display = 'inline-block';
+                timerBadge.innerHTML = `<i class="fa-solid fa-clock"></i> ${daysLeft} dias`;
+                timerBadge.classList.add('state-trial');
+                timerBadge.style.display = 'inline-flex';
             } else {
-                timerBadge.textContent = `Expirado`;
-                timerBadge.style.display = 'inline-block';
-                timerBadge.style.background = '#fee2e2';
-                timerBadge.style.color = '#ef4444';
+                timerBadge.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Expirado`;
+                timerBadge.classList.add('state-expired');
+                timerBadge.style.display = 'inline-flex';
             }
         } else if (rest.subscription_status === 'active' || rest.stripe_customer_id) {
-            timerBadge.textContent = `PRO`;
-            timerBadge.style.display = 'inline-block';
-            timerBadge.style.background = '#dcfce7';
-            timerBadge.style.color = '#16a34a';
+            timerBadge.innerHTML = `<i class="fa-solid fa-crown"></i> PRO`;
+            timerBadge.classList.add('state-pro');
+            timerBadge.style.display = 'inline-flex';
         } else {
             timerBadge.style.display = 'none';
         }
@@ -211,7 +220,8 @@ document.getElementById('setupForm').onsubmit = async (e) => {
         await supabase.from('menu_items').insert(demoItems);
     }
 
-    // 3. Reload to switch view
+    // 3. Set Flag and Reload
+    localStorage.setItem('just_created_rest', 'true');
     window.location.reload();
 };
 
