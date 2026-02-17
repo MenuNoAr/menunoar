@@ -14,83 +14,107 @@ export default async function handler(req, res) {
     const { email, userId } = req.body;
     if (!email || !userId) return res.status(400).json({ error: 'Missing Data' });
 
+    let debug = {
+        email_searched: email,
+        userId: userId,
+        stripe_customers_found: 0,
+        subs_found: 0,
+        errors: []
+    };
+
     try {
-        console.log(`[SYNC] Syncing subscription for ${email}...`);
+        console.log(`[SYNC] Starting sync for ${email}`);
 
         // 1. Fetch current DB record
         const { data: currentDb, error: dbError } = await supabase
             .from('restaurants')
-            .select('id, stripe_customer_id, subscription_status, subscription_plan, trial_ends_at')
+            .select('id, stripe_customer_id, subscription_status')
             .eq('owner_id', userId)
             .single();
 
-        if (dbError || !currentDb) {
-            console.error(`[SYNC] User/Restaurant not found via owner_id: ${userId}`);
-            return res.status(404).json({ error: 'Restaurant not found' });
-        }
+        if (dbError) debug.errors.push("Supabase error: " + dbError.message);
 
-        let stripeCustomerId = currentDb.stripe_customer_id;
-        let stripeSubscription = null;
+        let stripeCustomerId = currentDb?.stripe_customer_id;
+        let foundSub = null;
 
-        // 2. CASE A: We already have a Stripe Customer ID -> Check directly
-        if (stripeCustomerId) {
-            const subs = await stripe.subscriptions.list({
-                customer: stripeCustomerId,
-                limit: 1,
-            });
-            // We look for 'active' or 'trialing'
-            stripeSubscription = subs.data.find(s => s.status === 'active' || s.status === 'trialing');
-        }
+        // 2. SEARCH BY EMAIL (Fallback mais comum)
+        console.log(`[SYNC] Searching Stripe Customers by email: ${email}`);
+        const customers = await stripe.customers.list({
+            email: email,
+            limit: 5,
+            expand: ['data.subscriptions']
+        });
 
-        // 3. CASE B: No Customer ID or No Active Sub found -> Search by Email Fallback
-        if (!stripeSubscription) {
-            console.log(`[SYNC] Searching by Email: ${email}`);
-            const customers = await stripe.customers.list({
-                email: email,
-                limit: 1,
-                expand: ['data.subscriptions'],
-            });
+        debug.stripe_customers_found = customers.data.length;
 
-            if (customers.data.length > 0) {
-                const customer = customers.data[0];
+        if (customers.data.length > 0) {
+            for (const customer of customers.data) {
                 const subs = customer.subscriptions?.data || [];
-                stripeSubscription = subs.find(s => s.status === 'active' || s.status === 'trialing');
-                if (stripeSubscription) {
+                const active = subs.find(s => s.status === 'active' || s.status === 'trialing');
+                if (active) {
+                    foundSub = active;
                     stripeCustomerId = customer.id;
+                    debug.subs_found++;
+                    break;
                 }
             }
         }
 
-        // 4. UPDATE LOGIC
-        if (stripeSubscription) {
-            console.log(`[SYNC] FOUND STRIPE SUBSCRIPTION: ${stripeSubscription.status}`);
+        // 3. SEARCH BY SESSIONS (Se o email falhou, tentamos o ID de referência)
+        if (!foundSub) {
+            console.log(`[SYNC] No sub found by email. Checking recent sessions for userId: ${userId}`);
+            const sessions = await stripe.checkout.sessions.list({
+                limit: 10,
+                expand: ['data.subscription']
+            });
 
-            const newStatus = stripeSubscription.status; // 'active' or 'trialing'
-
-            // CRITICAL: If we found a Stripe subscription, the user is PRO.
-            // We must clear trial_ends_at (internal trial) because they now have a real Stripe link.
-            const updateData = {
-                stripe_customer_id: stripeCustomerId,
-                subscription_plan: 'pro',
-                subscription_status: newStatus,
-                trial_ends_at: null // DISABLE INTERNAL TRIAL - Stripe handles it now
-            };
-
-            // Only update if something changed
-            if (currentDb.subscription_status !== newStatus || currentDb.stripe_customer_id !== stripeCustomerId || currentDb.trial_ends_at !== null) {
-                console.log("[SYNC] Updating DB with Stripe Data...");
-                await supabase.from('restaurants').update(updateData).eq('id', currentDb.id);
-                return res.status(200).json({ status: newStatus, updated: true, source: 'stripe' });
+            const mySession = sessions.data.find(s => s.client_reference_id === userId && s.status === 'complete');
+            if (mySession && mySession.customer) {
+                stripeCustomerId = mySession.customer;
+                // Get the subscription from session
+                if (mySession.subscription) {
+                    foundSub = typeof mySession.subscription === 'string'
+                        ? await stripe.subscriptions.retrieve(mySession.subscription)
+                        : mySession.subscription;
+                    debug.subs_found++;
+                }
             }
-
-            return res.status(200).json({ status: newStatus, updated: false, source: 'stripe' });
-        } else {
-            console.log("[SYNC] No active Stripe subscription found. Keeping internal status.");
-            return res.status(200).json({ status: currentDb.subscription_status, updated: false, source: 'internal' });
         }
 
+        // 4. FINAL DECISION
+        if (foundSub && stripeCustomerId) {
+            console.log(`[SYNC] VALID SUB FOUND. Status: ${foundSub.status}`);
+
+            const { error: updateError } = await supabase.from('restaurants').update({
+                stripe_customer_id: stripeCustomerId,
+                subscription_status: foundSub.status,
+                subscription_plan: 'pro',
+                trial_ends_at: null // DISABLE TRIAL
+            }).eq('owner_id', userId);
+
+            if (updateError) debug.errors.push("Update error: " + updateError.message);
+
+            return res.status(200).json({
+                success: true,
+                updated: true,
+                status: foundSub.status,
+                debug: debug
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            updated: false,
+            message: "Nenhuma subscrição ativa encontrada no Stripe para este utilizador.",
+            debug: debug
+        });
+
     } catch (err) {
-        console.error("[SYNC] Error:", err);
-        return res.status(500).json({ error: err.message });
+        console.error("[SYNC] FATAL ERROR:", err);
+        return res.status(500).json({
+            success: false,
+            error: err.message,
+            debug: debug
+        });
     }
 }
