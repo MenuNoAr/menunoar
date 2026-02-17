@@ -34,7 +34,14 @@ async function init() {
             }
 
             // Redirect to Stripe Payment Link
-            window.location.href = `${stripeLink}?prefilled_email=${encodeURIComponent(currentUser.email)}`;
+            // We append both email for prefilling AND client_reference_id for webhook matching
+            const params = new URLSearchParams();
+            params.append('prefilled_email', currentUser.email);
+
+            // Standard Payment Links support 'client_reference_id' parameter
+            params.append('client_reference_id', currentUser.id);
+
+            window.location.href = `${stripeLink}?${params.toString()}`;
         };
     }
 }
