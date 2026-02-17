@@ -50,12 +50,10 @@
 
             <div class="header-separator"></div>
 
-            <!-- Elaborated Theme Toggle -->
-            <div class="theme-toggle" onclick="toggleDarkMode()" title="Alternar Tema">
-                <i class="fa-solid fa-sun"></i>
+            <!-- Theme Icon Toggle -->
+            <button id="themeBtn" class="btn-icon-only" onclick="toggleDarkMode()" title="Alternar Tema">
                 <i class="fa-solid fa-moon"></i>
-                <div class="toggle-ball"></div>
-            </div>
+            </button>
 
             <button onclick="signOut()" class="btn-header-secondary">
                 <i class="fa-solid fa-right-from-bracket"></i> Include Sair
@@ -228,10 +226,13 @@
     <script type="module" src="js/dashboard.js"></script>
     <script>
         // Check for dark mode preference and set initial logo
+        // Check for dark mode preference and set initial logo
         if (localStorage.getItem('menu_theme') === 'dark') {
             document.body.classList.add('dark-mode');
             const logo = document.getElementById('dashboardLogo');
             if (logo) logo.src = 'assets/images/Ilogo.svg';
+            const btnIcon = document.querySelector('#themeBtn i');
+            if (btnIcon) btnIcon.className = 'fa-solid fa-sun';
         }
 
         // Helper for PDF file name display

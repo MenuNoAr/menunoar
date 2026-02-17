@@ -702,6 +702,12 @@ window.toggleDarkMode = () => {
     if (logo) {
         logo.src = isDark ? 'assets/images/Ilogo.svg' : 'assets/images/logo.svg';
     }
+
+    // Swap Icon
+    const btnIcon = document.querySelector('#themeBtn i');
+    if (btnIcon) {
+        btnIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
 }
 
 // Start
