@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Digital</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+    <link rel="stylesheet" href="css/menu.css"> <!-- New dedicated CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div id="loading" class="loading-screen">
+        <div class="spinner"></div>
+        <p>A carregar ementa...</p>
+    </div>
+
+    <!-- Mobile Wrapper (Simulates Phone on Desktop) -->
+    <div id="mobile-view">
+
+        <!-- Header Section -->
+        <header id="heroHeader">
+            <div id="coverContainer" class="cover-image"></div>
+            <div class="header-content">
+                <h1 id="restName">Restaurante</h1>
+                <p id="restDesc" class="description"></p>
+
+                <div class="info-badges">
+                    <span id="badgeWifi" style="display:none;"><i class="fa-solid fa-wifi"></i> <span
+                            id="textWifi"></span></span>
+                    <span id="badgePhone" style="display:none;"><i class="fa-solid fa-phone"></i> <span
+                            id="textPhone"></span></span>
+                    <span id="badgeAddress" style="display:none;"><i class="fa-solid fa-location-dot"></i> <span
+                            id="textAddress"></span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Category Tabs -->
+        <div id="categoryTabs" class="category-tabs">
+            <!-- Injected via JS -->
+        </div>
+
+        <!-- Carousel Window -->
+        <div id="menuSliderWindow" class="slider-window">
+            <div id="menuSliderTrack" class="slider-track">
+                <!-- Sections Injected via JS -->
+            </div>
+        </div>
+
+        <!-- Float Footer (Branding) -->
+        <footer class="menu-footer">
+            <p>Menu digital por <b>Menu no Ar</b></p>
+        </footer>
+    </div>
+
+    <script type="module">
+        let currentCategoryIndex = 0;
+
+        // --- PREVIEW LISTENER ---
+        window.addEventListener('message', (event) => {
+            const { type, data } = event.data;
+            if (type === 'previewUpdate') {
+                // Texts
+                if (data.name) document.getElementById('restName').textContent = data.name;
+                if (data.description) document.getElementById('restDesc').textContent = data.description;
+
+                // Wifi
+                const badgeWifi = document.getElementById('badgeWifi');
+                if (data.wifi_password) {
+                    badgeWifi.style.display = 'inline-flex';
+                    document.getElementById('textWifi').textContent = data.wifi_password;
+                } else {
+                    badgeWifi.style.display = 'none';
+                }
+
+                // Phone
+                const badgePhone = document.getElementById('badgePhone');
+                if (data.phone) {
+                    badgePhone.style.display = 'inline-flex';
+                    document.getElementById('textPhone').textContent = data.phone;
+                } else {
+                    badgePhone.style.display = 'none';
+                }
+
+                // Address
+                const badgeAddress = document.getElementById('badgeAddress');
+                if (data.address) {
+                    badgeAddress.style.display = 'inline-flex';
+                    document.getElementById('textAddress').textContent = data.address;
+                } else {
+                    badgeAddress.style.display = 'none';
+                }
+
+                // Font
+                if (data.font) {
+                    document.body.style.fontFamily = `'${data.font}', sans-serif`;
+                    // Note: We can't easily load the font link dynamically here repeatedly without spamming head, 
+                    // but usually the font is already loaded or we assume user won't switch 100 times quickly.
+                    // For now simplest is setting family.
+                }
+
+                // Colors
+                if (data.color_background) {
+                    const bg = data.color_background;
+                    document.documentElement.style.setProperty('--bg-mobile', bg);
+                    document.getElementById('mobile-view').style.background = bg;
+
+                    const isDark = bg.toLowerCase() === '#1a1a1a' || bg.toLowerCase() === '#121212' || bg.toLowerCase() === '#000000';
+                    if (isDark) {
+                        document.documentElement.style.setProperty('--bg-card', '#252525');
+                        document.documentElement.style.setProperty('--bg-badge', '#333333');
+                        document.documentElement.style.setProperty('--border', '#333333');
+                        document.documentElement.style.setProperty('--text-muted', '#a0a0a0');
+                        document.documentElement.style.setProperty('--bg-page', '#121212');
+                    } else {
+                        document.documentElement.style.setProperty('--bg-card', '#FFFFFF');
+                        document.documentElement.style.setProperty('--bg-badge', '#F5F7FA');
+                        document.documentElement.style.setProperty('--border', '#F0F0F0');
+                        document.documentElement.style.setProperty('--text-muted', '#666666');
+                        document.documentElement.style.setProperty('--bg-page', '#F0F2F5');
+                    }
+                }
+            } else if (type === 'previewUpdateCover') {
+                const url = data;
+                if (url) {
+                    const el = document.getElementById('coverContainer');
+                    el.style.display = 'block';
+                    el.style.backgroundImage = `url('${url}')`;
+                }
+            }
+        });
+
+        async function init() {
+            const res = await fetch('/api/config');
+            const config = await res.json();
+            const supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+            const params = new URLSearchParams(window.location.search);
+            const slug = params.get('id');
+
+            if (!slug) return document.body.innerHTML = '<h1 style="padding:20px;">Restaurante não encontrado.</h1>';
+
+            // Fetch Restaurant & Items
+            const { data: restaurant } = await supabase.from('restaurants').select('*').eq('slug', slug).single();
+            if (!restaurant) return document.body.innerHTML = '<h1 style="padding:20px;">404 - Restaurante não encontrado.</h1>';
+
+            // PDF MODE CHECK
+            if (restaurant.menu_type === 'pdf' && restaurant.pdf_url) {
+                window.location.href = restaurant.pdf_url;
+                return;
+            }
+
+            // Load Font dynamically
+            const fontName = restaurant.font || 'Inter';
+            const link = document.createElement('link');
+            link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@400;700&display=swap`;
+            link.rel = 'stylesheet';
+            document.head.appendChild(link);
+            document.body.style.setProperty('--font-heading', `'${fontName}', sans-serif`);
+            document.body.style.fontFamily = `'${fontName}', sans-serif`;
+
+            // Apply Custom Colors & Theme Logic
+            if (restaurant.color_primary) document.documentElement.style.setProperty('--primary', restaurant.color_primary);
+            if (restaurant.color_text) document.documentElement.style.setProperty('--text', restaurant.color_text);
+
+            if (restaurant.color_background) {
+                const bg = restaurant.color_background;
+                document.documentElement.style.setProperty('--bg-mobile', bg);
+
+                // Heuristic for Dark Mode
+                const isDark = bg.toLowerCase() === '#1a1a1a' || bg.toLowerCase() === '#121212' || bg.toLowerCase() === '#000000';
+
+                if (isDark) {
+                    document.documentElement.style.setProperty('--bg-card', '#252525');
+                    document.documentElement.style.setProperty('--bg-badge', '#333333');
+                    document.documentElement.style.setProperty('--border', '#333333');
+                    document.documentElement.style.setProperty('--text-muted', '#a0a0a0');
+                    document.documentElement.style.setProperty('--bg-page', '#121212');
+                } else {
+                    document.documentElement.style.setProperty('--bg-card', '#FFFFFF');
+                    document.documentElement.style.setProperty('--bg-badge', '#F5F7FA');
+                    document.documentElement.style.setProperty('--border', '#F0F0F0');
+                    document.documentElement.style.setProperty('--text-muted', '#666666');
+                    document.documentElement.style.setProperty('--bg-page', '#F0F2F5');
+                }
+                document.getElementById('mobile-view').style.background = restaurant.color_background;
+            }
+
+            // POPULATE HEADER
+            document.title = restaurant.name;
+            document.getElementById('restName').textContent = restaurant.name;
+            document.getElementById('restDesc').textContent = restaurant.description || '';
+
+            // Cover
+            if (restaurant.cover_url) {
+                document.getElementById('coverContainer').style.backgroundImage = `url('${restaurant.cover_url}')`;
+            } else {
+                document.getElementById('coverContainer').style.display = 'none';
+                document.getElementById('heroHeader').style.paddingTop = '100px';
+            }
+
+            // Badges
+            if (restaurant.wifi_password) {
+                document.getElementById('badgeWifi').style.display = 'inline-flex';
+                document.getElementById('textWifi').textContent = restaurant.wifi_password;
+            }
+            if (restaurant.phone) {
+                document.getElementById('badgePhone').style.display = 'inline-flex';
+                document.getElementById('textPhone').textContent = restaurant.phone;
+            }
+            if (restaurant.address) {
+                document.getElementById('badgeAddress').style.display = 'inline-flex';
+                document.getElementById('textAddress').textContent = restaurant.address;
+            }
+
+            // LOAD ITEMS
+            // LOAD ITEMS
+            let { data: items } = await supabase.from('menu_items')
+                .select('*')
+                .eq('restaurant_id', restaurant.id)
+                .order('category')
+                .order('name');
+
+            if (!items) items = [];
+
+            // Group Items
+            const uniqueCats = [...new Set(items.map(i => i.category))];
+            const groups = {};
+            uniqueCats.forEach(c => groups[c] = items.filter(i => i.category === c));
+
+            // RENDER TABS & SECTIONS
+            const tabsContainer = document.getElementById('categoryTabs');
+            const track = document.getElementById('menuSliderTrack');
+            const catImages = restaurant.category_images || {};
+
+            uniqueCats.forEach((cat, index) => {
+                // 1. Create Tab
+                const btn = document.createElement('button');
+                btn.className = 'tab-btn';
+                btn.textContent = cat;
+                if (index === 0) btn.classList.add('active');
+                btn.onclick = () => switchToCategory(index);
+                tabsContainer.appendChild(btn);
+
+                // 2. Create Section Slide
+                const slide = document.createElement('div');
+                slide.className = 'menu-slide';
+                slide.id = `slide-${index}`;
+
+                // Header (Banner or Title)
+                let headerHTML = `<h2 class="slide-title">${cat}</h2>`;
+                if (catImages[cat]) {
+                    headerHTML = `
+                        <div class="cat-banner">
+                            <img src="${catImages[cat]}" loading="lazy">
+                            <div class="cat-banner-overlay">
+                                <h2>${cat}</h2>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Items
+                let itemsHTML = groups[cat].map(item => `
+                    <div class="menu-item ${!item.available ? 'unavailable' : ''}">
+                        <div class="item-text">
+                            <h3>${item.name}</h3>
+                            <p class="item-desc">${item.description || ''}</p>
+                            <div class="item-price">${item.price.toFixed(2)}€</div>
+                        </div>
+                        ${item.image_url ? `<div class="item-img"><img src="${item.image_url}" loading="lazy"></div>` : ''}
+                    </div>
+                `).join('');
+
+                slide.innerHTML = `<div class="slide-content">${headerHTML}<div class="items-grid">${itemsHTML}</div></div>`;
+                track.appendChild(slide);
+            });
+
+            window.switchToCategory = (index) => {
+                currentCategoryIndex = index;
+                // Slide Logic
+                track.style.transform = `translateX(-${index * 100}%)`;
+
+                // Active Tab Logic
+                document.querySelectorAll('.tab-btn').forEach((b, i) => {
+                    if (i === index) {
+                        b.classList.add('active');
+                        b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    } else {
+                        b.classList.remove('active');
+                    }
+                });
+
+                // Scroll to top of content (optional, but good UX)
+                // document.getElementById('menuSliderWindow').scrollTop = 0;
+            };
+
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

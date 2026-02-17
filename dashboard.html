@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Menu no Ar</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+
+    <!-- Preconnect to Font Provider -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        media="print" onload="this.media='all'">
+
+    <!-- Menu Styles (Visuals for preview) -->
+    <link rel="stylesheet" href="css/menu.css">
+    <!-- Editor Styles (Overlays) -->
+    <link rel="stylesheet" href="css/editor.css">
+
+    <!-- Defer non-critical scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js" defer></script>
+</head>
+
+<body>
+
+    <div class="dashboard-header">
+        <div class="header-brand">
+            <img src="assets/images/logo.svg" alt="Logo" id="dashboardLogo">
+            <div class="header-text">
+                <h1>Editor Visual</h1>
+                <span id="userDisplay">...</span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn-header-action" onclick="openSettingsModal()">
+                <i class="fa-solid fa-sliders"></i> Configurações
+            </button>
+
+            <a id="liveLink" href="#" target="_blank" class="btn-header-link">
+                Ver ao Vivo <i class="fa-solid fa-rocket"></i>
+            </a>
+
+            <div class="header-separator"></div>
+
+            <!-- Elaborated Theme Toggle -->
+            <div class="theme-toggle" onclick="toggleDarkMode()" title="Alternar Tema">
+                <i class="fa-solid fa-sun"></i>
+                <i class="fa-solid fa-moon"></i>
+                <div class="toggle-ball"></div>
+            </div>
+
+            <button onclick="signOut()" class="btn-header-secondary">
+                <i class="fa-solid fa-right-from-bracket"></i> Include Sair
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN EDITOR AREA -->
+    <div class="editor-container">
+
+        <!-- Mobile Preview / Editor Wrapper -->
+        <div id="mobile-view">
+
+            <!-- HEADER (Editable) -->
+            <header id="heroHeader">
+                <div id="coverEditor" class="cover-image editable-container" onclick="triggerCoverUpload()">
+                    <div class="edit-icon-overlay"><i class="fa-solid fa-camera"></i>&nbsp; Alterar Capa</div>
+                    <input type="file" id="coverUpload" accept="image/*" style="display:none;">
+                </div>
+
+                <div class="header-content">
+                    <h1 id="restNameEditor" class="text-editable" onclick="editRestName()">Restaurante Nome</h1>
+                    <p id="restDescEditor" class="description text-editable" onclick="editRestDesc()">Descrição...</p>
+
+                    <div class="info-badges">
+                        <span id="badgeWifi" class="editable-container" onclick="editWifi()">
+                            <i class="fa-solid fa-wifi"></i> <span id="textWifi">Wifi</span>
+                        </span>
+                        <span id="badgePhone" class="editable-container" onclick="editPhone()">
+                            <i class="fa-solid fa-phone"></i> <span id="textPhone">Tel</span>
+                        </span>
+                        <span id="badgeAddress" class="editable-container" onclick="editAddress()">
+                            <i class="fa-solid fa-location-dot"></i> <span id="textAddress">Morada</span>
+                        </span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TABS (Replica of menu.html categoryTabs) -->
+            <div id="categoryNav" class="category-tabs" style="justify-content: flex-start; overflow-x: auto;">
+                <!-- Categories injected here -->
+            </div>
+
+            <!-- MENU CONTENT -->
+            <div id="menuContainer" class="slider-window">
+                <!-- Items injected here as slides or vertical sections -->
+            </div>
+
+            <footer class="menu-footer">
+                <p>Menu digital por <b>Menu no Ar</b></p>
+                <p>Modo de Edição</p>
+            </footer>
+
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <h2 style="margin-bottom:20px; color:var(--color-text);">Configurações</h2>
+            <form id="settingsForm">
+                <div class="form-group">
+                    <label>Link do Menu (Slug)</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-link"></i>
+                        <input type="text" id="modalSlug" placeholder="ex: meurestaurante">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Fonte</label>
+                    <select id="modalFont">
+                        <option value="Inter">Inter (Padrão)</option>
+                        <option value="Playfair Display">Playfair Display (Elegante)</option>
+                        <option value="Oswald">Oswald (Forte)</option>
+                    </select>
+                </div>
+
+                <div class="form-group"
+                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:var(--bg-page); padding:10px; border-radius:10px;">
+                    <label style="margin:0; display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-file-pdf"></i> Ativar Menu PDF
+                    </label>
+                    <label class="switch">
+                        <input type="checkbox" id="pdfToggle" onchange="togglePdfDetails()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="form-group" id="pdfDetails" style="display:none; animation: fadeIn 0.3s;">
+                    <label>Upload do PDF</label>
+
+                    <div class="file-upload-wrapper" onclick="document.getElementById('pdfUploadInput').click()">
+                        <div class="upload-icon">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <div class="upload-text">
+                            <span id="pdfFileNameDisplay">Clique para selecionar o PDF</span>
+                            <small>Tamanho máx: 10MB</small>
+                        </div>
+                    </div>
+                    <input type="file" id="pdfUploadInput" style="display:none;" accept="application/pdf"
+                        onchange="handlePdfSelect(this)">
+
+                    <p style="font-size:0.8rem; color:#888; margin-top:8px; display:flex; gap:5px;">
+                        <i class="fa-solid fa-circle-info"></i>
+                        Se ativo, os clientes verão o PDF em vez do menu digital.
+                    </p>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('settingsModal')">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Guardar Configurações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ITEM EDIT MODAL -->
+    <div id="itemModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <h2 id="modalTitle" style="margin-bottom:20px; color:var(--color-text);">Editar Produto</h2>
+            <form id="itemEditForm">
+                <input type="hidden" id="editItemId">
+                <div class="form-group">
+                    <label>Nome do Prato</label>
+                    <input type="text" id="editItemName" required>
+                </div>
+                <div class="form-group">
+                    <label>Preço (€)</label>
+                    <input type="number" step="0.01" id="editItemPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="editItemDesc" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <input list="catSuggestions" id="editItemCat" required>
+                    <datalist id="catSuggestions">
+                        <option value="Entradas">
+                        <option value="Pratos Principais">
+                        <option value="Sobremesas">
+                        <option value="Bebidas">
+                    </datalist>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('itemModal')">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Guardar Prato</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- GENERIC TEXT EDIT MODAL -->
+    <div id="textModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <h2 id="textModalTitle">Editar Texto</h2>
+            <div class="form-group">
+                <input type="text" id="textInput" placeholder="Escreve aqui...">
+                <textarea id="textAreaInput" rows="4" style="display:none;" placeholder="Escreve aqui..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('textModal')">Cancelar</button>
+                <button id="saveTextBtn" class="btn-confirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/dashboard.js"></script>
+    <script>
+        // Check for dark mode preference and set initial logo
+        if (localStorage.getItem('menu_theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            const logo = document.getElementById('dashboardLogo');
+            if (logo) logo.src = 'assets/images/Ilogo.svg';
+        }
+
+        // Helper for PDF file name display
+        function handlePdfSelect(input) {
+            const fileName = input.files[0] ? input.files[0].name : "Clique para selecionar o PDF";
+            document.getElementById('pdfFileNameDisplay').textContent = fileName;
+            document.querySelector('.file-upload-wrapper').classList.add('selected');
+        }
+    </script>
+</body>
+
+</html>

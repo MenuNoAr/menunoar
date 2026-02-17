@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Criar Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <h1>A criar utilizador admin...</h1>
+    <p id="status">Aguarde...</p>
+
+    <script type="module">
+        // 1. Fetch Config
+        const res = await fetch('/api/config');
+        const config = await res.json();
+        const supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+
+        async function createAdmin() {
+            const status = document.getElementById('status');
+
+            // Tenta criar o user pela API oficial (muito mais seguro que SQL manual)
+            const { data, error } = await supabase.auth.signUp({
+                email: 'admin@teste.com',
+                password: 'admin',
+            });
+
+            if (error) {
+                console.error(error);
+                status.textContent = "Erro: " + error.message;
+                status.style.color = "red";
+            } else {
+                console.log(data);
+                status.textContent = "Sucesso! Utilizador criado. Podes ir fazer login.";
+                status.style.color = "green";
+
+                // Se o email confirmation estiver ligado, pode aparecer msg a dizer "Verifica o email".
+                if (data.user && !data.session) {
+                    status.textContent += " (Verifica o teu email para confirmar, se necessário).";
+                }
+            }
+        }
+
+        createAdmin();
+    </script>
+</body>
+
+</html>
