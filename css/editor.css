@@ -166,10 +166,13 @@
 
 /* Editor Canvas (Resetting Mobile View) */
 .editor-canvas {
-    margin-top: 70px;
-    /* Navbar height */
+    margin: 70px auto 0 auto;
+    /* Top adjusted for navbar, centered horizontally */
     min-height: calc(100vh - 70px);
     background: var(--bg-page);
+    max-width: 800px;
+    /* Limit width */
+    width: 100%;
 }
 
 /* Overriding old mobile emulator styles */
