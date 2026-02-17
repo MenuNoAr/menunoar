@@ -1,5 +1,6 @@
 /* dashboard.js - Unified Visual Editor Logic */
 import { initUploadService, uploadFile } from './upload-service.js';
+import { initAuthListener, signOut, getSupabase } from './auth-service.js';
 
 let supabase;
 let currentUser;
@@ -10,27 +11,61 @@ let currentSlideIndex = 0; // Store active slide
 
 // Function to initialize everything
 async function init() {
-    const res = await fetch('/api/config');
-    const config = await res.json();
-    supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    supabase = await getSupabase();
 
-    // Init upload service with our supabase instance
+    // Init upload service
     initUploadService(supabase);
 
-    const storedUser = localStorage.getItem('menu_user');
-    if (!storedUser) { window.location.href = 'login.html'; return; }
-    currentUser = JSON.parse(storedUser);
+    // Auth Listener
+    initAuthListener(async (user) => {
+        currentUser = user;
+        document.getElementById('userDisplay').textContent = user.email.split('@')[0]; // Show part of email
 
-    document.getElementById('userDisplay').textContent = currentUser.username;
-    loadData();
+        await loadData();
+
+    }, () => {
+        // No Auth
+        window.location.href = 'login.html';
+    });
 }
 
-window.signOut = () => { localStorage.removeItem('menu_user'); window.location.href = 'index.html'; }
+window.signOut = () => signOut();
 
 // --- DATA LOADING ---
 async function loadData() {
-    // Fetch Restaurant
-    const { data: rest } = await supabase.from('restaurants').select('*').eq('owner_username', currentUser.username).single();
+    if (!currentUser) return;
+
+    // Fetch Restaurant by OWNER ID (Supabase Auth ID)
+    let { data: rest, error } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('owner_id', currentUser.id)
+        .single();
+
+    // Auto-Create Restaurant if first time login
+    if (!rest) {
+        console.log("Utilizador novo, a criar restaurante...");
+        const newRest = {
+            owner_id: currentUser.id,
+            name: "O Meu Restaurante",
+            slug: "restaurante-" + Math.floor(Math.random() * 10000),
+            description: "Edita esta descrição...",
+            menu_type: "digital"
+        };
+
+        const { data: created, error: createError } = await supabase
+            .from('restaurants')
+            .insert([newRest])
+            .select()
+            .single();
+
+        if (createError) {
+            console.error("Erro ao criar restaurante inicial:", createError);
+            alert("Erro ao iniciar a tua conta. Recarrega a página.");
+            return;
+        }
+        rest = created;
+    }
 
     if (rest) {
         restaurantId = rest.id;
@@ -47,21 +82,16 @@ async function loadData() {
 
         menuItems = items || [];
 
-
-
         // --- SEEDING LOGIC ---
         // Se a categoria "Pratos Principais" não existir, cria estes pratos automaticamente NA BASE DE DADOS
         const hasPratosPrincipais = menuItems.some(i => i.category === 'Pratos Principais');
 
-        if (!hasPratosPrincipais) {
+        if (!hasPratosPrincipais && menuItems.length === 0) {
             console.log("Seeding Pratos Principais...");
             const demoItems = [
                 { restaurant_id: restaurantId, name: 'Bacalhau à Lagareiro', description: 'Lombo alto, batatas a murro e muito azeite.', price: 18.50, category: 'Pratos Principais', available: true },
                 { restaurant_id: restaurantId, name: 'Arroz de Marisco', description: 'Arroz malandrinho recheado de mar.', price: 22.00, category: 'Pratos Principais', available: true },
-                { restaurant_id: restaurantId, name: 'Polvo à Lagareiro', description: 'Tenro, assado e bem regado.', price: 19.50, category: 'Pratos Principais', available: true },
-                { restaurant_id: restaurantId, name: 'Caldeirada de Peixe', description: 'Peixe fresco cozinhado lentamente.', price: 16.00, category: 'Pratos Principais', available: true },
-                { restaurant_id: restaurantId, name: 'Bacalhau com Natas', description: 'Cremoso, gratinado e impossível de ignorar.', price: 14.50, category: 'Pratos Principais', available: true },
-                { restaurant_id: restaurantId, name: 'Feijoada de Marisco', description: 'Feijão e marisco numa combinação ousada.', price: 18.00, category: 'Pratos Principais', available: true }
+                { restaurant_id: restaurantId, name: 'Cheesecake', description: 'Delicioso com frutos vermelhos.', price: 4.50, category: 'Sobremesas', available: true }
             ];
 
             const { error: insertError } = await supabase.from('menu_items').insert(demoItems);
@@ -69,37 +99,12 @@ async function loadData() {
             if (!insertError) {
                 // Recarregar para ter os IDs reais
                 return loadData();
-            } else {
-                console.error("Erro ao criar pratos demo:", insertError);
-            }
-        }
-
-        // --- SEEDING LOGIC: Sobremesas ---
-        const hasSobremesas = menuItems.some(i => i.category === 'Sobremesas');
-
-        if (!hasSobremesas) {
-            console.log("Seeding Sobremesas...");
-            const dessertItems = [
-                { restaurant_id: restaurantId, name: 'Pastel de Nata', description: 'Pequeno, mas manda no prato.', price: 1.50, category: 'Sobremesas', available: true },
-                { restaurant_id: restaurantId, name: 'Leite Creme', description: 'Creme sedoso com crosta caramelizada.', price: 3.50, category: 'Sobremesas', available: true },
-                { restaurant_id: restaurantId, name: 'Arroz Doce', description: 'Clássico caseiro com desenhos canela.', price: 3.00, category: 'Sobremesas', available: true },
-                { restaurant_id: restaurantId, name: 'Baba de Camelo', description: 'Doce, leve e misteriosa na origem.', price: 3.50, category: 'Sobremesas', available: true },
-                { restaurant_id: restaurantId, name: 'Toucinho do Céu', description: 'Pecado doce oficialmente aprovado.', price: 4.50, category: 'Sobremesas', available: true },
-                { restaurant_id: restaurantId, name: 'Mousse de Chocolate', description: 'Intensa e cremosa.', price: 3.50, category: 'Sobremesas', available: true }
-            ];
-
-            const { error: insertDessertError } = await supabase.from('menu_items').insert(dessertItems);
-
-            if (!insertDessertError) {
-                return loadData();
-            } else {
-                console.error("Erro ao criar sobremesas demo:", insertDessertError);
             }
         }
 
         renderMenu(menuItems);
     } else {
-        document.getElementById('restNameEditor').textContent = "Clica para nomear";
+        document.getElementById('restNameEditor').textContent = "Erro ao carregar";
     }
 }
 

@@ -618,6 +618,11 @@ footer {
         /* Smaller logo on mobile */
     }
 
+    main {
+        padding-top: 70px;
+        /* Match fixed navbar height */
+    }
+
     h1 {
         font-size: 2.5rem;
     }

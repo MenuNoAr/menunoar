@@ -4,196 +4,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Menu no Ar</title>
-    <!-- Favicon -->
+    <title>Entrar - Menu no Ar</title>
     <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
-
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        :root {
+            --primary: #1fa8ff;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --bg-light: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-light);
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding-top: 0;
-            background-color: #f8fafc;
-            background-image: radial-gradient(#e0f2fe 0.5px, transparent 0.5px);
-            background-size: 20px 20px;
+            padding: 20px;
         }
 
-        .auth-container {
+        .auth-card {
+            background: white;
             width: 100%;
-            max-width: 420px;
-            background: #fff;
-            padding: 3rem 2.5rem;
-            border-radius: 30px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            padding: 3rem 2rem;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            border: 1px solid #e2e8f0;
         }
 
-        .auth-container h2 {
+        .logo {
             margin-bottom: 2rem;
-            font-size: 2.2rem;
-            color: #1e1e1e;
+            height: 50px;
         }
 
-        .logo-login {
-            height: 80px;
-            margin-bottom: 1.5rem;
+        h1 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: var(--text-gray);
+            margin-bottom: 2rem;
         }
 
         .form-group {
-            margin-bottom: 1.2rem;
             text-align: left;
+            margin-bottom: 1rem;
         }
 
-        .form-group label {
+        label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: #64748b;
-            text-transform: uppercase;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
         }
 
-        .form-group input {
+        input {
             width: 100%;
-            padding: 0.9rem 1.2rem;
-            border-radius: 12px;
+            padding: 0.8rem 1rem;
             border: 2px solid #e2e8f0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            border-radius: 12px;
+            font-family: inherit;
             font-size: 1rem;
-            background: #f8fafc;
             transition: all 0.2s;
         }
 
-        .form-group input:focus {
+        input:focus {
             outline: none;
-            border-color: #1fa8ff;
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(31, 168, 255, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(31, 168, 255, 0.1);
         }
 
-        .btn-submit {
+        .btn {
             width: 100%;
-            margin-top: 1rem;
-            padding: 1rem;
-            font-size: 1.1rem;
-            background: linear-gradient(135deg, #1fa8ff 0%, #00d4bd 100%);
-            color: white;
+            padding: 0.9rem;
             border: none;
-            border-radius: 50px;
-            font-family: 'Luckiest Guy', cursive;
+            border-radius: 12px;
+            font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 10px 20px -5px rgba(31, 168, 255, 0.4);
+            font-size: 1rem;
             transition: transform 0.2s;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .btn-submit:hover {
+        .btn:hover {
             transform: translateY(-2px);
         }
 
-        .back-link {
-            display: inline-block;
-            margin-top: 1.5rem;
-            font-weight: 600;
-            color: #64748b;
-            text-decoration: none;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+        .btn-primary {
+            background: var(--primary);
+            color: white;
         }
 
-        .back-link:hover {
-            color: #1fa8ff;
+        .btn-google {
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: var(--text-dark);
+        }
+
+        .btn-google:hover {
+            background: #f8fafc;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            margin: 1.5rem 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .divider span {
+            padding: 0 10px;
+        }
+
+        .links {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        #error-msg {
+            color: #ef4444;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+            background: #fee2e2;
+            padding: 10px;
+            border-radius: 8px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="auth-container">
+    <div class="auth-card">
         <a href="index.html">
-            <img src="assets/images/logo.svg" alt="Logo" class="logo-login">
+            <img src="assets/images/logo.svg" alt="Menu no Ar" class="logo">
         </a>
-        <h2>ENTRAR</h2>
+        <h1>Bem-vindo de volta!</h1>
+        <p>Gere o teu menu digital em segundos.</p>
+
+        <div id="error-msg"></div>
+
         <form id="loginForm">
             <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" placeholder="admin" required>
+                <label>Email</label>
+                <input type="email" id="email" required placeholder="exemplo@email.com">
             </div>
+
             <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="••••••" required>
+                <label>Password</label>
+                <input type="password" id="password" required placeholder="••••••••">
             </div>
-            <button type="submit" class="btn-submit">ENTRAR</button>
-            <p id="loginStatus"
-                style="margin-top:15px; font-weight:600; font-family: 'Plus Jakarta Sans', sans-serif; font-size:0.9rem;">
-            </p>
+
+            <button type="submit" class="btn btn-primary">Entrar</button>
         </form>
-        <a href="index.html" class="back-link">← Voltar a Terra</a>
+
+        <div class="divider"><span>OU</span></div>
+
+        <button id="googleBtn" class="btn btn-google">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" style="width:20px;">
+            Entrar com Google
+        </button>
+
+        <div class="links">
+            Não tens conta? <a href="signup.html">Criar Conta Grátis</a>
+        </div>
     </div>
 
-    <!-- Script especifico para Login Custom -->
     <script type="module">
-        // Importar config
-        async function getConfig() {
-            try {
-                const res = await fetch('/api/config');
-                if (!res.ok) throw new Error('Falha config');
-                return await res.json();
-            } catch (e) { return {}; }
+        import { initAuthListener, signIn, signInWithGoogle } from './js/auth-service.js';
+
+        // Check session
+        initAuthListener((user) => {
+            window.location.href = 'dashboard.html';
+        });
+
+        const form = document.getElementById('loginForm');
+        const errorMsg = document.getElementById('error-msg');
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.style.display = 'block';
         }
 
-        const loginForm = document.getElementById('loginForm');
-        const loginStatus = document.getElementById('loginStatus');
-
-        loginForm.addEventListener('submit', async (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            loginStatus.textContent = "A verificar...";
-            loginStatus.style.color = "#64748b";
+            errorMsg.style.display = 'none';
 
-            const config = await getConfig();
-            if (!config.supabaseUrl) {
-                loginStatus.textContent = "Erro: API Config não carregada.";
-                return;
-            }
-
-            const supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
-
-            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // Verificar na tabela custom 'app_users'
-            const { data, error } = await supabase
-                .from('app_users')
-                .select('*')
-                .eq('username', username)
-                .eq('password', password)
-                .single();
+            // Show loading state
+            const btn = form.querySelector('button');
+            const originalText = btn.textContent;
+            btn.textContent = 'A entrar...';
+            btn.disabled = true;
 
-            if (error || !data) {
-                loginStatus.textContent = "Dados incorretos.";
-                loginStatus.style.color = "#ef4444";
+            const { data, error } = await signIn(email, password);
+
+            if (error) {
+                showError("Email ou password incorretos.");
+                btn.textContent = originalText;
+                btn.disabled = false;
             } else {
-                loginStatus.textContent = "Sucesso! A entrar...";
-                loginStatus.style.color = "#10b981";
-
-                // Guardar sessão manualmente no browser
-                localStorage.setItem('menu_user', JSON.stringify(data));
-
-                setTimeout(() => {
-                    window.location.href = "dashboard.html";
-                }, 1000);
+                window.location.href = 'dashboard.html';
             }
+        });
+
+        document.getElementById('googleBtn').addEventListener('click', async () => {
+            const { error } = await signInWithGoogle();
+            if (error) showError("Erro ao iniciar com Google: " + error.message);
         });
     </script>
 </body>
