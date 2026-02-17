@@ -18,6 +18,8 @@ async function init() {
 
     // Auth Listener
     initAuthListener(async (user) => {
+        if (currentUser && currentUser.id === user.id) return; // Prevent reload on token refresh
+
         currentUser = user;
         document.getElementById('userDisplay').textContent = user.email.split('@')[0]; // Show part of email
 
@@ -146,20 +148,41 @@ function renderHeader(data) {
 
     // Cover
     const coverDiv = document.getElementById('coverEditor');
+    let overlayContent = '';
+
     if (data.cover_url) {
         coverDiv.style.backgroundImage = `url('${data.cover_url}')`;
         coverDiv.style.height = '350px';
+        // Add Remove Button
+        overlayContent = `
+            <div class="edit-icon-overlay">
+                <i class="fa-solid fa-camera"></i> Alterar
+                <button class="action-btn btn-delete" style="margin-left:10px; width:30px; height:30px;" onclick="deleteCover(); event.stopPropagation();" title="Remover Capa">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>`;
     } else {
         coverDiv.style.backgroundImage = 'none';
         coverDiv.style.backgroundColor = '#ddd';
         coverDiv.style.height = '120px'; // Reduced height for empty state
+        overlayContent = `<div class="edit-icon-overlay"><i class="fa-solid fa-camera"></i> Adicionar Capa</div>`;
     }
+
+    // Rebuild content to include button
+    coverDiv.innerHTML = overlayContent + `<input type="file" id="coverUpload" style="display:none;" accept="image/*">`;
 
     // Badges
     updateBadge('badgeWifi', 'textWifi', data.wifi_password, '📶 Wifi: ');
     updateBadge('badgePhone', 'textPhone', data.phone, '📞 ');
     updateBadge('badgeAddress', 'textAddress', data.address, '📍 ');
 }
+
+window.deleteCover = async () => {
+    if (confirm("Remover a capa do restaurante?")) {
+        await supabase.from('restaurants').update({ cover_url: null }).eq('id', restaurantId);
+        loadData();
+    }
+};
 
 function updateBadge(badgeId, textId, value, prefix) {
     const el = document.getElementById(badgeId);
