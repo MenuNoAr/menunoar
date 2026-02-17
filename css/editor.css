@@ -166,8 +166,8 @@
 
 /* Editor Canvas (Mimics #mobile-view from menu.css) */
 .editor-canvas {
-    margin: 90px auto 40px auto;
-    min-height: calc(100vh - 130px);
+    margin: 70px auto 0 auto;
+    min-height: calc(100vh - 70px);
     background: var(--bg-card);
     max-width: 600px;
     width: 100%;
