@@ -417,17 +417,24 @@ window.scrollToSlide = (index) => {
 function createItemCard(item) {
     const isAvail = item.available;
     const eyeIcon = isAvail ? 'fa-eye' : 'fa-eye-slash';
-    const eyeColor = isAvail ? 'var(--primary)' : '#999';
+
+    // Color: Green for visible, Muted Red/Gray for hidden to be very clear
+    const eyeColor = isAvail ? 'var(--success)' : '#ccc';
+    const opacity = isAvail ? '1' : '0.5';
 
     return `
-        <div class="menu-item ${!isAvail ? 'unavailable' : ''} editable-container" style="position:relative;">
+        <div class="menu-item ${!isAvail ? 'unavailable' : ''} editable-container" style="position:relative; align-items:center;">
             
-            <!-- Visibility Toggle (Always Visible) -->
-            <button class="btn-eye-toggle" onclick="toggleAvailability('${item.id}', ${isAvail})" title="Visibilidade" style="position:absolute; top:10px; right:10px; border:none; background:transparent; font-size:1.1rem; color:${eyeColor}; cursor:pointer; z-index:5; padding:5px;">
-                <i class="fa-solid ${eyeIcon}"></i>
-            </button>
+            <!-- Visibility Toggle (Left Side) -->
+            <div class="item-status" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding-right:5px;">
+                <button class="btn-eye-toggle" onclick="toggleAvailability('${item.id}', ${isAvail})" title="Alterar Visibilidade" 
+                        style="border:none; background:transparent; font-size:1.2rem; color:${eyeColor}; cursor:pointer; padding:10px; transition:transform 0.2s;">
+                    <i class="fa-solid ${eyeIcon}"></i>
+                </button>
+                <span style="font-size:0.6rem; color:#999; margin-top:-5px;">${isAvail ? 'Visível' : 'Oculto'}</span>
+            </div>
 
-            <div class="item-text" onclick="openEditItemModal('${item.id}')" style="padding-right:30px; cursor:pointer;">
+            <div class="item-text" onclick="openEditItemModal('${item.id}')" style="cursor:pointer; flex:1;">
                 <h3 style="margin-bottom:5px;">${item.name}</h3>
                 <p class="item-desc" style="font-size:0.85rem; color:#666; margin-bottom:8px;">${item.description || ''}</p>
                 <div class="item-price" style="font-weight:700;">${Number(item.price).toFixed(2)}€</div>
