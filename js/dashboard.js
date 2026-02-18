@@ -8,6 +8,7 @@ let restaurantId;
 let currentData = {}; // Store restaurant data
 let menuItems = [];   // Store items
 let currentSlideIndex = 0; // Store active slide
+let sortableInstance = null; // Store SortableJS instance
 
 // Function to initialize everything
 async function init() {
@@ -405,13 +406,11 @@ function renderMenu(items) {
             <i class="fa-solid fa-grip-lines-vertical handle" style="margin-left:8px; opacity:0.3; cursor:grab;"></i>
         `;
 
-        // Drag Attributes
-        btn.setAttribute('draggable', 'true');
+        // Drag Attributes (Handled by SortableJS)
         btn.dataset.category = cat;
         btn.dataset.index = index;
 
-        // Drag Events
-        addDragEvents(btn, uniqueCats);
+        // Drag Events (Handled by SortableJS)
 
         nav.appendChild(btn);
 
@@ -482,6 +481,39 @@ function renderMenu(items) {
 
     // Initialize height for active slide
     setTimeout(() => scrollToSlide(currentSlideIndex), 50);
+
+    // --- INITIALIZE SORTABLEJS ---
+    if (window.Sortable) {
+        // Destroy previous instance if exists to avoid duplicates
+        if (sortableInstance) {
+            sortableInstance.destroy();
+        }
+
+        sortableInstance = new Sortable(nav, {
+            animation: 150,
+            handle: '.handle', // Drag handle
+            draggable: '.draggable-tab', // Only drag tabs, not "add button"
+            ghostClass: 'sortable-ghost', // Class for the drop placeholder
+            chosenClass: 'sortable-chosen', // Class for the chosen item
+            dragClass: 'sortable-drag', // Class for the dragging item
+            onEnd: async function (evt) {
+                // Save the new order
+                const newOrder = [];
+                // Query all tabs in the new order
+                nav.querySelectorAll('.draggable-tab').forEach(tab => {
+                    newOrder.push(tab.dataset.category);
+                });
+
+                console.log("SortableJS: Saving new order:", newOrder);
+                await saveCategoryOrder(newOrder);
+
+                // Correctly update slide index if the active tab moved
+                // (Optional: Recalc currentSlideIndex based on active class)
+                const newIndex = Array.from(nav.querySelectorAll('.tab-btn')).findIndex(btn => btn.classList.contains('active'));
+                if (newIndex !== -1) currentSlideIndex = newIndex;
+            }
+        });
+    }
 }
 
 // Global observer for dynamic height
@@ -490,45 +522,7 @@ let slideObserver = null;
 // --- DRAG AND DROP LOGIC ---
 // --- DRAG AND DROP LOGIC (Robust 2D) ---
 function addDragEvents(item, allCats) {
-    item.addEventListener('dragstart', (e) => {
-        e.target.classList.add('dragging');
-        e.dataTransfer.setData('text/plain', item.dataset.category);
-    });
-
-    item.addEventListener('dragend', async (e) => {
-        e.target.classList.remove('dragging');
-
-        // Save the new order
-        const nav = document.getElementById('categoryNav');
-        const newOrder = [];
-        // Only get the category tabs, ignore "add button"
-        nav.querySelectorAll('.draggable-tab').forEach(tab => {
-            newOrder.push(tab.dataset.category);
-        });
-
-        console.log("Saving new order:", newOrder);
-        await saveCategoryOrder(newOrder);
-    });
-
-    // Allow dropping on the navigation container
-    // Use 'ondragover' to avoid duplicate listeners if this function is called multiple times
-    const nav = document.getElementById('categoryNav');
-    nav.ondragover = (e) => {
-        e.preventDefault();
-        const afterElement = getDragAfterElement(nav, e.clientX, e.clientY);
-        const draggable = document.querySelector('.dragging');
-        if (!draggable) return;
-
-        // "Add Cat" button should always be last, so insert before it if possible
-        const addBtn = document.querySelector('.btn-add-cat');
-
-        if (afterElement == null) {
-            // Append to end (before AddBtn if exists)
-            nav.insertBefore(draggable, addBtn);
-        } else {
-            nav.insertBefore(draggable, afterElement);
-        }
-    };
+    // Deprecated: SortableJS handles this now.
 }
 
 // Helper to calculate where to drop (2D Aware)

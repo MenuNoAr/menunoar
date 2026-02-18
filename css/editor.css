@@ -934,3 +934,24 @@ img {
     max-width: 100%;
     height: auto;
 }
+
+/* --- SORTABLEJS STYLES --- */
+.sortable-ghost {
+    opacity: 0.4 !important;
+    background: var(--bg-card) !important;
+    border: 2px dashed var(--border) !important;
+    transform: scale(0.95);
+}
+
+.sortable-chosen {
+    background: var(--primary-glow) !important;
+}
+
+.sortable-drag {
+    opacity: 1 !important;
+    background: var(--bg-card) !important;
+    box-shadow: var(--shadow-lg) !important;
+    z-index: 9999 !important;
+    cursor: grabbing !important;
+    transform: scale(1.02);
+}
