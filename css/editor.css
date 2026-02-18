@@ -595,16 +595,107 @@ body {
     color: var(--primary);
 }
 
-/* --- MODALS --- */
+/* --- CATEGORY BANNERS (In Editor) --- */
+.cat-banner {
+    width: 100%;
+    height: 180px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 25px;
+    border: 1px solid var(--border);
+}
+
+.cat-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cat-banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    display: flex;
+    align-items: flex-end;
+    padding: 20px;
+    color: white;
+}
+
+.cat-banner-overlay h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+/* --- ADD ITEM BUTTON --- */
+.add-item-btn {
+    width: 100%;
+    padding: 20px;
+    background: var(--bg-page);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-md);
+    text-align: center;
+    color: var(--primary);
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.add-item-btn:hover {
+    background: var(--primary-glow);
+    border-color: var(--primary);
+    transform: scale(0.99);
+}
+
+/* --- ITEM ACTIONS REFINED --- */
+.item-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: all 0.2s;
+    z-index: 20;
+}
+
+.menu-item:hover .item-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* --- MODALS REFINED --- */
+/* --- MODALS & OVERLAYS --- */
 .edit-modal {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 5000;
     opacity: 0;
     pointer-events: none;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -623,13 +714,117 @@ body {
     width: 100%;
     max-width: 500px;
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-    transform: translateY(20px);
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid var(--border);
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .edit-modal.open .edit-modal-content {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+}
+
+.edit-modal-content h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 25px;
+    letter-spacing: -0.5px;
+}
+
+.edit-modal-content p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* Switch Component */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.switch input {
+    display: none;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--border);
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: var(--primary);
+}
+
+input:checked+.slider:before {
+    transform: translateX(24px);
+}
+
+/* Custom File Upload Box */
+.file-upload-wrapper {
+    border: 2px dashed var(--border);
+    padding: 30px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg-page);
+}
+
+.file-upload-wrapper:hover {
+    border-color: var(--primary);
+    background: var(--primary-glow);
+}
+
+.upload-icon {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+.upload-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.upload-text span {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.upload-text small {
+    color: var(--text-muted);
+}
+
+/* --- SECTION SLIDER (FORCE FIX) --- */
+.slider-window {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.slider-track {
+    display: flex;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .form-group {
