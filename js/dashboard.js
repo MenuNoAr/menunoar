@@ -722,18 +722,13 @@ window.handleCatUpload = async (catName, input) => {
     }
 }
 
-window.addNewCategory = () => {
-    openTextModal("Nova Categoria", "", (val) => {
-        if (!val) return;
-        openAddItemModal(val);
-        alert(`A criar categoria "${val}". Adiciona o primeiro prato para a guardar!`);
-    });
-}
+
 
 window.renameCategory = (oldName) => {
-    openTextModal("Renomear Categoria", oldName, async (val) => {
-        if (!val || val === oldName) return;
+    const val = prompt("Novo nome para a categoria:", oldName);
+    if (!val || val === oldName) return;
 
+    (async () => {
         // 1. Update Items
         const { error } = await supabase.from('menu_items')
             .update({ category: val })
@@ -751,7 +746,7 @@ window.renameCategory = (oldName) => {
         }
 
         loadData();
-    });
+    })();
 };
 
 window.deleteCategory = async (catName) => {
@@ -830,31 +825,19 @@ window.deleteItem = async (id) => {
 // --- MODALS ---
 
 // Text Modal
-let textCallback = null;
-window.openTextModal = (title, currentVal, cb) => {
-    document.getElementById('textModalTitle').textContent = title;
-    document.getElementById('textInput').value = currentVal || '';
-    document.getElementById('textModal').classList.add('open');
-    textCallback = cb;
+// Add New Category (Simplified)
+window.addNewCategory = () => {
+    const val = prompt("Nome da Nova Categoria:");
+    if (!val) return;
 
-    // Choose input type based on length/context
-    if (title.includes("Descrição")) {
-        document.getElementById('textInput').style.display = 'none';
-        document.getElementById('textAreaInput').style.display = 'block';
-        document.getElementById('textAreaInput').value = currentVal || '';
-    } else {
-        document.getElementById('textInput').style.display = 'block';
-        document.getElementById('textAreaInput').style.display = 'none';
-    }
-}
-
-document.getElementById('saveTextBtn').onclick = () => {
-    const val = document.getElementById('textInput').style.display === 'none'
-        ? document.getElementById('textAreaInput').value
-        : document.getElementById('textInput').value;
-    if (textCallback) textCallback(val);
-    closeModal('textModal');
+    // Optimistic UI update or just reload logic
+    // Ideally we create a temporary empty category but our logic is item-based.
+    // So we just tell user to add an item.
+    openAddItemModal(val);
+    alert(`A criar categoria "${val}". Adiciona o primeiro prato para a guardar!`);
 };
+
+
 
 
 
