@@ -421,7 +421,7 @@ function renderMenu(items) {
                 <div class="cat-banner editable-trigger" onclick="triggerCatUpload('${cat}')">
                     <img src="${catImages[cat]}" loading="lazy">
                     <div class="cat-banner-overlay">
-                        <h2 contenteditable="true" class="inline-editable" onclick="event.stopPropagation();" onblur="handleCategoryRename('${cat}', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${cat}</h2>
+                        <h2 contenteditable="true" spellcheck="false" class="inline-editable" onclick="event.stopPropagation();" onblur="handleCategoryRename('${cat}', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${cat}</h2>
                     </div>
                     <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
                     <div class="item-actions" style="opacity:1; top:10px; right:10px;">
@@ -432,7 +432,7 @@ function renderMenu(items) {
         } else {
             headerHTML = `
                  <div class="slide-title" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span contenteditable="true" class="text-editable inline-editable" onblur="handleCategoryRename('${cat}', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${cat}</span>
+                    <span contenteditable="true" spellcheck="false" class="text-editable inline-editable" onblur="handleCategoryRename('${cat}', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${cat}</span>
                     <div style="display:flex; gap:10px; align-items:center;">
                          <label class="custom-file-upload" style="font-size:0.8rem; cursor:pointer; color:var(--primary);">
                             <i class="fa-solid fa-image"></i> Imagem
@@ -618,12 +618,12 @@ function createItemCard(item) {
         <div id="item-card-${item.id}" class="menu-item ${!isAvail ? 'unavailable' : ''} editable-container" style="position:relative; align-items:center;">
             
             <div class="item-text" style="flex:1;">
-                <h3 contenteditable="true" class="inline-editable" onblur="handleItemUpdate('${item.id}', 'name', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" style="margin-bottom:5px; display:inline-block;">${item.name}</h3>
-                <p contenteditable="true" class="item-desc inline-editable" onblur="handleItemUpdate('${item.id}', 'description', this.innerText)" style="font-size:0.85rem; color:#666; margin-bottom:8px;">${item.description || ''}</p>
+                <h3 contenteditable="true" spellcheck="false" class="inline-editable" onblur="handleItemUpdate('${item.id}', 'name', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" style="margin-bottom:5px; display:inline-block;">${item.name}</h3>
+                <p contenteditable="true" spellcheck="false" class="item-desc inline-editable" onblur="handleItemUpdate('${item.id}', 'description', this.innerText)" style="font-size:0.85rem; color:#666; margin-bottom:8px;">${item.description || ''}</p>
                 
                 <div style="display:flex; align-items:center; gap:15px;">
                     <div class="item-price" style="font-weight:700; display:flex; align-items:center;">
-                        <span contenteditable="true" class="inline-editable" onblur="handleItemUpdate('${item.id}', 'price', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${Number(item.price).toFixed(2)}</span>€
+                        <span contenteditable="true" spellcheck="false" class="inline-editable" onblur="handleItemUpdate('${item.id}', 'price', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${Number(item.price).toFixed(2)}</span>€
                     </div>
                     
                     <!-- Toggle moved next to price -->
@@ -662,6 +662,7 @@ function setupInlineEdit(elementId, fieldName) {
     if (!el) return;
 
     el.setAttribute('contenteditable', 'true');
+    el.setAttribute('spellcheck', 'false'); // Disable wavy lines
     el.classList.add('inline-editable');
 
     // Save on Blur (Focus Lost)
