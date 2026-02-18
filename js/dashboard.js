@@ -778,418 +778,417 @@ window.handleCategoryRename = async (oldName, newName) => {
 };
 
 window.deleteCategory = async (catName) => {
-    window.deleteCategory = async (catName) => {
-        if (confirm(`Tens a certeza que queres apagar a categoria "${catName}" e TODOS os seus pratos?`)) {
-            // 1. Delete Items
-            await supabase.from('menu_items')
-                .delete()
-                .eq('category', catName)
-                .eq('restaurant_id', restaurantId);
+    if (confirm(`Tens a certeza que queres apagar a categoria "${catName}" e TODOS os seus pratos?`)) {
+        // 1. Delete Items
+        await supabase.from('menu_items')
+            .delete()
+            .eq('category', catName)
+            .eq('restaurant_id', restaurantId);
 
-            // 2. Clean Image Key
-            if (currentData.category_images && currentData.category_images[catName]) {
-                const newImages = { ...currentData.category_images };
-                delete newImages[catName];
-                await supabase.from('restaurants').update({ category_images: newImages }).eq('id', restaurantId);
-            }
-
-            // 3. Clean Order Key (Critical for removing empty categories)
-            if (currentData.category_order && currentData.category_order.includes(catName)) {
-                const newOrder = currentData.category_order.filter(c => c !== catName);
-                await supabase.from('restaurants').update({ category_order: newOrder }).eq('id', restaurantId);
-            }
-
-            loadData();
+        // 2. Clean Image Key
+        if (currentData.category_images && currentData.category_images[catName]) {
+            const newImages = { ...currentData.category_images };
+            delete newImages[catName];
+            await supabase.from('restaurants').update({ category_images: newImages }).eq('id', restaurantId);
         }
-    };
+
+        // 3. Clean Order Key (Critical for removing empty categories)
+        if (currentData.category_order && currentData.category_order.includes(catName)) {
+            const newOrder = currentData.category_order.filter(c => c !== catName);
+            await supabase.from('restaurants').update({ category_order: newOrder }).eq('id', restaurantId);
+        }
+
+        loadData();
+    }
+};
 
 
-    // Item Actions
-    window.triggerItemImageUpload = (id) => document.getElementById(`item-upload-${id}`).click();
-    window.handleItemImageUpload = async (id, input) => {
-        if (!input.files.length) return;
-        const { data, error } = await uploadFile(input.files[0], `item-${id}`);
-        if (error) { alert("Erro ao fazer upload: " + error.message); return; }
-        if (data) {
-            await supabase.from('menu_items').update({ image_url: data.publicUrl }).eq('id', id);
-            loadData();
+// Item Actions
+window.triggerItemImageUpload = (id) => document.getElementById(`item-upload-${id}`).click();
+window.handleItemImageUpload = async (id, input) => {
+    if (!input.files.length) return;
+    const { data, error } = await uploadFile(input.files[0], `item-${id}`);
+    if (error) { alert("Erro ao fazer upload: " + error.message); return; }
+    if (data) {
+        await supabase.from('menu_items').update({ image_url: data.publicUrl }).eq('id', id);
+        loadData();
+    }
+}
+
+window.toggleAvailability = async (id, currentStatus, btn) => {
+    // Optimistic Update
+    const newStatus = !currentStatus;
+    const card = document.getElementById(`item-card-${id}`);
+
+    // Update Local State
+    const item = menuItems.find(i => i.id == id);
+    if (item) item.available = newStatus;
+
+    // UI Updates
+    if (card) {
+        if (newStatus) card.classList.remove('unavailable');
+        else card.classList.add('unavailable');
+    }
+
+    // Button Update
+    if (btn) {
+        const icon = btn.querySelector('i');
+        if (newStatus) {
+            icon.className = 'fa-solid fa-eye';
+            btn.style.color = 'var(--success)';
+            btn.setAttribute('onclick', `toggleAvailability('${id}', true, this); event.stopPropagation();`);
+        } else {
+            icon.className = 'fa-solid fa-eye-slash';
+            btn.style.color = '#ccc';
+            btn.setAttribute('onclick', `toggleAvailability('${id}', false, this); event.stopPropagation();`);
         }
     }
 
-    window.toggleAvailability = async (id, currentStatus, btn) => {
-        // Optimistic Update
-        const newStatus = !currentStatus;
-        const card = document.getElementById(`item-card-${id}`);
+    // Background DB Update
+    await supabase.from('menu_items').update({ available: newStatus }).eq('id', id);
+}
 
-        // Update Local State
-        const item = menuItems.find(i => i.id == id);
-        if (item) item.available = newStatus;
+// Inline Item Update Handler
+window.handleItemUpdate = async (id, field, value) => {
+    let finalVal = value.trim();
 
-        // UI Updates
-        if (card) {
-            if (newStatus) card.classList.remove('unavailable');
-            else card.classList.add('unavailable');
-        }
-
-        // Button Update
-        if (btn) {
-            const icon = btn.querySelector('i');
-            if (newStatus) {
-                icon.className = 'fa-solid fa-eye';
-                btn.style.color = 'var(--success)';
-                btn.setAttribute('onclick', `toggleAvailability('${id}', true, this); event.stopPropagation();`);
-            } else {
-                icon.className = 'fa-solid fa-eye-slash';
-                btn.style.color = '#ccc';
-                btn.setAttribute('onclick', `toggleAvailability('${id}', false, this); event.stopPropagation();`);
-            }
-        }
-
-        // Background DB Update
-        await supabase.from('menu_items').update({ available: newStatus }).eq('id', id);
-    }
-
-    // Inline Item Update Handler
-    window.handleItemUpdate = async (id, field, value) => {
-        let finalVal = value.trim();
-
-        // Special handling for Price
-        if (field === 'price') {
-            finalVal = parseFloat(finalVal.replace(',', '.').replace(/[^0-9.]/g, ''));
-            if (isNaN(finalVal)) {
-                loadData(); // Revert invalid input
-                return;
-            }
-        }
-
-        const update = {};
-        update[field] = finalVal;
-
-        await supabase.from('menu_items').update(update).eq('id', id);
-        // Don't full reload to verify small text changes, but updating local state is good practice
-        // For simplicity and guaranteed sync, we can reload or just update local array
-        const item = menuItems.find(i => i.id == id);
-        if (item) item[field] = finalVal;
-
-        // If price, we might want to re-format it in UI, so maybe reload isn't bad or just let it stay as typed until refresh
-        if (field === 'price') loadData();
-    };
-
-    window.deleteItem = async (id) => {
-        if (confirm("Tens a certeza que queres apagar este prato?")) {
-            await supabase.from('menu_items').delete().eq('id', id);
-            loadData();
+    // Special handling for Price
+    if (field === 'price') {
+        finalVal = parseFloat(finalVal.replace(',', '.').replace(/[^0-9.]/g, ''));
+        if (isNaN(finalVal)) {
+            loadData(); // Revert invalid input
+            return;
         }
     }
 
+    const update = {};
+    update[field] = finalVal;
 
-    // --- MODALS ---
+    await supabase.from('menu_items').update(update).eq('id', id);
+    // Don't full reload to verify small text changes, but updating local state is good practice
+    // For simplicity and guaranteed sync, we can reload or just update local array
+    const item = menuItems.find(i => i.id == id);
+    if (item) item[field] = finalVal;
 
-    // Text Modal
-    // Add New Category (Simplified)
-    // Add New Category (Seamless Flow)
-    // Add New Category (Seamless Flow - No Modal)
-    window.addNewCategory = async () => {
-        // Generate unique name
-        let baseName = "Nova Categoria";
-        let name = baseName;
-        let counter = 1;
+    // If price, we might want to re-format it in UI, so maybe reload isn't bad or just let it stay as typed until refresh
+    if (field === 'price') loadData();
+};
 
-        // Check against ALL categories (both in items and in saved order)
-        const existingCats = new Set(menuItems.map(i => i.category));
-        if (currentData.category_order) currentData.category_order.forEach(c => existingCats.add(c));
+window.deleteItem = async (id) => {
+    if (confirm("Tens a certeza que queres apagar este prato?")) {
+        await supabase.from('menu_items').delete().eq('id', id);
+        loadData();
+    }
+}
 
-        while (existingCats.has(name)) {
-            counter++;
-            name = `${baseName} ${counter}`;
-        }
 
-        // Update category_order to persist this "empty" category
-        let newOrder = currentData.category_order || [];
-        // Ensure we don't duplicate (though name check prevents it)
-        if (!newOrder.includes(name)) {
-            newOrder.push(name);
-        }
+// --- MODALS ---
 
-        // Persist
-        const { error } = await supabase.from('restaurants')
-            .update({ category_order: newOrder })
-            .eq('id', restaurantId);
+// Text Modal
+// Add New Category (Simplified)
+// Add New Category (Seamless Flow)
+// Add New Category (Seamless Flow - No Modal)
+window.addNewCategory = async () => {
+    // Generate unique name
+    let baseName = "Nova Categoria";
+    let name = baseName;
+    let counter = 1;
 
-        if (error) {
-            alert("Erro ao criar categoria: " + error.message);
+    // Check against ALL categories (both in items and in saved order)
+    const existingCats = new Set(menuItems.map(i => i.category));
+    if (currentData.category_order) currentData.category_order.forEach(c => existingCats.add(c));
+
+    while (existingCats.has(name)) {
+        counter++;
+        name = `${baseName} ${counter}`;
+    }
+
+    // Update category_order to persist this "empty" category
+    let newOrder = currentData.category_order || [];
+    // Ensure we don't duplicate (though name check prevents it)
+    if (!newOrder.includes(name)) {
+        newOrder.push(name);
+    }
+
+    // Persist
+    const { error } = await supabase.from('restaurants')
+        .update({ category_order: newOrder })
+        .eq('id', restaurantId);
+
+    if (error) {
+        alert("Erro ao criar categoria: " + error.message);
+        return;
+    }
+
+    // Optimistic Update & Reload
+    currentData.category_order = newOrder;
+    // We don't need to reload from DB, just re-render
+    // But loadData ensures total sync. Let's try loadData for safety.
+    loadData();
+
+    // Scroll to the end after a brief delay
+    setTimeout(() => {
+        const track = document.getElementById('editorTrack');
+        if (track) scrollToSlide(track.children.length - 1);
+    }, 500);
+};
+
+
+
+
+
+/* --- IMAGE MODAL LOGIC --- */
+let currentImageItemId = null;
+
+window.openImageModal = (id) => {
+    currentImageItemId = id;
+    const item = menuItems.find(i => i.id == id);
+    if (!item) return;
+
+    const display = document.getElementById('imgPreviewDisplay');
+    const placeholder = document.getElementById('imgPreviewPlaceholder');
+
+    if (item.image_url) {
+        display.src = item.image_url;
+        display.style.display = 'block';
+        placeholder.style.display = 'none';
+        document.getElementById('btnRemoveImage').style.display = 'inline-flex';
+    } else {
+        display.style.display = 'none';
+        placeholder.style.display = 'block';
+        document.getElementById('btnRemoveImage').style.display = 'none';
+    }
+
+    document.getElementById('imageModal').classList.add('open');
+};
+
+document.getElementById('btnChangeImage').onclick = () => {
+    document.getElementById('modalImageUpload').click();
+};
+
+document.getElementById('modalImageUpload').onchange = async (e) => {
+    if (!e.target.files.length || !currentImageItemId) return;
+
+    const btn = document.getElementById('btnChangeImage');
+    const original = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    // Reuse existing upload handler logic
+    await handleItemImageUpload(currentImageItemId, e.target);
+
+    btn.innerHTML = original;
+    btn.disabled = false;
+    closeModal('imageModal');
+};
+
+document.getElementById('btnRemoveImage').onclick = async () => {
+    if (!currentImageItemId) return;
+    if (confirm("Remover imagem deste prato?")) {
+        await supabase.from('menu_items').update({ image_url: null }).eq('id', currentImageItemId);
+        closeModal('imageModal');
+        loadData();
+    }
+};
+
+// --- QR CODE ---
+let qrCode = null;
+
+window.openQrModal = () => {
+    document.getElementById('qrModal').classList.add('open');
+
+    // Generate QR if not exists or update it
+    const url = `${window.location.origin}/menu.html?id=${currentData.slug}`;
+
+    if (!qrCode) {
+        // Wait for library to be ready if loaded async
+        if (typeof QRCodeStyling === 'undefined') {
+            alert("QR Code library loading... Try again in a second.");
             return;
         }
 
-        // Optimistic Update & Reload
-        currentData.category_order = newOrder;
-        // We don't need to reload from DB, just re-render
-        // But loadData ensures total sync. Let's try loadData for safety.
-        loadData();
-
-        // Scroll to the end after a brief delay
-        setTimeout(() => {
-            const track = document.getElementById('editorTrack');
-            if (track) scrollToSlide(track.children.length - 1);
-        }, 500);
-    };
-
-
-
-
-
-    /* --- IMAGE MODAL LOGIC --- */
-    let currentImageItemId = null;
-
-    window.openImageModal = (id) => {
-        currentImageItemId = id;
-        const item = menuItems.find(i => i.id == id);
-        if (!item) return;
-
-        const display = document.getElementById('imgPreviewDisplay');
-        const placeholder = document.getElementById('imgPreviewPlaceholder');
-
-        if (item.image_url) {
-            display.src = item.image_url;
-            display.style.display = 'block';
-            placeholder.style.display = 'none';
-            document.getElementById('btnRemoveImage').style.display = 'inline-flex';
-        } else {
-            display.style.display = 'none';
-            placeholder.style.display = 'block';
-            document.getElementById('btnRemoveImage').style.display = 'none';
-        }
-
-        document.getElementById('imageModal').classList.add('open');
-    };
-
-    document.getElementById('btnChangeImage').onclick = () => {
-        document.getElementById('modalImageUpload').click();
-    };
-
-    document.getElementById('modalImageUpload').onchange = async (e) => {
-        if (!e.target.files.length || !currentImageItemId) return;
-
-        const btn = document.getElementById('btnChangeImage');
-        const original = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-        btn.disabled = true;
-
-        // Reuse existing upload handler logic
-        await handleItemImageUpload(currentImageItemId, e.target);
-
-        btn.innerHTML = original;
-        btn.disabled = false;
-        closeModal('imageModal');
-    };
-
-    document.getElementById('btnRemoveImage').onclick = async () => {
-        if (!currentImageItemId) return;
-        if (confirm("Remover imagem deste prato?")) {
-            await supabase.from('menu_items').update({ image_url: null }).eq('id', currentImageItemId);
-            closeModal('imageModal');
-            loadData();
-        }
-    };
-
-    // --- QR CODE ---
-    let qrCode = null;
-
-    window.openQrModal = () => {
-        document.getElementById('qrModal').classList.add('open');
-
-        // Generate QR if not exists or update it
-        const url = `${window.location.origin}/menu.html?id=${currentData.slug}`;
-
-        if (!qrCode) {
-            // Wait for library to be ready if loaded async
-            if (typeof QRCodeStyling === 'undefined') {
-                alert("QR Code library loading... Try again in a second.");
-                return;
+        qrCode = new QRCodeStyling({
+            width: 300,
+            height: 300,
+            type: "svg",
+            data: url,
+            image: "assets/images/logo.svg",
+            dotsOptions: {
+                color: "#00B2FF",
+                type: "rounded"
+            },
+            backgroundOptions: {
+                color: "#ffffff",
+            },
+            imageOptions: {
+                crossOrigin: "anonymous",
+                margin: 10
             }
-
-            qrCode = new QRCodeStyling({
-                width: 300,
-                height: 300,
-                type: "svg",
-                data: url,
-                image: "assets/images/logo.svg",
-                dotsOptions: {
-                    color: "#00B2FF",
-                    type: "rounded"
-                },
-                backgroundOptions: {
-                    color: "#ffffff",
-                },
-                imageOptions: {
-                    crossOrigin: "anonymous",
-                    margin: 10
-                }
-            });
-            const container = document.getElementById('qr-code-container');
-            container.innerHTML = '';
-            qrCode.append(container);
-        } else {
-            qrCode.update({ data: url });
-        }
+        });
+        const container = document.getElementById('qr-code-container');
+        container.innerHTML = '';
+        qrCode.append(container);
+    } else {
+        qrCode.update({ data: url });
     }
+}
 
-    window.downloadQr = () => {
-        if (qrCode) qrCode.download({ name: `menu-${currentData.slug}-qr`, extension: "png" });
-    }
+window.downloadQr = () => {
+    if (qrCode) qrCode.download({ name: `menu-${currentData.slug}-qr`, extension: "png" });
+}
 
-    // Settings Modal
-    window.openSettingsModal = () => {
-        document.getElementById('modalSlug').value = currentData.slug || '';
-        document.getElementById('modalFont').value = currentData.font || 'Inter';
+// Settings Modal
+window.openSettingsModal = () => {
+    document.getElementById('modalSlug').value = currentData.slug || '';
+    document.getElementById('modalFont').value = currentData.font || 'Inter';
 
-        // PDF Logic
-        const isPdf = currentData.menu_type === 'pdf';
-        document.getElementById('pdfToggle').checked = isPdf;
-        togglePdfDetails();
+    // PDF Logic
+    const isPdf = currentData.menu_type === 'pdf';
+    document.getElementById('pdfToggle').checked = isPdf;
+    togglePdfDetails();
 
-        // Plan Logic
-        const planText = document.getElementById('currentPlanText');
-        if (planText) {
-            const hasStripeId = !!currentData.stripe_customer_id;
-            const status = currentData.subscription_status;
+    // Plan Logic
+    const planText = document.getElementById('currentPlanText');
+    if (planText) {
+        const hasStripeId = !!currentData.stripe_customer_id;
+        const status = currentData.subscription_status;
 
-            if (hasStripeId && (status === 'active' || status === 'trialing')) {
-                // STRIPE PREMIUM (Card already added)
-                planText.textContent = "Profissional (Membro Premium)";
+        if (hasStripeId && (status === 'active' || status === 'trialing')) {
+            // STRIPE PREMIUM (Card already added)
+            planText.textContent = "Profissional (Membro Premium)";
+            planText.style.color = "#16a34a"; // Green
+        } else if (status === 'trialing') {
+            // INTERNAL FREE TRIAL (No card)
+            const daysLeft = Math.ceil((new Date(currentData.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
+            if (daysLeft > 0) {
+                planText.textContent = `Teste Grátis (${daysLeft} dias restantes)`;
                 planText.style.color = "#16a34a"; // Green
-            } else if (status === 'trialing') {
-                // INTERNAL FREE TRIAL (No card)
-                const daysLeft = Math.ceil((new Date(currentData.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
-                if (daysLeft > 0) {
-                    planText.textContent = `Teste Grátis (${daysLeft} dias restantes)`;
-                    planText.style.color = "#16a34a"; // Green
-                } else {
-                    planText.textContent = "Teste Expirado";
-                    planText.style.color = "#ef4444"; // Red
-                }
-            } else if (status === 'active') {
-                planText.textContent = "Profissional (Ativo)";
-                planText.style.color = "#16a34a";
             } else {
-                planText.textContent = currentData.subscription_plan === 'pro' ? "Profissional (" + status + ")" : "Sem Plano Ativo";
-                planText.style.color = status === 'active' ? "#16a34a" : "#6b7280";
+                planText.textContent = "Teste Expirado";
+                planText.style.color = "#ef4444"; // Red
             }
-        }
-
-        document.getElementById('settingsModal').classList.add('open');
-    }
-
-    window.togglePdfDetails = () => {
-        const isPdf = document.getElementById('pdfToggle').checked;
-        document.getElementById('pdfDetails').style.display = isPdf ? 'block' : 'none';
-    }
-
-    document.getElementById('settingsForm').onsubmit = async (e) => {
-        e.preventDefault();
-
-        const isPdf = document.getElementById('pdfToggle').checked;
-
-        const updates = {
-            slug: document.getElementById('modalSlug').value,
-            font: document.getElementById('modalFont').value,
-            menu_type: isPdf ? 'pdf' : 'digital'
-        };
-
-        // PDF Handling
-        const pdfInput = document.getElementById('pdfUploadInput');
-        if (pdfInput.files.length > 0) {
-            // Use upload service, specifying bucket 'menu-pdfs'
-            const { data, error } = await uploadFile(pdfInput.files[0], 'menu-pdf', 'menu-pdfs');
-            if (error) { alert("Erro ao fazer upload do PDF: " + error.message); return; }
-            if (data) {
-                updates.pdf_url = data.publicUrl;
-            }
-        }
-
-        await supabase.from('restaurants').update(updates).eq('id', restaurantId);
-        alert("Configurações guardadas!");
-        closeModal('settingsModal');
-        loadData();
-    }
-
-
-    // Item Modal (Add/Edit)
-    window.openAddItemModal = (prefillCat = '') => {
-        document.getElementById('editItemName').value = '';
-        document.getElementById('editItemPrice').value = '';
-        document.getElementById('editItemDesc').value = '';
-        document.getElementById('editItemCat').value = prefillCat;
-        document.getElementById('editItemId').value = ''; // Empty = Add
-        document.getElementById('modalTitle').textContent = "Adicionar Prato";
-        document.getElementById('itemModal').classList.add('open');
-    }
-
-    window.openEditItemModal = (id) => {
-        const item = menuItems.find(i => i.id == id);
-        if (!item) return;
-        document.getElementById('editItemName').value = item.name;
-        document.getElementById('editItemPrice').value = item.price;
-        document.getElementById('editItemDesc').value = item.description || '';
-        document.getElementById('editItemCat').value = item.category;
-        document.getElementById('editItemId').value = item.id;
-        document.getElementById('modalTitle').textContent = "Editar Prato";
-        document.getElementById('itemModal').classList.add('open');
-    }
-
-    document.getElementById('itemEditForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const id = document.getElementById('editItemId').value;
-        const payload = {
-            restaurant_id: restaurantId,
-            name: document.getElementById('editItemName').value,
-            price: parseFloat(document.getElementById('editItemPrice').value),
-            description: document.getElementById('editItemDesc').value,
-            category: document.getElementById('editItemCat').value,
-            available: true // Default true on add
-        };
-
-        if (id) {
-            // Update
-            delete payload.restaurant_id; // Don't update parent
-            delete payload.available; // Don't reset availability
-            await supabase.from('menu_items').update(payload).eq('id', id);
+        } else if (status === 'active') {
+            planText.textContent = "Profissional (Ativo)";
+            planText.style.color = "#16a34a";
         } else {
-            // Insert
-            await supabase.from('menu_items').insert([payload]);
-        }
-        closeModal('itemModal');
-        loadData();
-    }
-
-
-    // Utils
-    window.closeModal = (id) => document.getElementById(id).classList.remove('open');
-
-    window.startEditing = () => {
-        closeModal('trialSuccessModal');
-        // Force a scroll to the top to ensure visibility
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Dark Mode logic reused
-    window.toggleDarkMode = () => {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        localStorage.setItem('menu_theme', isDark ? 'dark' : 'light');
-
-        // Swap Logo
-        const logo = document.getElementById('dashboardLogo');
-        if (logo) {
-            logo.src = isDark ? 'assets/images/Ilogo.svg' : 'assets/images/logo.svg';
-        }
-
-        // Swap Icon
-        const btnIcon = document.getElementById('themeIcon');
-        if (btnIcon) {
-            btnIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            planText.textContent = currentData.subscription_plan === 'pro' ? "Profissional (" + status + ")" : "Sem Plano Ativo";
+            planText.style.color = status === 'active' ? "#16a34a" : "#6b7280";
         }
     }
 
-    // Start
-    init();
+    document.getElementById('settingsModal').classList.add('open');
+}
+
+window.togglePdfDetails = () => {
+    const isPdf = document.getElementById('pdfToggle').checked;
+    document.getElementById('pdfDetails').style.display = isPdf ? 'block' : 'none';
+}
+
+document.getElementById('settingsForm').onsubmit = async (e) => {
+    e.preventDefault();
+
+    const isPdf = document.getElementById('pdfToggle').checked;
+
+    const updates = {
+        slug: document.getElementById('modalSlug').value,
+        font: document.getElementById('modalFont').value,
+        menu_type: isPdf ? 'pdf' : 'digital'
+    };
+
+    // PDF Handling
+    const pdfInput = document.getElementById('pdfUploadInput');
+    if (pdfInput.files.length > 0) {
+        // Use upload service, specifying bucket 'menu-pdfs'
+        const { data, error } = await uploadFile(pdfInput.files[0], 'menu-pdf', 'menu-pdfs');
+        if (error) { alert("Erro ao fazer upload do PDF: " + error.message); return; }
+        if (data) {
+            updates.pdf_url = data.publicUrl;
+        }
+    }
+
+    await supabase.from('restaurants').update(updates).eq('id', restaurantId);
+    alert("Configurações guardadas!");
+    closeModal('settingsModal');
+    loadData();
+}
+
+
+// Item Modal (Add/Edit)
+window.openAddItemModal = (prefillCat = '') => {
+    document.getElementById('editItemName').value = '';
+    document.getElementById('editItemPrice').value = '';
+    document.getElementById('editItemDesc').value = '';
+    document.getElementById('editItemCat').value = prefillCat;
+    document.getElementById('editItemId').value = ''; // Empty = Add
+    document.getElementById('modalTitle').textContent = "Adicionar Prato";
+    document.getElementById('itemModal').classList.add('open');
+}
+
+window.openEditItemModal = (id) => {
+    const item = menuItems.find(i => i.id == id);
+    if (!item) return;
+    document.getElementById('editItemName').value = item.name;
+    document.getElementById('editItemPrice').value = item.price;
+    document.getElementById('editItemDesc').value = item.description || '';
+    document.getElementById('editItemCat').value = item.category;
+    document.getElementById('editItemId').value = item.id;
+    document.getElementById('modalTitle').textContent = "Editar Prato";
+    document.getElementById('itemModal').classList.add('open');
+}
+
+document.getElementById('itemEditForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('editItemId').value;
+    const payload = {
+        restaurant_id: restaurantId,
+        name: document.getElementById('editItemName').value,
+        price: parseFloat(document.getElementById('editItemPrice').value),
+        description: document.getElementById('editItemDesc').value,
+        category: document.getElementById('editItemCat').value,
+        available: true // Default true on add
+    };
+
+    if (id) {
+        // Update
+        delete payload.restaurant_id; // Don't update parent
+        delete payload.available; // Don't reset availability
+        await supabase.from('menu_items').update(payload).eq('id', id);
+    } else {
+        // Insert
+        await supabase.from('menu_items').insert([payload]);
+    }
+    closeModal('itemModal');
+    loadData();
+}
+
+
+// Utils
+window.closeModal = (id) => document.getElementById(id).classList.remove('open');
+
+window.startEditing = () => {
+    closeModal('trialSuccessModal');
+    // Force a scroll to the top to ensure visibility
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Dark Mode logic reused
+window.toggleDarkMode = () => {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('menu_theme', isDark ? 'dark' : 'light');
+
+    // Swap Logo
+    const logo = document.getElementById('dashboardLogo');
+    if (logo) {
+        logo.src = isDark ? 'assets/images/Ilogo.svg' : 'assets/images/logo.svg';
+    }
+
+    // Swap Icon
+    const btnIcon = document.getElementById('themeIcon');
+    if (btnIcon) {
+        btnIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+}
+
+// Start
+init();
