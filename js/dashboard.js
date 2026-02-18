@@ -11,33 +11,41 @@ let currentSlideIndex = 0; // Store active slide
 
 // Function to initialize everything
 async function init() {
-    supabase = await getSupabase();
-
-    // Init upload service
-    initUploadService(supabase);
-
-    // Auth Listener
-    initAuthListener(async (user) => {
-        if (currentUser && currentUser.id === user.id) return; // Prevent reload on token refresh
-
-        currentUser = user;
-        document.getElementById('userDisplay').textContent = user.email.split('@')[0]; // Show part of email
-
-        await loadData();
-
-        // Check if we just finished setup
-        if (localStorage.getItem('just_created_rest') === 'true') {
-            localStorage.removeItem('just_created_rest');
-            setTimeout(() => {
-                const modal = document.getElementById('trialSuccessModal');
-                if (modal) modal.classList.add('open');
-            }, 800);
+    try {
+        supabase = await getSupabase();
+        if (!supabase) {
+            console.error("Supabase fail");
+            alert("Erro de conexão. Por favor recarregue a página.");
+            return;
         }
 
-    }, () => {
-        // No Auth
-        window.location.href = 'login.html';
-    });
+        // Init upload service
+        initUploadService(supabase);
+
+        // Auth Listener
+        initAuthListener(async (user) => {
+            if (currentUser && currentUser.id === user.id) return;
+
+            currentUser = user;
+            const userDisplay = document.getElementById('userDisplay');
+            if (userDisplay) userDisplay.textContent = user.email.split('@')[0];
+
+            await loadData();
+
+            if (localStorage.getItem('just_created_rest') === 'true') {
+                localStorage.removeItem('just_created_rest');
+                setTimeout(() => {
+                    const modal = document.getElementById('trialSuccessModal');
+                    if (modal) modal.classList.add('open');
+                }, 800);
+            }
+
+        }, () => {
+            window.location.href = 'login.html';
+        });
+    } catch (err) {
+        console.error("Init Error:", err);
+    }
 }
 
 window.signOut = () => signOut();
@@ -251,27 +259,40 @@ function renderHeader(data) {
         coverDiv.style.height = '350px';
         // Add Remove Button
         overlayContent = `
-            <div class="edit-icon-overlay">
-                <i class="fa-solid fa-camera"></i> Alterar
-                <button class="action-btn btn-delete" style="margin-left:10px; width:30px; height:30px;" onclick="deleteCover(); event.stopPropagation();" title="Remover Capa">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+            <div class="edit-overlay">
+                <div>
+                    <i class="fa-solid fa-camera"></i> Alterar Capa
+                    <button class="action-btn btn-delete" style="margin-left:10px; width:30px; height:30px;" onclick="deleteCover(); event.stopPropagation();" title="Remover Capa">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
             </div>`;
     } else {
         coverDiv.style.backgroundImage = 'none';
-        coverDiv.style.backgroundColor = '#ddd';
+        coverDiv.style.backgroundColor = 'var(--bg-page)';
         coverDiv.style.height = '120px'; // Reduced height for empty state
-        overlayContent = `<div class="edit-icon-overlay"><i class="fa-solid fa-camera"></i> Adicionar Capa</div>`;
+        overlayContent = `<div class="edit-overlay"><i class="fa-solid fa-camera"></i> Adicionar Capa</div>`;
     }
 
     // Rebuild content to include button
-    coverDiv.innerHTML = overlayContent + `<input type="file" id="coverUpload" style="display:none;" accept="image/*">`;
+    coverDiv.innerHTML = overlayContent + `<input type="file" id="coverUpload" style="display:none;" accept="image/*" onchange="handleCoverUpload(this)">`;
 
     // Badges
     updateBadge('badgeWifi', 'textWifi', data.wifi_password, '📶 Wifi: ');
     updateBadge('badgePhone', 'textPhone', data.phone, '📞 ');
     updateBadge('badgeAddress', 'textAddress', data.address, '📍 ');
 }
+
+window.handleCoverUpload = async (input) => {
+    if (!input.files.length) return;
+    const file = input.files[0];
+    const { data, error } = await uploadFile(file, 'cover');
+    if (error) { alert("Erro ao fazer upload: " + error.message); return; }
+    if (data) {
+        await supabase.from('restaurants').update({ cover_url: data.publicUrl }).eq('id', restaurantId);
+        loadData();
+    }
+};
 
 window.deleteCover = async () => {
     if (confirm("Remover a capa do restaurante?")) {
@@ -358,10 +379,10 @@ function renderMenu(items) {
 
         if (catImages[cat]) {
             headerHTML = `
-                <div class="cat-banner editable-container" onclick="triggerCatUpload('${cat}')">
+                <div class="cat-banner editable-trigger" onclick="triggerCatUpload('${cat}')">
                     <img src="${catImages[cat]}" loading="lazy">
                     <div class="cat-banner-overlay"><h2>${cat}</h2></div>
-                    <div class="edit-icon-overlay"><i class="fa-solid fa-camera"></i> Capa | <i class="fa-solid fa-pen"></i> Nome</div>
+                    <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
                     <div class="item-actions" style="opacity:1; top:10px; right:10px;">
                         <button class="action-btn btn-edit" onclick="renameCategory('${cat}'); event.stopPropagation();" title="Renomear"><i class="fa-solid fa-pen"></i></button>
                         <button class="action-btn btn-delete" onclick="deleteCategory('${cat}'); event.stopPropagation();" title="Apagar Categoria"><i class="fa-solid fa-trash"></i></button>
@@ -578,17 +599,10 @@ function createItemCard(item) {
 // --- ACTIONS & EVENTS ---
 
 // Header Actions
-window.triggerCoverUpload = () => document.getElementById('coverUpload').click();
-document.getElementById('coverUpload').addEventListener('change', async (e) => {
-    if (!e.target.files.length) return;
-    const file = e.target.files[0];
-    const { data, error } = await uploadFile(file, 'cover');
-    if (error) { alert("Erro ao fazer upload: " + error.message); return; }
-    if (data) {
-        await supabase.from('restaurants').update({ cover_url: data.publicUrl }).eq('id', restaurantId);
-        loadData();
-    }
-});
+window.triggerCoverUpload = () => {
+    const input = document.getElementById('coverUpload');
+    if (input) input.click();
+};
 
 window.editRestName = () => openTextModal("Nome do Restaurante", currentData.name, async (val) => {
     await supabase.from('restaurants').update({ name: val }).eq('id', restaurantId);
