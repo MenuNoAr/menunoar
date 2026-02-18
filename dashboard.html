@@ -33,10 +33,11 @@
     <!-- SETUP SCREEN (Visible only if no restaurant) -->
     <div id="setup-screen" class="setup-container" style="display:none;">
         <div class="setup-card">
-            <div class="setup-header">
-                <img src="assets/images/logo.svg" alt="Logo" class="setup-logo">
-                <h2>Bem-vindo</h2>
-                <p>Vamos configurar o teu restaurante.</p>
+            <div class="setup-header" style="margin-bottom: 35px;">
+                <img src="assets/images/logo.svg" alt="Logo" class="setup-logo"
+                    style="height: 70px; margin-bottom: 20px;">
+                <h2 style="font-size: 2.2rem; letter-spacing: -1px;">Bem-vindo, Chef!</h2>
+                <p style="font-size: 1.1rem;">Vamos dar vida ao teu menu digital.</p>
             </div>
 
             <form id="setupForm" class="setup-form">
@@ -321,10 +322,12 @@
                     ✨</button>
             </form>
 
-            <div style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px;">
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">É a tua primeira vez?</p>
-                <button onclick="openTutorial()" class="btn-nav"
-                    style="width: 100%; border: 1px solid var(--primary); color: var(--primary); background: var(--primary-glow);">
+            <div
+                style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 25px; display: flex; flex-direction: column; gap: 12px;">
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 4px; text-align: center;">É a tua
+                    primeira vez no Menu no Ar?</p>
+                <button onclick="openTutorial()" class="btn-secondary btn-full"
+                    style="height: 54px; border-width: 2px;">
                     <i class="fa-solid fa-graduation-cap"></i> Ver Tutorial Passo-a-Passo
                 </button>
             </div>
@@ -403,7 +406,7 @@
                 <button id="prevTutBtn" class="btn-nav" onclick="prevTutorialPage()" disabled>
                     <i class="fa-solid fa-arrow-left"></i> Anterior
                 </button>
-                <span id="tutPageCounter" style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted);">Página
+                <span id="tutPageCounter" class="tut-page-counter">Página
                     1 de 5</span>
                 <button id="nextTutBtn" class="btn-confirm" onclick="nextTutorialPage()">
                     Próximo <i class="fa-solid fa-arrow-right"></i>

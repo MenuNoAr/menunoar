@@ -52,11 +52,17 @@ button,
     outline: none;
     background: none;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.95rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
+    height: 46px;
+    /* Target height for uniformity */
+    padding: 0 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    white-space: nowrap;
     transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -90,8 +96,23 @@ button:disabled {
 .nav-brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
     flex-shrink: 0;
+}
+
+.nav-brand img {
+    height: 32px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+}
+
+#userDisplay {
+    background: var(--primary-glow);
+    color: var(--primary);
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
 }
 
 .nav-brand .divider {
@@ -103,8 +124,17 @@ button:disabled {
 .nav-tools {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     flex-shrink: 0;
+}
+
+.nav-tools .btn-nav {
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 14px;
+}
+
+.dark-mode .nav-tools .btn-nav {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* Hide labels earlier to avoid overlap */
@@ -140,17 +170,13 @@ button:disabled {
 
 /* --- NAV ITEM BUTTON STYLING --- */
 .btn-nav {
-    padding: 10px 16px;
-    border-radius: 12px;
     color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.95rem;
     background: transparent;
     border: 1px solid transparent;
 }
 
 .btn-nav i {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 .btn-nav:hover {
@@ -162,6 +188,7 @@ button:disabled {
 .btn-nav.active {
     background: var(--primary-glow);
     color: var(--primary);
+    border-color: var(--primary-glow);
 }
 
 .btn-live {
@@ -813,14 +840,10 @@ input:checked+.slider:before {
 .btn-confirm,
 .btn-cancel {
     flex: 1;
-    padding: 16px;
+    height: 54px;
+    /* Slightly taller for main actions */
     border-radius: 16px;
     font-weight: 800;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
     transition: all 0.2s;
 }
 
@@ -871,15 +894,11 @@ input:checked+.slider:before {
 .btn-danger-soft {
     background: rgba(239, 68, 68, 0.1);
     color: var(--danger);
-    border: none;
-    padding: 8px 12px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
 }
 
 .btn-danger-soft:hover {
     background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-2px);
 }
 
 .btn-delete {
@@ -997,6 +1016,32 @@ img {
     color: var(--text-muted);
     font-size: 1rem;
     line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.tutorial-footer {
+    padding: 20px 30px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-card);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.tutorial-footer button {
+    height: 48px !important;
+    min-width: 140px;
+    border-radius: 14px;
+}
+
+.tut-page-counter {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg-page);
+    padding: 6px 12px;
+    border-radius: 50px;
 }
 
 .tutorial-feature-list {
