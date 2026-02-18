@@ -420,10 +420,11 @@ function renderMenu(items) {
             headerHTML = `
                 <div class="cat-banner editable-trigger" onclick="triggerCatUpload('${cat}')">
                     <img src="${catImages[cat]}" loading="lazy">
-                    <div class="cat-banner-overlay"><h2>${cat}</h2></div>
+                    <div class="cat-banner-overlay">
+                        <h2 contenteditable="true" class="inline-editable" onclick="event.stopPropagation();" onblur="handleCategoryRename('${cat}', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${cat}</h2>
+                    </div>
                     <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
                     <div class="item-actions" style="opacity:1; top:10px; right:10px;">
-                        <button class="action-btn btn-edit" onclick="renameCategory('${cat}'); event.stopPropagation();" title="Renomear"><i class="fa-solid fa-pen"></i></button>
                         <button class="action-btn btn-delete" onclick="deleteCategory('${cat}'); event.stopPropagation();" title="Apagar Categoria"><i class="fa-solid fa-trash"></i></button>
                     </div>
                     <input type="file" id="upload-${cat.replace(/\s/g, '-')}" onchange="handleCatUpload('${cat}', this)" style="display:none;" accept="image/*">
@@ -431,7 +432,7 @@ function renderMenu(items) {
         } else {
             headerHTML = `
                  <div class="slide-title" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span class="text-editable" onclick="renameCategory('${cat}')">${cat} <i class="fa-solid fa-pen" style="font-size:0.8rem; opacity:0.5;"></i></span>
+                    <span contenteditable="true" class="text-editable inline-editable" onblur="handleCategoryRename('${cat}', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${cat}</span>
                     <div style="display:flex; gap:10px; align-items:center;">
                          <label class="custom-file-upload" style="font-size:0.8rem; cursor:pointer; color:var(--primary);">
                             <i class="fa-solid fa-image"></i> Imagem
@@ -616,17 +617,22 @@ function createItemCard(item) {
     return `
         <div id="item-card-${item.id}" class="menu-item ${!isAvail ? 'unavailable' : ''} editable-container" style="position:relative; align-items:center;">
             
-            <div class="item-text" onclick="openEditItemModal('${item.id}')" style="cursor:pointer; flex:1;">
-                <h3 style="margin-bottom:5px;">${item.name}</h3>
-                <p class="item-desc" style="font-size:0.85rem; color:#666; margin-bottom:8px;">${item.description || ''}</p>
+            <div class="item-text" style="flex:1;">
+                <h3 contenteditable="true" class="inline-editable" onblur="handleItemUpdate('${item.id}', 'name', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" style="margin-bottom:5px; display:inline-block;">${item.name}</h3>
+                <p contenteditable="true" class="item-desc inline-editable" onblur="handleItemUpdate('${item.id}', 'description', this.innerText)" style="font-size:0.85rem; color:#666; margin-bottom:8px;">${item.description || ''}</p>
                 
                 <div style="display:flex; align-items:center; gap:15px;">
-                    <div class="item-price" style="font-weight:700;">${Number(item.price).toFixed(2)}€</div>
+                    <div class="item-price" style="font-weight:700; display:flex; align-items:center;">
+                        <span contenteditable="true" class="inline-editable" onblur="handleItemUpdate('${item.id}', 'price', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${Number(item.price).toFixed(2)}</span>€
+                    </div>
                     
                     <!-- Toggle moved next to price -->
                     <button class="btn-eye-toggle" onclick="toggleAvailability('${item.id}', ${isAvail}, this); event.stopPropagation();" title="Visibilidade" 
                             style="border:none; background:transparent; font-size:1rem; color:${eyeColor}; cursor:pointer; padding:5px; transition:transform 0.2s;">
                         <i class="fa-solid ${eyeIcon}"></i>
+                    </button>
+                     <button class="action-btn btn-delete" style="width:24px; height:24px; font-size:0.7rem;" onclick="deleteItem('${item.id}'); event.stopPropagation();" title="Apagar Prato">
+                        <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
             </div>
@@ -724,29 +730,39 @@ window.handleCatUpload = async (catName, input) => {
 
 
 
-window.renameCategory = (oldName) => {
-    const val = prompt("Novo nome para a categoria:", oldName);
-    if (!val || val === oldName) return;
+// Unified Category Rename Handler (Inline)
+window.handleCategoryRename = async (oldName, newName) => {
+    const val = newName.trim();
+    if (!val || val === oldName) return; // No change
 
-    (async () => {
-        // 1. Update Items
-        const { error } = await supabase.from('menu_items')
-            .update({ category: val })
-            .eq('category', oldName)
-            .eq('restaurant_id', restaurantId);
+    // 1. Update Items
+    const { error } = await supabase.from('menu_items')
+        .update({ category: val })
+        .eq('category', oldName)
+        .eq('restaurant_id', restaurantId);
 
-        if (error) { alert("Erro ao renomear: " + error.message); return; }
+    if (error) {
+        alert("Erro ao renomear: " + error.message);
+        loadData(); // Revert UI
+        return;
+    }
 
-        // 2. Update Image Key if exists
-        if (currentData.category_images && currentData.category_images[oldName]) {
-            const newImages = { ...currentData.category_images };
-            newImages[val] = newImages[oldName];
-            delete newImages[oldName];
-            await supabase.from('restaurants').update({ category_images: newImages }).eq('id', restaurantId);
-        }
+    // 2. Update Image Key if exists
+    if (currentData.category_images && currentData.category_images[oldName]) {
+        const newImages = { ...currentData.category_images };
+        newImages[val] = newImages[oldName];
+        delete newImages[oldName];
+        await supabase.from('restaurants').update({ category_images: newImages }).eq('id', restaurantId);
+    }
 
-        loadData();
-    })();
+    // 3. Update Order Array if exists
+    if (currentData.category_order && currentData.category_order.includes(oldName)) {
+        const newOrder = currentData.category_order.map(c => c === oldName ? val : c);
+        await supabase.from('restaurants').update({ category_order: newOrder }).eq('id', restaurantId);
+    }
+
+    // Reload to refresh all bindings (simplest way to ensure consistency)
+    loadData();
 };
 
 window.deleteCategory = async (catName) => {
@@ -813,6 +829,32 @@ window.toggleAvailability = async (id, currentStatus, btn) => {
     // Background DB Update
     await supabase.from('menu_items').update({ available: newStatus }).eq('id', id);
 }
+
+// Inline Item Update Handler
+window.handleItemUpdate = async (id, field, value) => {
+    let finalVal = value.trim();
+
+    // Special handling for Price
+    if (field === 'price') {
+        finalVal = parseFloat(finalVal.replace(',', '.').replace(/[^0-9.]/g, ''));
+        if (isNaN(finalVal)) {
+            loadData(); // Revert invalid input
+            return;
+        }
+    }
+
+    const update = {};
+    update[field] = finalVal;
+
+    await supabase.from('menu_items').update(update).eq('id', id);
+    // Don't full reload to verify small text changes, but updating local state is good practice
+    // For simplicity and guaranteed sync, we can reload or just update local array
+    const item = menuItems.find(i => i.id == id);
+    if (item) item[field] = finalVal;
+
+    // If price, we might want to re-format it in UI, so maybe reload isn't bad or just let it stay as typed until refresh
+    if (field === 'price') loadData();
+};
 
 window.deleteItem = async (id) => {
     if (confirm("Tens a certeza que queres apagar este prato?")) {

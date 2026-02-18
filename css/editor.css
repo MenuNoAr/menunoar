@@ -444,26 +444,42 @@ button:disabled {
 }
 
 /* --- INLINE EDITING --- */
+/* --- INLINE EDITING --- */
 .inline-editable {
     cursor: text;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    padding: 0 4px;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px dashed transparent;
+    /* Subtle hint it's editable */
+    border-radius: 6px;
+    padding: 2px 6px;
+    margin: -1px -5px;
+    /* Offset padding to prevent layout shift */
+    position: relative;
+    z-index: 1;
 }
 
 .inline-editable:hover {
-    background: rgba(0, 0, 0, 0.05);
-    /* Subtle highlight */
+    background: rgba(31, 168, 255, 0.04);
+    /* Very light primary tint */
+    border-color: rgba(31, 168, 255, 0.3);
 }
 
 .inline-editable:focus {
     background: white;
-    border-color: var(--primary);
+    border: 1px solid var(--primary);
     outline: none;
-    box-shadow: 0 0 0 3px var(--primary-glow);
+    box-shadow: 0 4px 12px rgba(31, 168, 255, 0.15);
     color: var(--text);
-    /* Ensure contrast */
+    z-index: 10;
+    /* Bring to front */
+    min-width: 50px;
+    /* Ensure click target size */
+}
+
+/* For dark mode specific adjust */
+.dark-mode .inline-editable:focus {
+    background: #1e1e1e;
+    color: white;
 }
 
 /* --- LOCKED OVERLAY --- */
