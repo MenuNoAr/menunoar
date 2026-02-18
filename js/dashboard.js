@@ -563,6 +563,7 @@ function getDragAfterElement(container, x, y) {
 }
 
 // Save Order to Supabase
+// Save Order to Supabase
 async function saveCategoryOrder(order) {
     const { error } = await supabase.from('restaurants')
         .update({ category_order: order })
@@ -572,11 +573,16 @@ async function saveCategoryOrder(order) {
         console.error("Error saving order:", error);
     } else {
         currentData.category_order = order;
-        // Re-render handled by drag event merely moving DOM, 
-        // but let's reload to ensure logic sync (simpler) or just update internal state
-        // Ideally we don't full reload to not jar functionality, but let's re-render
-        // to sync the SLIDER track order with the TABS order.
-        loadData();
+        // Don't reload full data to avoid flicker.
+        // We just need to ensure the SLIDES track matches the TABS order.
+        // However, since the tabs were reordered visually, the track indexes 
+        // effectively changed relative to the tabs.
+        // The simplest way to keep them in sync without full reload is actually
+        // to re-render JUST the menu part, or accept the reload.
+        // But invalidating the view is safer to avoid index mismatches.
+
+        // Let's do a soft re-render of the menu container instead of full fetch
+        renderMenu(menuItems);
     }
 }
 
