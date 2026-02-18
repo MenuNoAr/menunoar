@@ -471,7 +471,7 @@ function renderMenu(items) {
     const addCatBtn = document.createElement('button');
     addCatBtn.innerHTML = '<i class="fa-solid fa-plus"></i> <span style="margin-left: 5px;">Nova Categoria</span>';
     addCatBtn.className = 'tab-btn btn-add-cat';
-    addCatBtn.onclick = addNewCategory;
+    addCatBtn.onclick = addNewCategoryOptimized;
     nav.appendChild(addCatBtn);
 
     // Final spacer to ensure "Nova Categoria" isn't cut off by card edge
@@ -564,7 +564,7 @@ async function saveCategoryOrder(order) {
 }
 
 // Slider Navigation
-window.scrollToSlide = (index) => {
+window.scrollToSlide = (index, options = {}) => {
     const track = document.getElementById('editorTrack');
     if (!track || !track.children.length) return;
 
@@ -574,7 +574,18 @@ window.scrollToSlide = (index) => {
 
     currentSlideIndex = index; // Save state
 
-    track.style.transform = `translateX(-${index * 100}%)`;
+    // Instant Jump or Smooth Scroll
+    if (options.instant) {
+        track.style.transition = 'none';
+        track.style.transform = `translateX(-${index * 100}%)`;
+        // Force reflow
+        track.offsetHeight;
+        // Restore transition for future slides (optional, or let next call handle it)
+        setTimeout(() => { track.style.transition = 'transform 0.3s ease'; }, 50);
+    } else {
+        track.style.transition = 'transform 0.3s ease';
+        track.style.transform = `translateX(-${index * 100}%)`;
+    }
 
     // Update active tab
     document.querySelectorAll('.tab-btn').forEach((btn, i) => {
@@ -908,15 +919,9 @@ window.addNewCategory = async () => {
         newOrder.push(name);
     }
 
-    // Persist
-    const { error } = await supabase.from('restaurants')
-        .update({ category_order: newOrder })
-        .eq('id', restaurantId);
-
-    if (error) {
-        alert("Erro ao criar categoria: " + error.message);
-        return;
-    }
+    // --- INSTANT UI UPDATE (Optimistic) ---
+    currentData.category_order = newOrder;
+    renderMenu(menuItems);
 
     // Optimistic Update & Reload
     currentData.category_order = newOrder;
@@ -925,9 +930,33 @@ window.addNewCategory = async () => {
     loadData();
 
     // Scroll to the end after a brief delay
+    // Scroll to the end after a brief delay & Auto-Focus
     setTimeout(() => {
         const track = document.getElementById('editorTrack');
-        if (track) scrollToSlide(track.children.length - 1);
+        if (track && track.children.length) {
+            const lastIndex = track.children.length - 1;
+            scrollToSlide(lastIndex);
+
+            // Auto-focus and select text for renaming
+            // Use a slightly longer delay to ensure the slide transition/render is settled
+            setTimeout(() => {
+                const lastSlide = track.children[lastIndex];
+                if (!lastSlide) return;
+
+                // Find either h2 or span that is the category name
+                const editableHeader = lastSlide.querySelector('.inline-editable');
+
+                if (editableHeader) {
+                    editableHeader.focus();
+                    // Select all text
+                    const range = document.createRange();
+                    range.selectNodeContents(editableHeader);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }, 300); // Wait for scroll animation to start/finish
+        }
     }, 500);
 };
 
@@ -1187,6 +1216,75 @@ window.toggleDarkMode = () => {
         btnIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     }
 }
+
+// --- OPTIMIZED NEW CATEGORY LOGIC ---
+window.addNewCategoryOptimized = async () => {
+    console.log("[OPTIMIZED] Adding new category...");
+    // Generate unique name
+    let baseName = "Nova Categoria";
+    let name = baseName;
+    let counter = 1;
+
+    // Check against ALL categories (both in items and in saved order)
+    const existingCats = new Set(menuItems.map(i => i.category));
+    if (currentData.category_order) currentData.category_order.forEach(c => existingCats.add(c));
+
+    while (existingCats.has(name)) {
+        counter++;
+        name = `${baseName} ${counter}`;
+    }
+
+    // Update category_order to persist this "empty" category
+    let newOrder = currentData.category_order || [];
+    // Ensure we don't duplicate (though name check prevents it)
+    if (!newOrder.includes(name)) {
+        newOrder.push(name);
+    }
+
+    // --- INSTANT UI UPDATE (Optimistic) ---
+    currentData.category_order = newOrder;
+    renderMenu(menuItems);
+
+    // Scroll to the end INSTANTLY & Auto-Focus
+    // Use a tiny timeout to let the DOM update from renderMenu
+    setTimeout(() => {
+        const track = document.getElementById('editorTrack');
+        if (track && track.children.length) {
+            const lastIndex = track.children.length - 1;
+
+            // Instant scroll without animation
+            scrollToSlide(lastIndex, { instant: true });
+
+            // Auto-focus logic
+            setTimeout(() => {
+                const lastSlide = track.children[lastIndex];
+                if (!lastSlide) return;
+
+                // Find either h2 or span that is the category name
+                const editableHeader = lastSlide.querySelector('.inline-editable');
+
+                if (editableHeader) {
+                    editableHeader.focus();
+                    // Select all text
+                    const range = document.createRange();
+                    range.selectNodeContents(editableHeader);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }, 50);
+        }
+    }, 10);
+
+    // --- BACKGROUND PERSIST ---
+    const { error } = await supabase.from('restaurants')
+        .update({ category_order: newOrder })
+        .eq('id', restaurantId);
+
+    if (error) {
+        console.error("Error saving category:", error);
+    }
+};
 
 // Start
 init();
