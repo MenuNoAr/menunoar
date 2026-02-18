@@ -83,6 +83,19 @@ export async function signInWithGoogle() {
     });
 }
 
+// Sign In with Facebook
+export async function signInWithFacebook() {
+    const sb = await getSupabase();
+    if (!sb) return { error: { message: "System error" } };
+
+    return await sb.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+            redirectTo: window.location.origin + '/dashboard.html'
+        }
+    });
+}
+
 // Sign Out
 export async function signOut() {
     const sb = await getSupabase();
