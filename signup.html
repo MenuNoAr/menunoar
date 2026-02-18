@@ -92,6 +92,34 @@
             box-shadow: 0 0 0 3px rgba(31, 168, 255, 0.1);
         }
 
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            cursor: pointer;
+            color: var(--text-gray);
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .password-wrapper input {
+            padding-right: 45px;
+        }
+
         .btn {
             width: 100%;
             padding: 0.9rem;
@@ -203,7 +231,12 @@
 
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" id="password" required placeholder="Mínimo 6 caracteres">
+                <div class="password-wrapper">
+                    <input type="password" id="password" required placeholder="Mínimo 6 caracteres">
+                    <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary">Criar Conta</button>
@@ -237,6 +270,18 @@
             errorMsg.className = type;
             errorMsg.style.display = 'block';
         }
+
+        window.togglePassword = function (inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        };
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
