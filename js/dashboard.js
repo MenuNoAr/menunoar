@@ -1046,8 +1046,13 @@ document.getElementById('btnRemoveImage').onclick = async () => {
 let qrCode = null;
 
 window.openQrModal = () => {
+    const modal = document.getElementById('qrModal');
+    if (modal.classList.contains('open')) {
+        closeModal('qrModal');
+        return;
+    }
     closeAllModals();
-    document.getElementById('qrModal').classList.add('open');
+    modal.classList.add('open');
 
     // Generate QR if not exists or update it
     const url = `${window.location.origin}/menu.html?id=${currentData.slug}`;
@@ -1091,6 +1096,12 @@ window.downloadQr = () => {
 
 // Settings Modal
 window.openSettingsModal = () => {
+    const modal = document.getElementById('settingsModal');
+    if (modal.classList.contains('open')) {
+        closeModal('settingsModal');
+        return;
+    }
+
     document.getElementById('modalSlug').value = currentData.slug || '';
     document.getElementById('modalFont').value = currentData.font || 'Inter';
 
@@ -1129,7 +1140,7 @@ window.openSettingsModal = () => {
     }
 
     closeAllModals();
-    document.getElementById('settingsModal').classList.add('open');
+    modal.classList.add('open');
 }
 
 window.togglePdfDetails = () => {
@@ -1369,10 +1380,15 @@ const tutorialContent = [
 ];
 
 window.openTutorial = () => {
+    const modal = document.getElementById('tutorialModal');
+    if (modal && modal.classList.contains('open')) {
+        closeModal('tutorialModal');
+        return;
+    }
+
     currentTutPage = 0;
     renderTutorialPage();
     closeAllModals();
-    const modal = document.getElementById('tutorialModal');
     if (modal) modal.classList.add('open');
 };
 
