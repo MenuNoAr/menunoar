@@ -488,10 +488,10 @@ function renderMenu(items) {
 let slideObserver = null;
 
 // --- DRAG AND DROP LOGIC ---
+// --- DRAG AND DROP LOGIC (Robust 2D) ---
 function addDragEvents(item, allCats) {
     item.addEventListener('dragstart', (e) => {
         e.target.classList.add('dragging');
-        // Store the category name being dragged
         e.dataTransfer.setData('text/plain', item.dataset.category);
     });
 
@@ -511,10 +511,11 @@ function addDragEvents(item, allCats) {
     });
 
     // Allow dropping on the navigation container
+    // Use 'ondragover' to avoid duplicate listeners if this function is called multiple times
     const nav = document.getElementById('categoryNav');
-    nav.addEventListener('dragover', (e) => {
+    nav.ondragover = (e) => {
         e.preventDefault();
-        const afterElement = getDragAfterElement(nav, e.clientX);
+        const afterElement = getDragAfterElement(nav, e.clientX, e.clientY);
         const draggable = document.querySelector('.dragging');
         if (!draggable) return;
 
@@ -522,27 +523,45 @@ function addDragEvents(item, allCats) {
         const addBtn = document.querySelector('.btn-add-cat');
 
         if (afterElement == null) {
+            // Append to end (before AddBtn if exists)
             nav.insertBefore(draggable, addBtn);
         } else {
             nav.insertBefore(draggable, afterElement);
         }
-    });
+    };
 }
 
-// Helper to calculate where to drop
-function getDragAfterElement(container, x) {
+// Helper to calculate where to drop (2D Aware)
+function getDragAfterElement(container, x, y) {
     const draggableElements = [...container.querySelectorAll('.draggable-tab:not(.dragging)')];
 
-    return draggableElements.reduce((closest, child) => {
+    let bestCandidate = null;
+    let minDist = Number.POSITIVE_INFINITY;
+
+    for (const child of draggableElements) {
         const box = child.getBoundingClientRect();
-        // Check center point
-        const offset = x - box.left - box.width / 2;
-        if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-        } else {
-            return closest;
+        // Distance to center
+        const centerX = box.left + box.width / 2;
+        const centerY = box.top + box.height / 2;
+
+        // Squared Euclidean distance
+        const dist = (x - centerX) ** 2 + (y - centerY) ** 2;
+
+        if (dist < minDist) {
+            minDist = dist;
+            bestCandidate = { element: child, centerX: centerX, centerY: centerY };
         }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    if (!bestCandidate) return null;
+
+    // Determine relative position
+    // If to the right of the closest element, insert AFTER it
+    if (x > bestCandidate.centerX) {
+        return bestCandidate.element.nextElementSibling;
+    } else {
+        return bestCandidate.element;
+    }
 }
 
 // Save Order to Supabase
