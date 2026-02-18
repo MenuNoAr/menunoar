@@ -101,8 +101,8 @@
 }
 
 .dark-mode .dashboard-navbar {
-    background: rgba(15, 23, 42, 0.85);
-    border-color: rgba(255, 255, 255, 0.05);
+    background: rgba(18, 18, 18, 0.9);
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
 .nav-brand {
@@ -243,22 +243,44 @@ body.dark-mode .trial-timer-badge.state-expired {
     }
 
     .dashboard-navbar {
-        padding: 0 1rem;
+        padding: 0 0.75rem;
+    }
+
+    .nav-tools {
+        gap: 4px;
+    }
+
+    .btn-nav {
+        padding: 8px;
+    }
+
+    .nav-brand {
+        gap: 8px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .nav-brand .divider,
+    .nav-brand #userDisplay {
+        display: none;
     }
 }
 
 /* Editor Canvas (Mimics #mobile-view from menu.css) */
 .editor-canvas {
-    margin: 70px auto 0 auto;
-    min-height: calc(100vh - 70px);
+    margin: 72px auto 60px auto;
+    /* Exactly clear 72px navbar */
+    min-height: calc(100vh - 72px);
     background: var(--bg-card);
-    max-width: 600px;
+    max-width: 550px;
+    /* Slightly narrower to ensure it fits mobile screens well */
     width: 100%;
-    /* Exact match to menu.css #mobile-view defaults */
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.08);
     border-radius: 0;
     position: relative;
-    padding-bottom: 80px;
+    padding-bottom: 100px;
 }
 
 /* On mobile, fill the screen */
@@ -518,21 +540,22 @@ body {
 }
 
 .dark-mode {
-    --light-bg: #0f172a;
-    --bg-card: #1e293b;
-    --text: #f8fafc;
-    --text-muted: #94a3b8;
-    --border: #334155;
-    --bg-page: #0f172a;
-    --color-text: #f8fafc;
+    --light-bg: #000000;
+    --bg-card: #121212;
+    --text: #ffffff;
+    --text-muted: #a0a0a0;
+    --border: #2a2a2a;
+    --bg-page: #000000;
+    --color-text: #ffffff;
 }
 
 /* Retaining modal styles as they were good (Refined) */
 .edit-modal {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.85);
+    /* Proper dark overlay */
+    backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
