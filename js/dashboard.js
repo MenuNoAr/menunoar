@@ -26,20 +26,16 @@ async function init() {
         initAuthListener(async (user) => {
             if (currentUser && currentUser.id === user.id) return;
 
-<<<<<<< HEAD
-        currentUser = user;
-        const meta = user.user_metadata || {};
-        let name = meta.full_name || meta.name;
-        if (!name) {
-            name = user.email.split('@')[0].replace(/[._]/g, ' ');
-        }
-        const initials = name.split(' ').map(n => n.charAt(0)).slice(0, 2).join('').toUpperCase();
-        document.getElementById('userDisplay').textContent = initials;
-=======
             currentUser = user;
+            const meta = user.user_metadata || {};
+            let name = meta.full_name || meta.name;
+            if (!name) {
+                name = user.email.split('@')[0].replace(/[._]/g, ' ');
+            }
+            const initials = name.split(' ').map(n => n.charAt(0)).slice(0, 2).join('').toUpperCase();
+
             const userDisplay = document.getElementById('userDisplay');
-            if (userDisplay) userDisplay.textContent = user.email.split('@')[0];
->>>>>>> 68503b15aa966c3c468f59c65f03469c5a0c80a8
+            if (userDisplay) userDisplay.textContent = initials;
 
             await loadData();
 
