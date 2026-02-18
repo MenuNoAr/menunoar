@@ -292,7 +292,7 @@ body {
     /* Even rounder! */
     box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);
     position: relative;
-    overflow: hidden;
+    /* REMOVED overflow: hidden to fix sticky nav and clipping */
     min-height: 85vh;
     border: 1px solid var(--border);
 }
@@ -305,6 +305,9 @@ body {
 .menu-header {
     position: relative;
     background: var(--bg-card);
+    overflow: hidden;
+    /* Handle rounded clipping here */
+    border-radius: 40px 40px 0 0;
 }
 
 .cover-image {
@@ -441,17 +444,27 @@ body {
     gap: 12px;
     padding: 16px 20px;
     background: var(--bg-card);
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    scrollbar-width: thin;
+    /* Added thin scrollbar for better visibility when needed */
+    scrollbar-color: var(--border) transparent;
+    -ms-overflow-style: auto;
     scroll-behavior: smooth;
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: var(--navbar-height);
-    z-index: 100;
+    z-index: 1000;
+    /* Increased z-index */
+    width: 100%;
 }
 
 .category-scroll-nav::-webkit-scrollbar {
-    display: none;
+    height: 4px;
+    /* Small visible scrollbar to indicate scrollability */
+}
+
+.category-scroll-nav::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
 }
 
 .tab-btn {
@@ -463,6 +476,7 @@ body {
     border-radius: 20px;
     font-weight: 700;
     font-size: 0.9rem;
+    white-space: nowrap;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
