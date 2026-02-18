@@ -296,15 +296,13 @@ function renderHeader(data) {
         coverDiv.style.backgroundImage = `url('${data.cover_url}')`;
         coverDiv.style.height = '350px';
         // Add Remove Button
+        // Add Remove Button
         overlayContent = `
-            <div class="edit-overlay">
-                <div>
-                    <i class="fa-solid fa-camera"></i> Alterar Capa
-                    <button class="action-btn btn-delete" style="margin-left:10px; width:30px; height:30px;" onclick="deleteCover(); event.stopPropagation();" title="Remover Capa">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </div>`;
+            <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
+            <div style="position: absolute; top: 15px; right: 15px; z-index: 50;">
+                <button class="action-btn btn-delete" onclick="deleteCover(); event.stopPropagation();" title="Remover Capa" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1);"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        `;
     } else {
         coverDiv.style.backgroundImage = 'none';
         coverDiv.style.backgroundColor = 'var(--bg-page)';
