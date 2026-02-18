@@ -43,7 +43,6 @@ body {
     line-height: 1.6;
 }
 
-/* --- DASHBOARD NAVBAR --- */
 .dashboard-navbar {
     position: fixed;
     top: 0;
@@ -55,10 +54,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 5%;
-    z-index: 1000;
-    box-shadow: var(--shadow-sm);
-    backdrop-filter: blur(10px);
+    padding: 0 40px;
+    z-index: 10000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    backdrop-filter: blur(25px);
+    gap: 20px;
 }
 
 .dark-mode .dashboard-navbar {
@@ -69,17 +69,20 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-weight: 700;
+    flex-shrink: 0;
 }
 
-.nav-brand img {
-    height: 32px;
+.nav-brand .divider {
+    color: var(--border);
+    font-size: 1.2rem;
+    font-weight: 300;
 }
 
 .nav-tools {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    flex-shrink: 1;
 }
 
 /* Navbar Buttons */
@@ -117,17 +120,15 @@ body {
 .trial-timer-badge {
     padding: 6px 14px;
     border-radius: 50px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     display: none;
-    /* Injected via JS */
     align-items: center;
     gap: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s;
-    cursor: default;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .trial-timer-badge:hover {
@@ -265,34 +266,58 @@ body {
     margin-top: 4px;
 }
 
-/* Responsive Navbar */
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
     .desktop-only {
         display: none;
     }
 
-    .nav-brand .divider,
-    .nav-brand #userDisplay {
+    .nav-brand #userDisplay,
+    .nav-brand .divider {
         display: none;
     }
 
     .dashboard-navbar {
         padding: 0 15px;
+        gap: 10px;
+    }
+
+    .trial-timer-badge {
+        font-size: 0.6rem;
+        padding: 4px 10px;
+    }
+}
+
+@media (max-width: 700px) {
+    .dashboard-navbar {
+        padding: 0 10px;
+    }
+
+    .nav-tools {
+        gap: 4px;
+    }
+
+    .btn-nav {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+
+    .trial-timer-badge {
+        display: none !important;
     }
 }
 
 /* --- EDITOR CANVAS (MOBILE-FIRST FEEL) --- */
 .editor-canvas {
     max-width: 600px;
-    /* Slightly wider for better content display */
     width: 96%;
     margin: calc(var(--navbar-height) + 30px) auto 100px auto;
     background: var(--bg-card);
     border-radius: 40px;
-    /* Even rounder! */
     box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);
     position: relative;
-    /* REMOVED overflow: hidden to fix sticky nav and clipping */
+    /* Maintain visibility for sticky nav while preventing horizontal bleed */
+    overflow-x: hidden;
+    overflow-y: visible;
     min-height: 85vh;
     border: 1px solid var(--border);
 }
@@ -441,30 +466,22 @@ body {
 .category-scroll-nav {
     display: flex;
     overflow-x: auto;
-    gap: 12px;
-    padding: 16px 20px;
+    gap: 10px;
+    padding: 14px 20px;
     background: var(--bg-card);
-    scrollbar-width: thin;
-    /* Added thin scrollbar for better visibility when needed */
-    scrollbar-color: var(--border) transparent;
-    -ms-overflow-style: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     scroll-behavior: smooth;
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: var(--navbar-height);
-    z-index: 1000;
-    /* Increased z-index */
+    z-index: 8000;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .category-scroll-nav::-webkit-scrollbar {
-    height: 4px;
-    /* Small visible scrollbar to indicate scrollability */
-}
-
-.category-scroll-nav::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 10px;
+    display: none;
 }
 
 .tab-btn {
@@ -506,6 +523,8 @@ body {
     background: transparent;
     color: var(--primary);
     border: 1.5px dashed var(--primary);
+    padding-right: 35px;
+    /* Ensure it doesn't get cut by transition/fade */
 }
 
 .btn-add-cat:hover {
