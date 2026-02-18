@@ -25,6 +25,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <script>
         // CRITICAL: Check theme BEFORE body renders to avoid white flash
@@ -96,53 +97,41 @@
 
     <!-- TRIAL ACTIVATED MODAL (Celebration) -->
     <div id="trialSuccessModal" class="edit-modal">
-        <div class="edit-modal-content celebration-card text-center">
+        <div class="edit-modal-content celebration-card">
             <div class="celebration-icon">
                 <i class="fa-solid fa-gift"></i>
             </div>
-            <h2 style="margin-top: 15px;">Teste Grátis Ativado! 🎉</h2>
-            <p class="celebration-subtitle">Tens 30 dias para explorar todas as ferramentas PRO sem limites.</p>
+            <h2>Teste Grátis Ativado! 🎉</h2>
+            <p>Tens 30 dias para explorar todas as ferramentas PRO sem limites.</p>
 
-            <div class="feature-list" style="text-align: left; margin: 25px 0;">
-                <div class="feature-item" style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <i class="fa-solid fa-check" style="color: var(--success); margin-top: 5px;"></i>
+            <div class="feature-list" style="text-align: left; margin: 30px 0; display: grid; gap: 15px;">
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                    <i class="fa-solid fa-circle-check" style="color:var(--success); font-size: 1.2rem;"></i>
                     <div>
                         <strong style="display: block;">Menu Ilimitado</strong>
-                        <span style="font-size: 0.85rem; opacity: 0.7;">Cria quantos pratos e categorias
-                            quiseres.</span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Cria pratos e categorias sem
+                            restrições.</span>
                     </div>
                 </div>
-                <div class="feature-item" style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <i class="fa-solid fa-check" style="color: var(--success); margin-top: 5px;"></i>
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                    <i class="fa-solid fa-circle-check" style="color:var(--success); font-size: 1.2rem;"></i>
                     <div>
-                        <strong style="display: block;">QR Code Inteligente</strong>
-                        <span style="font-size: 0.85rem; opacity: 0.7;">Gera e descarrega o teu QR Code
+                        <strong style="display: block;">QR Code PRO</strong>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Gera e descarrega o teu QR Code
                             personalizado.</span>
                     </div>
                 </div>
-                <div class="feature-item" style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <i class="fa-solid fa-check" style="color: var(--success); margin-top: 5px;"></i>
-                    <div>
-                        <strong style="display: block;">Design Premium</strong>
-                        <span style="font-size: 0.85rem; opacity: 0.7;">Personaliza cores, fontes e banners do teu
-                            menu.</span>
-                    </div>
-                </div>
             </div>
 
-            <div class="payment-info-box"
-                style="background: var(--bg-page); padding: 15px; border-radius: 12px; margin-bottom: 25px; display: flex; gap: 15px; align-items: start; text-align: left; font-size: 0.85rem;">
-                <i class="fa-solid fa-circle-info" style="color: var(--primary); margin-top: 3px;"></i>
-                <p style="margin: 0; line-height: 1.4;">Podes confirmar a tua assinatura definitiva a qualquer momento
-                    no fundo da página para garantir que o teu menu nunca fica offline.</p>
+            <div
+                style="background: var(--bg-page); padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; gap: 12px; text-align: left; font-size: 0.85rem;">
+                <i class="fa-solid fa-lightbulb" style="color: var(--primary);"></i>
+                <span>Ativa a assinatura definitiva a qualquer momento no fundo da página.</span>
             </div>
 
-            <div class="modal-actions" style="justify-content: center; width: 100%; margin: 0;">
-                <button class="btn-confirm" onclick="closeModal('trialSuccessModal')"
-                    style="width: 100%; justify-content: center;">
-                    Começar a Editar <i class="fa-solid fa-chevron-right" style="margin-left: 10px;"></i>
-                </button>
-            </div>
+            <button class="btn-confirm btn-full" onclick="startEditing()">
+                Ir para o Editor <i class="fa-solid fa-chevron-right"></i>
+            </button>
         </div>
     </div>
 

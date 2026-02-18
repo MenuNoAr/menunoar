@@ -32,14 +32,42 @@ async function init() {
 
             await loadData();
 
+            // Check if we just finished setup
             if (localStorage.getItem('just_created_rest') === 'true') {
                 localStorage.removeItem('just_created_rest');
                 setTimeout(() => {
                     const modal = document.getElementById('trialSuccessModal');
-                    if (modal) modal.classList.add('open');
+                    if (modal) {
+                        modal.classList.add('open');
+                        // Decent confetti animation
+                        if (window.confetti) {
+                            const duration = 3 * 1000;
+                            const end = Date.now() + duration;
+
+                            (function frame() {
+                                confetti({
+                                    particleCount: 3,
+                                    angle: 60,
+                                    spread: 55,
+                                    origin: { x: 0 },
+                                    colors: ['#1fa8ff', '#16a34a', '#ffffff']
+                                });
+                                confetti({
+                                    particleCount: 3,
+                                    angle: 120,
+                                    spread: 55,
+                                    origin: { x: 1 },
+                                    colors: ['#1fa8ff', '#16a34a', '#ffffff']
+                                });
+
+                                if (Date.now() < end) {
+                                    requestAnimationFrame(frame);
+                                }
+                            }());
+                        }
+                    }
                 }, 800);
             }
-
         }, () => {
             window.location.href = 'login.html';
         });
@@ -1016,6 +1044,12 @@ document.getElementById('itemEditForm').onsubmit = async (e) => {
 
 // Utils
 window.closeModal = (id) => document.getElementById(id).classList.remove('open');
+
+window.startEditing = () => {
+    closeModal('trialSuccessModal');
+    // Force a scroll to the top to ensure visibility
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 // Dark Mode logic reused
 window.toggleDarkMode = () => {
