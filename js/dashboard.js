@@ -868,15 +868,30 @@ window.deleteItem = async (id) => {
 
 // Text Modal
 // Add New Category (Simplified)
+// Add New Category (Seamless Flow)
 window.addNewCategory = () => {
-    const val = prompt("Nome da Nova Categoria:");
-    if (!val) return;
+    // We can't have empty categories in this DB structure (it's item-based), 
+    // so we prompt for the first item of the new category essentially, OR we handle it via the UI.
+    // User requested "add empty/placeholder and edit name".
+    // Best compromise: Create a placeholder item in "Nova Categoria" that is hidden/unavailable?
+    // actually, let's just use a default name and let them rename it.
 
-    // Optimistic UI update or just reload logic
-    // Ideally we create a temporary empty category but our logic is item-based.
-    // So we just tell user to add an item.
-    openAddItemModal(val);
-    alert(`A criar categoria "${val}". Adiciona o primeiro prato para a guardar!`);
+    // Check if "Nova Categoria" exists to avoid duplicates
+    let baseName = "Nova Categoria";
+    let name = baseName;
+    let counter = 1;
+    const existingCats = [...new Set(menuItems.map(i => i.category))];
+
+    while (existingCats.includes(name)) {
+        counter++;
+        name = `${baseName} ${counter}`;
+    }
+
+    // Opens the modal pre-filled with this new category name
+    // This feels like "Creating a new category"
+    openAddItemModal(name);
+    // Optionally focus the category field in the modal?
+    // document.getElementById('editItemCat').focus();
 };
 
 

@@ -482,6 +482,14 @@ button:disabled {
     color: white;
 }
 
+[contenteditable]:empty:before {
+    content: attr(placeholder);
+    color: #9ca3af;
+    pointer-events: none;
+    display: block;
+    /* For Firefox */
+}
+
 /* --- LOCKED OVERLAY --- */
 .locked-overlay {
     position: fixed;
@@ -650,6 +658,14 @@ button:disabled {
     font-weight: 800;
     margin-bottom: 25px;
     letter-spacing: -0.5px;
+}
+
+/* Ensure banner text is clickable for editing */
+.cat-banner-overlay h2 {
+    position: relative;
+    z-index: 20;
+    pointer-events: auto;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 .edit-modal-content p {
