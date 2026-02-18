@@ -1009,6 +1009,7 @@ window.openImageModal = (id) => {
         document.getElementById('btnRemoveImage').style.display = 'none';
     }
 
+    closeAllModals();
     document.getElementById('imageModal').classList.add('open');
 };
 
@@ -1045,6 +1046,7 @@ document.getElementById('btnRemoveImage').onclick = async () => {
 let qrCode = null;
 
 window.openQrModal = () => {
+    closeAllModals();
     document.getElementById('qrModal').classList.add('open');
 
     // Generate QR if not exists or update it
@@ -1126,6 +1128,7 @@ window.openSettingsModal = () => {
         }
     }
 
+    closeAllModals();
     document.getElementById('settingsModal').classList.add('open');
 }
 
@@ -1171,6 +1174,7 @@ window.openAddItemModal = (prefillCat = '') => {
     document.getElementById('editItemCat').value = prefillCat;
     document.getElementById('editItemId').value = ''; // Empty = Add
     document.getElementById('modalTitle').textContent = "Adicionar Prato";
+    closeAllModals();
     document.getElementById('itemModal').classList.add('open');
 }
 
@@ -1183,6 +1187,7 @@ window.openEditItemModal = (id) => {
     document.getElementById('editItemCat').value = item.category;
     document.getElementById('editItemId').value = item.id;
     document.getElementById('modalTitle').textContent = "Editar Prato";
+    closeAllModals();
     document.getElementById('itemModal').classList.add('open');
 }
 
@@ -1214,6 +1219,10 @@ document.getElementById('itemEditForm').onsubmit = async (e) => {
 
 // Utils
 window.closeModal = (id) => document.getElementById(id).classList.remove('open');
+
+window.closeAllModals = () => {
+    document.querySelectorAll('.edit-modal').forEach(modal => modal.classList.remove('open'));
+};
 
 window.startEditing = () => {
     closeModal('trialSuccessModal');
@@ -1362,6 +1371,7 @@ const tutorialContent = [
 window.openTutorial = () => {
     currentTutPage = 0;
     renderTutorialPage();
+    closeAllModals();
     const modal = document.getElementById('tutorialModal');
     if (modal) modal.classList.add('open');
 };
