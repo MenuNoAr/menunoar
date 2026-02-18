@@ -453,6 +453,12 @@ function renderMenu(items) {
     addCatBtn.onclick = addNewCategory;
     nav.appendChild(addCatBtn);
 
+    // Final spacer to ensure "Nova Categoria" isn't cut off by card edge
+    const spacer = document.createElement('div');
+    spacer.style.minWidth = '40px';
+    spacer.style.height = '1px';
+    nav.appendChild(spacer);
+
     // Initialize height for active slide
     setTimeout(() => scrollToSlide(currentSlideIndex), 50);
 }
