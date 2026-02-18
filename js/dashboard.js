@@ -355,6 +355,7 @@ function renderMenu(items) {
     // Clear previous content
     container.innerHTML = '<div id="editorTrack" class="slider-track" style="transition: transform 0.3s ease;"></div>';
     const track = document.getElementById('editorTrack');
+    nav.className = 'category-tabs sticky-nav'; // Match menu.html class
     nav.innerHTML = '';
 
     // 1. Determine Category Order
