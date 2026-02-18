@@ -445,40 +445,49 @@ button:disabled {
 
 /* --- INLINE EDITING --- */
 /* --- INLINE EDITING --- */
+/* --- INLINE EDITING (MINIMALIST) --- */
 .inline-editable {
     cursor: text;
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-    border: 1px dashed transparent;
-    /* Subtle hint it's editable */
-    border-radius: 6px;
-    padding: 2px 6px;
-    margin: -1px -5px;
-    /* Offset padding to prevent layout shift */
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px dashed transparent;
+    /* Only show bottom hint if needed, or none */
+    border-radius: 4px;
+    padding: 1px 4px;
+    margin: 0;
     position: relative;
-    z-index: 1;
-}
-
-.inline-editable:hover {
-    background: rgba(31, 168, 255, 0.04);
-    /* Very light primary tint */
-    border-color: rgba(31, 168, 255, 0.3);
-}
-
-.inline-editable:focus {
-    background: white;
-    border: 1px solid var(--primary);
-    outline: none;
-    box-shadow: 0 4px 12px rgba(31, 168, 255, 0.15);
-    color: var(--text);
     z-index: 10;
-    /* Bring to front */
-    min-width: 50px;
-    /* Ensure click target size */
 }
 
-/* For dark mode specific adjust */
+/* Hover: Subtle text hint */
+.inline-editable:hover {
+    background: rgba(0, 0, 0, 0.03);
+    /* Extremely subtle */
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Focus: Clean, premium interaction */
+.inline-editable:focus {
+    background: transparent;
+    outline: none;
+    border-bottom: 2px solid var(--primary);
+    /* Minimalist underline */
+    border-radius: 0;
+    padding-bottom: 0px;
+    /* Adjust for border */
+    color: var(--text);
+    box-shadow: none;
+    /* Remove heavy glow */
+}
+
+/* Dark mode adjustments */
+.dark-mode .inline-editable:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+}
+
 .dark-mode .inline-editable:focus {
-    background: #1e1e1e;
+    background: transparent;
+    border-bottom-color: var(--primary);
     color: white;
 }
 
