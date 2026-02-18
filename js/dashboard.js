@@ -403,7 +403,9 @@ function renderMenu(items) {
 
         btn.innerHTML = `
             <span>${cat}</span>
-            <i class="fa-solid fa-grip-lines-vertical handle" style="margin-left:8px; opacity:0.3; cursor:grab;"></i>
+            <div class="handle" style="padding: 10px 15px; margin: -10px -15px -10px 0px; cursor:grab; display:flex; align-items:center;">
+                <i class="fa-solid fa-grip-lines-vertical" style="opacity:0.4;"></i>
+            </div>
         `;
 
         // Drag Attributes (Handled by SortableJS)
