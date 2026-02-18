@@ -283,15 +283,22 @@ body {
 
 /* --- EDITOR CANVAS (MOBILE-FIRST FEEL) --- */
 .editor-canvas {
-    max-width: 550px;
-    width: 94%;
-    margin: calc(var(--navbar-height) + 20px) auto 80px auto;
+    max-width: 600px;
+    /* Slightly wider for better content display */
+    width: 96%;
+    margin: calc(var(--navbar-height) + 30px) auto 100px auto;
     background: var(--bg-card);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
+    border-radius: 40px;
+    /* Even rounder! */
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
-    min-height: 80vh;
+    min-height: 85vh;
+    border: 1px solid var(--border);
+}
+
+.dark-mode .editor-canvas {
+    box-shadow: 0 40px 120px -20px rgba(0, 0, 0, 0.6);
 }
 
 /* --- MENU HEADER & COVER --- */
@@ -311,22 +318,23 @@ body {
 }
 
 .header-content {
-    padding: 30px 20px;
+    padding: 40px 25px;
     text-align: center;
 }
 
 .header-content h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin-bottom: 5px;
-    letter-spacing: -1px;
+    font-size: 2.8rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
 }
 
 .header-content p {
     color: var(--text-muted);
-    font-size: 1rem;
-    max-width: 400px;
-    margin: 0 auto 25px auto;
+    font-size: 1.1rem;
+    max-width: 450px;
+    margin: 0 auto 30px auto;
 }
 
 .info-badges {
@@ -431,22 +439,19 @@ body {
     display: flex;
     overflow-x: auto;
     gap: 12px;
-    padding: 15px;
+    padding: 16px 20px;
     background: var(--bg-card);
     scrollbar-width: none;
     -ms-overflow-style: none;
     scroll-behavior: smooth;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: var(--navbar-height);
+    z-index: 100;
 }
 
 .category-scroll-nav::-webkit-scrollbar {
     display: none;
-}
-
-.category-scroll-nav.sticky-nav {
-    position: sticky;
-    top: var(--navbar-height);
-    z-index: 100;
-    border-bottom: 1px solid var(--border);
 }
 
 .tab-btn {
@@ -455,25 +460,42 @@ body {
     border: none;
     background: var(--bg-page);
     color: var(--text-muted);
-    border-radius: 50px;
+    border-radius: 20px;
     font-weight: 700;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     gap: 8px;
+    position: relative;
+}
+
+/* DEFEAT THE BLUE BAR FROM menu.css */
+.tab-btn.active::after {
+    display: none !important;
 }
 
 .tab-btn.active {
     background: var(--primary);
     color: white;
-    box-shadow: 0 8px 16px var(--primary-glow);
+    box-shadow: 0 10px 20px -5px var(--primary-glow);
+    transform: translateY(-2px);
+}
+
+.tab-btn:hover:not(.active) {
+    background: var(--border);
+    color: var(--text);
 }
 
 .btn-add-cat {
-    background: var(--primary-glow);
+    background: transparent;
     color: var(--primary);
-    border: 1px dashed var(--primary);
+    border: 1.5px dashed var(--primary);
+}
+
+.btn-add-cat:hover {
+    background: var(--primary-glow);
 }
 
 /* --- MENU ITEMS --- */
