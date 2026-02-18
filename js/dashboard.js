@@ -925,9 +925,33 @@ window.addNewCategory = async () => {
     loadData();
 
     // Scroll to the end after a brief delay
+    // Scroll to the end after a brief delay & Auto-Focus
     setTimeout(() => {
         const track = document.getElementById('editorTrack');
-        if (track) scrollToSlide(track.children.length - 1);
+        if (track && track.children.length) {
+            const lastIndex = track.children.length - 1;
+            scrollToSlide(lastIndex);
+
+            // Auto-focus and select text for renaming
+            // Use a slightly longer delay to ensure the slide transition/render is settled
+            setTimeout(() => {
+                const lastSlide = track.children[lastIndex];
+                if (!lastSlide) return;
+
+                // Find either h2 or span that is the category name
+                const editableHeader = lastSlide.querySelector('.inline-editable');
+
+                if (editableHeader) {
+                    editableHeader.focus();
+                    // Select all text
+                    const range = document.createRange();
+                    range.selectNodeContents(editableHeader);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }, 300); // Wait for scroll animation to start/finish
+        }
     }, 500);
 };
 
