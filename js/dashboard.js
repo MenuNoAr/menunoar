@@ -1303,5 +1303,122 @@ window.addNewCategoryOptimized = async () => {
     }
 };
 
+// --- TUTORIAL SYSTEM ---
+let currentTutPage = 0;
+const tutorialContent = [
+    {
+        title: "Bem-vindo ao Menu no Ar! 🚀",
+        text: "Este é o teu painel de controlo. Aqui podes criar um menu digital incrível em minutos. Vamos mostrar-te como funciona!",
+        image: "https://placehold.co/600x300/1fa8ff/ffffff?text=Dashboard+Visão+Geral",
+        features: [
+            { icon: "fa-magic", text: "Edição visual em tempo real" },
+            { icon: "fa-qrcode", text: "QR Code pronto a imprimir" }
+        ]
+    },
+    {
+        title: "Criar e Editar Pratos 🍔",
+        text: "Clica em qualquer texto (nome, descrição ou preço) para editar diretamente. Clica no ícone da câmara para adicionar fotos deliciosas.",
+        image: "https://placehold.co/600x300/1fa8ff/ffffff?text=Editar+Pratos",
+        features: [
+            { icon: "fa-pencil", text: "Clica e escreve para mudar nomes" },
+            { icon: "fa-camera", text: "Upload de fotos instantâneo" }
+        ]
+    },
+    {
+        title: "Organizar Categorias 📂",
+        text: "Podes arrastar as categorias na barra superior para mudar a ordem. Usa o botão 'Nova Categoria' para expandir o teu menu.",
+        image: "https://placehold.co/600x300/1fa8ff/ffffff?text=Organizar+Categorias",
+        features: [
+            { icon: "fa-grip-vertical", text: "Arrasta para reordenar" },
+            { icon: "fa-plus", text: "Cria secções personalizadas" }
+        ]
+    },
+    {
+        title: "Mover e Apagar 🧹",
+        text: "Usa os ícones de lixo para remover categorias ou pratos. Podes também ocultar pratos temporariamente usando o ícone do olho.",
+        image: "https://placehold.co/600x300/1fa8ff/ffffff?text=Gestão+de+Itens",
+        features: [
+            { icon: "fa-trash", text: "Apaga o que já não precisas" },
+            { icon: "fa-eye-slash", text: "Oculta pratos esgotados" }
+        ]
+    },
+    {
+        title: "Tudo Pronto! ✨",
+        text: "Agora que já sabes o básico, é hora de brilhar. Clica no botão 'Ver Menu' para veres o resultado final como os teus clientes o verão.",
+        image: "https://placehold.co/600x300/1fa8ff/ffffff?text=Sucesso!",
+        features: [
+            { icon: "fa-rocket", text: "O teu menu está online" },
+            { icon: "fa-check", text: "Boas vendas, Chef!" }
+        ]
+    }
+];
+
+window.openTutorial = () => {
+    currentTutPage = 0;
+    renderTutorialPage();
+    const modal = document.getElementById('tutorialModal');
+    if (modal) modal.classList.add('open');
+};
+
+window.closeModal = (id) => {
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.remove('open');
+};
+
+function renderTutorialPage() {
+    const page = tutorialContent[currentTutPage];
+    const container = document.getElementById('tutorialPages');
+    const progressBar = document.getElementById('tutorialProgressBar');
+    const counter = document.getElementById('tutPageCounter');
+    const nextBtn = document.getElementById('nextTutBtn');
+    const prevBtn = document.getElementById('prevTutBtn');
+
+    if (!container) return;
+
+    // Progress
+    const progress = ((currentTutPage + 1) / tutorialContent.length) * 100;
+    progressBar.style.width = `${progress}%`;
+    counter.textContent = `Página ${currentTutPage + 1} de ${tutorialContent.length}`;
+
+    // Navigation Buttons
+    prevBtn.disabled = currentTutPage === 0;
+    nextBtn.innerHTML = currentTutPage === tutorialContent.length - 1
+        ? 'Começar a Criar! <i class="fa-solid fa-rocket"></i>'
+        : 'Próximo <i class="fa-solid fa-arrow-right"></i>';
+
+    // Content
+    container.innerHTML = `
+        <div class="tutorial-step">
+            <img src="${page.image}" alt="${page.title}">
+            <h3>${page.title}</h3>
+            <p>${page.text}</p>
+            <div class="tutorial-feature-list">
+                ${page.features.map(f => `
+                    <div class="feature-item">
+                        <i class="fa-solid ${f.icon}"></i>
+                        <span>${f.text}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+window.nextTutorialPage = () => {
+    if (currentTutPage < tutorialContent.length - 1) {
+        currentTutPage++;
+        renderTutorialPage();
+    } else {
+        closeModal('tutorialModal');
+    }
+};
+
+window.prevTutorialPage = () => {
+    if (currentTutPage > 0) {
+        currentTutPage--;
+        renderTutorialPage();
+    }
+};
+
 // Start
 init();
