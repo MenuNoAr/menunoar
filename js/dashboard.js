@@ -21,7 +21,13 @@ async function init() {
         if (currentUser && currentUser.id === user.id) return; // Prevent reload on token refresh
 
         currentUser = user;
-        document.getElementById('userDisplay').textContent = user.email.split('@')[0]; // Show part of email
+        const meta = user.user_metadata || {};
+        let name = meta.full_name || meta.name;
+        if (!name) {
+            name = user.email.split('@')[0].replace(/[._]/g, ' ');
+        }
+        const initials = name.split(' ').map(n => n.charAt(0)).slice(0, 2).join('').toUpperCase();
+        document.getElementById('userDisplay').textContent = initials;
 
         await loadData();
 
