@@ -27,8 +27,15 @@ async function init() {
             if (currentUser && currentUser.id === user.id) return;
 
             currentUser = user;
+            const meta = user.user_metadata || {};
+            let name = meta.full_name || meta.name;
+            if (!name) {
+                name = user.email.split('@')[0].replace(/[._]/g, ' ');
+            }
+            const initials = name.split(' ').map(n => n.charAt(0)).slice(0, 2).join('').toUpperCase();
+
             const userDisplay = document.getElementById('userDisplay');
-            if (userDisplay) userDisplay.textContent = user.email.split('@')[0];
+            if (userDisplay) userDisplay.textContent = initials;
 
             await loadData();
 
@@ -206,6 +213,9 @@ async function loadData() {
 
     menuItems = items || [];
     renderMenu(menuItems);
+
+    // Init editing listeners
+    initHeaderEditing();
 }
 
 // --- SETUP WIZARD LOGIC ---
@@ -348,6 +358,7 @@ function renderMenu(items) {
     // Clear previous content
     container.innerHTML = '<div id="editorTrack" class="slider-track" style="transition: transform 0.3s ease;"></div>';
     const track = document.getElementById('editorTrack');
+    nav.className = 'category-tabs sticky-nav'; // Match menu.html class
     nav.innerHTML = '';
 
     // 1. Determine Category Order
@@ -409,10 +420,11 @@ function renderMenu(items) {
             headerHTML = `
                 <div class="cat-banner editable-trigger" onclick="triggerCatUpload('${cat}')">
                     <img src="${catImages[cat]}" loading="lazy">
-                    <div class="cat-banner-overlay"><h2>${cat}</h2></div>
+                    <div class="cat-banner-overlay">
+                        <h2 contenteditable="true" class="inline-editable" onclick="event.stopPropagation();" onblur="handleCategoryRename('${cat}', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${cat}</h2>
+                    </div>
                     <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
                     <div class="item-actions" style="opacity:1; top:10px; right:10px;">
-                        <button class="action-btn btn-edit" onclick="renameCategory('${cat}'); event.stopPropagation();" title="Renomear"><i class="fa-solid fa-pen"></i></button>
                         <button class="action-btn btn-delete" onclick="deleteCategory('${cat}'); event.stopPropagation();" title="Apagar Categoria"><i class="fa-solid fa-trash"></i></button>
                     </div>
                     <input type="file" id="upload-${cat.replace(/\s/g, '-')}" onchange="handleCatUpload('${cat}', this)" style="display:none;" accept="image/*">
@@ -420,7 +432,7 @@ function renderMenu(items) {
         } else {
             headerHTML = `
                  <div class="slide-title" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span class="text-editable" onclick="renameCategory('${cat}')">${cat} <i class="fa-solid fa-pen" style="font-size:0.8rem; opacity:0.5;"></i></span>
+                    <span contenteditable="true" class="text-editable inline-editable" onblur="handleCategoryRename('${cat}', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${cat}</span>
                     <div style="display:flex; gap:10px; align-items:center;">
                          <label class="custom-file-upload" style="font-size:0.8rem; cursor:pointer; color:var(--primary);">
                             <i class="fa-solid fa-image"></i> Imagem
@@ -605,17 +617,22 @@ function createItemCard(item) {
     return `
         <div id="item-card-${item.id}" class="menu-item ${!isAvail ? 'unavailable' : ''} editable-container" style="position:relative; align-items:center;">
             
-            <div class="item-text" onclick="openEditItemModal('${item.id}')" style="cursor:pointer; flex:1;">
-                <h3 style="margin-bottom:5px;">${item.name}</h3>
-                <p class="item-desc" style="font-size:0.85rem; color:#666; margin-bottom:8px;">${item.description || ''}</p>
+            <div class="item-text" style="flex:1;">
+                <h3 contenteditable="true" class="inline-editable" onblur="handleItemUpdate('${item.id}', 'name', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" style="margin-bottom:5px; display:inline-block;">${item.name}</h3>
+                <p contenteditable="true" class="item-desc inline-editable" onblur="handleItemUpdate('${item.id}', 'description', this.innerText)" style="font-size:0.85rem; color:#666; margin-bottom:8px;">${item.description || ''}</p>
                 
                 <div style="display:flex; align-items:center; gap:15px;">
-                    <div class="item-price" style="font-weight:700;">${Number(item.price).toFixed(2)}€</div>
+                    <div class="item-price" style="font-weight:700; display:flex; align-items:center;">
+                        <span contenteditable="true" class="inline-editable" onblur="handleItemUpdate('${item.id}', 'price', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${Number(item.price).toFixed(2)}</span>€
+                    </div>
                     
                     <!-- Toggle moved next to price -->
                     <button class="btn-eye-toggle" onclick="toggleAvailability('${item.id}', ${isAvail}, this); event.stopPropagation();" title="Visibilidade" 
                             style="border:none; background:transparent; font-size:1rem; color:${eyeColor}; cursor:pointer; padding:5px; transition:transform 0.2s;">
                         <i class="fa-solid ${eyeIcon}"></i>
+                    </button>
+                     <button class="action-btn btn-delete" style="width:24px; height:24px; font-size:0.7rem;" onclick="deleteItem('${item.id}'); event.stopPropagation();" title="Apagar Prato">
+                        <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
             </div>
@@ -633,35 +650,59 @@ function createItemCard(item) {
 // --- ACTIONS & EVENTS ---
 
 // Header Actions
+// Header Actions
 window.triggerCoverUpload = () => {
     const input = document.getElementById('coverUpload');
     if (input) input.click();
 };
 
-window.editRestName = () => openTextModal("Nome do Restaurante", currentData.name, async (val) => {
-    await supabase.from('restaurants').update({ name: val }).eq('id', restaurantId);
-    loadData();
-});
+// Inline Editing Setup
+function setupInlineEdit(elementId, fieldName) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
 
-window.editRestDesc = () => openTextModal("Descrição", currentData.description, async (val) => {
-    await supabase.from('restaurants').update({ description: val }).eq('id', restaurantId);
-    loadData();
-});
+    el.setAttribute('contenteditable', 'true');
+    el.classList.add('inline-editable');
 
-window.editWifi = () => openTextModal("Password Wifi", currentData.wifi_password, async (val) => {
-    await supabase.from('restaurants').update({ wifi_password: val }).eq('id', restaurantId);
-    loadData();
-});
+    // Save on Blur (Focus Lost)
+    el.addEventListener('blur', async () => {
+        const newVal = el.innerText.trim();
+        // Optimistic update already visible
 
-window.editPhone = () => openTextModal("Telefone", currentData.phone, async (val) => {
-    await supabase.from('restaurants').update({ phone: val }).eq('id', restaurantId);
-    loadData();
-});
+        // Save to DB
+        const update = {};
+        update[fieldName] = newVal;
+        await supabase.from('restaurants').update(update).eq('id', restaurantId);
 
-window.editAddress = () => openTextModal("Morada", currentData.address, async (val) => {
-    await supabase.from('restaurants').update({ address: val }).eq('id', restaurantId);
-    loadData();
-});
+        // Update local state
+        currentData[fieldName] = newVal;
+    });
+
+    // Save on Enter (prevent newline for single line fields)
+    el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            el.blur();
+        }
+    });
+}
+
+// Initialize Inline Editing for Badge Fields
+// Note: Name/Desc initialized in renderHeader because they might re-render? 
+// No, header is static in DOM structure mostly, but we can init once.
+// Ideally call this after renderHeader or just once.
+// Let's attach manually in renderHeader to be safe or just call globally if elements exist.
+
+window.initHeaderEditing = () => {
+    setupInlineEdit('restNameEditor', 'name');
+    setupInlineEdit('restDescEditor', 'description');
+
+    // Badges specific logic (they have spans inside)
+    // Actually, let's target the inner spans for badges
+    setupInlineEdit('textWifi', 'wifi_password');
+    setupInlineEdit('textPhone', 'phone');
+    setupInlineEdit('textAddress', 'address');
+};
 
 
 // Category Actions
@@ -687,36 +728,41 @@ window.handleCatUpload = async (catName, input) => {
     }
 }
 
-window.addNewCategory = () => {
-    openTextModal("Nova Categoria", "", (val) => {
-        if (!val) return;
-        openAddItemModal(val);
-        alert(`A criar categoria "${val}". Adiciona o primeiro prato para a guardar!`);
-    });
-}
 
-window.renameCategory = (oldName) => {
-    openTextModal("Renomear Categoria", oldName, async (val) => {
-        if (!val || val === oldName) return;
 
-        // 1. Update Items
-        const { error } = await supabase.from('menu_items')
-            .update({ category: val })
-            .eq('category', oldName)
-            .eq('restaurant_id', restaurantId);
+// Unified Category Rename Handler (Inline)
+window.handleCategoryRename = async (oldName, newName) => {
+    const val = newName.trim();
+    if (!val || val === oldName) return; // No change
 
-        if (error) { alert("Erro ao renomear: " + error.message); return; }
+    // 1. Update Items
+    const { error } = await supabase.from('menu_items')
+        .update({ category: val })
+        .eq('category', oldName)
+        .eq('restaurant_id', restaurantId);
 
-        // 2. Update Image Key if exists
-        if (currentData.category_images && currentData.category_images[oldName]) {
-            const newImages = { ...currentData.category_images };
-            newImages[val] = newImages[oldName];
-            delete newImages[oldName];
-            await supabase.from('restaurants').update({ category_images: newImages }).eq('id', restaurantId);
-        }
+    if (error) {
+        alert("Erro ao renomear: " + error.message);
+        loadData(); // Revert UI
+        return;
+    }
 
-        loadData();
-    });
+    // 2. Update Image Key if exists
+    if (currentData.category_images && currentData.category_images[oldName]) {
+        const newImages = { ...currentData.category_images };
+        newImages[val] = newImages[oldName];
+        delete newImages[oldName];
+        await supabase.from('restaurants').update({ category_images: newImages }).eq('id', restaurantId);
+    }
+
+    // 3. Update Order Array if exists
+    if (currentData.category_order && currentData.category_order.includes(oldName)) {
+        const newOrder = currentData.category_order.map(c => c === oldName ? val : c);
+        await supabase.from('restaurants').update({ category_order: newOrder }).eq('id', restaurantId);
+    }
+
+    // Reload to refresh all bindings (simplest way to ensure consistency)
+    loadData();
 };
 
 window.deleteCategory = async (catName) => {
@@ -784,6 +830,32 @@ window.toggleAvailability = async (id, currentStatus, btn) => {
     await supabase.from('menu_items').update({ available: newStatus }).eq('id', id);
 }
 
+// Inline Item Update Handler
+window.handleItemUpdate = async (id, field, value) => {
+    let finalVal = value.trim();
+
+    // Special handling for Price
+    if (field === 'price') {
+        finalVal = parseFloat(finalVal.replace(',', '.').replace(/[^0-9.]/g, ''));
+        if (isNaN(finalVal)) {
+            loadData(); // Revert invalid input
+            return;
+        }
+    }
+
+    const update = {};
+    update[field] = finalVal;
+
+    await supabase.from('menu_items').update(update).eq('id', id);
+    // Don't full reload to verify small text changes, but updating local state is good practice
+    // For simplicity and guaranteed sync, we can reload or just update local array
+    const item = menuItems.find(i => i.id == id);
+    if (item) item[field] = finalVal;
+
+    // If price, we might want to re-format it in UI, so maybe reload isn't bad or just let it stay as typed until refresh
+    if (field === 'price') loadData();
+};
+
 window.deleteItem = async (id) => {
     if (confirm("Tens a certeza que queres apagar este prato?")) {
         await supabase.from('menu_items').delete().eq('id', id);
@@ -795,31 +867,19 @@ window.deleteItem = async (id) => {
 // --- MODALS ---
 
 // Text Modal
-let textCallback = null;
-window.openTextModal = (title, currentVal, cb) => {
-    document.getElementById('textModalTitle').textContent = title;
-    document.getElementById('textInput').value = currentVal || '';
-    document.getElementById('textModal').classList.add('open');
-    textCallback = cb;
+// Add New Category (Simplified)
+window.addNewCategory = () => {
+    const val = prompt("Nome da Nova Categoria:");
+    if (!val) return;
 
-    // Choose input type based on length/context
-    if (title.includes("Descrição")) {
-        document.getElementById('textInput').style.display = 'none';
-        document.getElementById('textAreaInput').style.display = 'block';
-        document.getElementById('textAreaInput').value = currentVal || '';
-    } else {
-        document.getElementById('textInput').style.display = 'block';
-        document.getElementById('textAreaInput').style.display = 'none';
-    }
-}
-
-document.getElementById('saveTextBtn').onclick = () => {
-    const val = document.getElementById('textInput').style.display === 'none'
-        ? document.getElementById('textAreaInput').value
-        : document.getElementById('textInput').value;
-    if (textCallback) textCallback(val);
-    closeModal('textModal');
+    // Optimistic UI update or just reload logic
+    // Ideally we create a temporary empty category but our logic is item-based.
+    // So we just tell user to add an item.
+    openAddItemModal(val);
+    alert(`A criar categoria "${val}". Adiciona o primeiro prato para a guardar!`);
 };
+
+
 
 
 

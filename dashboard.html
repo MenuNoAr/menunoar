@@ -23,23 +23,9 @@
     <!-- Editor Styles (Overlays) -->
     <link rel="stylesheet" href="css/editor.css">
 
+    <!-- Defer non-critical scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-    <script>
-        // CRITICAL: Check theme BEFORE body renders to avoid white flash
-        (function () {
-            const savedTheme = localStorage.getItem('menu_theme');
-            if (savedTheme === 'dark') {
-                document.documentElement.classList.add('dark-mode');
-                // Ensure body gets class as soon as it's available
-                document.addEventListener('DOMContentLoaded', () => {
-                    document.body.classList.add('dark-mode');
-                });
-            }
-        })();
-    </script>
 </head>
 
 <body>
@@ -95,85 +81,17 @@
         </div>
     </div>
 
-    <!-- TRIAL ACTIVATED MODAL (Celebration) -->
-    <div id="trialSuccessModal" class="edit-modal">
-        <div class="edit-modal-content celebration-card">
-            <div class="celebration-icon">
-                <i class="fa-solid fa-gift"></i>
-            </div>
-            <h2>Teste Grátis Ativado! 🎉</h2>
-            <p>Tens 30 dias para explorar todas as ferramentas PRO sem limites.</p>
-
-            <div class="feature-list" style="text-align: left; margin: 30px 0; display: grid; gap: 15px;">
-                <div style="display: flex; gap: 12px; align-items: flex-start;">
-                    <i class="fa-solid fa-circle-check" style="color:var(--success); font-size: 1.2rem;"></i>
-                    <div>
-                        <strong style="display: block;">Menu Ilimitado</strong>
-                        <span style="font-size: 0.8rem; color: var(--text-muted);">Cria pratos e categorias sem
-                            restrições.</span>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 12px; align-items: flex-start;">
-                    <i class="fa-solid fa-circle-check" style="color:var(--success); font-size: 1.2rem;"></i>
-                    <div>
-                        <strong style="display: block;">QR Code PRO</strong>
-                        <span style="font-size: 0.8rem; color: var(--text-muted);">Gera e descarrega o teu QR Code
-                            personalizado.</span>
-                    </div>
-                </div>
-            </div>
-
-            <div
-                style="background: var(--bg-page); padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; gap: 12px; text-align: left; font-size: 0.85rem;">
-                <i class="fa-solid fa-lightbulb" style="color: var(--primary);"></i>
-                <span>Ativa a assinatura definitiva a qualquer momento no fundo da página.</span>
-            </div>
-
-            <button class="btn-confirm btn-full" onclick="startEditing()">
-                Ir para o Editor <i class="fa-solid fa-chevron-right"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- EXPIRED ACCOUNT BLOCKER -->
-    <div id="expiredBlocker" class="locked-overlay" style="display:none;">
-        <div class="locked-content">
-            <div class="locked-icon">
-                <i class="fa-solid fa-lock"></i>
-            </div>
-            <h2>Acesso Bloqueado</h2>
-            <p>O teu período de teste gratuito terminou. Para continuares a gerir o teu menu e mantê-lo online para os
-                clientes, ativa o teu plano profissional agora.</p>
-
-            <div class="locked-features">
-                <span><i class="fa-solid fa-circle-xmark"></i> Edição de Itens</span>
-                <span><i class="fa-solid fa-circle-xmark"></i> Download de QR Code</span>
-                <span><i class="fa-solid fa-circle-xmark"></i> Personalização Visual</span>
-            </div>
-
-            <a href="subscription.html" class="btn-confirm btn-full"
-                style="text-decoration: none; display: flex; align-items: center; justify-content: center; width: 100%;">
-                <i class="fa-solid fa-rocket" style="margin-right: 10px;"></i> Ativar Premium Agora
-            </a>
-            <button onclick="signOut()" class="btn-nav"
-                style="margin-top: 15px; width: 100%; justify-content: center; border: 1px solid var(--border);">
-                Sair da Conta
-            </button>
-        </div>
-    </div>
-
     <!-- MAIN DASHBOARD (Hidden by default until loaded) -->
     <div id="main-dashboard" style="display:none;">
 
         <div class="dashboard-navbar">
             <div class="nav-brand">
-                <img src="assets/images/logo.svg" alt="MenuNoAr" id="dashboardLogo">
+                <img src="assets/images/logo.svg" alt="MenuNoAr">
                 <span class="divider">|</span>
                 <span id="userDisplay">Chef</span>
             </div>
 
             <div class="nav-tools">
-                <span id="trialTimer" class="trial-timer-badge"></span>
                 <button class="btn-nav" onclick="openQrModal()" title="QR Code">
                     <i class="fa-solid fa-qrcode"></i> <span class="desktop-only">QR Code</span>
                 </button>
@@ -183,7 +101,7 @@
                 <a id="liveLink" href="#" target="_blank" class="btn-nav btn-live" title="Ver ao Vivo">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="desktop-only">Ver Menu</span>
                 </a>
-                <button class="btn-nav" onclick="toggleDarkMode()" title="Tema" id="themeBtn">
+                <button class="btn-nav" onclick="toggleDarkMode()" title="Tema">
                     <i class="fa-solid fa-moon" id="themeIcon"></i>
                 </button>
                 <button class="btn-nav" onclick="window.location.href='subscription.html'" title="Planos">
@@ -206,18 +124,20 @@
                 </div>
 
                 <div class="header-content container">
-                    <h1 id="restNameEditor" class="editable-text" onclick="editRestName()">Restaurante</h1>
-                    <p id="restDescEditor" class="editable-text-sm" onclick="editRestDesc()">Descrição...</p>
+                    <!-- Inline Editable Fields -->
+                    <h1 id="restNameEditor" class="inline-editable">Restaurante</h1>
+                    <p id="restDescEditor" class="inline-editable">Descrição...</p>
 
                     <div class="info-badges">
-                        <span id="badgeWifi" class="badge editable-badge" onclick="editWifi()">
-                            <i class="fa-solid fa-wifi"></i> <span id="textWifi">Wifi</span>
+                        <span id="badgeWifi" class="badge">
+                            <i class="fa-solid fa-wifi"></i> <span id="textWifi" class="inline-editable">Wifi</span>
                         </span>
-                        <span id="badgePhone" class="badge editable-badge" onclick="editPhone()">
-                            <i class="fa-solid fa-phone"></i> <span id="textPhone">Tel</span>
+                        <span id="badgePhone" class="badge">
+                            <i class="fa-solid fa-phone"></i> <span id="textPhone" class="inline-editable">Tel</span>
                         </span>
-                        <span id="badgeAddress" class="badge editable-badge" onclick="editAddress()">
-                            <i class="fa-solid fa-location-dot"></i> <span id="textAddress">Morada</span>
+                        <span id="badgeAddress" class="badge">
+                            <i class="fa-solid fa-location-dot"></i> <span id="textAddress"
+                                class="inline-editable">Morada</span>
                         </span>
                     </div>
                 </div>
@@ -350,7 +270,55 @@
         </div>
     </div>
 
+    <!-- SETUP WIZARD MODAL -->
+    <div id="setupModal" class="edit-modal" style="z-index: 99999;">
+        <div class="edit-modal-content" style="max-width: 500px; text-align: center;">
+            <div style="margin-bottom: 20px;">
+                <img src="assets/images/logo.svg" alt="Logo" style="height: 60px; margin-bottom: 15px;">
+                <h2 style="color:var(--primary);">Bem-vindo Chef! 👨‍🍳</h2>
+                <p style="color:var(--text-muted);">Vamos configurar o teu restaurante em 30 segundos.</p>
+            </div>
 
+            <form id="setupForm" style="text-align: left;">
+                <div class="form-group">
+                    <label>Nome do Restaurante</label>
+                    <input type="text" id="setupName" placeholder="ex: O Tasco do Zé" required
+                        oninput="generateSlug(this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label>Link Personalizado (Slug)</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-link"></i>
+                        <input type="text" id="setupSlug" placeholder="ex: o-tasco-do-ze" required>
+                    </div>
+                    <small style="font-size: 0.8rem; color: var(--text-muted);">Será o teu link:
+                        menunoar.com/menu.html?id=<b>slug</b></small>
+                </div>
+
+                <div class="form-group">
+                    <label>Descrição Curta</label>
+                    <textarea id="setupDesc" rows="2"
+                        placeholder="ex: A melhor comida tradicional de Lisboa..."></textarea>
+                </div>
+
+                <div class="form-group"
+                    style="background:var(--bg-page); padding:15px; border-radius:8px; display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" id="setupDemo" checked
+                        style="width:20px; height:20px; accent-color:var(--primary);">
+                    <label for="setupDemo" style="margin:0; cursor:pointer;">
+                        <strong>Adicionar pratos de exemplo?</strong><br>
+                        <span style="font-size:0.85rem; font-weight:normal;">Cria categorias e pratos para não começares
+                            do zero.</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-confirm"
+                    style="width: 100%; margin-top: 10px; font-size: 1.1rem; padding: 12px;">Criar Menu Mágico
+                    ✨</button>
+            </form>
+        </div>
+    </div>
 
     <!-- IMAGE PREVIEW MODAL -->
     <div id="imageModal" class="edit-modal">
@@ -377,20 +345,7 @@
         </div>
     </div>
 
-    <!-- GENERIC TEXT EDIT MODAL -->
-    <div id="textModal" class="edit-modal">
-        <div class="edit-modal-content">
-            <h2 id="textModalTitle">Editar Texto</h2>
-            <div class="form-group">
-                <input type="text" id="textInput" placeholder="Escreve aqui...">
-                <textarea id="textAreaInput" rows="4" style="display:none;" placeholder="Escreve aqui..."></textarea>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal('textModal')">Cancelar</button>
-                <button id="saveTextBtn" class="btn-confirm">Confirmar</button>
-            </div>
-        </div>
-    </div>
+    <!-- GENERIC TEXT EDIT MODAL REMOVED -->
 
     <!-- QR CODE MODAL -->
     <div id="qrModal" class="edit-modal">
