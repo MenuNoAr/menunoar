@@ -213,6 +213,9 @@ async function loadData() {
 
     menuItems = items || [];
     renderMenu(menuItems);
+
+    // Init editing listeners
+    initHeaderEditing();
 }
 
 // --- SETUP WIZARD LOGIC ---
@@ -641,35 +644,59 @@ function createItemCard(item) {
 // --- ACTIONS & EVENTS ---
 
 // Header Actions
+// Header Actions
 window.triggerCoverUpload = () => {
     const input = document.getElementById('coverUpload');
     if (input) input.click();
 };
 
-window.editRestName = () => openTextModal("Nome do Restaurante", currentData.name, async (val) => {
-    await supabase.from('restaurants').update({ name: val }).eq('id', restaurantId);
-    loadData();
-});
+// Inline Editing Setup
+function setupInlineEdit(elementId, fieldName) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
 
-window.editRestDesc = () => openTextModal("Descrição", currentData.description, async (val) => {
-    await supabase.from('restaurants').update({ description: val }).eq('id', restaurantId);
-    loadData();
-});
+    el.setAttribute('contenteditable', 'true');
+    el.classList.add('inline-editable');
 
-window.editWifi = () => openTextModal("Password Wifi", currentData.wifi_password, async (val) => {
-    await supabase.from('restaurants').update({ wifi_password: val }).eq('id', restaurantId);
-    loadData();
-});
+    // Save on Blur (Focus Lost)
+    el.addEventListener('blur', async () => {
+        const newVal = el.innerText.trim();
+        // Optimistic update already visible
 
-window.editPhone = () => openTextModal("Telefone", currentData.phone, async (val) => {
-    await supabase.from('restaurants').update({ phone: val }).eq('id', restaurantId);
-    loadData();
-});
+        // Save to DB
+        const update = {};
+        update[fieldName] = newVal;
+        await supabase.from('restaurants').update(update).eq('id', restaurantId);
 
-window.editAddress = () => openTextModal("Morada", currentData.address, async (val) => {
-    await supabase.from('restaurants').update({ address: val }).eq('id', restaurantId);
-    loadData();
-});
+        // Update local state
+        currentData[fieldName] = newVal;
+    });
+
+    // Save on Enter (prevent newline for single line fields)
+    el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            el.blur();
+        }
+    });
+}
+
+// Initialize Inline Editing for Badge Fields
+// Note: Name/Desc initialized in renderHeader because they might re-render? 
+// No, header is static in DOM structure mostly, but we can init once.
+// Ideally call this after renderHeader or just once.
+// Let's attach manually in renderHeader to be safe or just call globally if elements exist.
+
+window.initHeaderEditing = () => {
+    setupInlineEdit('restNameEditor', 'name');
+    setupInlineEdit('restDescEditor', 'description');
+
+    // Badges specific logic (they have spans inside)
+    // Actually, let's target the inner spans for badges
+    setupInlineEdit('textWifi', 'wifi_password');
+    setupInlineEdit('textPhone', 'phone');
+    setupInlineEdit('textAddress', 'address');
+};
 
 
 // Category Actions
