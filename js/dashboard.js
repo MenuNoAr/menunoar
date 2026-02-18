@@ -11,15 +11,22 @@ let currentSlideIndex = 0; // Store active slide
 
 // Function to initialize everything
 async function init() {
-    supabase = await getSupabase();
+    try {
+        supabase = await getSupabase();
+        if (!supabase) {
+            console.error("Supabase fail");
+            alert("Erro de conexão. Por favor recarregue a página.");
+            return;
+        }
 
-    // Init upload service
-    initUploadService(supabase);
+        // Init upload service
+        initUploadService(supabase);
 
-    // Auth Listener
-    initAuthListener(async (user) => {
-        if (currentUser && currentUser.id === user.id) return; // Prevent reload on token refresh
+        // Auth Listener
+        initAuthListener(async (user) => {
+            if (currentUser && currentUser.id === user.id) return;
 
+<<<<<<< HEAD
         currentUser = user;
         const meta = user.user_metadata || {};
         let name = meta.full_name || meta.name;
@@ -28,13 +35,56 @@ async function init() {
         }
         const initials = name.split(' ').map(n => n.charAt(0)).slice(0, 2).join('').toUpperCase();
         document.getElementById('userDisplay').textContent = initials;
+=======
+            currentUser = user;
+            const userDisplay = document.getElementById('userDisplay');
+            if (userDisplay) userDisplay.textContent = user.email.split('@')[0];
+>>>>>>> 68503b15aa966c3c468f59c65f03469c5a0c80a8
 
-        await loadData();
+            await loadData();
 
-    }, () => {
-        // No Auth
-        window.location.href = 'login.html';
-    });
+            // Check if we just finished setup
+            if (localStorage.getItem('just_created_rest') === 'true') {
+                localStorage.removeItem('just_created_rest');
+                setTimeout(() => {
+                    const modal = document.getElementById('trialSuccessModal');
+                    if (modal) {
+                        modal.classList.add('open');
+                        // Decent confetti animation
+                        if (window.confetti) {
+                            const duration = 3 * 1000;
+                            const end = Date.now() + duration;
+
+                            (function frame() {
+                                confetti({
+                                    particleCount: 3,
+                                    angle: 60,
+                                    spread: 55,
+                                    origin: { x: 0 },
+                                    colors: ['#1fa8ff', '#16a34a', '#ffffff']
+                                });
+                                confetti({
+                                    particleCount: 3,
+                                    angle: 120,
+                                    spread: 55,
+                                    origin: { x: 1 },
+                                    colors: ['#1fa8ff', '#16a34a', '#ffffff']
+                                });
+
+                                if (Date.now() < end) {
+                                    requestAnimationFrame(frame);
+                                }
+                            }());
+                        }
+                    }
+                }, 800);
+            }
+        }, () => {
+            window.location.href = 'login.html';
+        });
+    } catch (err) {
+        console.error("Init Error:", err);
+    }
 }
 
 window.signOut = () => signOut();
@@ -67,19 +117,30 @@ async function loadData() {
 
         // 3. FORCE SYNC STATUS (Fixes Webhook Issues)
         try {
-            console.log("Syncing subscription status...");
-            await fetch('/api/sync_status', {
+            console.log("Syncing subscription status for email:", currentUser.email);
+            const syncRes = await fetch('/api/sync_status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: currentUser.email, userId: currentUser.id })
             });
 
-            // Reload data after sync to get fresh status
-            const { data: refreshed } = await supabase.from('restaurants').select('*').eq('id', rest.id).maybeSingle();
-            if (refreshed) rest = refreshed;
+            if (!syncRes.ok) {
+                const errorText = await syncRes.text();
+                console.error("[SYNC ERROR SERVER]", syncRes.status, errorText);
+                throw new Error(`Erro no servidor (${syncRes.status})`);
+            }
 
+            const syncData = await syncRes.json();
+            console.log("[SYNC RESULT]", syncData);
+
+            if (syncData.updated) {
+                console.log("[SYNC] Data was updated from Stripe. Reloading...");
+                const { data: refreshed } = await supabase.from('restaurants').select('*').eq('owner_id', currentUser.id).maybeSingle();
+                if (refreshed) rest = refreshed;
+            }
         } catch (e) {
-            console.error("Sync failed:", e);
+            console.warn("Sync temporarily unavailable or failed:", e);
+            // Don't alert() here to avoid spamming the user, but log it.
         }
     }
 
@@ -111,9 +172,39 @@ async function loadData() {
         // Hide Upgrade Button completely
         const upgradeBtn = document.querySelector('a[href="subscription.html"]');
         if (upgradeBtn) upgradeBtn.style.display = 'none';
+    } else {
+        // User is NOT Premium (No active Stripe sub). Check internal trial.
+        const daysLeft = Math.ceil((new Date(rest.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
+        if (daysLeft <= 0) {
+            const blocker = document.getElementById('expiredBlocker');
+            if (blocker) blocker.style.display = 'flex';
+            // Optional: prevent fetching items if blocked
+            // return; 
+        }
+    }
 
-        // Hide "Premium" in nav if we want (or keep it as status)
-        // Keep it but maybe add a checkmark
+    // --- TRIAL TIMER IN NAVBAR ---
+    const timerBadge = document.getElementById('trialTimer');
+    if (timerBadge) {
+        timerBadge.className = 'trial-timer-badge'; // Reset classes
+        if (rest.subscription_status === 'trialing' && !rest.stripe_customer_id) {
+            const daysLeft = Math.ceil((new Date(rest.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
+            if (daysLeft > 0) {
+                timerBadge.innerHTML = `<i class="fa-solid fa-clock"></i> ${daysLeft} dias`;
+                timerBadge.classList.add('state-trial');
+                timerBadge.style.display = 'inline-flex';
+            } else {
+                timerBadge.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Expirado`;
+                timerBadge.classList.add('state-expired');
+                timerBadge.style.display = 'inline-flex';
+            }
+        } else if (rest.subscription_status === 'active' || rest.stripe_customer_id) {
+            timerBadge.innerHTML = `<i class="fa-solid fa-crown"></i> PRO`;
+            timerBadge.classList.add('state-pro');
+            timerBadge.style.display = 'inline-flex';
+        } else {
+            timerBadge.style.display = 'none';
+        }
     }
 
 
@@ -182,7 +273,8 @@ document.getElementById('setupForm').onsubmit = async (e) => {
         await supabase.from('menu_items').insert(demoItems);
     }
 
-    // 3. Reload to switch view
+    // 3. Set Flag and Reload
+    localStorage.setItem('just_created_rest', 'true');
     window.location.reload();
 };
 
@@ -206,27 +298,40 @@ function renderHeader(data) {
         coverDiv.style.height = '350px';
         // Add Remove Button
         overlayContent = `
-            <div class="edit-icon-overlay">
-                <i class="fa-solid fa-camera"></i> Alterar
-                <button class="action-btn btn-delete" style="margin-left:10px; width:30px; height:30px;" onclick="deleteCover(); event.stopPropagation();" title="Remover Capa">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+            <div class="edit-overlay">
+                <div>
+                    <i class="fa-solid fa-camera"></i> Alterar Capa
+                    <button class="action-btn btn-delete" style="margin-left:10px; width:30px; height:30px;" onclick="deleteCover(); event.stopPropagation();" title="Remover Capa">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
             </div>`;
     } else {
         coverDiv.style.backgroundImage = 'none';
-        coverDiv.style.backgroundColor = '#ddd';
+        coverDiv.style.backgroundColor = 'var(--bg-page)';
         coverDiv.style.height = '120px'; // Reduced height for empty state
-        overlayContent = `<div class="edit-icon-overlay"><i class="fa-solid fa-camera"></i> Adicionar Capa</div>`;
+        overlayContent = `<div class="edit-overlay"><i class="fa-solid fa-camera"></i> Adicionar Capa</div>`;
     }
 
     // Rebuild content to include button
-    coverDiv.innerHTML = overlayContent + `<input type="file" id="coverUpload" style="display:none;" accept="image/*">`;
+    coverDiv.innerHTML = overlayContent + `<input type="file" id="coverUpload" style="display:none;" accept="image/*" onchange="handleCoverUpload(this)">`;
 
     // Badges
     updateBadge('badgeWifi', 'textWifi', data.wifi_password, '📶 Wifi: ');
     updateBadge('badgePhone', 'textPhone', data.phone, '📞 ');
     updateBadge('badgeAddress', 'textAddress', data.address, '📍 ');
 }
+
+window.handleCoverUpload = async (input) => {
+    if (!input.files.length) return;
+    const file = input.files[0];
+    const { data, error } = await uploadFile(file, 'cover');
+    if (error) { alert("Erro ao fazer upload: " + error.message); return; }
+    if (data) {
+        await supabase.from('restaurants').update({ cover_url: data.publicUrl }).eq('id', restaurantId);
+        loadData();
+    }
+};
 
 window.deleteCover = async () => {
     if (confirm("Remover a capa do restaurante?")) {
@@ -313,10 +418,10 @@ function renderMenu(items) {
 
         if (catImages[cat]) {
             headerHTML = `
-                <div class="cat-banner editable-container" onclick="triggerCatUpload('${cat}')">
+                <div class="cat-banner editable-trigger" onclick="triggerCatUpload('${cat}')">
                     <img src="${catImages[cat]}" loading="lazy">
                     <div class="cat-banner-overlay"><h2>${cat}</h2></div>
-                    <div class="edit-icon-overlay"><i class="fa-solid fa-camera"></i> Capa | <i class="fa-solid fa-pen"></i> Nome</div>
+                    <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
                     <div class="item-actions" style="opacity:1; top:10px; right:10px;">
                         <button class="action-btn btn-edit" onclick="renameCategory('${cat}'); event.stopPropagation();" title="Renomear"><i class="fa-solid fa-pen"></i></button>
                         <button class="action-btn btn-delete" onclick="deleteCategory('${cat}'); event.stopPropagation();" title="Apagar Categoria"><i class="fa-solid fa-trash"></i></button>
@@ -358,6 +463,12 @@ function renderMenu(items) {
     addCatBtn.className = 'tab-btn btn-add-cat';
     addCatBtn.onclick = addNewCategory;
     nav.appendChild(addCatBtn);
+
+    // Final spacer to ensure "Nova Categoria" isn't cut off by card edge
+    const spacer = document.createElement('div');
+    spacer.style.minWidth = '40px';
+    spacer.style.height = '1px';
+    nav.appendChild(spacer);
 
     // Initialize height for active slide
     setTimeout(() => scrollToSlide(currentSlideIndex), 50);
@@ -533,17 +644,10 @@ function createItemCard(item) {
 // --- ACTIONS & EVENTS ---
 
 // Header Actions
-window.triggerCoverUpload = () => document.getElementById('coverUpload').click();
-document.getElementById('coverUpload').addEventListener('change', async (e) => {
-    if (!e.target.files.length) return;
-    const file = e.target.files[0];
-    const { data, error } = await uploadFile(file, 'cover');
-    if (error) { alert("Erro ao fazer upload: " + error.message); return; }
-    if (data) {
-        await supabase.from('restaurants').update({ cover_url: data.publicUrl }).eq('id', restaurantId);
-        loadData();
-    }
-});
+window.triggerCoverUpload = () => {
+    const input = document.getElementById('coverUpload');
+    if (input) input.click();
+};
 
 window.editRestName = () => openTextModal("Nome do Restaurante", currentData.name, async (val) => {
     await supabase.from('restaurants').update({ name: val }).eq('id', restaurantId);
@@ -843,27 +947,29 @@ window.openSettingsModal = () => {
     // Plan Logic
     const planText = document.getElementById('currentPlanText');
     if (planText) {
-        if (currentData.subscription_plan === 'pro') {
-            // Check status
-            if (currentData.subscription_status === 'trialing') {
-                const daysLeft = Math.ceil((new Date(currentData.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
-                if (daysLeft > 0) {
-                    planText.textContent = `Teste Grátis (${daysLeft} dias restantes)`;
-                    planText.style.color = "#16a34a"; // Green
-                } else {
-                    planText.textContent = "Teste Expirado";
-                    planText.style.color = "#ef4444"; // Red
-                }
-            } else if (currentData.subscription_status === 'active') {
-                planText.textContent = "Profissional (Ativo)";
+        const hasStripeId = !!currentData.stripe_customer_id;
+        const status = currentData.subscription_status;
+
+        if (hasStripeId && (status === 'active' || status === 'trialing')) {
+            // STRIPE PREMIUM (Card already added)
+            planText.textContent = "Profissional (Membro Premium)";
+            planText.style.color = "#16a34a"; // Green
+        } else if (status === 'trialing') {
+            // INTERNAL FREE TRIAL (No card)
+            const daysLeft = Math.ceil((new Date(currentData.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
+            if (daysLeft > 0) {
+                planText.textContent = `Teste Grátis (${daysLeft} dias restantes)`;
                 planText.style.color = "#16a34a"; // Green
             } else {
-                planText.textContent = "Profissional (" + currentData.subscription_status + ")";
+                planText.textContent = "Teste Expirado";
                 planText.style.color = "#ef4444"; // Red
             }
+        } else if (status === 'active') {
+            planText.textContent = "Profissional (Ativo)";
+            planText.style.color = "#16a34a";
         } else {
-            planText.textContent = "Sem Plano Ativo";
-            planText.style.color = "#6b7280"; // Gray
+            planText.textContent = currentData.subscription_plan === 'pro' ? "Profissional (" + status + ")" : "Sem Plano Ativo";
+            planText.style.color = status === 'active' ? "#16a34a" : "#6b7280";
         }
     }
 
@@ -956,7 +1062,12 @@ document.getElementById('itemEditForm').onsubmit = async (e) => {
 // Utils
 window.closeModal = (id) => document.getElementById(id).classList.remove('open');
 
-// Dark Mode logic reused
+window.startEditing = () => {
+    closeModal('trialSuccessModal');
+    // Force a scroll to the top to ensure visibility
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // Dark Mode logic reused
 window.toggleDarkMode = () => {
     document.body.classList.toggle('dark-mode');
@@ -970,7 +1081,7 @@ window.toggleDarkMode = () => {
     }
 
     // Swap Icon
-    const btnIcon = document.querySelector('#themeBtn i');
+    const btnIcon = document.getElementById('themeIcon');
     if (btnIcon) {
         btnIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     }

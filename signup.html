@@ -92,6 +92,34 @@
             box-shadow: 0 0 0 3px rgba(31, 168, 255, 0.1);
         }
 
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            cursor: pointer;
+            color: var(--text-gray);
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .password-wrapper input {
+            padding-right: 45px;
+        }
+
         .btn {
             width: 100%;
             padding: 0.9rem;
@@ -163,13 +191,23 @@
         }
 
         #error-msg {
-            color: #ef4444;
             font-size: 0.9rem;
             margin-bottom: 1rem;
             display: none;
-            background: #fee2e2;
             padding: 10px;
             border-radius: 8px;
+        }
+
+        #error-msg.error {
+            color: #ef4444;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+        }
+
+        #error-msg.success {
+            color: #16a34a;
+            background: #f0fdf4;
+            border: 1px solid #dcfce7;
         }
     </style>
 </head>
@@ -193,7 +231,12 @@
 
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" id="password" required placeholder="Mínimo 6 caracteres">
+                <div class="password-wrapper">
+                    <input type="password" id="password" required placeholder="Mínimo 6 caracteres">
+                    <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary">Criar Conta</button>
@@ -222,10 +265,23 @@
         const form = document.getElementById('signupForm');
         const errorMsg = document.getElementById('error-msg');
 
-        function showError(msg) {
+        function showMsg(msg, type = 'error') {
             errorMsg.textContent = msg;
+            errorMsg.className = type;
             errorMsg.style.display = 'block';
         }
+
+        window.togglePassword = function (inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        };
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -235,12 +291,12 @@
             const password = document.getElementById('password').value;
 
             if (password.length < 6) {
-                showError("A password deve ter pelo menos 6 caracteres.");
+                showMsg("A password deve ter pelo menos 6 caracteres.", 'error');
                 return;
             }
 
             // Show loading state
-            const btn = form.querySelector('button');
+            const btn = form.querySelector('button[type="submit"]');
             const originalText = btn.textContent;
             btn.textContent = 'A criar conta...';
             btn.disabled = true;
@@ -248,7 +304,7 @@
             const { data, error } = await signUp(email, password);
 
             if (error) {
-                showError("Erro: " + error.message);
+                showMsg("Erro: " + error.message, 'error');
                 btn.textContent = originalText;
                 btn.disabled = false;
             } else {
@@ -258,8 +314,9 @@
                 if (data.session) {
                     window.location.href = 'dashboard.html';
                 } else {
-                    showError("Conta criada! Verifica o teu email para confirmar.");
-                    btn.textContent = "Verifica o Email";
+                    // Set flag and redirect to login
+                    localStorage.setItem('signupEmailPending', 'true');
+                    window.location.href = 'login.html';
                 }
             }
         });
@@ -268,9 +325,9 @@
             const { error } = await signInWithGoogle();
             if (error) {
                 if (error.message.includes("provider is not enabled")) {
-                    showError("O login com Google ainda não foi ativado no sistema (Supabase).");
+                    showMsg("O login com Google ainda não foi ativado no sistema (Supabase).", 'error');
                 } else {
-                    showError("Erro: " + error.message);
+                    showMsg("Erro: " + error.message, 'error');
                 }
             }
         });

@@ -92,6 +92,34 @@
             box-shadow: 0 0 0 3px rgba(31, 168, 255, 0.1);
         }
 
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            cursor: pointer;
+            color: var(--text-gray);
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .password-wrapper input {
+            padding-right: 45px;
+        }
+
         .btn {
             width: 100%;
             padding: 0.9rem;
@@ -193,7 +221,12 @@
 
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" id="password" required placeholder="••••••••">
+                <div class="password-wrapper">
+                    <input type="password" id="password" required placeholder="••••••••">
+                    <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary">Entrar</button>
@@ -222,10 +255,37 @@
         const form = document.getElementById('loginForm');
         const errorMsg = document.getElementById('error-msg');
 
-        function showError(msg) {
+        function showMsg(msg, isSuccess = false) {
             errorMsg.textContent = msg;
             errorMsg.style.display = 'block';
+            if (isSuccess) {
+                errorMsg.style.background = '#dcfce7';
+                errorMsg.style.color = '#15803d';
+                errorMsg.style.border = '1px solid #bbf7d0';
+            } else {
+                errorMsg.style.background = '#fee2e2';
+                errorMsg.style.color = '#b91c1c';
+                errorMsg.style.border = '1px solid #fecaca';
+            }
         }
+
+        // Check for signup success
+        if (localStorage.getItem('signupEmailPending') === 'true') {
+            localStorage.removeItem('signupEmailPending');
+            showMsg("Conta criada! Verifica o teu email para confirmar.", true);
+        }
+
+        window.togglePassword = function (inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        };
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -235,7 +295,7 @@
             const password = document.getElementById('password').value;
 
             // Show loading state
-            const btn = form.querySelector('button');
+            const btn = form.querySelector('button[type="submit"]');
             const originalText = btn.textContent;
             btn.textContent = 'A entrar...';
             btn.disabled = true;
@@ -243,7 +303,7 @@
             const { data, error } = await signIn(email, password);
 
             if (error) {
-                showError("Email ou password incorretos.");
+                showMsg("Email ou password incorretos.");
                 btn.textContent = originalText;
                 btn.disabled = false;
             } else {
@@ -255,9 +315,9 @@
             const { error } = await signInWithGoogle();
             if (error) {
                 if (error.message.includes("provider is not enabled")) {
-                    showError("O login com Google ainda não foi ativado no sistema (Supabase).");
+                    showMsg("O login com Google ainda não foi ativado no sistema (Supabase).");
                 } else {
-                    showError("Erro: " + error.message);
+                    showMsg("Erro: " + error.message);
                 }
             }
         });
