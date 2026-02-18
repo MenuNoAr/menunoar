@@ -155,16 +155,6 @@
             background: #f8fafc;
         }
 
-        .btn-facebook {
-            background: #1877f2;
-            color: white;
-            border: none;
-        }
-
-        .btn-facebook:hover {
-            background: #166fe5;
-        }
-
         .divider {
             display: flex;
             align-items: center;
@@ -249,18 +239,13 @@
             Entrar com Google
         </button>
 
-        <button id="facebookBtn" class="btn btn-facebook">
-            <i class="fa-brands fa-facebook" style="font-size: 20px;"></i>
-            Entrar com Facebook
-        </button>
-
         <div class="links">
             Não tens conta? <a href="signup.html">Criar Conta Grátis</a>
         </div>
     </div>
 
     <script type="module">
-        import { initAuthListener, signIn, signInWithGoogle, signInWithFacebook } from './js/auth-service.js';
+        import { initAuthListener, signIn, signInWithGoogle } from './js/auth-service.js';
 
         // Check session
         initAuthListener((user) => {
@@ -331,17 +316,6 @@
             if (error) {
                 if (error.message.includes("provider is not enabled")) {
                     showMsg("O login com Google ainda não foi ativado no sistema (Supabase).");
-                } else {
-                    showMsg("Erro: " + error.message);
-                }
-            }
-        });
-
-        document.getElementById('facebookBtn').addEventListener('click', async () => {
-            const { error } = await signInWithFacebook();
-            if (error) {
-                if (error.message.includes("provider is not enabled")) {
-                    showMsg("O login com Facebook ainda não foi ativado no sistema (Supabase).");
                 } else {
                     showMsg("Erro: " + error.message);
                 }
