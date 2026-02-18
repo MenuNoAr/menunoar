@@ -475,8 +475,6 @@ button:disabled {
     border-radius: 0;
     padding-bottom: 0px;
     /* Adjust for border */
-    color: inherit;
-    /* Keep existing text color (e.g. white on banner) */
     box-shadow: none;
     /* Remove heavy glow */
 }
@@ -490,8 +488,6 @@ button:disabled {
 .dark-mode .inline-editable:focus {
     background: transparent;
     border-bottom-color: var(--primary);
-    color: inherit;
-    /* Inherit works best here too */
 }
 
 [contenteditable]:empty:before {
