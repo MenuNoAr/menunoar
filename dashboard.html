@@ -124,18 +124,20 @@
                 </div>
 
                 <div class="header-content container">
-                    <h1 id="restNameEditor" class="editable-text" onclick="editRestName()">Restaurante</h1>
-                    <p id="restDescEditor" class="editable-text-sm" onclick="editRestDesc()">Descrição...</p>
+                    <!-- Inline Editable Fields -->
+                    <h1 id="restNameEditor" class="inline-editable">Restaurante</h1>
+                    <p id="restDescEditor" class="inline-editable">Descrição...</p>
 
                     <div class="info-badges">
-                        <span id="badgeWifi" class="badge editable-badge" onclick="editWifi()">
-                            <i class="fa-solid fa-wifi"></i> <span id="textWifi">Wifi</span>
+                        <span id="badgeWifi" class="badge">
+                            <i class="fa-solid fa-wifi"></i> <span id="textWifi" class="inline-editable">Wifi</span>
                         </span>
-                        <span id="badgePhone" class="badge editable-badge" onclick="editPhone()">
-                            <i class="fa-solid fa-phone"></i> <span id="textPhone">Tel</span>
+                        <span id="badgePhone" class="badge">
+                            <i class="fa-solid fa-phone"></i> <span id="textPhone" class="inline-editable">Tel</span>
                         </span>
-                        <span id="badgeAddress" class="badge editable-badge" onclick="editAddress()">
-                            <i class="fa-solid fa-location-dot"></i> <span id="textAddress">Morada</span>
+                        <span id="badgeAddress" class="badge">
+                            <i class="fa-solid fa-location-dot"></i> <span id="textAddress"
+                                class="inline-editable">Morada</span>
                         </span>
                     </div>
                 </div>
@@ -343,20 +345,7 @@
         </div>
     </div>
 
-    <!-- GENERIC TEXT EDIT MODAL -->
-    <div id="textModal" class="edit-modal">
-        <div class="edit-modal-content">
-            <h2 id="textModalTitle">Editar Texto</h2>
-            <div class="form-group">
-                <input type="text" id="textInput" placeholder="Escreve aqui...">
-                <textarea id="textAreaInput" rows="4" style="display:none;" placeholder="Escreve aqui..."></textarea>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal('textModal')">Cancelar</button>
-                <button id="saveTextBtn" class="btn-confirm">Confirmar</button>
-            </div>
-        </div>
-    </div>
+    <!-- GENERIC TEXT EDIT MODAL REMOVED -->
 
     <!-- QR CODE MODAL -->
     <div id="qrModal" class="edit-modal">

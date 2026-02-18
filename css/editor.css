@@ -443,6 +443,29 @@ button:disabled {
     opacity: 1;
 }
 
+/* --- INLINE EDITING --- */
+.inline-editable {
+    cursor: text;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 0 4px;
+}
+
+.inline-editable:hover {
+    background: rgba(0, 0, 0, 0.05);
+    /* Subtle highlight */
+}
+
+.inline-editable:focus {
+    background: white;
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-glow);
+    color: var(--text);
+    /* Ensure contrast */
+}
+
 /* --- LOCKED OVERLAY --- */
 .locked-overlay {
     position: fixed;
