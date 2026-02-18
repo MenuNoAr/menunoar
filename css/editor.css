@@ -426,17 +426,27 @@ body {
     font-weight: 700;
 }
 
-/* Sticky Category Nav Fix */
-.category-scroll-nav.sticky-nav {
-    position: sticky;
-    top: var(--navbar-height);
+/* --- CATEGORY NAVIGATION --- */
+.category-scroll-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 15px;
     background: var(--bg-card);
-    z-index: 99;
-    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
 }
 
 .category-scroll-nav::-webkit-scrollbar {
     display: none;
+}
+
+.category-scroll-nav.sticky-nav {
+    position: sticky;
+    top: var(--navbar-height);
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
 }
 
 .tab-btn {
