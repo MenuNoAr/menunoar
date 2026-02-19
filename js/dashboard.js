@@ -8,6 +8,7 @@ let restaurantId;
 let currentData = {}; // Store restaurant data
 let menuItems = [];   // Store items
 let currentSlideIndex = 0; // Store active slide
+let activeCategoryName = null; // Store active category name to maintain selection
 let sortableInstance = null; // Store SortableJS instance
 
 // Function to initialize everything
@@ -406,7 +407,13 @@ function renderMenu(items) {
         btn.style.alignItems = 'center';
         btn.style.justifyContent = 'center';
         btn.style.gap = '2px';
-        if (index === 0) btn.classList.add('active');
+        // Determine active state visually
+        if (activeCategoryName) {
+            if (cat === activeCategoryName) btn.classList.add('active');
+        } else if (index === 0) {
+            btn.classList.add('active');
+            activeCategoryName = cat;
+        }
 
         // Make whole button clickable
         btn.onclick = () => scrollToSlide(index);
@@ -491,8 +498,14 @@ function renderMenu(items) {
     spacer.style.height = '1px';
     nav.appendChild(spacer);
 
+    // If we have an active category name, find its new index
+    if (activeCategoryName) {
+        const newIdx = uniqueCats.indexOf(activeCategoryName);
+        if (newIdx !== -1) currentSlideIndex = newIdx;
+    }
+
     // Initialize height for active slide
-    setTimeout(() => scrollToSlide(currentSlideIndex), 50);
+    setTimeout(() => scrollToSlide(currentSlideIndex, { instant: true }), 50);
 
     // --- INITIALIZE SORTABLEJS ---
     if (window.Sortable) {
@@ -632,7 +645,10 @@ window.scrollToSlide = (index, options = {}) => {
     // Precise Tab Activation
     const tabs = document.querySelectorAll('.draggable-tab');
     tabs.forEach((t, i) => {
-        if (i === index) t.classList.add('active');
+        if (i === index) {
+            t.classList.add('active');
+            activeCategoryName = t.dataset.category; // Save active category name
+        }
         else t.classList.remove('active');
     });
 
