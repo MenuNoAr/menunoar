@@ -1353,128 +1353,200 @@ window.addNewCategoryOptimized = async () => {
     }
 };
 
-// --- TUTORIAL SYSTEM ---
-let currentTutPage = 0;
-const tutorialContent = [
+// --- DYNAMIC INTERACTIVE TUTORIAL SYSTEM ---
+let currentTutStep = 0;
+const tutorialSteps = [
     {
-        title: "Bem-vindo ao Menu no Ar! 🚀",
-        text: "Este é o teu painel de controlo. Aqui podes criar um menu digital incrível em minutos. Vamos mostrar-te como funciona!",
-        image: "https://placehold.co/600x300/1fa8ff/ffffff?text=Dashboard+Visão+Geral",
-        features: [
-            { icon: "fa-magic", text: "Edição visual em tempo real" },
-            { icon: "fa-qrcode", text: "QR Code pronto a imprimir" }
-        ]
+        title: "Bem-vindo, Chef! 👋",
+        text: "Este é o teu novo painel de controlo. Vamos mostrar-te como criar um menu incrível em segundos.",
+        target: null, // Center
+        icon: "fa-rocket"
     },
     {
-        title: "Criar e Editar Pratos 🍔",
-        text: "Clica em qualquer texto (nome, descrição ou preço) para editar diretamente. Clica no ícone da câmara para adicionar fotos deliciosas.",
-        image: "https://placehold.co/600x300/1fa8ff/ffffff?text=Editar+Pratos",
-        features: [
-            { icon: "fa-pencil", text: "Clica e escreve para mudar nomes" },
-            { icon: "fa-camera", text: "Upload de fotos instantâneo" }
-        ]
+        title: "Edição Instantânea ✍️",
+        text: "Clica em qualquer texto (nome, descrição, preço) para o editares na hora. Tenta no nome do restaurante!",
+        target: "#restNameEditor",
+        icon: "fa-pencil"
     },
     {
-        title: "Organizar Categorias 📂",
-        text: "Podes arrastar as categorias na barra superior para mudar a ordem. Usa o botão 'Nova Categoria' para expandir o teu menu.",
-        image: "https://placehold.co/600x300/1fa8ff/ffffff?text=Organizar+Categorias",
-        features: [
-            { icon: "fa-grip-vertical", text: "Arrasta para reordenar" },
-            { icon: "fa-plus", text: "Cria secções personalizadas" }
-        ]
+        title: "Categorias 📂",
+        text: "Organiza o teu menu por secções. Podes arrastar as abas para as reordenar como quiseres.",
+        target: "#categoryNav",
+        icon: "fa-layer-group"
     },
     {
-        title: "Mover e Apagar 🧹",
-        text: "Usa os ícones de lixo para remover categorias ou pratos. Podes também ocultar pratos temporariamente usando o ícone do olho.",
-        image: "https://placehold.co/600x300/1fa8ff/ffffff?text=Gestão+de+Itens",
-        features: [
-            { icon: "fa-trash", text: "Apaga o que já não precisas" },
-            { icon: "fa-eye-slash", text: "Oculta pratos esgotados" }
-        ]
+        title: "Adicionar Pratos ✨",
+        text: "Clica aqui para adicionar um prato novo na categoria que estás a ver.",
+        target: ".add-item-btn",
+        icon: "fa-plus"
     },
     {
-        title: "Tudo Pronto! ✨",
-        text: "Agora que já sabes o básico, é hora de brilhar. Clica no botão 'Ver Menu' para veres o resultado final como os teus clientes o verão.",
-        image: "https://placehold.co/600x300/1fa8ff/ffffff?text=Sucesso!",
-        features: [
-            { icon: "fa-rocket", text: "O teu menu está online" },
-            { icon: "fa-check", text: "Boas vendas, Chef!" }
-        ]
+        title: "Personalização 🎨",
+        text: "Aqui podes mudar o teu link (slug), as cores do menu e ativar o modo PDF.",
+        target: "button[onclick='openSettingsModal()']",
+        icon: "fa-gear"
+    },
+    {
+        title: "Ver Resultado 🚀",
+        text: "Clica aqui para veres como os teus clientes verão o teu menu live!",
+        target: "#liveLinkBtn",
+        icon: "fa-eye"
     }
 ];
 
 window.openTutorial = () => {
-    const modal = document.getElementById('tutorialModal');
-    if (modal && modal.classList.contains('open')) {
-        closeModal('tutorialModal');
-        return;
+    closeAllModals();
+    currentTutStep = 0;
+
+    // Remove existing if any
+    const existing = document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow');
+    existing.forEach(el => el.remove());
+
+    renderStep(0);
+};
+
+function renderStep(index) {
+    currentTutStep = index;
+    const step = tutorialSteps[index];
+
+    // 1. Create/Update Spotlight
+    let spotlight = document.querySelector('.tutorial-spotlight');
+    if (!spotlight) {
+        spotlight = document.createElement('div');
+        spotlight.className = 'tutorial-spotlight';
+        document.body.appendChild(spotlight);
     }
 
-    currentTutPage = 0;
-    renderTutorialPage();
-    closeAllModals();
-    if (modal) modal.classList.add('open');
-};
+    // 2. Create/Update Tooltip
+    let tooltip = document.querySelector('.tutorial-tooltip');
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.className = 'tutorial-tooltip';
+        document.body.appendChild(tooltip);
+    }
 
-window.closeModal = (id) => {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('open');
-};
+    // 3. Create/Update Arrow
+    let arrow = document.querySelector('.tutorial-arrow');
+    if (!arrow) {
+        arrow = document.createElement('div');
+        arrow.className = 'tutorial-arrow';
+        arrow.innerHTML = `<svg viewBox="0 0 24 24" width="40" height="40"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" fill="var(--primary)"/></svg>`;
+        document.body.appendChild(arrow);
+    }
 
-function renderTutorialPage() {
-    const page = tutorialContent[currentTutPage];
-    const container = document.getElementById('tutorialPages');
-    const progressBar = document.getElementById('tutorialProgressBar');
-    const counter = document.getElementById('tutPageCounter');
-    const nextBtn = document.getElementById('nextTutBtn');
-    const prevBtn = document.getElementById('prevTutBtn');
+    const targetEl = step.target ? document.querySelector(step.target) : null;
 
-    if (!container) return;
+    if (targetEl) {
+        const rect = targetEl.getBoundingClientRect();
+        const padding = 10;
 
-    // Progress
-    const progress = ((currentTutPage + 1) / tutorialContent.length) * 100;
-    progressBar.style.width = `${progress}%`;
-    counter.textContent = `Página ${currentTutPage + 1} de ${tutorialContent.length}`;
+        // Spotlight position
+        spotlight.style.opacity = '1';
+        spotlight.style.left = `${rect.left - padding}px`;
+        spotlight.style.top = `${rect.top - padding}px`;
+        spotlight.style.width = `${rect.width + padding * 2}px`;
+        spotlight.style.height = `${rect.height + padding * 2}px`;
+        spotlight.style.display = 'block';
 
-    // Navigation Buttons
-    prevBtn.disabled = currentTutPage === 0;
-    nextBtn.innerHTML = currentTutPage === tutorialContent.length - 1
-        ? 'Começar a Criar! <i class="fa-solid fa-rocket"></i>'
-        : 'Próximo <i class="fa-solid fa-arrow-right"></i>';
+        // Ensure element is visible
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Content
-    container.innerHTML = `
-        <div class="tutorial-step">
-            <img src="${page.image}" alt="${page.title}">
-            <h3>${page.title}</h3>
-            <p>${page.text}</p>
-            <div class="tutorial-feature-list">
-                ${page.features.map(f => `
-                    <div class="feature-item">
-                        <i class="fa-solid ${f.icon}"></i>
-                        <span>${f.text}</span>
-                    </div>
-                `).join('')}
+        // Wait for scroll/transition
+        setTimeout(() => {
+            const updatedRect = targetEl.getBoundingClientRect();
+            positionTooltipAndArrow(updatedRect, tooltip, arrow);
+        }, 300);
+
+    } else {
+        // Center position for welcome
+        spotlight.style.opacity = '0';
+        spotlight.style.display = 'none';
+
+        tooltip.style.left = '50%';
+        tooltip.style.top = '50%';
+        tooltip.style.transform = 'translate(-50%, -50%)';
+        arrow.style.opacity = '0';
+    }
+
+    // Update Tooltip Content
+    tooltip.innerHTML = `
+        <div class="tutorial-header">
+            <h3><i class="fa-solid ${step.icon}"></i> ${step.title}</h3>
+        </div>
+        <p>${step.text}</p>
+        <div class="tutorial-actions">
+            <div class="tutorial-step-dots">
+                ${tutorialSteps.map((_, i) => `<div class="tutorial-dot ${i === index ? 'active' : ''}"></div>`).join('')}
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="tutorial-btn-skip" onclick="closeTutorial()">Sair</button>
+                <button class="tutorial-btn-next" onclick="nextStep()">
+                    ${index === tutorialSteps.length - 1 ? 'Começar!' : 'Próximo'}
+                </button>
             </div>
         </div>
     `;
 }
 
-window.nextTutorialPage = () => {
-    if (currentTutPage < tutorialContent.length - 1) {
-        currentTutPage++;
-        renderTutorialPage();
+function positionTooltipAndArrow(rect, tooltip, arrow) {
+    const margin = 20;
+    const arrowSize = 40;
+
+    let tooltipX, tooltipY, arrowX, arrowY, arrowRotate;
+
+    // Decide placement based on space
+    if (rect.top > 400) {
+        // Place above
+        tooltipX = rect.left + rect.width / 2 - 160;
+        tooltipY = rect.top - 200 - margin;
+        arrowX = rect.left + rect.width / 2 - 20;
+        arrowY = rect.top - margin - 35;
+        arrowRotate = 180;
     } else {
-        closeModal('tutorialModal');
+        // Place below
+        tooltipX = rect.left + rect.width / 2 - 160;
+        tooltipY = rect.bottom + margin + 30;
+        arrowX = rect.left + rect.width / 2 - 20;
+        arrowY = rect.bottom + margin - 15;
+        arrowRotate = 0;
+    }
+
+    // Bounds check
+    if (tooltipX < 20) tooltipX = 20;
+    if (tooltipX + 320 > window.innerWidth - 20) tooltipX = window.innerWidth - 340;
+
+    tooltip.style.left = `${tooltipX}px`;
+    tooltip.style.top = `${tooltipY}px`;
+    tooltip.style.transform = 'none';
+
+    arrow.style.opacity = '1';
+    arrow.style.left = `${arrowX}px`;
+    arrow.style.top = `${arrowY}px`;
+    arrow.style.transform = `rotate(${arrowRotate}deg)`;
+}
+
+window.nextStep = () => {
+    if (currentTutStep < tutorialSteps.length - 1) {
+        renderStep(currentTutStep + 1);
+    } else {
+        closeTutorial();
     }
 };
 
+window.closeTutorial = () => {
+    const els = document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow');
+    els.forEach(el => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 400);
+    });
+};
+
 window.prevTutorialPage = () => {
-    if (currentTutPage > 0) {
-        currentTutPage--;
-        renderTutorialPage();
+    if (currentTutStep > 0) {
+        renderStep(currentTutStep - 1);
     }
 };
+
 
 // Close modals on overlay click (using mousedown for faster/cleaner response)
 document.addEventListener('mousedown', (event) => {

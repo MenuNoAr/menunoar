@@ -376,44 +376,7 @@
         </div>
     </div>
 
-    <!-- TUTORIAL MODAL -->
-    <div id="tutorialModal" class="edit-modal">
-        <div class="edit-modal-content"
-            style="max-width: 600px; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
 
-            <!-- Progress Bar -->
-            <div class="tutorial-progress">
-                <div id="tutorialProgressBar" class="progress-fill" style="width: 20%;"></div>
-            </div>
-
-            <div class="tutorial-header"
-                style="padding: 25px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <i class="fa-solid fa-graduation-cap" style="font-size: 1.5rem; color: var(--primary);"></i>
-                    <h2 style="margin: 0; font-size: 1.2rem;">Tutorial do Chef</h2>
-                </div>
-                <button class="btn-nav" onclick="closeModal('tutorialModal')" style="padding: 8px; min-width: auto;">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div id="tutorialPages" class="tutorial-body" style="padding: 30px; min-height: 400px;">
-                <!-- Page content injected via JS -->
-            </div>
-
-            <div class="tutorial-footer"
-                style="padding: 20px 30px; border-top: 1px solid var(--border); background: var(--bg-page); display: flex; justify-content: space-between; align-items: center;">
-                <button id="prevTutBtn" class="btn-nav" onclick="prevTutorialPage()" disabled>
-                    <i class="fa-solid fa-arrow-left"></i> Anterior
-                </button>
-                <span id="tutPageCounter" class="tut-page-counter">Página
-                    1 de 5</span>
-                <button id="nextTutBtn" class="btn-confirm" onclick="nextTutorialPage()">
-                    Próximo <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- SORTABLE, CONFETTI, ETC -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>

@@ -1069,3 +1069,119 @@ img {
         transform: translateY(0);
     }
 }
+
+/* --- DYNAMIC TUTORIAL SYSTEM --- */
+.tutorial-spotlight {
+    position: fixed;
+    z-index: 20001;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+    border-radius: 16px;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 3px solid var(--primary);
+}
+
+.tutorial-tooltip {
+    position: fixed;
+    z-index: 20005;
+    background: var(--bg-card);
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    width: 320px;
+    max-width: 90vw;
+    pointer-events: auto;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid var(--border);
+    animation: tooltipAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tooltipAppear {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.tutorial-tooltip h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tutorial-tooltip p {
+    margin: 0 0 20px 0;
+    font-size: 0.95rem;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.tutorial-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.tutorial-btn-next {
+    background: var(--primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.tutorial-btn-next:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.tutorial-btn-skip {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: none;
+    padding: 8px;
+}
+
+.tutorial-btn-skip:hover {
+    color: var(--text);
+}
+
+.tutorial-step-dots {
+    display: flex;
+    gap: 5px;
+}
+
+.tutorial-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.3s;
+}
+
+.tutorial-dot.active {
+    background: var(--primary);
+    width: 15px;
+    border-radius: 3px;
+}
+
+.tutorial-arrow {
+    position: fixed;
+    z-index: 20004;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    pointer-events: none;
+}
