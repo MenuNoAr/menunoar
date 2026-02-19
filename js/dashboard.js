@@ -1453,11 +1453,11 @@ window.prevTutorialPage = () => {
 };
 
 // Close modals on overlay click
-window.onclick = (event) => {
+document.addEventListener('click', (event) => {
     if (event.target.classList.contains('edit-modal')) {
         closeAllModals();
     }
-};
+});
 
 // Start
 init();
