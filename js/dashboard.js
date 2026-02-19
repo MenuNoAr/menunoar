@@ -1452,8 +1452,8 @@ window.prevTutorialPage = () => {
     }
 };
 
-// Close modals on overlay click
-document.addEventListener('click', (event) => {
+// Close modals on overlay click (using mousedown for faster/cleaner response)
+document.addEventListener('mousedown', (event) => {
     if (event.target.classList.contains('edit-modal')) {
         closeAllModals();
     }
