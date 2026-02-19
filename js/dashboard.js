@@ -1452,5 +1452,12 @@ window.prevTutorialPage = () => {
     }
 };
 
+// Close modals on overlay click
+window.onclick = (event) => {
+    if (event.target.classList.contains('edit-modal')) {
+        closeAllModals();
+    }
+};
+
 // Start
 init();

@@ -162,8 +162,8 @@ h1#restName {
     flex-wrap: wrap;
     /* Prevent scroll, wrap instead */
     width: 100%;
-    gap: 5px;
-    padding: 0 5px 10px 5px;
+    gap: 0px;
+    padding: 0 5px 5px 5px;
     /* Added bottom padding */
     margin-bottom: 5px;
     /* Reduced margin slightly to compensate */
@@ -189,7 +189,7 @@ h1#restName {
     text-align: center;
     border: none;
     background: transparent;
-    padding: 15px 10px;
+    padding: 12px 14px;
     margin: 0;
     white-space: nowrap;
     font-size: 0.95rem;
