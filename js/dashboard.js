@@ -45,37 +45,17 @@ async function init() {
             if (localStorage.getItem('just_created_rest') === 'true') {
                 localStorage.removeItem('just_created_rest');
                 setTimeout(() => {
-                    const modal = document.getElementById('trialSuccessModal');
-                    if (modal) {
-                        modal.classList.add('open');
-                        // Decent confetti animation
-                        if (window.confetti) {
-                            const duration = 3 * 1000;
-                            const end = Date.now() + duration;
-
-                            (function frame() {
-                                confetti({
-                                    particleCount: 3,
-                                    angle: 60,
-                                    spread: 55,
-                                    origin: { x: 0 },
-                                    colors: ['#1fa8ff', '#16a34a', '#ffffff']
-                                });
-                                confetti({
-                                    particleCount: 3,
-                                    angle: 120,
-                                    spread: 55,
-                                    origin: { x: 1 },
-                                    colors: ['#1fa8ff', '#16a34a', '#ffffff']
-                                });
-
-                                if (Date.now() < end) {
-                                    requestAnimationFrame(frame);
-                                }
-                            }());
-                        }
+                    // Start the new dynamic tutorial automatically!
+                    if (window.confetti) {
+                        confetti({
+                            particleCount: 150,
+                            spread: 70,
+                            origin: { y: 0.6 },
+                            colors: ['#1fa8ff', '#16a34a', '#ffffff']
+                        });
                     }
-                }, 800);
+                    openTutorial();
+                }, 1000);
             }
         }, () => {
             window.location.href = 'login.html';
@@ -1447,6 +1427,7 @@ function renderStep(index) {
         spotlight.style.width = `${rect.width + padding * 2}px`;
         spotlight.style.height = `${rect.height + padding * 2}px`;
         spotlight.style.display = 'block';
+        spotlight.style.boxShadow = '0 0 0 9999px rgba(0, 0, 0, 0.85)'; // Darker background
 
         // Ensure element is visible
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });

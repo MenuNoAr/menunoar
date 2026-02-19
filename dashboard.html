@@ -19,9 +19,9 @@
         media="print" onload="this.media='all'">
 
     <!-- Menu Styles (Visuals for preview) -->
-    <link rel="stylesheet" href="css/menu.css">
+    <link rel="stylesheet" href="css/menu.css?v=1.1">
     <!-- Editor Styles (Overlays) -->
-    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/editor.css?v=1.2">
 
     <!-- Defer non-critical scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
@@ -109,8 +109,10 @@
                     <i class="fa-solid fa-crown" style="color:var(--primary);"></i> <span
                         class="desktop-only">Premium</span>
                 </button>
-                <button class="btn-nav" onclick="openTutorial()" title="Tutorial">
+                <button class="btn-nav" onclick="openTutorial()" title="Tutorial" style="position:relative;">
                     <i class="fa-solid fa-graduation-cap"></i> <span class="desktop-only">Ajuda</span>
+                    <span
+                        style="position:absolute; top:-5px; right:-5px; background:var(--danger); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:800; animation: pulse 2s infinite;">NOVO</span>
                 </button>
                 <button class="btn-nav btn-danger-soft" onclick="signOut()" title="Sair">
                     <i class="fa-solid fa-right-from-bracket"></i>
@@ -383,14 +385,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 
     <!-- Scripts -->
-    <script type="module" src="js/dashboard.js"></script>
+    <script type="module" src="js/dashboard.js?v=1.2"></script>
     <script>
+        // Pulse animation for the NEW badge
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+                70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+                100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            }
+        `;
+        document.head.appendChild(style);
+
         // Check for dark mode preference and set initial logo
         if (localStorage.getItem('menu_theme') === 'dark') {
             document.body.classList.add('dark-mode');
             const logo = document.getElementById('dashboardLogo');
             if (logo) logo.src = 'assets/images/Ilogo.svg';
-            const btnIcon = document.querySelector('#themeBtn i');
+        coIcon = document.querySelector('#themeBtn i');
             if (btnIcon) btnIcon.className = 'fa-solid fa-sun';
         }
 
