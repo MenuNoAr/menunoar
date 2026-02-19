@@ -281,7 +281,13 @@ document.getElementById('setupForm').onsubmit = async (e) => {
 // --- RENDERING ---
 
 function updateLiveLink(slug) {
-    document.getElementById('liveLink').href = `${window.location.origin}/menu.html?id=${slug}`;
+    const url = `${window.location.origin}/menu.html?id=${slug}`;
+    const btn = document.getElementById('liveLinkBtn');
+    if (btn) {
+        btn.onclick = () => window.open(url, '_blank');
+    }
+    const link = document.getElementById('liveLink');
+    if (link) link.href = url;
 }
 
 function renderHeader(data) {
@@ -398,7 +404,8 @@ function renderMenu(items) {
         btn.className = 'tab-btn draggable-tab';
         btn.style.display = 'flex';
         btn.style.alignItems = 'center';
-        btn.style.gap = '4px';
+        btn.style.justifyContent = 'center';
+        btn.style.gap = '2px';
         if (index === 0) btn.classList.add('active');
 
         // Make whole button clickable
@@ -406,8 +413,8 @@ function renderMenu(items) {
 
         btn.innerHTML = `
             <span>${cat}</span>
-            <div class="handle" style="padding: 10px 2px; margin-right: -2px; cursor:grab; display:flex; align-items:center;">
-                <i class="fa-solid fa-grip-lines-vertical" style="opacity:0.4;"></i>
+            <div class="handle" style="padding: 10px 0; margin-left: 2px; cursor:grab; display:flex; align-items:center;">
+                <i class="fa-solid fa-grip-lines-vertical" style="opacity:0.3; font-size: 0.8rem;"></i>
             </div>
         `;
 
