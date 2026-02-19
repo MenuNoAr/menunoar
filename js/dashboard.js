@@ -1472,6 +1472,8 @@ function renderStep(index) {
             }
         };
 
+        // Snap once synchronously to avoid any "starting from 0,0" or "sliding from previous step" lag
+        syncPosition(startTime);
         requestAnimationFrame(syncPosition);
     } else {
         // Center position for welcome

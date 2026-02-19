@@ -1092,7 +1092,7 @@ img {
     width: 320px;
     max-width: 90vw;
     pointer-events: auto;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.3s ease, transform 0.3s ease;
     border: 1px solid var(--border);
     animation: tooltipAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
