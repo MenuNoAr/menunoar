@@ -1357,7 +1357,7 @@ const tutorialSteps = [
     {
         title: "Adicionar Pratos ✨",
         text: "Clica aqui para adicionar um prato novo na categoria que estás a ver.",
-        target: ".add-item-btn",
+        target: ".add-item-btn", // This targets the first one, we'll ensure it's visible in renderStep
         icon: "fa-plus"
     },
     {
@@ -1416,28 +1416,37 @@ function renderStep(index) {
 
     const targetEl = step.target ? document.querySelector(step.target) : null;
 
+    // Handle slider elements: if we target something inside the menu, go to first slide
+    if (step.target === '.add-item-btn') {
+        scrollToSlide(0, { instant: true });
+    }
+
     if (targetEl) {
-        const rect = targetEl.getBoundingClientRect();
-        const padding = 10;
+        // Spotlight position (will be refined after potential scroll)
+        const updatePosition = () => {
+            const rect = targetEl.getBoundingClientRect();
+            const padding = 10;
 
-        // Spotlight position
-        spotlight.style.opacity = '1';
-        spotlight.style.left = `${rect.left - padding}px`;
-        spotlight.style.top = `${rect.top - padding}px`;
-        spotlight.style.width = `${rect.width + padding * 2}px`;
-        spotlight.style.height = `${rect.height + padding * 2}px`;
-        spotlight.style.display = 'block';
-        spotlight.style.boxShadow = '0 0 0 9999px rgba(0, 0, 0, 0.85)'; // Darker background
+            spotlight.style.opacity = '1';
+            spotlight.style.left = `${rect.left - padding}px`;
+            spotlight.style.top = `${rect.top - padding}px`;
+            spotlight.style.width = `${rect.width + padding * 2}px`;
+            spotlight.style.height = `${rect.height + padding * 2}px`;
+            spotlight.style.display = 'block';
+            spotlight.style.boxShadow = '0 0 0 9999px rgba(0, 0, 0, 0.85)';
 
-        // Ensure element is visible
+            positionTooltipAndArrow(rect, tooltip, arrow);
+        };
+
+        // Ensure element is visible in the window
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-        // Wait for scroll/transition
-        setTimeout(() => {
-            const updatedRect = targetEl.getBoundingClientRect();
-            positionTooltipAndArrow(updatedRect, tooltip, arrow);
-        }, 300);
+        // Initial position
+        updatePosition();
 
+        // Refined position after scroll/animations
+        setTimeout(updatePosition, 300);
+        setTimeout(updatePosition, 600); // Second pass for smoothness
     } else {
         // Center position for welcome
         spotlight.style.opacity = '0';
@@ -1461,6 +1470,7 @@ function renderStep(index) {
             </div>
             <div style="display:flex; gap:8px;">
                 <button class="tutorial-btn-skip" onclick="closeTutorial()">Sair</button>
+                ${index > 0 ? `<button class="tutorial-btn-next" style="background:var(--bg-page); color:var(--text); border:1px solid var(--border);" onclick="prevTutorialPage()">Anterior</button>` : ''}
                 <button class="tutorial-btn-next" onclick="nextStep()">
                     ${index === tutorialSteps.length - 1 ? 'Começar!' : 'Próximo'}
                 </button>
