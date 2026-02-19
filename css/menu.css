@@ -169,7 +169,7 @@ h1#restName {
     /* Reduced margin slightly to compensate */
     scrollbar-width: none;
     border-bottom: 1px solid var(--border);
-    min-height: 60px;
+    min-height: 50px;
     /* Force minimum height */
     align-items: center;
     /* Center items vertically */
@@ -189,7 +189,7 @@ h1#restName {
     text-align: center;
     border: none;
     background: transparent;
-    padding: 12px 14px;
+    padding: 10px 8px;
     margin: 0;
     white-space: nowrap;
     font-size: 0.95rem;

@@ -192,20 +192,20 @@ button:disabled {
 }
 
 .btn-live {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-    color: white !important;
-    border: none;
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    color: var(--primary);
+    background: var(--primary-glow);
+    border: 1px solid var(--primary-glow);
 }
 
 .btn-live:hover {
-    background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
-    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.4);
+    background: var(--primary);
+    color: white !important;
+    transform: translateY(-2px);
 }
 
 .dark-mode .btn-live {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    background: rgba(31, 168, 255, 0.1);
+    color: var(--primary);
 }
 
 .trial-timer-badge {
