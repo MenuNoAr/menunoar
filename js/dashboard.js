@@ -398,6 +398,7 @@ function renderMenu(items) {
         btn.className = 'tab-btn draggable-tab';
         btn.style.display = 'flex';
         btn.style.alignItems = 'center';
+        btn.style.gap = '4px';
         if (index === 0) btn.classList.add('active');
 
         // Make whole button clickable
@@ -405,7 +406,7 @@ function renderMenu(items) {
 
         btn.innerHTML = `
             <span>${cat}</span>
-            <div class="handle" style="padding: 10px 15px; margin-right: -10px; cursor:grab; display:flex; align-items:center;">
+            <div class="handle" style="padding: 10px 2px; margin-right: -2px; cursor:grab; display:flex; align-items:center;">
                 <i class="fa-solid fa-grip-lines-vertical" style="opacity:0.4;"></i>
             </div>
         `;

@@ -191,22 +191,7 @@ button:disabled {
     border-color: var(--primary-glow);
 }
 
-.btn-live {
-    color: var(--primary);
-    background: var(--primary-glow);
-    border: 1px solid var(--primary-glow);
-}
 
-.btn-live:hover {
-    background: var(--primary);
-    color: white !important;
-    transform: translateY(-2px);
-}
-
-.dark-mode .btn-live {
-    background: rgba(31, 168, 255, 0.1);
-    color: var(--primary);
-}
 
 .trial-timer-badge {
     padding: 6px 14px;
