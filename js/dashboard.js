@@ -413,8 +413,8 @@ function renderMenu(items) {
 
         btn.innerHTML = `
             <span>${cat}</span>
-            <div class="handle" style="padding: 10px 0; margin-left: 2px; cursor:grab; display:flex; align-items:center;">
-                <i class="fa-solid fa-grip-lines-vertical" style="opacity:0.3; font-size: 0.8rem;"></i>
+            <div class="handle" style="padding: 15px 15px; margin: -10px -10px -10px -5px; cursor:grab; display:flex; align-items:center;">
+                <i class="fa-solid fa-grip-lines-vertical" style="opacity:0.3; font-size: 0.9rem;"></i>
             </div>
         `;
 
