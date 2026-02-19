@@ -1414,51 +1414,7 @@ function renderStep(index) {
         document.body.appendChild(arrow);
     }
 
-    const targetEl = step.target ? document.querySelector(step.target) : null;
-
-    // Handle slider elements: if we target something inside the menu, go to first slide
-    if (step.target === '.add-item-btn') {
-        scrollToSlide(0, { instant: true });
-    }
-
-    if (targetEl) {
-        // Spotlight position (will be refined after potential scroll)
-        const updatePosition = () => {
-            const rect = targetEl.getBoundingClientRect();
-            const padding = 10;
-
-            spotlight.style.opacity = '1';
-            spotlight.style.left = `${rect.left - padding}px`;
-            spotlight.style.top = `${rect.top - padding}px`;
-            spotlight.style.width = `${rect.width + padding * 2}px`;
-            spotlight.style.height = `${rect.height + padding * 2}px`;
-            spotlight.style.display = 'block';
-            spotlight.style.boxShadow = '0 0 0 9999px rgba(0, 0, 0, 0.85)';
-
-            positionTooltipAndArrow(rect, tooltip, arrow);
-        };
-
-        // Ensure element is visible in the window
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        // Initial position
-        updatePosition();
-
-        // Refined position after scroll/animations
-        setTimeout(updatePosition, 300);
-        setTimeout(updatePosition, 600); // Second pass for smoothness
-    } else {
-        // Center position for welcome
-        spotlight.style.opacity = '0';
-        spotlight.style.display = 'none';
-
-        tooltip.style.left = '50%';
-        tooltip.style.top = '50%';
-        tooltip.style.transform = 'translate(-50%, -50%)';
-        arrow.style.opacity = '0';
-    }
-
-    // Update Tooltip Content
+    // Update Tooltip Content FIRST so we can measure it
     tooltip.innerHTML = `
         <div class="tutorial-header">
             <h3><i class="fa-solid ${step.icon}"></i> ${step.title}</h3>
@@ -1477,34 +1433,85 @@ function renderStep(index) {
             </div>
         </div>
     `;
+
+    const targetEl = step.target ? document.querySelector(step.target) : null;
+
+    // Handle slider elements: if we target something inside the menu, go to first slide
+    if (step.target === '.add-item-btn') {
+        scrollToSlide(0, { instant: true });
+    }
+
+    if (targetEl) {
+        // 1. Instant Scroll to target (removes travel lag)
+        targetEl.scrollIntoView({ behavior: 'auto', block: 'center' });
+
+        // 2. Decide placement ONCE per step to avoid jumping
+        const initialRect = targetEl.getBoundingClientRect();
+        const placement = (initialRect.top > window.innerHeight / 2) ? 'above' : 'below';
+
+        // 3. Continuous Sync
+        let startTime = performance.now();
+        const duration = 800;
+
+        const syncPosition = (now) => {
+            const rect = targetEl.getBoundingClientRect();
+            const padding = 10;
+
+            spotlight.style.opacity = '1';
+            spotlight.style.left = `${rect.left - padding}px`;
+            spotlight.style.top = `${rect.top - padding}px`;
+            spotlight.style.width = `${rect.width + padding * 2}px`;
+            spotlight.style.height = `${rect.height + padding * 2}px`;
+            spotlight.style.display = 'block';
+            spotlight.style.boxShadow = '0 0 0 9999px rgba(0, 0, 0, 0.85)';
+
+            positionTooltipAndArrow(rect, tooltip, arrow, placement);
+
+            if (now - startTime < duration) {
+                requestAnimationFrame(syncPosition);
+            }
+        };
+
+        requestAnimationFrame(syncPosition);
+    } else {
+        // Center position for welcome
+        spotlight.style.opacity = '0';
+        spotlight.style.display = 'none';
+
+        tooltip.style.left = '50%';
+        tooltip.style.top = '50%';
+        tooltip.style.transform = 'translate(-50%, -50%)';
+        arrow.style.opacity = '0';
+    }
+
 }
 
-function positionTooltipAndArrow(rect, tooltip, arrow) {
+function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
     const margin = 20;
-    const arrowSize = 40;
+    const arrowSize = 25;
+    const tooltipHeight = tooltip.offsetHeight;
+    const tooltipWidth = 320;
 
     let tooltipX, tooltipY, arrowX, arrowY, arrowRotate;
 
-    // Decide placement based on space
-    if (rect.top > 400) {
-        // Place above
-        tooltipX = rect.left + rect.width / 2 - 160;
-        tooltipY = rect.top - 200 - margin;
-        arrowX = rect.left + rect.width / 2 - 20;
-        arrowY = rect.top - margin - 35;
+    // Horizontal centering relative to target
+    tooltipX = rect.left + rect.width / 2 - tooltipWidth / 2;
+
+    // Bounds check horizontal
+    if (tooltipX < 20) tooltipX = 20;
+    if (tooltipX + tooltipWidth > window.innerWidth - 20) tooltipX = window.innerWidth - tooltipWidth - 20;
+
+    if (placement === 'above') {
+        tooltipY = rect.top - tooltipHeight - margin - 10;
+        arrowX = rect.left + rect.width / 2 - 12;
+        arrowY = rect.top - margin - 5;
         arrowRotate = 180;
     } else {
-        // Place below
-        tooltipX = rect.left + rect.width / 2 - 160;
-        tooltipY = rect.bottom + margin + 30;
-        arrowX = rect.left + rect.width / 2 - 20;
+        tooltipY = rect.bottom + margin + 10;
+        arrowX = rect.left + rect.width / 2 - 12;
         arrowY = rect.bottom + margin - 15;
         arrowRotate = 0;
     }
-
-    // Bounds check
-    if (tooltipX < 20) tooltipX = 20;
-    if (tooltipX + 320 > window.innerWidth - 20) tooltipX = window.innerWidth - 340;
 
     tooltip.style.left = `${tooltipX}px`;
     tooltip.style.top = `${tooltipY}px`;
