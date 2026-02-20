@@ -1402,6 +1402,10 @@ function renderStep(index) {
     if (!tooltip) {
         tooltip = document.createElement('div');
         tooltip.className = 'tutorial-tooltip';
+        // Set initial invisible state to prevent flicker
+        tooltip.style.opacity = '0';
+        tooltip.style.visibility = 'hidden';
+        tooltip.style.transition = 'none';
         document.body.appendChild(tooltip);
     }
 
@@ -1474,16 +1478,31 @@ function renderStep(index) {
 
         // Snap once synchronously to avoid any "starting from 0,0" or "sliding from previous step" lag
         syncPosition(startTime);
+        tooltip.style.visibility = 'visible'; // Show now that it's in place
         requestAnimationFrame(syncPosition);
     } else {
         // Center position for welcome
         spotlight.style.opacity = '0';
         spotlight.style.display = 'none';
 
+        // Ensure no movement transitions during initial center snap
+        tooltip.style.transition = 'none';
+
         tooltip.style.left = '50%';
         tooltip.style.top = '50%';
         tooltip.style.transform = 'translate(-50%, -50%)';
+
+        // Force a reflow to ensure the position is applied before showing
+        tooltip.offsetHeight;
+
+        tooltip.style.visibility = 'visible';
+        tooltip.style.opacity = '1';
         arrow.style.opacity = '0';
+
+        // Re-enable only opacity transition for smooth fades in future steps
+        setTimeout(() => {
+            tooltip.style.transition = 'opacity 0.3s ease';
+        }, 50);
     }
 
 }
