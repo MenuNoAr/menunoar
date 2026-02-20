@@ -286,28 +286,69 @@ document.getElementById('btnRemoveImage').onclick = async () => {
 };
 
 // ─── QR Code Modal ────────────────────────────────────────────────────────────
+const QR_DEFAULT_LOGO = 'assets/images/logo.svg';
 let _qrCode = null;
+let _qrLogoUrl = QR_DEFAULT_LOGO; // tracks current logo (default or custom Data URL)
 
 window.openQrModal = () => {
     const modal = document.getElementById('qrModal');
     if (modal.classList.contains('open')) { window.closeModal('qrModal'); return; }
     window.closeAllModals();
     modal.classList.add('open');
+    _renderQr();
+};
 
+function _renderQr() {
     const url = `${window.location.origin}/menu.html?id=${state.currentData.slug}`;
+    const opts = {
+        width: 280, height: 280, type: 'svg', data: url,
+        image: _qrLogoUrl,
+        dotsOptions: { color: '#00B2FF', type: 'rounded' },
+        backgroundOptions: { color: '#ffffff' },
+        imageOptions: { crossOrigin: 'anonymous', margin: 8 },
+    };
+
+    const container = document.getElementById('qr-code-container');
+    if (!container) return;
+
     if (!_qrCode) {
         if (typeof QRCodeStyling === 'undefined') return;
-        _qrCode = new QRCodeStyling({
-            width: 300, height: 300, type: 'svg', data: url,
-            image: 'assets/images/logo.svg',
-            dotsOptions: { color: '#00B2FF', type: 'rounded' },
-            backgroundOptions: { color: '#ffffff' },
-            imageOptions: { crossOrigin: 'anonymous', margin: 10 },
-        });
-        _qrCode.append(document.getElementById('qr-code-container'));
+        _qrCode = new QRCodeStyling(opts);
+        _qrCode.append(container);
     } else {
-        _qrCode.update({ data: url });
+        _qrCode.update(opts);
     }
+}
+
+/** Called when user picks a new logo file */
+window.handleQrLogoChange = (input) => {
+    if (!input.files.length) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        _qrLogoUrl = e.target.result; // Data URL
+        // Update preview image
+        const img = document.getElementById('qrLogoImg');
+        if (img) img.src = _qrLogoUrl;
+        // Show "repor padrão" button
+        const resetBtn = document.getElementById('btnResetQrLogo');
+        if (resetBtn) resetBtn.style.display = 'inline-flex';
+        // Re-render QR with new logo
+        _renderQr();
+    };
+    reader.readAsDataURL(file);
+    // Clear input so same file can be re-selected
+    input.value = '';
+};
+
+/** Revert logo back to the MenuNoAr default */
+window.resetQrLogo = () => {
+    _qrLogoUrl = QR_DEFAULT_LOGO;
+    const img = document.getElementById('qrLogoImg');
+    if (img) img.src = QR_DEFAULT_LOGO;
+    const resetBtn = document.getElementById('btnResetQrLogo');
+    if (resetBtn) resetBtn.style.display = 'none';
+    _renderQr();
 };
 
 window.downloadQr = () =>

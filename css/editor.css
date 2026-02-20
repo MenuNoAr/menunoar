@@ -1083,6 +1083,72 @@ img {
     transform: scale(1.02);
 }
 
+/* --- QR CODE LOGO SECTION --- */
+.qr-logo-section {
+    background: var(--bg-page);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 4px;
+    text-align: left;
+}
+
+.qr-logo-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.qr-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.qr-logo-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    border: 2px solid var(--border);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: border-color 0.2s;
+}
+
+.qr-logo-preview:hover {
+    border-color: var(--primary);
+}
+
+.qr-logo-preview img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+.qr-logo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.qr-logo-actions .btn-secondary.small {
+    height: 36px;
+    font-size: 0.82rem;
+    justify-content: center;
+}
+
 /* --- TUTORIAL SYSTEM --- */
 .tutorial-progress {
     height: 6px;

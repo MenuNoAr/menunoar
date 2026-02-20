@@ -314,14 +314,40 @@
 
     <!-- QR CODE MODAL -->
     <div id="qrModal" class="edit-modal">
-        <div class="edit-modal-content" style="text-align:center;">
+        <div class="edit-modal-content" style="text-align:center; max-width:480px;">
             <h2 style="margin-bottom:20px; color:var(--text);">O Teu QR Code</h2>
+
+            <!-- QR Preview -->
             <div id="qr-code-container" style="margin: 0 auto 20px auto; display:flex; justify-content:center;"></div>
-            <p style="margin-bottom:20px; color:var(--text-muted);">Imprime este código e coloca-o nas mesas.</p>
+
+            <!-- Logo Customizer -->
+            <div class="qr-logo-section">
+                <p class="qr-logo-label"><i class="fa-solid fa-image"></i> Logo no interior do QR Code</p>
+                <div class="qr-logo-row">
+                    <div id="qrLogoPreview" class="qr-logo-preview">
+                        <img id="qrLogoImg" src="assets/images/logo.svg" alt="Logo QR">
+                    </div>
+                    <div class="qr-logo-actions">
+                        <button class="btn-secondary small" onclick="document.getElementById('qrLogoUpload').click()">
+                            <i class="fa-solid fa-upload"></i> Trocar Logo
+                        </button>
+                        <button class="btn-secondary small" id="btnResetQrLogo" onclick="resetQrLogo()"
+                            style="display:none;">
+                            <i class="fa-solid fa-rotate-left"></i> Repor Padrão
+                        </button>
+                    </div>
+                </div>
+                <input type="file" id="qrLogoUpload" accept="image/*" style="display:none;"
+                    onchange="handleQrLogoChange(this)">
+            </div>
+
+            <p style="margin:16px 0 20px; color:var(--text-muted); font-size:0.875rem;">Imprime este código e coloca-o
+                nas mesas.</p>
+
             <div class="modal-actions" style="justify-content:center;">
                 <button class="btn-cancel" onclick="closeModal('qrModal')">Fechar</button>
                 <button class="btn-confirm" onclick="downloadQr()">
-                    <i class="fa-solid fa-download" style="margin-right:8px;"></i> Baixar PNG
+                    <i class="fa-solid fa-download" style="margin-right:8px;"></i>Baixar PNG
                 </button>
             </div>
         </div>
