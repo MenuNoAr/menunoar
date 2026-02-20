@@ -1089,7 +1089,7 @@ img {
     padding: 24px;
     border-radius: 20px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-    width: 480px;
+    width: 540px;
     max-width: 90vw;
     pointer-events: auto;
     transition: opacity 0.3s ease;
@@ -1132,7 +1132,8 @@ img {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 15px;
+    gap: 8px;
+    /* Tighter gap to help content fit */
 }
 
 .tutorial-btn-next {

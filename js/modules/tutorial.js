@@ -5,13 +5,15 @@ import { scrollToSlide } from './render.js';
 
 let currentTutStep = 0;
 const tutorialSteps = [
-    { title: "Bem-vindo, Chef! 👋", text: "Este é o teu novo painel de controlo. Vamos mostrar-te como criar um menu incrível em segundos.", target: null, icon: "fa-rocket" },
-    { title: "Edição Instantânea ✍️", text: "Clica em qualquer texto (nome, descrição, preço) para o editares na hora. Tenta no nome do restaurante!", target: "#restNameEditor", icon: "fa-pencil" },
-    { title: "Categorias 📂", text: "Organiza o teu menu por secções. Podes arrastar as abas para as reordenar como quiseres.", target: "#categoryNav", icon: "fa-layer-group" },
-    { title: "Adicionar Pratos ✨", text: "Clica aqui para adicionar um prato novo na categoria que estás a ver.", target: ".add-item-btn", icon: "fa-plus" },
-    { title: "Personalização 🎨", text: "Aqui podes mudar o teu link (slug), as cores do menu e ativar o modo PDF.", target: "button[onclick='openSettingsModal()']", icon: "fa-gear" },
-    { title: "Ver Resultado 🚀", text: "Clica aqui para veres como os teus clientes verão o teu menu live!", target: "#liveLinkBtn", icon: "fa-eye" }
+    { title: "Bem-vindo! 👋", text: "Este é o teu painel. Vamos criar o teu menu em segundos.", target: null, icon: "fa-rocket" },
+    { title: "Edição Direta ✍️", text: "Clica em qualquer texto para o editares na hora.", target: "#restNameEditor", icon: "fa-pencil" },
+    { title: "Categorias 📂", text: "Organiza o menu. Arrastas as abas para reordenar.", target: "#categoryNav", icon: "fa-layer-group" },
+    { title: "Novo Prato ✨", text: "Clica aqui para adicionares pratos nesta categoria.", target: ".add-item-btn", icon: "fa-plus" },
+    { title: "Configurações 🎨", text: "Muda o link e cores ou ativa o modo PDF aqui.", target: "button[onclick='openSettingsModal()']", icon: "fa-gear" },
+    { title: "Vê o Menu 🚀", text: "Clica aqui para veres como os clientes verão o teu menu.", target: "#liveLinkBtn", icon: "fa-eye" }
 ];
+
+let typeTimeout = null;
 
 export function openTutorial() {
     window.closeAllModals();
@@ -21,6 +23,7 @@ export function openTutorial() {
 }
 
 function renderStep(index) {
+    if (typeTimeout) clearTimeout(typeTimeout);
     currentTutStep = index;
     const step = tutorialSteps[index];
 
@@ -30,7 +33,7 @@ function renderStep(index) {
 
     tooltip.innerHTML = `
         <div class="tutorial-header"><h3><i class="fa-solid ${step.icon}"></i> ${step.title}</h3></div>
-        <p>${step.text}</p>
+        <p id="tutText" style="min-height: 3em;"></p>
         <div class="tutorial-actions">
             <button class="tutorial-btn-skip" onclick="closeTutorial()">Sair</button>
             <div class="tutorial-step-dots">${tutorialSteps.map((_, i) => `<div class="tutorial-dot ${i === index ? 'active' : ''}"></div>`).join('')}</div>
@@ -40,6 +43,18 @@ function renderStep(index) {
             </div>
         </div>
     `;
+
+    // Typewriter effect
+    const textTarget = tooltip.querySelector('#tutText');
+    let i = 0;
+    const type = () => {
+        if (i < step.text.length) {
+            textTarget.textContent += step.text.charAt(i);
+            i++;
+            typeTimeout = setTimeout(type, 10); // Faster typewriter
+        }
+    };
+    type();
 
     const targetEl = step.target ? document.querySelector(step.target) : null;
     if (step.target === '.add-item-btn') scrollToSlide(0, { instant: true });
@@ -77,7 +92,7 @@ function createEl(tag, className, styles = {}, html = '') {
 }
 
 function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
-    const margin = 20, tooltipWidth = 480, tooltipHeight = tooltip.offsetHeight;
+    const margin = 20, tooltipWidth = 540, tooltipHeight = tooltip.offsetHeight;
     let tx = rect.left + rect.width / 2 - tooltipWidth / 2;
     tx = Math.max(20, Math.min(tx, window.innerWidth - tooltipWidth - 20));
 
