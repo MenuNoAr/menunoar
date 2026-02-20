@@ -4,8 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Menu no Ar</title>
+    <title>Painel de Gestão - Menu no Ar</title>
+    <meta name="description"
+        content="Gere o seu menu digital de forma simples e profissional com o Menu no Ar. Editor em tempo real, QR Code e muito mais.">
+    <meta name="keywords" content="menu digital, qr code restaurante, e-menu, gestão restaurante, portugal">
     <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Menu no Ar - Gestão de Menu Digital">
+    <meta property="og:description" content="O editor de menus mais rápido e intuitivo para o seu restaurante.">
+    <meta property="og:image" content="assets/images/logo.svg">
 
     <!-- Preconnect to Font Provider -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,16 +42,15 @@
     <!-- SETUP SCREEN (Visible only if no restaurant) -->
     <div id="setup-screen" class="setup-container" style="display:none;">
         <div class="setup-card">
-            <div class="setup-header" style="margin-bottom: 35px;">
-                <img src="assets/images/logo.svg" alt="Logo" class="setup-logo"
-                    style="height: 70px; margin-bottom: 20px;">
-                <h2 style="font-size: 2.2rem; letter-spacing: -1px;">Bem-vindo, Chef!</h2>
-                <p style="font-size: 1.1rem;">Vamos dar vida ao teu menu digital.</p>
+            <div class="setup-header">
+                <img src="assets/images/logo.svg" alt="Logo" class="setup-logo">
+                <h2>Bem-vindo, Chef!</h2>
+                <p>Vamos dar vida ao teu menu digital.</p>
             </div>
 
             <form id="setupForm" class="setup-form">
                 <div class="form-group">
-                    <label>Nome do Restaurante</label>
+                    <label for="setupName">Nome do Restaurante</label>
                     <div class="input-with-icon">
                         <i class="fa-solid fa-store"></i>
                         <input type="text" id="setupName" placeholder="ex: O Tasco do Zé" required
@@ -51,16 +59,16 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Link Personalizado</label>
+                    <label for="setupSlug">Link Personalizado</label>
                     <div class="input-with-icon">
                         <i class="fa-solid fa-link"></i>
                         <input type="text" id="setupSlug" placeholder="ex: o-tasco-do-ze" required>
                     </div>
-                    <small>menunoar.com/menu.html?id=<b>slug</b></small>
+                    <small>menunoar.com/menu.html?id=<b id="slugPreview">slug</b></small>
                 </div>
 
                 <div class="form-group">
-                    <label>Descrição Curta</label>
+                    <label for="setupDesc">Descrição Curta</label>
                     <div class="input-with-icon">
                         <i class="fa-solid fa-align-left"></i>
                         <textarea id="setupDesc" rows="2" placeholder="Descreve o teu espaço..."></textarea>
@@ -68,10 +76,10 @@
                 </div>
 
                 <div class="form-checkbox-group">
-                    <input type="checkbox" id="setupDemo" checked style="width: auto; margin-right: 10px;">
+                    <input type="checkbox" id="setupDemo" checked>
                     <label for="setupDemo">
                         <strong>Adicionar pratos de exemplo?</strong>
-                        <span>Cria categorias e pratos iniciais.</span>
+                        <span>Cria categorias e pratos iniciais para te ajudar a começar.</span>
                     </label>
                 </div>
 
@@ -111,8 +119,7 @@
                 </button>
                 <button class="btn-nav" onclick="openTutorial()" title="Tutorial" style="position:relative;">
                     <i class="fa-solid fa-graduation-cap"></i> <span class="desktop-only">Ajuda</span>
-                    <span
-                        style="position:absolute; top:-5px; right:-5px; background:var(--danger); color:white; font-size:10px; padding:2px 6px; border-radius:10px; font-weight:800; animation: pulse 2s infinite;">NOVO</span>
+                    <span class="badge-pulse">NOVO</span>
                 </button>
                 <button class="btn-nav btn-danger-soft" onclick="signOut()" title="Sair">
                     <i class="fa-solid fa-right-from-bracket"></i>
@@ -276,65 +283,7 @@
         </div>
     </div>
 
-    <!-- SETUP WIZARD MODAL -->
-    <div id="setupModal" class="edit-modal" style="z-index: 99999;">
-        <div class="edit-modal-content" style="max-width: 500px; text-align: center;">
-            <div style="margin-bottom: 20px;">
-                <img src="assets/images/logo.svg" alt="Logo" style="height: 60px; margin-bottom: 15px;">
-                <h2 style="color:var(--primary);">Bem-vindo Chef! 👨‍🍳</h2>
-                <p style="color:var(--text-muted);">Vamos configurar o teu restaurante em 30 segundos.</p>
-            </div>
-
-            <form id="setupForm" style="text-align: left;">
-                <div class="form-group">
-                    <label>Nome do Restaurante</label>
-                    <input type="text" id="setupName" placeholder="ex: O Tasco do Zé" required
-                        oninput="generateSlug(this.value)">
-                </div>
-
-                <div class="form-group">
-                    <label>Link Personalizado (Slug)</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-link"></i>
-                        <input type="text" id="setupSlug" placeholder="ex: o-tasco-do-ze" required>
-                    </div>
-                    <small style="font-size: 0.8rem; color: var(--text-muted);">Será o teu link:
-                        menunoar.com/menu.html?id=<b>slug</b></small>
-                </div>
-
-                <div class="form-group">
-                    <label>Descrição Curta</label>
-                    <textarea id="setupDesc" rows="2"
-                        placeholder="ex: A melhor comida tradicional de Lisboa..."></textarea>
-                </div>
-
-                <div class="form-group"
-                    style="background:var(--bg-page); padding:15px; border-radius:8px; display:flex; align-items:center; gap:10px;">
-                    <input type="checkbox" id="setupDemo" checked
-                        style="width:20px; height:20px; accent-color:var(--primary);">
-                    <label for="setupDemo" style="margin:0; cursor:pointer;">
-                        <strong>Adicionar pratos de exemplo?</strong><br>
-                        <span style="font-size:0.85rem; font-weight:normal;">Cria categorias e pratos para não começares
-                            do zero.</span>
-                    </label>
-                </div>
-
-                <button type="submit" class="btn-confirm"
-                    style="width: 100%; margin-top: 10px; font-size: 1.1rem; padding: 12px;">Criar Menu Mágico
-                    ✨</button>
-            </form>
-
-            <div
-                style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 25px; display: flex; flex-direction: column; gap: 12px;">
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 4px; text-align: center;">É a tua
-                    primeira vez no Menu no Ar?</p>
-                <button onclick="openTutorial()" class="btn-secondary btn-full"
-                    style="height: 54px; border-width: 2px;">
-                    <i class="fa-solid fa-graduation-cap"></i> Ver Tutorial Passo-a-Passo
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- SETUP WIZARD MODAL REMOVED (DUPLICATE OF SETUP SCREEN) -->
 
     <!-- IMAGE PREVIEW MODAL -->
     <div id="imageModal" class="edit-modal">
@@ -386,32 +335,23 @@
 
     <!-- Scripts -->
     <script type="module" src="js/dashboard.js?v=3.1"></script>
-    <script>
-        // Pulse animation for the NEW badge
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes pulse {
-                0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-                70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-                100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-            }
-        `;
-        document.head.appendChild(style);
+    <script type="module">
+        // Inline helpers moved to module scope for cleanliness
+        window.handlePdfSelect = (input) => {
+            const fileName = input.files[0] ? input.files[0].name : "Clique para selecionar o PDF";
+            const display = document.getElementById('pdfFileNameDisplay');
+            if (display) display.textContent = fileName;
+            const wrapper = document.querySelector('.file-upload-wrapper');
+            if (wrapper) wrapper.classList.add('selected');
+        };
 
-        // Check for dark mode preference and set initial logo
+        // Dark mode initial sync
         if (localStorage.getItem('menu_theme') === 'dark') {
             document.body.classList.add('dark-mode');
             const logo = document.getElementById('dashboardLogo');
             if (logo) logo.src = 'assets/images/Ilogo.svg';
-            coIcon = document.querySelector('#themeBtn i');
-            if (btnIcon) btnIcon.className = 'fa-solid fa-sun';
-        }
-
-        // Helper for PDF file name display
-        function handlePdfSelect(input) {
-            const fileName = input.files[0] ? input.files[0].name : "Clique para selecionar o PDF";
-            document.getElementById('pdfFileNameDisplay').textContent = fileName;
-            document.querySelector('.file-upload-wrapper').classList.add('selected');
+            const themeIcon = document.getElementById('themeIcon');
+            if (themeIcon) themeIcon.className = 'fa-solid fa-sun';
         }
     </script>
 </body>

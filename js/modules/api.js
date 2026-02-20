@@ -8,16 +8,15 @@ import { initHeaderEditing } from './ui-handlers.js';
 export async function loadData() {
     const { supabase, currentUser } = state;
 
-    // 1. Check for User Restaurant
+    // 1. Fetch Restaurant Data (Essential first step)
     let { data: rest, error } = await supabase
         .from('restaurants')
         .select('*')
         .eq('owner_id', currentUser.id)
-        .limit(1)
         .maybeSingle();
 
     if (error) {
-        console.error("Erro ao carregar dados:", error);
+        console.error("Erro ao carregar restaurante:", error);
         return;
     }
 
@@ -26,46 +25,47 @@ export async function loadData() {
         document.getElementById('setup-screen').style.display = 'flex';
         document.getElementById('main-dashboard').style.display = 'none';
         return;
-    } else {
-        document.getElementById('setup-screen').style.display = 'none';
-        document.getElementById('main-dashboard').style.display = 'block';
-
-        // 3. FORCE SYNC STATUS
-        try {
-            const syncRes = await fetch('/api/sync_status', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: currentUser.email, userId: currentUser.id })
-            });
-
-            if (syncRes.ok) {
-                const syncData = await syncRes.json();
-                if (syncData.updated) {
-                    const { data: refreshed } = await supabase.from('restaurants').select('*').eq('owner_id', currentUser.id).maybeSingle();
-                    if (refreshed) rest = refreshed;
-                }
-            }
-        } catch (e) {
-            console.warn("Sync temporarily unavailable or failed:", e);
-        }
     }
 
-    updateState({ restaurantId: rest.id, currentData: rest });
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('main-dashboard').style.display = 'block';
 
+    // 3. Parallel Background Tasks: Sync Status & Fetch Items
+    const [syncResult, itemsResult] = await Promise.allSettled([
+        // Sync Task
+        fetch('/api/sync_status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentUser.email, userId: currentUser.id })
+        }).then(res => res.ok ? res.json() : null).catch(() => null),
+
+        // Items Task
+        supabase.from('menu_items')
+            .select('*')
+            .eq('restaurant_id', rest.id)
+            .order('category')
+            .order('name')
+    ]);
+
+    // Handle Sync Update if any
+    if (syncResult.status === 'fulfilled' && syncResult.value?.updated) {
+        const { data: refreshed } = await supabase.from('restaurants').select('*').eq('id', rest.id).maybeSingle();
+        if (refreshed) rest = refreshed;
+    }
+
+    // Update State & Render
+    updateState({
+        restaurantId: rest.id,
+        currentData: rest,
+        menuItems: itemsResult.status === 'fulfilled' ? (itemsResult.value.data || []) : []
+    });
+
+    // UI Updates
     renderHeader(rest);
+    renderMenu(state.menuItems);
     updateLiveLink(rest.slug);
     checkSubscription(rest);
     updateTrialTimer(rest);
-
-    // Fetch Items
-    const { data: items } = await supabase.from('menu_items')
-        .select('*')
-        .eq('restaurant_id', rest.id)
-        .order('category')
-        .order('name');
-
-    updateState({ menuItems: items || [] });
-    renderMenu(state.menuItems);
     initHeaderEditing();
 }
 
