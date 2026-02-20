@@ -1425,13 +1425,13 @@ function renderStep(index) {
         </div>
         <p>${step.text}</p>
         <div class="tutorial-actions">
+            <button class="tutorial-btn-skip" onclick="closeTutorial()">Sair</button>
             <div class="tutorial-step-dots">
                 ${tutorialSteps.map((_, i) => `<div class="tutorial-dot ${i === index ? 'active' : ''}"></div>`).join('')}
             </div>
             <div style="display:flex; gap:8px;">
-                <button class="tutorial-btn-skip" onclick="closeTutorial()">Sair</button>
-                ${index > 0 ? `<button class="tutorial-btn-next" style="background:var(--bg-page); color:var(--text); border:1px solid var(--border);" onclick="prevTutorialPage()">Anterior</button>` : ''}
-                <button class="tutorial-btn-next" onclick="nextStep()">
+                ${index > 0 ? `<button class="tutorial-btn-next" style="background:var(--bg-page); color:var(--text); border:1px solid var(--border); padding: 10px 15px;" onclick="prevTutorialPage()">Anterior</button>` : ''}
+                <button class="tutorial-btn-next" style="padding: 10px 15px;" onclick="nextStep()">
                     ${index === tutorialSteps.length - 1 ? 'Começar!' : 'Próximo'}
                 </button>
             </div>
@@ -1511,7 +1511,7 @@ function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
     const margin = 20;
     const arrowSize = 25;
     const tooltipHeight = tooltip.offsetHeight;
-    const tooltipWidth = 320;
+    const tooltipWidth = 420;
 
     let tooltipX, tooltipY, arrowX, arrowY, arrowRotate;
 
