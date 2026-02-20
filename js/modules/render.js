@@ -1,15 +1,16 @@
 /**
- * render.js - UI Generation and Rendering
+ * render.js - UI Rendering
+ * Optimizations: DocumentFragment, escapeHTML (XSS protection), lazy img loading,
+ * requestAnimationFrame for Sortable init, cleaner scrollToSlide.
  */
 import { state, updateState } from './state.js';
-import { saveCategoryOrder, loadData } from './api.js';
-import { uploadFile } from '../upload-service.js';
+import { saveCategoryOrder } from './api.js';
 
-const escapeHTML = (str) => {
-    if (!str) return '';
-    return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-};
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const escapeHTML = (str) => str ? String(str).replace(/[&<>"']/g, m => ESC[m]) : '';
 
+// ─── Live Link ────────────────────────────────────────────────────────────────
 export function updateLiveLink(slug) {
     const url = `${window.location.origin}/menu.html?id=${slug}`;
     const btn = document.getElementById('liveLinkBtn');
@@ -18,9 +19,12 @@ export function updateLiveLink(slug) {
     if (link) link.href = url;
 }
 
+// ─── Header ───────────────────────────────────────────────────────────────────
 export function renderHeader(data) {
-    document.getElementById('restNameEditor').textContent = data.name || "Nome do Restaurante";
-    document.getElementById('restDescEditor').textContent = data.description || "Descrição curta (clica para editar)";
+    const nameEl = document.getElementById('restNameEditor');
+    const descEl = document.getElementById('restDescEditor');
+    if (nameEl) nameEl.textContent = data.name || 'Nome do Restaurante';
+    if (descEl) descEl.textContent = data.description || 'Descrição curta (clica para editar)';
 
     const coverDiv = document.getElementById('coverEditor');
     if (coverDiv) {
@@ -30,7 +34,9 @@ export function renderHeader(data) {
             coverDiv.innerHTML = `
                 <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
                 <div class="header-actions-abs">
-                    <button class="action-btn btn-delete" onclick="deleteCover(); event.stopPropagation();" title="Remover Capa"><i class="fa-solid fa-trash"></i></button>
+                    <button class="action-btn btn-delete" onclick="deleteCover(); event.stopPropagation();" title="Remover Capa">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </div>
                 <input type="file" id="coverUpload" style="display:none;" accept="image/*" onchange="handleCoverUpload(this)">
             `;
@@ -38,131 +44,177 @@ export function renderHeader(data) {
             coverDiv.style.backgroundImage = 'none';
             coverDiv.style.backgroundColor = 'var(--bg-page)';
             coverDiv.style.height = '120px';
-            coverDiv.innerHTML = `<div class="edit-overlay"><i class="fa-solid fa-camera"></i> Adicionar Capa</div><input type="file" id="coverUpload" style="display:none;" accept="image/*" onchange="handleCoverUpload(this)">`;
+            coverDiv.innerHTML = `
+                <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Adicionar Capa</div>
+                <input type="file" id="coverUpload" style="display:none;" accept="image/*" onchange="handleCoverUpload(this)">
+            `;
         }
     }
 
-    updateBadge('badgeWifi', 'textWifi', data.wifi_password);
-    updateBadge('badgePhone', 'textPhone', data.phone);
-    updateBadge('badgeAddress', 'textAddress', data.address);
+    _updateBadge('badgeWifi', 'textWifi', data.wifi_password);
+    _updateBadge('badgePhone', 'textPhone', data.phone);
+    _updateBadge('badgeAddress', 'textAddress', data.address);
 }
 
-function updateBadge(badgeId, textId, value) {
+function _updateBadge(badgeId, textId, value) {
     const el = document.getElementById(badgeId);
     const span = document.getElementById(textId);
     if (!el || !span) return;
-    span.textContent = value || "Adicionar...";
+    span.textContent = value || 'Adicionar...';
     el.style.opacity = value ? '1' : '0.5';
 }
 
+// ─── Menu ─────────────────────────────────────────────────────────────────────
 export function renderMenu(items) {
     const container = document.getElementById('menuContainer');
     const nav = document.getElementById('categoryNav');
     if (!container || !nav) return;
 
-    // Use DocumentFragment for batch nav updates
-    const navFragment = document.createDocumentFragment();
-
-    // Track setup
+    // Reset track
     container.innerHTML = '<div id="editorTrack" class="slider-track"></div>';
     const track = document.getElementById('editorTrack');
-
     nav.className = 'category-tabs sticky-nav';
 
-    const uniqueCatsSet = new Set(items.map(i => i.category));
-    if (state.currentData.category_order) state.currentData.category_order.forEach(c => uniqueCatsSet.add(c));
+    // Build ordered category list
+    const catSet = new Set(items.map(i => i.category));
+    (state.currentData.category_order || []).forEach(c => catSet.add(c));
+    let cats = Array.from(catSet);
 
-    let uniqueCats = Array.from(uniqueCatsSet);
-    if (state.currentData.category_order) {
+    if (state.currentData.category_order?.length) {
         const order = state.currentData.category_order;
-        uniqueCats.sort((a, b) => (order.indexOf(a) === -1 ? 999 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 999 : order.indexOf(b)));
+        cats.sort((a, b) => {
+            const ia = order.indexOf(a), ib = order.indexOf(b);
+            return (ia === -1 ? 9999 : ia) - (ib === -1 ? 9999 : ib);
+        });
     }
 
-    const groups = uniqueCats.reduce((acc, cat) => {
+    // Group items by category (single pass)
+    const groups = cats.reduce((acc, cat) => {
         acc[cat] = items.filter(i => i.category === cat);
         return acc;
     }, {});
 
-    uniqueCats.forEach((cat, index) => {
-        // Build Nav Tabs
-        const btn = document.createElement('div');
-        btn.className = `tab-btn draggable-tab ${(!state.activeCategoryName && index === 0) || (cat === state.activeCategoryName) ? 'active' : ''}`;
-        btn.dataset.category = cat;
-        btn.dataset.index = index;
-        btn.onclick = () => scrollToSlide(index);
+    // Build nav + slides via DocumentFragment (batch DOM insertion)
+    const navFrag = document.createDocumentFragment();
 
-        if (!state.activeCategoryName && index === 0) updateState({ activeCategoryName: cat });
+    cats.forEach((cat, index) => {
+        // ── Nav tab ──
+        const tab = document.createElement('div');
+        const isActive = state.activeCategoryName
+            ? cat === state.activeCategoryName
+            : index === 0;
 
-        btn.innerHTML = `
+        if (isActive && !state.activeCategoryName) updateState({ activeCategoryName: cat });
+
+        tab.className = `tab-btn draggable-tab${isActive ? ' active' : ''}`;
+        tab.dataset.category = cat;
+        tab.dataset.index = index;
+        tab.onclick = () => scrollToSlide(index);
+        tab.innerHTML = `
             <span>${escapeHTML(cat)}</span>
-            <div class="handle"><i class="fa-solid fa-grip-lines-vertical"></i></div>
+            <div class="handle" title="Arrastar">
+                <i class="fa-solid fa-grip-lines-vertical"></i>
+            </div>
         `;
-        navFragment.appendChild(btn);
+        navFrag.appendChild(tab);
 
-        // Build Slides
+        // ── Slide section ──
         const section = document.createElement('div');
-        section.id = `sec-${cat.replace(/\s/g, '-')}`;
+        section.id = `sec-${cat.replace(/\s+/g, '-')}`;
         section.className = 'menu-slide';
         section.style.minWidth = '100%';
 
-        const catImages = state.currentData.category_images || {};
-        const safeCat = cat.replace(/\s/g, '-');
+        const catImg = (state.currentData.category_images || {})[cat];
+        const safeCat = cat.replace(/\s+/g, '-');
 
-        let headerHTML = catImages[cat]
+        const headerHTML = catImg
             ? `<div class="cat-banner editable-trigger" onclick="triggerCatUpload('${cat}')">
-                <img src="${catImages[cat]}" loading="lazy">
+                <img src="${catImg}" loading="lazy" alt="${escapeHTML(cat)}">
                 <div class="cat-banner-overlay">
-                    <h2 contenteditable="true" spellcheck="false" class="inline-editable" onclick="event.stopPropagation();" onblur="handleCategoryRename('${cat}', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${escapeHTML(cat)}</h2>
+                    <h2 contenteditable="true" spellcheck="false" class="inline-editable"
+                        onclick="event.stopPropagation();"
+                        onblur="handleCategoryRename('${cat}', this.innerText)"
+                        onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+                    >${escapeHTML(cat)}</h2>
                 </div>
                 <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
                 <div class="header-actions">
-                    <button class="action-btn btn-delete" onclick="deleteCategory('${cat}'); event.stopPropagation();" title="Apagar Categoria"><i class="fa-solid fa-trash"></i></button>
+                    <button class="action-btn btn-delete"
+                        onclick="deleteCategory('${cat}'); event.stopPropagation();"
+                        title="Apagar Categoria">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </div>
-                <input type="file" id="upload-${safeCat}" onchange="handleCatUpload('${cat}', this)" style="display:none;" accept="image/*">
+                <input type="file" id="upload-${safeCat}"
+                    onchange="handleCatUpload('${cat}', this)"
+                    style="display:none;" accept="image/*">
             </div>`
             : `<div class="slide-title">
-                <span contenteditable="true" spellcheck="false" class="text-editable inline-editable" onblur="handleCategoryRename('${cat}', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${escapeHTML(cat)}</span>
+                <span contenteditable="true" spellcheck="false"
+                    class="text-editable inline-editable"
+                    onblur="handleCategoryRename('${cat}', this.innerText)"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+                >${escapeHTML(cat)}</span>
                 <div class="cat-actions-minimal">
-                     <label class="custom-file-upload"><i class="fa-solid fa-image"></i> Imagem<input type="file" onchange="handleCatUpload('${cat}', this)" style="display:none;" accept="image/*"></label>
-                    <button class="action-btn btn-delete" onclick="deleteCategory('${cat}')" title="Apagar Categoria"><i class="fa-solid fa-trash"></i></button>
+                    <label class="custom-file-upload">
+                        <i class="fa-solid fa-image"></i> Imagem
+                        <input type="file" onchange="handleCatUpload('${cat}', this)"
+                            style="display:none;" accept="image/*">
+                    </label>
+                    <button class="action-btn btn-delete"
+                        onclick="deleteCategory('${cat}')"
+                        title="Apagar Categoria">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </div>
-             </div>`;
+            </div>`;
 
-        const itemsHTML = groups[cat].map(item => createItemCard(item)).join('');
-        const addItemBtn = `<div class="add-item-btn" onclick="openAddItemModal('${cat}')"><span><i class="fa-solid fa-plus"></i> Adicionar Prato em "${escapeHTML(cat)}"</span></div>`;
+        const itemsHTML = groups[cat].map(createItemCard).join('');
+        const addItemBtn = `
+            <div class="add-item-btn" onclick="openAddItemModal('${cat}')">
+                <span><i class="fa-solid fa-plus"></i> Adicionar Prato em "${escapeHTML(cat)}"</span>
+            </div>`;
 
         section.innerHTML = headerHTML + `<div class="items-grid">${itemsHTML}</div>` + addItemBtn;
         track.appendChild(section);
     });
 
-    // Final Tab actions
+    // Add "Nova Categoria" button
     const addCatBtn = document.createElement('button');
     addCatBtn.className = 'tab-btn btn-add-cat';
     addCatBtn.onclick = () => window.addNewCategoryOptimized();
     addCatBtn.innerHTML = '<i class="fa-solid fa-plus"></i> <span>Nova Categoria</span>';
-    navFragment.appendChild(addCatBtn);
+    navFrag.appendChild(addCatBtn);
 
+    // Flush nav to DOM in one operation
     nav.innerHTML = '';
-    nav.appendChild(navFragment);
+    nav.appendChild(navFrag);
 
+    // Sync active slide index
     if (state.activeCategoryName) {
-        const newIdx = uniqueCats.indexOf(state.activeCategoryName);
-        if (newIdx !== -1) updateState({ currentSlideIndex: newIdx });
+        const idx = cats.indexOf(state.activeCategoryName);
+        if (idx !== -1) updateState({ currentSlideIndex: idx });
     }
 
-    // Defer costly operations
+    // Defer expensive operations to after paint
     requestAnimationFrame(() => {
         scrollToSlide(state.currentSlideIndex, { instant: true });
+
         if (window.Sortable) {
-            if (state.sortableInstance) state.sortableInstance.destroy();
+            state.sortableInstance?.destroy();
             updateState({
                 sortableInstance: new Sortable(nav, {
-                    animation: 150, handle: '.handle', draggable: '.draggable-tab', ghostClass: 'sortable-ghost',
-                    onEnd: async function () {
-                        const newOrder = Array.from(nav.querySelectorAll('.draggable-tab')).map(tab => tab.dataset.category);
+                    animation: 150,
+                    handle: '.handle',
+                    draggable: '.draggable-tab',
+                    ghostClass: 'sortable-ghost',
+                    onEnd: async () => {
+                        const newOrder = Array.from(nav.querySelectorAll('.draggable-tab'))
+                            .map(t => t.dataset.category);
                         await saveCategoryOrder(newOrder);
-                        const newIndex = Array.from(nav.querySelectorAll('.tab-btn')).findIndex(btn => btn.classList.contains('active'));
-                        if (newIndex !== -1) updateState({ currentSlideIndex: newIndex });
+                        const newIdx = Array.from(nav.querySelectorAll('.tab-btn'))
+                            .findIndex(b => b.classList.contains('active'));
+                        if (newIdx !== -1) updateState({ currentSlideIndex: newIdx });
                     }
                 })
             });
@@ -170,65 +222,86 @@ export function renderMenu(items) {
     });
 }
 
+// ─── Slide Navigation ─────────────────────────────────────────────────────────
 export function scrollToSlide(index, options = {}) {
     const track = document.getElementById('editorTrack');
-    if (!track || !track.children.length) return;
+    if (!track?.children.length) return;
 
     index = Math.max(0, Math.min(index, track.children.length - 1));
     updateState({ currentSlideIndex: index });
 
-    track.style.transition = options.instant ? 'none' : 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+    track.style.transition = options.instant
+        ? 'none'
+        : 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
     track.style.transform = `translateX(-${index * 100}%)`;
 
-    if (options.instant) track.offsetHeight; // Force reflow
+    if (options.instant) void track.offsetHeight; // force reflow
 
-    // Update Tab Classes
-    const tabs = document.querySelectorAll('.draggable-tab');
-    tabs.forEach((t, i) => {
-        const isActive = i === index;
-        t.classList.toggle('active', isActive);
-        if (isActive) updateState({ activeCategoryName: t.dataset.category });
+    document.querySelectorAll('.draggable-tab').forEach((t, i) => {
+        const active = i === index;
+        t.classList.toggle('active', active);
+        if (active) updateState({ activeCategoryName: t.dataset.category });
     });
 
-    // Adjust Height
     const container = document.getElementById('menuContainer');
     const currentSlide = track.children[index];
     if (currentSlide && container) {
         container.style.height = `${currentSlide.offsetHeight}px`;
-        if (state.slideObserver) state.slideObserver.disconnect();
-        const obs = new ResizeObserver(entries => {
-            container.style.height = `${entries[0].target.offsetHeight}px`;
+        state.slideObserver?.disconnect();
+        const obs = new ResizeObserver(([entry]) => {
+            container.style.height = `${entry.target.offsetHeight}px`;
         });
         obs.observe(currentSlide);
         updateState({ slideObserver: obs });
     }
 }
 
+// ─── Item Card ────────────────────────────────────────────────────────────────
 export function createItemCard(item) {
     const { id, name, description, price, available: isAvail, image_url } = item;
     const eyeIcon = isAvail ? 'fa-eye' : 'fa-eye-slash';
+    const eyeColor = isAvail ? 'var(--success)' : '#ccc';
 
     return `
-        <div id="item-card-${id}" class="menu-item ${!isAvail ? 'unavailable' : ''} editable-container">
+        <div id="item-card-${id}" class="menu-item${!isAvail ? ' unavailable' : ''} editable-container">
             <div class="item-text">
-                <h3 contenteditable="true" spellcheck="false" class="inline-editable" onblur="handleItemUpdate('${id}', 'name', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${escapeHTML(name)}</h3>
-                <p contenteditable="true" spellcheck="false" class="item-desc inline-editable" onblur="handleItemUpdate('${id}', 'description', this.innerText)">${escapeHTML(description)}</p>
+                <h3 contenteditable="true" spellcheck="false" class="inline-editable"
+                    onblur="handleItemUpdate('${id}', 'name', this.innerText)"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+                    ${escapeHTML(name)}
+                </h3>
+                <p contenteditable="true" spellcheck="false" class="item-desc inline-editable"
+                    onblur="handleItemUpdate('${id}', 'description', this.innerText)">
+                    ${escapeHTML(description)}
+                </p>
                 <div class="item-footer">
                     <div class="item-price">
-                        <span contenteditable="true" spellcheck="false" class="inline-editable" onblur="handleItemUpdate('${id}', 'price', this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${Number(price).toFixed(2)}</span>€
+                        <span contenteditable="true" spellcheck="false" class="inline-editable"
+                            onblur="handleItemUpdate('${id}', 'price', this.innerText)"
+                            onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+                            ${Number(price).toFixed(2)}
+                        </span>€
                     </div>
                     <div class="item-controls">
-                        <button class="btn-eye-toggle" onclick="toggleAvailability('${id}', ${isAvail}, this); event.stopPropagation();" title="Visibilidade" style="color: ${isAvail ? 'var(--success)' : '#ccc'}">
+                        <button class="btn-eye-toggle"
+                            onclick="toggleAvailability('${id}', ${isAvail}, this); event.stopPropagation();"
+                            title="Visibilidade"
+                            style="color:${eyeColor};">
                             <i class="fa-solid ${eyeIcon}"></i>
                         </button>
-                        <button class="action-btn btn-delete" onclick="deleteItem('${id}'); event.stopPropagation();" title="Apagar Prato">
+                        <button class="action-btn btn-delete"
+                            onclick="deleteItem('${id}'); event.stopPropagation();"
+                            title="Apagar Prato">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
                 </div>
             </div>
             <div class="item-img" onclick="openImageModal('${id}')">
-                ${image_url ? `<img src="${image_url}" loading="lazy">` : `<div class="img-placeholder"><i class="fa-solid fa-image"></i></div>`}
+                ${image_url
+            ? `<img src="${image_url}" loading="lazy" alt="${escapeHTML(name)}">`
+            : `<div class="img-placeholder"><i class="fa-solid fa-image"></i></div>`
+        }
             </div>
         </div>
     `;

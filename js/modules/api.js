@@ -1,27 +1,31 @@
 /**
  * api.js - Supabase & Server Interactions
+ * Optimizations: parallel fetch (sync + items via Promise.allSettled),
+ * single updateState call, removed redundant .limit(1).
  */
 import { state, updateState } from './state.js';
 import { renderHeader, renderMenu, updateLiveLink } from './render.js';
 import { initHeaderEditing } from './ui-handlers.js';
 
+// ─── Load All Dashboard Data ──────────────────────────────────────────────────
 export async function loadData() {
     const { supabase, currentUser } = state;
+    if (!supabase || !currentUser) return;
 
-    // 1. Fetch Restaurant Data (Essential first step)
-    let { data: rest, error } = await supabase
+    // Step 1: fetch restaurant (blocking – needed for everything else)
+    const { data: restRaw, error } = await supabase
         .from('restaurants')
         .select('*')
         .eq('owner_id', currentUser.id)
         .maybeSingle();
 
     if (error) {
-        console.error("Erro ao carregar restaurante:", error);
+        console.error('Erro ao carregar restaurante:', error.message);
         return;
     }
 
-    // 2. Flow Control
-    if (!rest) {
+    // Step 2: show/hide UI
+    if (!restRaw) {
         document.getElementById('setup-screen').style.display = 'flex';
         document.getElementById('main-dashboard').style.display = 'none';
         return;
@@ -30,101 +34,126 @@ export async function loadData() {
     document.getElementById('setup-screen').style.display = 'none';
     document.getElementById('main-dashboard').style.display = 'block';
 
-    // 3. Parallel Background Tasks: Sync Status & Fetch Items
+    // Step 3: sync status + fetch items in PARALLEL
     const [syncResult, itemsResult] = await Promise.allSettled([
-        // Sync Task
         fetch('/api/sync_status', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: currentUser.email, userId: currentUser.id })
-        }).then(res => res.ok ? res.json() : null).catch(() => null),
+            body: JSON.stringify({ email: currentUser.email, userId: currentUser.id }),
+        }).then(r => (r.ok ? r.json() : null)).catch(() => null),
 
-        // Items Task
-        supabase.from('menu_items')
+        supabase
+            .from('menu_items')
             .select('*')
-            .eq('restaurant_id', rest.id)
+            .eq('restaurant_id', restRaw.id)
             .order('category')
-            .order('name')
+            .order('name'),
     ]);
 
-    // Handle Sync Update if any
+    // Re-fetch restaurant only if sync changed something
+    let rest = restRaw;
     if (syncResult.status === 'fulfilled' && syncResult.value?.updated) {
-        const { data: refreshed } = await supabase.from('restaurants').select('*').eq('id', rest.id).maybeSingle();
+        const { data: refreshed } = await supabase
+            .from('restaurants')
+            .select('*')
+            .eq('id', rest.id)
+            .maybeSingle();
         if (refreshed) rest = refreshed;
     }
 
-    // Update State & Render
-    updateState({
-        restaurantId: rest.id,
-        currentData: rest,
-        menuItems: itemsResult.status === 'fulfilled' ? (itemsResult.value.data || []) : []
-    });
+    const items = itemsResult.status === 'fulfilled'
+        ? (itemsResult.value.data ?? [])
+        : [];
 
-    // UI Updates
+    // Single state update
+    updateState({ restaurantId: rest.id, currentData: rest, menuItems: items });
+
+    // Render all UI
     renderHeader(rest);
-    renderMenu(state.menuItems);
+    renderMenu(items);
     updateLiveLink(rest.slug);
-    checkSubscription(rest);
-    updateTrialTimer(rest);
+    _checkSubscription(rest);
+    _updateTrialBadge(rest);
     initHeaderEditing();
 }
 
-function checkSubscription(rest) {
-    const hasStripeId = !!rest.stripe_customer_id;
-    const isStripeActive = rest.subscription_status === 'active';
-    const isStripeTrial = rest.subscription_status === 'trialing' && hasStripeId;
+// ─── Subscription Display ─────────────────────────────────────────────────────
+function _checkSubscription(rest) {
+    const isActive = rest.subscription_status === 'active';
+    const isPaidTrial = rest.subscription_status === 'trialing' && !!rest.stripe_customer_id;
 
-    if (isStripeActive || isStripeTrial) {
-        const planText = document.getElementById('currentPlanText');
-        if (planText) {
-            planText.textContent = isStripeActive ? "Profissional (Membro Premium)" : "Profissional (Teste Confirmado)";
-            planText.style.color = "#16a34a";
-        }
-        const upgradeBtn = document.querySelector('a[href="subscription.html"]');
-        if (upgradeBtn) upgradeBtn.style.display = 'none';
-    } else {
-        const daysLeft = Math.ceil((new Date(rest.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
-        if (daysLeft <= 0) {
-            const blocker = document.getElementById('expiredBlocker');
-            if (blocker) blocker.style.display = 'flex';
-        }
-    }
-}
-
-function updateTrialTimer(rest) {
-    const timerBadge = document.getElementById('trialTimer');
-    if (!timerBadge) return;
-
-    timerBadge.className = 'trial-timer-badge';
-    if (rest.subscription_status === 'trialing' && !rest.stripe_customer_id) {
-        const daysLeft = Math.ceil((new Date(rest.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
-        if (daysLeft > 0) {
-            timerBadge.innerHTML = `<i class="fa-solid fa-clock"></i> ${daysLeft} dias`;
-            timerBadge.classList.add('state-trial');
-            timerBadge.style.display = 'inline-flex';
+    const planText = document.getElementById('currentPlanText');
+    if (planText) {
+        if (isActive || isPaidTrial) {
+            planText.textContent = isActive
+                ? 'Profissional (Membro Premium)'
+                : 'Profissional (Teste Confirmado)';
+            planText.style.color = '#16a34a';
         } else {
-            timerBadge.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Expirado`;
-            timerBadge.classList.add('state-expired');
-            timerBadge.style.display = 'inline-flex';
+            const daysLeft = _daysLeft(rest.trial_ends_at);
+            planText.textContent = daysLeft > 0
+                ? `Teste Grátis (${daysLeft} dias restantes)`
+                : 'Teste Expirado';
+            planText.style.color = daysLeft > 0 ? '#16a34a' : '#ef4444';
         }
-    } else if (rest.subscription_status === 'active' || rest.stripe_customer_id) {
-        timerBadge.innerHTML = `<i class="fa-solid fa-crown"></i> PRO`;
-        timerBadge.classList.add('state-pro');
-        timerBadge.style.display = 'inline-flex';
-    } else {
-        timerBadge.style.display = 'none';
+    }
+
+    // Hide upgrade button for paying users
+    if (isActive || isPaidTrial) {
+        document.querySelector('a[href="subscription.html"]')?.style.setProperty('display', 'none');
+    }
+
+    // Show expired blocker
+    if (!isActive && !isPaidTrial && _daysLeft(rest.trial_ends_at) <= 0) {
+        const blocker = document.getElementById('expiredBlocker');
+        if (blocker) blocker.style.display = 'flex';
     }
 }
 
+function _updateTrialBadge(rest) {
+    const badge = document.getElementById('trialTimer');
+    if (!badge) return;
+
+    badge.className = 'trial-timer-badge';
+
+    const isActive = rest.subscription_status === 'active' || !!rest.stripe_customer_id;
+    const isTrial = rest.subscription_status === 'trialing' && !rest.stripe_customer_id;
+
+    if (isActive) {
+        badge.innerHTML = '<i class="fa-solid fa-crown"></i> PRO';
+        badge.classList.add('state-pro');
+        badge.style.display = 'inline-flex';
+    } else if (isTrial) {
+        const days = _daysLeft(rest.trial_ends_at);
+        if (days > 0) {
+            badge.innerHTML = `<i class="fa-solid fa-clock"></i> ${days} dias`;
+            badge.classList.add('state-trial');
+        } else {
+            badge.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Expirado';
+            badge.classList.add('state-expired');
+        }
+        badge.style.display = 'inline-flex';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function _daysLeft(dateStr) {
+    return Math.ceil((new Date(dateStr) - Date.now()) / 86_400_000);
+}
+
+// ─── Category Order ───────────────────────────────────────────────────────────
 export async function saveCategoryOrder(order) {
-    const { error } = await state.supabase.from('restaurants')
+    const { error } = await state.supabase
+        .from('restaurants')
         .update({ category_order: order })
         .eq('id', state.restaurantId);
 
-    if (!error) {
-        state.currentData.category_order = order;
-        renderMenu(state.menuItems);
-    } else {
-        console.error("Error saving order:", error);
+    if (error) {
+        console.error('Erro ao guardar ordem:', error.message);
+        return;
     }
+
+    state.currentData.category_order = order;
+    renderMenu(state.menuItems);
 }

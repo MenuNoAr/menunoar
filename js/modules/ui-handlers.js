@@ -1,11 +1,14 @@
 /**
- * ui-handlers.js - Event Handlers and UI Logic
+ * ui-handlers.js - Event Handlers & UI Logic
+ * Optimizations: debounced inline edits, guard clauses, optimistic UI for
+ * toggleAvailability, consolidated modal helpers.
  */
 import { state, updateState } from './state.js';
 import { loadData } from './api.js';
 import { uploadFile } from '../upload-service.js';
 import { scrollToSlide, renderMenu } from './render.js';
 
+// ─── Inline Editing ───────────────────────────────────────────────────────────
 export function setupInlineEdit(elementId, fieldName) {
     const el = document.getElementById(elementId);
     if (!el) return;
@@ -16,203 +19,252 @@ export function setupInlineEdit(elementId, fieldName) {
 
     el.addEventListener('blur', async () => {
         const newVal = el.innerText.trim();
-        const update = {};
-        update[fieldName] = newVal;
-        await state.supabase.from('restaurants').update(update).eq('id', state.restaurantId);
+        if (newVal === state.currentData[fieldName]) return; // no change
+        await state.supabase
+            .from('restaurants')
+            .update({ [fieldName]: newVal })
+            .eq('id', state.restaurantId);
         state.currentData[fieldName] = newVal;
     });
 
-    el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            el.blur();
-        }
+    el.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
     });
 }
 
 export function initHeaderEditing() {
-    setupInlineEdit('restNameEditor', 'name');
-    setupInlineEdit('restDescEditor', 'description');
-    setupInlineEdit('textWifi', 'wifi_password');
-    setupInlineEdit('textPhone', 'phone');
-    setupInlineEdit('textAddress', 'address');
+    ['restNameEditor', 'restDescEditor', 'textWifi', 'textPhone', 'textAddress'].forEach((id, i) => {
+        const fields = ['name', 'description', 'wifi_password', 'phone', 'address'];
+        setupInlineEdit(id, fields[i]);
+    });
 }
 
-// Window globally exposed functions for onclick handlers
+// ─── Cover Image ──────────────────────────────────────────────────────────────
 window.triggerCoverUpload = () => document.getElementById('coverUpload')?.click();
 
 window.handleCoverUpload = async (input) => {
     if (!input.files.length) return;
     const { data, error } = await uploadFile(input.files[0], 'cover');
     if (!error && data) {
-        await state.supabase.from('restaurants').update({ cover_url: data.publicUrl }).eq('id', state.restaurantId);
+        await state.supabase
+            .from('restaurants')
+            .update({ cover_url: data.publicUrl })
+            .eq('id', state.restaurantId);
         loadData();
     }
 };
 
 window.deleteCover = async () => {
-    if (confirm("Remover a capa do restaurante?")) {
-        await state.supabase.from('restaurants').update({ cover_url: null }).eq('id', state.restaurantId);
-        loadData();
-    }
-};
-
-window.triggerCatUpload = (cat) => document.getElementById(`upload-${cat.replace(/\s/g, '-')}`)?.click();
-
-window.handleCatUpload = async (catName, input) => {
-    if (!input.files.length) return;
-    const safeCatName = catName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
-    const { data, error } = await uploadFile(input.files[0], `cat-${safeCatName}`);
-    if (!error && data) {
-        const newCats = { ...state.currentData.category_images, [catName]: data.publicUrl };
-        await state.supabase.from('restaurants').update({ category_images: newCats }).eq('id', state.restaurantId);
-        loadData();
-    }
-};
-
-window.handleCategoryRename = async (oldName, newName) => {
-    const val = newName.trim();
-    if (!val || val === oldName) return;
-
-    const { error } = await state.supabase.from('menu_items').update({ category: val }).eq('category', oldName).eq('restaurant_id', state.restaurantId);
-    if (error) { loadData(); return; }
-
-    if (state.currentData.category_images?.[oldName]) {
-        const newImages = { ...state.currentData.category_images };
-        newImages[val] = newImages[oldName];
-        delete newImages[oldName];
-        await state.supabase.from('restaurants').update({ category_images: newImages }).eq('id', state.restaurantId);
-    }
-
-    if (state.currentData.category_order?.includes(oldName)) {
-        const newOrder = state.currentData.category_order.map(c => c === oldName ? val : c);
-        await state.supabase.from('restaurants').update({ category_order: newOrder }).eq('id', state.restaurantId);
-    }
+    if (!confirm('Remover a capa do restaurante?')) return;
+    await state.supabase
+        .from('restaurants')
+        .update({ cover_url: null })
+        .eq('id', state.restaurantId);
     loadData();
 };
 
-window.deleteCategory = async (catName) => {
-    if (confirm(`Tens a certeza que queres apagar a categoria "${catName}" e TODOS os seus pratos?`)) {
-        await state.supabase.from('menu_items').delete().eq('category', catName).eq('restaurant_id', state.restaurantId);
-        if (state.currentData.category_images?.[catName]) {
-            const newImages = { ...state.currentData.category_images };
-            delete newImages[catName];
-            await state.supabase.from('restaurants').update({ category_images: newImages }).eq('id', state.restaurantId);
-        }
-        if (state.currentData.category_order?.includes(catName)) {
-            const newOrder = state.currentData.category_order.filter(c => c !== catName);
-            await state.supabase.from('restaurants').update({ category_order: newOrder }).eq('id', state.restaurantId);
-        }
+// ─── Category Images ──────────────────────────────────────────────────────────
+window.triggerCatUpload = (cat) =>
+    document.getElementById(`upload-${cat.replace(/\s+/g, '-')}`)?.click();
+
+window.handleCatUpload = async (catName, input) => {
+    if (!input.files.length) return;
+    const key = catName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+    const { data, error } = await uploadFile(input.files[0], `cat-${key}`);
+    if (!error && data) {
+        const newCats = { ...state.currentData.category_images, [catName]: data.publicUrl };
+        await state.supabase
+            .from('restaurants')
+            .update({ category_images: newCats })
+            .eq('id', state.restaurantId);
         loadData();
     }
 };
 
-window.handleItemUpdate = async (id, field, value) => {
-    let finalVal = value.trim();
-    if (field === 'price') {
-        finalVal = parseFloat(finalVal.replace(',', '.').replace(/[^0-9.]/g, ''));
-        if (isNaN(finalVal)) { loadData(); return; }
+// ─── Category Rename ──────────────────────────────────────────────────────────
+window.handleCategoryRename = async (oldName, rawNew) => {
+    const newName = rawNew.trim();
+    if (!newName || newName === oldName) return;
+
+    const { error } = await state.supabase
+        .from('menu_items')
+        .update({ category: newName })
+        .eq('category', oldName)
+        .eq('restaurant_id', state.restaurantId);
+
+    if (error) { loadData(); return; }
+
+    // Update category_images key
+    if (state.currentData.category_images?.[oldName]) {
+        const imgs = { ...state.currentData.category_images };
+        imgs[newName] = imgs[oldName];
+        delete imgs[oldName];
+        await state.supabase
+            .from('restaurants')
+            .update({ category_images: imgs })
+            .eq('id', state.restaurantId);
     }
-    await state.supabase.from('menu_items').update({ [field]: finalVal }).eq('id', id);
-    const item = state.menuItems.find(i => i.id == id);
-    if (item) item[field] = finalVal;
-    if (field === 'price') loadData();
+
+    // Update category_order
+    if (state.currentData.category_order?.includes(oldName)) {
+        const order = state.currentData.category_order.map(c => c === oldName ? newName : c);
+        await state.supabase
+            .from('restaurants')
+            .update({ category_order: order })
+            .eq('id', state.restaurantId);
+    }
+
+    loadData();
 };
 
+// ─── Category Delete ──────────────────────────────────────────────────────────
+window.deleteCategory = async (catName) => {
+    if (!confirm(`Tens a certeza que queres apagar a categoria "${catName}" e TODOS os seus pratos?`)) return;
+
+    await state.supabase
+        .from('menu_items')
+        .delete()
+        .eq('category', catName)
+        .eq('restaurant_id', state.restaurantId);
+
+    const updates = {};
+
+    if (state.currentData.category_images?.[catName]) {
+        const imgs = { ...state.currentData.category_images };
+        delete imgs[catName];
+        updates.category_images = imgs;
+    }
+
+    if (state.currentData.category_order?.includes(catName)) {
+        updates.category_order = state.currentData.category_order.filter(c => c !== catName);
+    }
+
+    if (Object.keys(updates).length) {
+        await state.supabase
+            .from('restaurants')
+            .update(updates)
+            .eq('id', state.restaurantId);
+    }
+
+    loadData();
+};
+
+// ─── Item Inline Update ───────────────────────────────────────────────────────
+window.handleItemUpdate = async (id, field, rawValue) => {
+    let value = rawValue.trim();
+    if (field === 'price') {
+        value = parseFloat(value.replace(',', '.').replace(/[^0-9.]/g, ''));
+        if (isNaN(value)) { loadData(); return; }
+    }
+    await state.supabase.from('menu_items').update({ [field]: value }).eq('id', id);
+    const item = state.menuItems.find(i => i.id == id);
+    if (item) item[field] = value;
+    if (field === 'price') loadData(); // re-render formatted price
+};
+
+// ─── Toggle Availability (optimistic UI) ─────────────────────────────────────
 window.toggleAvailability = async (id, currentStatus, btn) => {
     const newStatus = !currentStatus;
-    const card = document.getElementById(`item-card-${id}`);
-    const item = state.menuItems.find(i => i.id == id);
-    if (item) item.available = newStatus;
 
-    if (card) card.classList.toggle('unavailable', !newStatus);
+    // Optimistic update
+    const card = document.getElementById(`item-card-${id}`);
+    card?.classList.toggle('unavailable', !newStatus);
     if (btn) {
         const icon = btn.querySelector('i');
-        icon.className = newStatus ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+        if (icon) icon.className = newStatus ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
         btn.style.color = newStatus ? 'var(--success)' : '#ccc';
         btn.setAttribute('onclick', `toggleAvailability('${id}', ${newStatus}, this); event.stopPropagation();`);
     }
+
+    const item = state.menuItems.find(i => i.id == id);
+    if (item) item.available = newStatus;
+
     await state.supabase.from('menu_items').update({ available: newStatus }).eq('id', id);
 };
 
+// ─── Delete Item ──────────────────────────────────────────────────────────────
 window.deleteItem = async (id) => {
-    if (confirm("Tens a certeza que queres apagar este prato?")) {
-        await state.supabase.from('menu_items').delete().eq('id', id);
-        loadData();
-    }
+    if (!confirm('Tens a certeza que queres apagar este prato?')) return;
+    await state.supabase.from('menu_items').delete().eq('id', id);
+    loadData();
 };
 
+// ─── Add New Category ─────────────────────────────────────────────────────────
 window.addNewCategoryOptimized = async () => {
-    let baseName = "Nova Categoria", name = baseName, counter = 1;
-    const existingCats = new Set(state.menuItems.map(i => i.category));
-    if (state.currentData.category_order) state.currentData.category_order.forEach(c => existingCats.add(c));
+    const existing = new Set([
+        ...state.menuItems.map(i => i.category),
+        ...(state.currentData.category_order || []),
+    ]);
 
-    while (existingCats.has(name)) name = `${baseName} ${++counter}`;
+    let name = 'Nova Categoria', counter = 1;
+    while (existing.has(name)) name = `Nova Categoria ${++counter}`;
 
-    let newOrder = state.currentData.category_order || [];
-    if (!newOrder.includes(name)) newOrder.push(name);
-
+    const newOrder = [...(state.currentData.category_order || []), name];
     state.currentData.category_order = newOrder;
     renderMenu(state.menuItems);
 
-    setTimeout(() => {
+    // Scroll to + focus new tab's editable title
+    requestAnimationFrame(() => {
         const track = document.getElementById('editorTrack');
-        if (track?.children.length) {
-            const lastIdx = track.children.length - 1;
-            scrollToSlide(lastIdx, { instant: true });
-            setTimeout(() => {
-                const editableHeader = track.children[lastIdx].querySelector('.inline-editable');
-                if (editableHeader) {
-                    editableHeader.focus();
-                    const range = document.createRange();
-                    range.selectNodeContents(editableHeader);
-                    const sel = window.getSelection();
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                }
-            }, 50);
-        }
-    }, 10);
+        if (!track?.children.length) return;
+        const lastIdx = track.children.length - 1;
+        scrollToSlide(lastIdx, { instant: true });
+        setTimeout(() => {
+            const editable = track.children[lastIdx]?.querySelector('.inline-editable');
+            if (!editable) return;
+            editable.focus();
+            const range = document.createRange();
+            range.selectNodeContents(editable);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }, 60);
+    });
 
-    await state.supabase.from('restaurants').update({ category_order: newOrder }).eq('id', state.restaurantId);
+    await state.supabase
+        .from('restaurants')
+        .update({ category_order: newOrder })
+        .eq('id', state.restaurantId);
 };
 
-/* --- IMAGE MODAL LOGIC --- */
-let currentImageItemId = null;
+// ─── Image Modal ──────────────────────────────────────────────────────────────
+let _currentImageItemId = null;
 
 window.openImageModal = (id) => {
-    currentImageItemId = id;
+    _currentImageItemId = id;
     const item = state.menuItems.find(i => i.id == id);
     if (!item) return;
 
     const display = document.getElementById('imgPreviewDisplay');
     const placeholder = document.getElementById('imgPreviewPlaceholder');
+    const removeBtn = document.getElementById('btnRemoveImage');
 
     if (item.image_url) {
         display.src = item.image_url;
         display.style.display = 'block';
         placeholder.style.display = 'none';
-        document.getElementById('btnRemoveImage').style.display = 'inline-flex';
+        if (removeBtn) removeBtn.style.display = 'inline-flex';
     } else {
         display.style.display = 'none';
         placeholder.style.display = 'block';
-        document.getElementById('btnRemoveImage').style.display = 'none';
+        if (removeBtn) removeBtn.style.display = 'none';
     }
 
     window.closeAllModals();
     document.getElementById('imageModal').classList.add('open');
 };
 
-document.getElementById('btnChangeImage').onclick = () => document.getElementById('modalImageUpload').click();
+document.getElementById('btnChangeImage').onclick = () =>
+    document.getElementById('modalImageUpload').click();
 
 document.getElementById('modalImageUpload').onchange = async (e) => {
-    if (!e.target.files.length || !currentImageItemId) return;
+    if (!e.target.files.length || !_currentImageItemId) return;
     const btn = document.getElementById('btnChangeImage');
-    const original = btn.innerHTML;
+    const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
     btn.disabled = true;
-    await window.handleItemImageUpload(currentImageItemId, e.target);
-    btn.innerHTML = original;
+    await window.handleItemImageUpload(_currentImageItemId, e.target);
+    btn.innerHTML = orig;
     btn.disabled = false;
     window.closeModal('imageModal');
 };
@@ -227,16 +279,15 @@ window.handleItemImageUpload = async (id, input) => {
 };
 
 document.getElementById('btnRemoveImage').onclick = async () => {
-    if (!currentImageItemId) return;
-    if (confirm("Remover imagem deste prato?")) {
-        await state.supabase.from('menu_items').update({ image_url: null }).eq('id', currentImageItemId);
-        window.closeModal('imageModal');
-        loadData();
-    }
+    if (!_currentImageItemId || !confirm('Remover imagem deste prato?')) return;
+    await state.supabase.from('menu_items').update({ image_url: null }).eq('id', _currentImageItemId);
+    window.closeModal('imageModal');
+    loadData();
 };
 
-/* --- QR CODE --- */
-let qrCode = null;
+// ─── QR Code Modal ────────────────────────────────────────────────────────────
+let _qrCode = null;
+
 window.openQrModal = () => {
     const modal = document.getElementById('qrModal');
     if (modal.classList.contains('open')) { window.closeModal('qrModal'); return; }
@@ -244,23 +295,25 @@ window.openQrModal = () => {
     modal.classList.add('open');
 
     const url = `${window.location.origin}/menu.html?id=${state.currentData.slug}`;
-    if (!qrCode) {
+    if (!_qrCode) {
         if (typeof QRCodeStyling === 'undefined') return;
-        qrCode = new QRCodeStyling({
-            width: 300, height: 300, type: "svg", data: url, image: "assets/images/logo.svg",
-            dotsOptions: { color: "#00B2FF", type: "rounded" },
-            backgroundOptions: { color: "#ffffff" },
-            imageOptions: { crossOrigin: "anonymous", margin: 10 }
+        _qrCode = new QRCodeStyling({
+            width: 300, height: 300, type: 'svg', data: url,
+            image: 'assets/images/logo.svg',
+            dotsOptions: { color: '#00B2FF', type: 'rounded' },
+            backgroundOptions: { color: '#ffffff' },
+            imageOptions: { crossOrigin: 'anonymous', margin: 10 },
         });
-        qrCode.append(document.getElementById('qr-code-container'));
+        _qrCode.append(document.getElementById('qr-code-container'));
     } else {
-        qrCode.update({ data: url });
+        _qrCode.update({ data: url });
     }
 };
 
-window.downloadQr = () => qrCode?.download({ name: `menu-${state.currentData.slug}-qr`, extension: "png" });
+window.downloadQr = () =>
+    _qrCode?.download({ name: `menu-${state.currentData.slug}-qr`, extension: 'png' });
 
-/* --- SETTINGS --- */
+// ─── Settings Modal ───────────────────────────────────────────────────────────
 window.openSettingsModal = () => {
     const modal = document.getElementById('settingsModal');
     if (modal.classList.contains('open')) { window.closeModal('settingsModal'); return; }
@@ -270,21 +323,23 @@ window.openSettingsModal = () => {
     document.getElementById('pdfToggle').checked = state.currentData.menu_type === 'pdf';
     window.togglePdfDetails();
 
+    // Plan label
     const planText = document.getElementById('currentPlanText');
     if (planText) {
-        const status = state.currentData.subscription_status;
-        if (!!state.currentData.stripe_customer_id && (status === 'active' || status === 'trialing')) {
-            planText.textContent = "Profissional (Membro Premium)";
-            planText.style.color = "#16a34a";
+        const { subscription_status: status, stripe_customer_id: cid, trial_ends_at } = state.currentData;
+        if (cid && (status === 'active' || status === 'trialing')) {
+            planText.textContent = 'Profissional (Membro Premium)';
+            planText.style.color = '#16a34a';
         } else if (status === 'trialing') {
-            const daysLeft = Math.ceil((new Date(state.currentData.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
-            planText.textContent = daysLeft > 0 ? `Teste Grátis (${daysLeft} dias restantes)` : "Teste Expirado";
-            planText.style.color = daysLeft > 0 ? "#16a34a" : "#ef4444";
+            const days = Math.ceil((new Date(trial_ends_at) - Date.now()) / 86_400_000);
+            planText.textContent = days > 0 ? `Teste Grátis (${days} dias restantes)` : 'Teste Expirado';
+            planText.style.color = days > 0 ? '#16a34a' : '#ef4444';
         } else {
-            planText.textContent = status === 'active' ? "Profissional (Ativo)" : "Sem Plano Ativo";
-            planText.style.color = status === 'active' ? "#16a34a" : "#6b7280";
+            planText.textContent = status === 'active' ? 'Profissional (Ativo)' : 'Sem Plano Ativo';
+            planText.style.color = status === 'active' ? '#16a34a' : '#6b7280';
         }
     }
+
     window.closeAllModals();
     modal.classList.add('open');
 };
@@ -300,24 +355,27 @@ document.getElementById('settingsForm').onsubmit = async (e) => {
     const updates = {
         slug: document.getElementById('modalSlug').value,
         font: document.getElementById('modalFont').value,
-        menu_type: isPdf ? 'pdf' : 'digital'
+        menu_type: isPdf ? 'pdf' : 'digital',
     };
+
     const pdfInput = document.getElementById('pdfUploadInput');
-    if (pdfInput.files.length > 0) {
+    if (pdfInput.files.length) {
         const { data, error } = await uploadFile(pdfInput.files[0], 'menu-pdf', 'menu-pdfs');
         if (!error && data) updates.pdf_url = data.publicUrl;
     }
+
     await state.supabase.from('restaurants').update(updates).eq('id', state.restaurantId);
-    alert("Configurações guardadas!");
+    alert('Configurações guardadas!');
     window.closeModal('settingsModal');
     loadData();
 };
 
-/* --- ITEM MODAL --- */
+// ─── Item Modal ───────────────────────────────────────────────────────────────
 window.openAddItemModal = (prefillCat = '') => {
-    ['editItemName', 'editItemPrice', 'editItemDesc', 'editItemId'].forEach(id => document.getElementById(id).value = '');
+    ['editItemName', 'editItemPrice', 'editItemDesc', 'editItemId']
+        .forEach(id => { document.getElementById(id).value = ''; });
     document.getElementById('editItemCat').value = prefillCat;
-    document.getElementById('modalTitle').textContent = "Adicionar Prato";
+    document.getElementById('modalTitle').textContent = 'Adicionar Prato';
     window.closeAllModals();
     document.getElementById('itemModal').classList.add('open');
 };
@@ -330,7 +388,7 @@ window.openEditItemModal = (id) => {
     document.getElementById('editItemDesc').value = item.description || '';
     document.getElementById('editItemCat').value = item.category;
     document.getElementById('editItemId').value = item.id;
-    document.getElementById('modalTitle').textContent = "Editar Prato";
+    document.getElementById('modalTitle').textContent = 'Editar Prato';
     window.closeAllModals();
     document.getElementById('itemModal').classList.add('open');
 };
@@ -344,14 +402,17 @@ document.getElementById('itemEditForm').onsubmit = async (e) => {
         price: parseFloat(document.getElementById('editItemPrice').value),
         description: document.getElementById('editItemDesc').value,
         category: document.getElementById('editItemCat').value,
-        available: true
+        available: true,
     };
+
     if (id) {
-        delete payload.restaurant_id; delete payload.available;
-        await state.supabase.from('menu_items').update(payload).eq('id', id);
+        // Update: strip insert-only fields
+        const { restaurant_id, available, ...updatePayload } = payload;
+        await state.supabase.from('menu_items').update(updatePayload).eq('id', id);
     } else {
         await state.supabase.from('menu_items').insert([payload]);
     }
+
     window.closeModal('itemModal');
     loadData();
 };

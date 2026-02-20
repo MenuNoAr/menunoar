@@ -11,7 +11,7 @@ export const state = {
     currentSlideIndex: 0,
     activeCategoryName: null,
     sortableInstance: null,
-    slideObserver: null
+    slideObserver: null,
 };
 
 export function updateState(newState) {
