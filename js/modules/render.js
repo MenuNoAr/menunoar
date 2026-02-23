@@ -109,13 +109,14 @@ export function renderPdfViewer(data) {
 
     // Embed the PDF as cleanly as possible.
     // The iframe adopts the max-width, sitting perfectly centered in the white canvas.
+    // #view=Fit guarantees the whole PDF scales to fit inside the given height/width with no scroll!
     canvas.innerHTML = `
         <div id="pdfLoading" style="position: absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#ffffff; z-index:10;">
             <i class="fa-solid fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
             <p style="color: var(--text-muted); font-weight: 500;">A carregar visualizador PDF...</p>
         </div>
-        <iframe src="${data.pdf_url}#toolbar=0&navpanes=0&scrollbar=0&view=FitV" 
-            style="flex:1; width:100%; max-width:900px; margin: 0 auto; height:100%; border:none; background: #ffffff; opacity: 0; transition: opacity 0.3s; display:block;" 
+        <iframe src="${data.pdf_url}#toolbar=0&navpanes=0&scrollbar=0&view=Fit" 
+            style="flex:1; width:100%; max-width:900px; margin: 0 auto; height:100%; border:none; background: #ffffff; opacity: 0; transition: opacity 0.3s; display:block; box-sizing: border-box;" 
             allowfullscreen 
             onload="document.getElementById('pdfLoading').style.display='none'; this.style.opacity='1';">
         </iframe>
