@@ -17,6 +17,12 @@ let typeTimeout = null;
 
 export function openTutorial() {
     window.closeAllModals();
+
+    // Close dropbar if open
+    if (document.getElementById('mobileDropbar')?.classList.contains('open')) {
+        window.toggleNavDropdown();
+    }
+
     currentTutStep = 0;
     document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow').forEach(el => el.remove());
     renderStep(0);
@@ -56,7 +62,23 @@ function renderStep(index) {
     };
     type();
 
-    const targetEl = step.target ? document.querySelector(step.target) : null;
+    const isMobile = window.innerWidth <= 850;
+    let targetSelector = step.target;
+
+    // Handle mobile dropbar steps
+    if (isMobile) {
+        if (targetSelector === "button[onclick='openSettingsModal()']") {
+            targetSelector = ".mobile-dropbar button[onclick*='openSettingsModal']";
+            if (!document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
+        } else if (targetSelector === "#liveLinkBtn") {
+            targetSelector = "#liveLinkBtnMobile";
+            if (!document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
+        } else {
+            if (document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
+        }
+    }
+
+    const targetEl = targetSelector ? document.querySelector(targetSelector) : null;
     if (step.target === '.add-item-btn') scrollToSlide(0, { instant: true });
 
     if (targetEl) {
@@ -92,7 +114,9 @@ function createEl(tag, className, styles = {}, html = '') {
 }
 
 function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
-    const margin = 20, tooltipWidth = 540, tooltipHeight = tooltip.offsetHeight;
+    const isMobile = window.innerWidth <= 850;
+    const margin = 20, tooltipWidth = isMobile ? Math.min(window.innerWidth - 40, 340) : 540;
+    const tooltipHeight = tooltip.offsetHeight;
     let tx = rect.left + rect.width / 2 - tooltipWidth / 2;
     tx = Math.max(20, Math.min(tx, window.innerWidth - tooltipWidth - 20));
 
