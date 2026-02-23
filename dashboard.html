@@ -187,6 +187,12 @@
                     </button>
                 </div>
 
+                <button class="btn-nav mobile-help-trigger" onclick="openTutorial()" title="Ajuda"
+                    style="position:relative;">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span class="badge-pulse" style="right: -2px; top: -2px;">NOVO</span>
+                </button>
+
                 <button class="btn-nav mobile-nav-trigger" onclick="toggleNavDropdown()" title="Menu">
                     <i class="fa-solid fa-bars-staggered" id="navMobileIcon"></i>
                 </button>
@@ -208,10 +214,6 @@
             </button>
             <button class="dropbar-item" onclick="window.location.href='subscription.html'">
                 <i class="fa-solid fa-crown" style="color:var(--primary);"></i> <span>Premium</span>
-            </button>
-            <button class="dropbar-item" onclick="openTutorial(); toggleNavDropdown()" style="position:relative;">
-                <i class="fa-solid fa-graduation-cap"></i> <span>Ajuda</span>
-                <span class="badge-pulse">NOVO</span>
             </button>
             <button class="dropbar-item btn-danger-soft" onclick="signOut()">
                 <i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span>

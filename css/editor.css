@@ -201,7 +201,8 @@ button:disabled {
     gap: 10px;
 }
 
-.mobile-nav-trigger {
+.mobile-nav-trigger,
+.mobile-help-trigger {
     display: none;
     background: var(--primary-glow) !important;
     color: var(--primary) !important;
@@ -259,7 +260,8 @@ button:disabled {
         display: none;
     }
 
-    .mobile-nav-trigger {
+    .mobile-nav-trigger,
+    .mobile-help-trigger {
         display: flex;
     }
 }
