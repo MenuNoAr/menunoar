@@ -101,7 +101,7 @@ button:disabled {
 }
 
 .nav-brand img {
-    height: 32px;
+    height: 38px;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
 }
 
@@ -541,7 +541,7 @@ button:disabled {
     }
 
     .nav-brand img {
-        height: 26px;
+        height: 31px;
     }
 
     .nav-tools {

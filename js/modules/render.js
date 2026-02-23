@@ -11,8 +11,9 @@ const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;
 const escapeHTML = (str) => str ? String(str).replace(/[&<>"']/g, m => ESC[m]) : '';
 
 // ─── Live Link ────────────────────────────────────────────────────────────────
+// ─── Live Link ────────────────────────────────────────────────────────────────
 export function updateLiveLink(slug) {
-    const url = `${window.location.origin}/menu.html?id=${slug}`;
+    const url = `https://menunoar.pt/menu.html?id=${slug}`;
 
     // Update both desktop and mobile buttons
     ['liveLinkBtn', 'liveLinkBtnMobile'].forEach(id => {
@@ -47,10 +48,23 @@ export function renderHeader(data) {
             `;
         } else {
             coverDiv.style.backgroundImage = 'none';
-            coverDiv.style.backgroundColor = 'var(--bg-page)';
-            coverDiv.style.height = '120px';
+            // Placeholder Styling
+            coverDiv.style.background = 'var(--bg-card)';
+            coverDiv.style.border = '2px dashed var(--border)';
+            coverDiv.style.borderRadius = 'var(--radius-lg)';
+            coverDiv.style.height = '180px';
+            coverDiv.style.display = 'flex';
+            coverDiv.style.alignItems = 'center';
+            coverDiv.style.justifyContent = 'center';
+            coverDiv.style.margin = '20px auto';
             coverDiv.innerHTML = `
-                <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Adicionar Capa</div>
+                <div style="text-align:center; color:var(--text-muted); padding:20px;">
+                    <i class="fa-solid fa-image" style="font-size: 2.5rem; margin-bottom:10px;"></i>
+                    <p style="font-weight:600; font-size:1rem; margin:0;">Adicionar Capa Principal</p>
+                    <p style="font-size:0.8rem; opacity:0.7; margin-top:5px;">Clica aqui para escolher foto</p>
+                </div>
+                <!-- Interactive Overlay -->
+                <div class="edit-overlay" style="border-radius:var(--radius-lg);"><i class="fa-solid fa-camera"></i> Carregar Imagem</div>
                 <input type="file" id="coverUpload" style="display:none;" accept="image/*" onchange="handleCoverUpload(this)">
             `;
         }
@@ -213,24 +227,31 @@ export function renderMenu(items) {
                     onchange="handleCatUpload('${cat}', this)"
                     style="display:none;" accept="image/*">
             </div>`
-            : `<div class="slide-title">
+            : `<div class="slide-title" style="margin-bottom:20px; text-align:center;">
                 <span contenteditable="true" spellcheck="false"
                     class="text-editable inline-editable"
                     onblur="handleCategoryRename('${cat}', this.innerText)"
                     onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+                    style="font-size:1.8rem; font-weight:700;"
                 >${escapeHTML(cat)}</span>
-                <div class="cat-actions-minimal">
-                    <label class="custom-file-upload">
-                        <i class="fa-solid fa-image"></i> Imagem
-                        <input type="file" onchange="handleCatUpload('${cat}', this)"
-                            style="display:none;" accept="image/*">
-                    </label>
-                    <button class="action-btn btn-delete"
-                        onclick="deleteCategory('${cat}')"
-                        title="Apagar Categoria">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+                
+                <div class="cat-banner-placeholder editable-trigger" onclick="triggerCatUpload('${cat}')" 
+                     style="background:var(--bg-card); border:2px dashed var(--border); border-radius:var(--radius-md); height:140px; margin-top:15px; display:flex; flex-direction:column; justify-content:center; align-items:center; color:var(--text-muted); cursor:pointer; position:relative;">
+                    
+                    <i class="fa-solid fa-image" style="font-size:2rem; margin-bottom:10px;"></i>
+                    <span style="font-weight:600; font-size:0.95rem;">Adicionar Capa em "${escapeHTML(cat)}"</span>
+                    
+                    <div class="edit-overlay" style="border-radius:var(--radius-md);"><i class="fa-solid fa-camera"></i> Escolher Imagem</div>
+                    
+                    <div class="header-actions-abs" style="position:absolute; top:10px; right:10px; z-index:10;">
+                        <button class="action-btn btn-delete"
+                            onclick="deleteCategory('${cat}'); event.stopPropagation();"
+                            title="Apagar Categoria">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
+                <input type="file" id="upload-${safeCat}" onchange="handleCatUpload('${cat}', this)" style="display:none;" accept="image/*">
             </div>`;
 
         const itemsHTML = groups[cat].map(createItemCard).join('');
@@ -361,10 +382,11 @@ export function createItemCard(item) {
                     </div>
                 </div>
             </div>
-            <div class="item-img" onclick="openImageModal('${id}')">
+            <div class="item-img" onclick="openImageModal('${id}')" 
+                style="${!image_url ? 'width:100px; height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg-page); border:2px dashed var(--border); color:var(--text-muted); border-radius:12px; text-align:center; cursor:pointer;' : ''}">
                 ${image_url
             ? `<img src="${image_url}" loading="lazy" alt="${escapeHTML(name)}">`
-            : `<div class="img-placeholder"><i class="fa-solid fa-image"></i></div>`
+            : `<i class="fa-solid fa-camera" style="font-size:1.5rem; margin-bottom:5px;"></i><span style="font-size:0.75rem; font-weight:600;">Adicionar<br>Foto</span>`
         }
             </div>
         </div>
