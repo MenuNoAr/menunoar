@@ -71,20 +71,25 @@ export function renderPdfViewer(data) {
 
     // Clear and set height
     canvas.innerHTML = '';
-    // Use an exact calculation that doesn't trigger scroll
-    canvas.style.height = 'calc(100vh - var(--navbar-height))';
-    canvas.style.maxHeight = 'calc(100vh - var(--navbar-height))';
-    canvas.style.maxWidth = '900px'; // Restrict width so it doesn't span the entire monitor
-    canvas.style.width = '100%';
-    canvas.style.margin = 'var(--navbar-height) auto 0 auto'; // Push down from navbar, center horizontally
+    // Use an exact positioning that anchors to viewport, preventing scroll
+    canvas.style.position = 'fixed';
+    canvas.style.top = 'var(--navbar-height)';
+    canvas.style.bottom = '0';
+    canvas.style.left = '0';
+    canvas.style.right = '0';
+    canvas.style.margin = '0';
     canvas.style.padding = '0';
     canvas.style.border = 'none';
+    canvas.style.width = '100vw';
+    canvas.style.maxWidth = '100vw';
+    canvas.style.height = 'calc(100vh - var(--navbar-height))';
     canvas.style.display = 'flex';
     canvas.style.flexDirection = 'column';
-    canvas.style.background = '#ffffff'; // Make sides white
-    canvas.style.position = 'relative';
-    canvas.style.overflow = 'hidden'; // kill any internal scroll
-    canvas.style.overflow = 'hidden'; // kill any internal scroll
+    canvas.style.background = '#ffffff'; // Paint sides of the screen white
+    canvas.style.overflow = 'hidden';
+
+    // Kill the outer page scroll so the only scroll is inside the PDF
+    document.body.style.overflow = 'hidden';
 
     // Hide the Tutorial / Help Button in PDF mode
     const tutBtn = document.querySelector('[onclick="openTutorial()"]');
@@ -103,14 +108,14 @@ export function renderPdfViewer(data) {
     }
 
     // Embed the PDF as cleanly as possible.
-    // #view=FitV forces the PDF to fit its height without scrolling if possible
+    // The iframe adopts the max-width, sitting perfectly centered in the white canvas.
     canvas.innerHTML = `
-        <div id="pdfLoading" style="position: absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg-page); z-index:10;">
+        <div id="pdfLoading" style="position: absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#ffffff; z-index:10;">
             <i class="fa-solid fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
             <p style="color: var(--text-muted); font-weight: 500;">A carregar visualizador PDF...</p>
         </div>
         <iframe src="${data.pdf_url}#toolbar=0&navpanes=0&scrollbar=0&view=FitV" 
-            style="flex:1; width:100%; height:100%; border:none; background: #525659; opacity: 0; transition: opacity 0.3s; display:block;" 
+            style="flex:1; width:100%; max-width:900px; margin: 0 auto; height:100%; border:none; background: #ffffff; opacity: 0; transition: opacity 0.3s; display:block;" 
             allowfullscreen 
             onload="document.getElementById('pdfLoading').style.display='none'; this.style.opacity='1';">
         </iframe>
