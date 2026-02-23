@@ -30,7 +30,7 @@
     <!-- Menu Styles (Visuals for preview) -->
     <link rel="stylesheet" href="css/menu.css?v=1.1">
     <!-- Editor Styles (Overlays) -->
-    <link rel="stylesheet" href="css/editor.css?v=3.1">
+    <link rel="stylesheet" href="css/editor.css?v=3.2">
 
     <!-- Defer non-critical scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
@@ -44,7 +44,7 @@
         <div class="setup-card">
             <div class="setup-header">
                 <img src="assets/images/logo.svg" alt="Logo" class="setup-logo">
-                <h2>Bem-vindo, Chef!</h2>
+                <h2>Bem-vindo, <span id="setupGreetingName">!</span></h2>
                 <p>Vamos dar vida ao teu menu digital.</p>
             </div>
 
@@ -97,7 +97,11 @@
             <div class="nav-brand">
                 <img id="dashboardLogo" src="assets/images/logo.svg" alt="MenuNoAr">
                 <span class="divider">|</span>
-                <span id="userDisplay">Chef</span>
+                <button id="userDisplay" class="user-name-btn" onclick="openRenameModal()"
+                    title="Clica para alterar o nome">
+                    <span id="userDisplayName">...</span>
+                    <i class="fa-solid fa-pen-to-square user-edit-icon"></i>
+                </button>
             </div>
 
             <div class="nav-tools">
@@ -354,6 +358,28 @@
     </div>
 
 
+
+    <!-- RENAME MODAL -->
+    <div id="renameModal" class="edit-modal">
+        <div class="edit-modal-content" style="max-width:380px;">
+            <h2 style="margin-bottom:6px; color:var(--color-text);">Alterar Nome</h2>
+            <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Este nome é apenas para
+                referência pessoal no painel.</p>
+            <form id="renameForm">
+                <div class="form-group">
+                    <label>O teu nome</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="renameInput" placeholder="ex: João Silva" maxlength="40" required>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('renameModal')">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- SORTABLE, CONFETTI, ETC -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>

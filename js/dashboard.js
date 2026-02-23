@@ -23,19 +23,21 @@ async function init() {
             if (state.currentUser?.id === user.id) return;
             updateState({ currentUser: user });
 
-            // Display initials in the navbar
+            // Display first name in the navbar
             const rawName = user.user_metadata?.full_name
                 ?? user.user_metadata?.name
                 ?? user.email.split('@')[0];
-            const cleanName = rawName.replace(/[._]/g, ' ');
-            const initials = cleanName.split(' ')
-                .map(w => w.charAt(0))
-                .slice(0, 2)
-                .join('')
-                .toUpperCase();
+            const cleanName = rawName.replace(/[._]/g, ' ').trim();
 
-            const el = document.getElementById('userDisplay');
-            if (el) el.textContent = initials;
+            // Use saved custom name if available, otherwise derive first name
+            const savedName = localStorage.getItem('user_display_name');
+            const firstName = savedName || cleanName.split(' ')[0];
+
+            const el = document.getElementById('userDisplayName');
+            if (el) el.textContent = firstName;
+
+            const greetEl = document.getElementById('setupGreetingName');
+            if (greetEl) greetEl.textContent = firstName + '!';
 
             await loadData();
 
@@ -66,6 +68,26 @@ async function init() {
 // ─── Global Helpers ───────────────────────────────────────────────────────────
 window.signOut = () => signOut();
 window.openTutorial = openTutorial;
+
+window.openRenameModal = () => {
+    const currentName = document.getElementById('userDisplayName')?.textContent || '';
+    const input = document.getElementById('renameInput');
+    if (input) input.value = currentName;
+    document.getElementById('renameModal')?.classList.add('open');
+    setTimeout(() => input?.focus(), 100);
+};
+
+document.getElementById('renameForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const newName = document.getElementById('renameInput').value.trim();
+    if (!newName) return;
+    localStorage.setItem('user_display_name', newName);
+    const el = document.getElementById('userDisplayName');
+    if (el) el.textContent = newName;
+    const greetEl = document.getElementById('setupGreetingName');
+    if (greetEl) greetEl.textContent = newName + '!';
+    window.closeModal('renameModal');
+});
 
 window.toggleDarkMode = () => {
     const isDark = document.body.classList.toggle('dark-mode');

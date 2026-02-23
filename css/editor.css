@@ -105,14 +105,38 @@ button:disabled {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
 }
 
-#userDisplay {
+.user-name-btn {
     background: var(--primary-glow);
     color: var(--primary);
-    padding: 6px 14px;
+    padding: 6px 12px;
     border-radius: 50px;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 0.85rem;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: auto;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.user-name-btn:hover {
+    background: var(--primary);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(31, 168, 255, 0.3);
+}
+
+.user-edit-icon {
+    font-size: 0.72rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.user-name-btn:hover .user-edit-icon {
+    opacity: 1;
 }
 
 .nav-brand .divider {
@@ -423,7 +447,7 @@ button:disabled {
         display: none;
     }
 
-    .nav-brand #userDisplay,
+    .nav-brand .user-name-btn,
     .nav-brand .divider {
         display: none;
     }
