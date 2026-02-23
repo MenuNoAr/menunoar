@@ -48,23 +48,17 @@ export function renderHeader(data) {
             `;
         } else {
             coverDiv.style.backgroundImage = 'none';
-            // Placeholder Styling
-            coverDiv.style.background = 'var(--bg-card)';
-            coverDiv.style.border = '2px dashed var(--border)';
-            coverDiv.style.borderRadius = 'var(--radius-lg)';
-            coverDiv.style.height = '180px';
-            coverDiv.style.display = 'flex';
-            coverDiv.style.alignItems = 'center';
-            coverDiv.style.justifyContent = 'center';
-            coverDiv.style.margin = '20px auto';
+            // Placeholder Styling (Original style via edit-overlay)
+            coverDiv.style.background = 'var(--bg-page)';
+            coverDiv.style.border = 'none';
+            coverDiv.style.borderRadius = '0';
+            coverDiv.style.height = '120px';
+            coverDiv.style.display = 'block';
+            coverDiv.style.margin = '0';
             coverDiv.innerHTML = `
-                <div style="text-align:center; color:var(--text-muted); padding:20px;">
-                    <i class="fa-solid fa-image" style="font-size: 2.5rem; margin-bottom:10px;"></i>
-                    <p style="font-weight:600; font-size:1rem; margin:0;">Adicionar Capa Principal</p>
-                    <p style="font-size:0.8rem; opacity:0.7; margin-top:5px;">Clica aqui para escolher foto</p>
+                <div class="edit-overlay" style="opacity: 1; border-radius: 0;">
+                    <i class="fa-solid fa-camera" style="margin-right:8px;"></i> Adicionar Capa
                 </div>
-                <!-- Interactive Overlay -->
-                <div class="edit-overlay" style="border-radius:var(--radius-lg);"><i class="fa-solid fa-camera"></i> Carregar Imagem</div>
                 <input type="file" id="coverUpload" style="display:none;" accept="image/*" onchange="handleCoverUpload(this)">
             `;
         }
@@ -235,13 +229,10 @@ export function renderMenu(items) {
                     style="font-size:1.8rem; font-weight:700;"
                 >${escapeHTML(cat)}</span>
                 
-                <div class="cat-banner-placeholder editable-trigger" onclick="triggerCatUpload('${cat}')" 
-                     style="background:var(--bg-card); border:2px dashed var(--border); border-radius:var(--radius-md); height:140px; margin-top:15px; display:flex; flex-direction:column; justify-content:center; align-items:center; color:var(--text-muted); cursor:pointer; position:relative;">
-                    
-                    <i class="fa-solid fa-image" style="font-size:2rem; margin-bottom:10px;"></i>
-                    <span style="font-weight:600; font-size:0.95rem;">Adicionar Capa em "${escapeHTML(cat)}"</span>
-                    
-                    <div class="edit-overlay" style="border-radius:var(--radius-md);"><i class="fa-solid fa-camera"></i> Escolher Imagem</div>
+                <div class="cat-banner editable-trigger" onclick="triggerCatUpload('${cat}')" style="background:var(--bg-page);">
+                    <div class="edit-overlay" style="opacity:1; border-radius:16px;">
+                        <i class="fa-solid fa-camera" style="margin-right:8px;"></i> Adicionar Capa
+                    </div>
                     
                     <div class="header-actions-abs" style="position:absolute; top:10px; right:10px; z-index:10;">
                         <button class="action-btn btn-delete"
@@ -382,11 +373,12 @@ export function createItemCard(item) {
                     </div>
                 </div>
             </div>
-            <div class="item-img" onclick="openImageModal('${id}')" 
-                style="${!image_url ? 'width:100px; height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg-page); border:2px dashed var(--border); color:var(--text-muted); border-radius:12px; text-align:center; cursor:pointer;' : ''}">
+            <div class="item-img editable-trigger" onclick="openImageModal('${id}')" style="position:relative; background:var(--bg-page);">
                 ${image_url
             ? `<img src="${image_url}" loading="lazy" alt="${escapeHTML(name)}" style="width:100%; height:100%; object-fit:cover; display:block;">`
-            : `<i class="fa-solid fa-camera" style="font-size:1.5rem; margin-bottom:5px;"></i><span style="font-size:0.75rem; font-weight:600;">Adicionar<br>Foto</span>`
+            : `<div class="edit-overlay" style="opacity:1; font-size:0.75rem; flex-direction:column; gap:4px; text-align:center;">
+                   <i class="fa-solid fa-camera" style="font-size:1.2rem;"></i>Adicionar<br>Foto
+               </div>`
         }
             </div>
         </div>
