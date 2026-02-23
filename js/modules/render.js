@@ -70,6 +70,28 @@ export function renderMenu(items) {
     const nav = document.getElementById('categoryNav');
     if (!container || !nav) return;
 
+    if (state.currentData.menu_type === 'pdf') {
+        nav.style.display = 'none';
+        container.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; background: var(--bg-card); border-radius: 16px; margin-top: 20px; border: 1px dashed var(--border);">
+                <i class="fa-solid fa-file-pdf" style="font-size: 4rem; color: var(--danger); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 15px; font-weight: 800; font-size: 1.5rem;">Modo PDF Ativo</h3>
+                <p style="color: var(--text-muted); margin-bottom: 25px; line-height: 1.6;">O teu menu está atualmente configurado para abrir o teu ficheiro PDF em vez do menu interativo.</p>
+                <div style="display:flex; gap: 10px; justify-content: center;">
+                    <a href="${state.currentData.pdf_url}" target="_blank" class="btn-confirm" style="text-decoration: none; width: auto; flex: none;">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver PDF Uploaded
+                    </a>
+                    <button class="btn-secondary" onclick="openSettingsModal()" style="width: auto; flex: none;">
+                        <i class="fa-solid fa-gear"></i> Definir PDF ou Voltar ao Digital
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    nav.style.display = '';
+
     // Reset track
     container.innerHTML = '<div id="editorTrack" class="slider-track"></div>';
     const track = document.getElementById('editorTrack');

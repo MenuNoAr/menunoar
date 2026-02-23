@@ -41,21 +41,27 @@ async function init() {
 
             await loadData();
 
-            // Fire tutorial + confetti after first restaurant creation
+            // Fire tutorial + confetti after first restaurant creation (Scratch)
             if (localStorage.getItem('just_created_rest') === 'true') {
                 localStorage.removeItem('just_created_rest');
                 setTimeout(() => {
                     if (window.confetti) {
-                        confetti({
-                            particleCount: 150,
-                            spread: 70,
-                            origin: { y: 0.6 },
-                            colors: ['#1fa8ff', '#16a34a', '#ffffff'],
-                        });
+                        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#1fa8ff', '#16a34a', '#ffffff'] });
                     }
                     openTutorial();
                 }, 1000);
             }
+
+            // Fire ONLY confetti (no tutorial) for PDF imports
+            if (localStorage.getItem('just_created_pdf') === 'true') {
+                localStorage.removeItem('just_created_pdf');
+                setTimeout(() => {
+                    if (window.confetti) {
+                        confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#1fa8ff', '#ef4444', '#ffffff'] });
+                    }
+                }, 1000);
+            }
+
         }, () => {
             window.location.href = 'login.html';
         });
@@ -189,7 +195,7 @@ document.getElementById('importForm')?.addEventListener('submit', async (e) => {
     }
 
     alert('✅ Menu PDF criado com sucesso!');
-    localStorage.setItem('just_created_rest', 'true');
+    localStorage.setItem('just_created_pdf', 'true');
     window.location.reload();
 });
 
