@@ -1039,8 +1039,17 @@ input:checked+.slider:before {
 
 .modal-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     margin-top: 32px;
+}
+
+@media (max-width: 500px) {
+
+    .modal-actions .btn-confirm,
+    .modal-actions .btn-cancel {
+        flex: 1 1 100% !important;
+    }
 }
 
 .btn-confirm,

@@ -27,6 +27,15 @@ export function updateLiveLink(slug) {
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 export function renderHeader(data) {
+    const canvas = document.querySelector('.editor-canvas');
+    if (canvas) {
+        const fontName = data.font || 'Inter';
+        // Add quotes for fonts with spaces, but Dancing Script is cursive
+        const fontType = fontName.includes('Playfair') ? 'serif' : (fontName.includes('Dancing') ? 'cursive' : 'sans-serif');
+        canvas.style.setProperty('--font-heading', `'${fontName}', ${fontType}`);
+        canvas.style.fontFamily = `'${fontName}', ${fontType}`;
+    }
+
     const nameEl = document.getElementById('restNameEditor');
     const descEl = document.getElementById('restDescEditor');
     if (nameEl) nameEl.textContent = data.name || 'Nome do Restaurante';

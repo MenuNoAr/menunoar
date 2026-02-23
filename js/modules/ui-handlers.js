@@ -416,7 +416,8 @@ document.getElementById('settingsForm').onsubmit = async (e) => {
     const btn = document.querySelector('#settingsForm .btn-confirm');
     if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A guardar...';
 
-    const isPdf = document.getElementById('pdfToggle').checked;
+    let isPdf = document.getElementById('pdfToggle').checked;
+
     const updates = {
         slug: document.getElementById('modalSlug').value,
         font: document.getElementById('modalFont').value,
@@ -424,9 +425,20 @@ document.getElementById('settingsForm').onsubmit = async (e) => {
     };
 
     const pdfInput = document.getElementById('pdfUploadInput');
+    let hasPdfUrl = state.currentData?.pdf_url ? true : false;
+
     if (pdfInput.files.length) {
         const { data, error } = await uploadFile(pdfInput.files[0], 'menu-pdf', 'menu-pdfs');
-        if (!error && data) updates.pdf_url = data.publicUrl;
+        if (!error && data) {
+            updates.pdf_url = data.publicUrl;
+            hasPdfUrl = true;
+        }
+    }
+
+    // Failsafe: if the user turns on PDF mode but there is no PDF file loaded, revert to digital
+    if (isPdf && !hasPdfUrl) {
+        updates.menu_type = 'digital';
+        document.getElementById('pdfToggle').checked = false;
     }
 
     await state.supabase.from('restaurants').update(updates).eq('id', state.restaurantId);
