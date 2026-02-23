@@ -88,21 +88,10 @@ export function renderPdfViewer(data) {
         return;
     }
 
-    // Embed the PDF with Google Docs viewer or native iframe (native is better for pagination if supported)
-    // We'll use a direct iframe, browsers have decent built-in PDF viewers with pagination.
+    // Embed the PDF as cleanly as possible.
+    // #toolbar=0&navpanes=0 hides the default browser PDF toolbars
     canvas.innerHTML = `
-        <div style="padding: 15px; background: var(--bg-card); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
-            <div>
-                <h3 style="font-size: 1.1rem; display:flex; align-items:center; gap: 8px;">
-                    <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> Modo PDF Ativo
-                </h3>
-                <span style="font-size: 0.85rem; color: var(--text-muted);">Apenas visualização. O menu do cliente será este ficheiro.</span>
-            </div>
-            <button class="btn-secondary small" onclick="openSettingsModal()">
-                <i class="fa-solid fa-pen"></i> Editar PDF
-            </button>
-        </div>
-        <iframe src="${data.pdf_url}" style="flex:1; width:100%; border:none; background: #525659;" allowfullscreen></iframe>
+        <iframe src="${data.pdf_url}#toolbar=0&navpanes=0&scrollbar=0" style="flex:1; width:100%; height:100%; border:none; background: #525659;" allowfullscreen></iframe>
     `;
 }
 
