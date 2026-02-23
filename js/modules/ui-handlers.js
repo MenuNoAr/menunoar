@@ -388,10 +388,31 @@ window.openSettingsModal = () => {
 window.togglePdfDetails = () => {
     const isPdf = document.getElementById('pdfToggle').checked;
     document.getElementById('pdfDetails').style.display = isPdf ? 'block' : 'none';
+
+    // Show existing PDF block if applicable
+    const pdfUrl = state.currentData?.pdf_url;
+    if (pdfUrl) {
+        document.getElementById('pdfUploadState').style.display = 'none';
+        document.getElementById('pdfActionsState').style.display = 'block';
+
+        let filename = 'menu.pdf';
+        try {
+            const parts = new URL(pdfUrl).pathname.split('/');
+            filename = parts[parts.length - 1] || 'menu.pdf';
+        } catch (e) { }
+        document.getElementById('pdfCurrentFileName').textContent = filename;
+        document.getElementById('pdfViewLink').href = pdfUrl;
+    } else {
+        document.getElementById('pdfUploadState').style.display = 'block';
+        document.getElementById('pdfActionsState').style.display = 'none';
+    }
 };
 
 document.getElementById('settingsForm').onsubmit = async (e) => {
     e.preventDefault();
+    const btn = document.querySelector('#settingsForm .btn-confirm');
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A guardar...';
+
     const isPdf = document.getElementById('pdfToggle').checked;
     const updates = {
         slug: document.getElementById('modalSlug').value,
@@ -406,9 +427,23 @@ document.getElementById('settingsForm').onsubmit = async (e) => {
     }
 
     await state.supabase.from('restaurants').update(updates).eq('id', state.restaurantId);
-    alert('Configurações guardadas!');
+
+    if (btn) btn.innerHTML = 'Guardar Configurações';
     window.closeModal('settingsModal');
     loadData();
+};
+
+window.deletePdfFile = async () => {
+    if (!confirm('Tem a certeza que deseja remover o PDF do menu? Terá de carregar outro PDF ou desativar o modo PDF para ter um menu online.')) return;
+
+    await state.supabase.from('restaurants').update({ pdf_url: null }).eq('id', state.restaurantId);
+    state.currentData.pdf_url = null;
+
+    document.getElementById('pdfUploadInput').value = '';
+    const display = document.getElementById('pdfFileNameDisplay');
+    if (display) display.textContent = 'Clique para selecionar o PDF';
+
+    window.togglePdfDetails();
 };
 
 // ─── Item Modal ───────────────────────────────────────────────────────────────

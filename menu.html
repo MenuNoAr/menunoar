@@ -148,17 +148,7 @@
 
             // PDF MODE CHECK
             if (restaurant.menu_type === 'pdf' && restaurant.pdf_url) {
-                document.title = restaurant.name;
-                document.body.innerHTML = `
-                    <style>
-                        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #333; }
-                        #pdfContainer { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-                        iframe { width: 100%; height: 100%; border: none; }
-                    </style>
-                    <div id="pdfContainer">
-                        <iframe src="${restaurant.pdf_url}"></iframe>
-                    </div>
-                `;
+                window.location.href = restaurant.pdf_url;
                 return;
             }
 

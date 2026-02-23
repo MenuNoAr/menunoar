@@ -4,7 +4,7 @@
  * single updateState call, removed redundant .limit(1).
  */
 import { state, updateState } from './state.js';
-import { renderHeader, renderMenu, updateLiveLink } from './render.js';
+import { renderHeader, renderMenu, renderPdfViewer, updateLiveLink } from './render.js';
 import { initHeaderEditing } from './ui-handlers.js';
 
 // ─── Load All Dashboard Data ──────────────────────────────────────────────────
@@ -69,12 +69,17 @@ export async function loadData() {
     updateState({ restaurantId: rest.id, currentData: rest, menuItems: items });
 
     // Render all UI
-    renderHeader(rest);
-    renderMenu(items);
+    if (rest.menu_type === 'pdf') {
+        renderPdfViewer(rest);
+    } else {
+        renderHeader(rest);
+        renderMenu(items);
+        initHeaderEditing();
+    }
+
     updateLiveLink(rest.slug);
     _checkSubscription(rest);
     _updateTrialBadge(rest);
-    initHeaderEditing();
 }
 
 // ─── Subscription Display ─────────────────────────────────────────────────────

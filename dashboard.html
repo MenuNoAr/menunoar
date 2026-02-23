@@ -277,17 +277,44 @@
                 </div>
 
                 <div class="form-group" id="pdfDetails" style="display:none; animation: fadeIn 0.3s;">
-                    <label>Upload do PDF</label>
+                    <label>Ficheiro PDF do Menu</label>
 
-                    <div class="file-upload-wrapper" onclick="document.getElementById('pdfUploadInput').click()">
-                        <div class="upload-icon">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                        </div>
-                        <div class="upload-text">
-                            <span id="pdfFileNameDisplay">Clique para selecionar o PDF</span>
-                            <small>Tamanho máx: 10MB</small>
+                    <div id="pdfUploadState">
+                        <div class="file-upload-wrapper" onclick="document.getElementById('pdfUploadInput').click()">
+                            <div class="upload-icon">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <div class="upload-text">
+                                <span id="pdfFileNameDisplay">Clique para selecionar o PDF</span>
+                                <small>Tamanho máx: 10MB</small>
+                            </div>
                         </div>
                     </div>
+
+                    <div id="pdfActionsState"
+                        style="display:none; background: var(--bg-page); padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-top: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <i class="fa-solid fa-file-pdf" style="font-size: 2rem; color: #ef4444;"></i>
+                            <div style="flex: 1; overflow: hidden;">
+                                <div style="font-weight: 700; font-size: 0.95rem; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                                    id="pdfCurrentFileName">Menu.pdf</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);"><a href="#" id="pdfViewLink"
+                                        target="_blank" style="color: var(--primary);">Ver PDF Atual</a></div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn-secondary small" style="flex: 1;"
+                                onclick="document.getElementById('pdfUploadInput').click()">
+                                <i class="fa-solid fa-pen"></i> Alterar
+                            </button>
+                            <button type="button" class="btn-secondary small"
+                                style="flex: 1; color: #ef4444; border-color: #fee2e2;"
+                                onclick="window.deletePdfFile()">
+                                <i class="fa-solid fa-trash"></i> Apagar
+                            </button>
+                        </div>
+                    </div>
+
                     <input type="file" id="pdfUploadInput" style="display:none;" accept="application/pdf"
                         onchange="handlePdfSelect(this)">
 

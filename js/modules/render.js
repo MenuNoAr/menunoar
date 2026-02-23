@@ -64,33 +64,53 @@ function _updateBadge(badgeId, textId, value) {
     el.style.opacity = value ? '1' : '0.5';
 }
 
-// ─── Menu ─────────────────────────────────────────────────────────────────────
-export function renderMenu(items) {
-    const container = document.getElementById('menuContainer');
-    const nav = document.getElementById('categoryNav');
-    if (!container || !nav) return;
+// ─── PDF Viewer ───────────────────────────────────────────────────────────────
+export function renderPdfViewer(data) {
+    const canvas = document.querySelector('.editor-canvas');
+    if (!canvas) return;
 
-    if (state.currentData.menu_type === 'pdf') {
-        nav.style.display = 'none';
-        container.innerHTML = `
-            <div style="text-align: center; padding: 60px 20px; background: var(--bg-card); border-radius: 16px; margin-top: 20px; border: 1px dashed var(--border);">
-                <i class="fa-solid fa-file-pdf" style="font-size: 4rem; color: var(--danger); margin-bottom: 20px;"></i>
-                <h3 style="margin-bottom: 15px; font-weight: 800; font-size: 1.5rem;">Modo PDF Ativo</h3>
-                <p style="color: var(--text-muted); margin-bottom: 25px; line-height: 1.6;">O teu menu está atualmente configurado para abrir o teu ficheiro PDF em vez do menu interativo.</p>
-                <div style="display:flex; gap: 10px; justify-content: center;">
-                    <a href="${state.currentData.pdf_url}" target="_blank" class="btn-confirm" style="text-decoration: none; width: auto; flex: none;">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver PDF Uploaded
-                    </a>
-                    <button class="btn-secondary" onclick="openSettingsModal()" style="width: auto; flex: none;">
-                        <i class="fa-solid fa-gear"></i> Definir PDF ou Voltar ao Digital
-                    </button>
-                </div>
+    // Clear and set height
+    canvas.innerHTML = '';
+    canvas.style.height = 'calc(100vh - var(--navbar-height))';
+    canvas.style.display = 'flex';
+    canvas.style.flexDirection = 'column';
+    canvas.style.background = 'var(--bg-page)';
+
+    if (!data.pdf_url) {
+        canvas.innerHTML = `
+            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: 20px;">
+                <i class="fa-solid fa-file-pdf" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 10px;">Nenhum PDF carregado</h3>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Vai às configurações (<i class="fa-solid fa-gear"></i>) para fazer upload do teu PDF.</p>
+                <button onclick="openSettingsModal()" class="btn-confirm"><i class="fa-solid fa-gear"></i> Abrir Configurações</button>
             </div>
         `;
         return;
     }
 
-    nav.style.display = '';
+    // Embed the PDF with Google Docs viewer or native iframe (native is better for pagination if supported)
+    // We'll use a direct iframe, browsers have decent built-in PDF viewers with pagination.
+    canvas.innerHTML = `
+        <div style="padding: 15px; background: var(--bg-card); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h3 style="font-size: 1.1rem; display:flex; align-items:center; gap: 8px;">
+                    <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> Modo PDF Ativo
+                </h3>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Apenas visualização. O menu do cliente será este ficheiro.</span>
+            </div>
+            <button class="btn-secondary small" onclick="openSettingsModal()">
+                <i class="fa-solid fa-pen"></i> Editar PDF
+            </button>
+        </div>
+        <iframe src="${data.pdf_url}" style="flex:1; width:100%; border:none; background: #525659;" allowfullscreen></iframe>
+    `;
+}
+
+// ─── Menu ─────────────────────────────────────────────────────────────────────
+export function renderMenu(items) {
+    const container = document.getElementById('menuContainer');
+    const nav = document.getElementById('categoryNav');
+    if (!container || !nav) return;
 
     // Reset track
     container.innerHTML = '<div id="editorTrack" class="slider-track"></div>';
