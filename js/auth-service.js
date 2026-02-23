@@ -97,10 +97,18 @@ export async function initAuthListener(onAuth, onNoAuth) {
     const sb = await getSupabase();
     if (!sb) return;
 
-    sb.auth.onAuthStateChange((event, session) => {
-        if (session) {
-            if (onAuth) onAuth(session.user);
-        } else {
+    // Check initial session immediately
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+        if (onAuth) onAuth(session.user);
+    } else {
+        if (onNoAuth) onNoAuth();
+    }
+
+    sb.auth.onAuthStateChange((event, currentSession) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+            if (currentSession && onAuth) onAuth(currentSession.user);
+        } else if (event === 'SIGNED_OUT') {
             if (onNoAuth) onNoAuth();
         }
     });

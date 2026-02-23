@@ -41,13 +41,31 @@
 
     <!-- SETUP SCREEN (Visible only if no restaurant) -->
     <div id="setup-screen" class="setup-container" style="display:none;">
-        <div class="setup-card">
+        <div class="setup-card" id="setup-choice-card">
             <div class="setup-header">
                 <img src="assets/images/logo.svg" alt="Logo" class="setup-logo">
                 <h2>Bem-vindo, <span id="setupGreetingName">!</span></h2>
+                <p>Já tens um menu ou queres começar do zero?</p>
+            </div>
+            <div class="setup-actions" style="display:flex; flex-direction:column; gap:15px; margin-top: 20px;">
+                <button type="button" class="btn-confirm btn-full" onclick="showSetupForm('import')">
+                    <i class="fa-solid fa-file-import"></i> Já tenho um menu (Importar)
+                </button>
+                <button type="button" class="btn-secondary btn-full" onclick="showSetupForm('scratch')">
+                    <i class="fa-solid fa-plus"></i> Criar do Zero
+                </button>
+            </div>
+        </div>
+
+        <div class="setup-card" id="setup-form-card" style="display:none;">
+            <button type="button" class="btn-cancel" onclick="goBackToSetupChoice()"
+                style="margin-bottom: 20px; width: 100%;">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </button>
+            <div class="setup-header">
+                <h2>Criar Menu do Zero</h2>
                 <p>Vamos dar vida ao teu menu digital.</p>
             </div>
-
             <form id="setupForm" class="setup-form">
                 <div class="form-group">
                     <label for="setupName">Nome do Restaurante</label>
@@ -85,6 +103,48 @@
 
                 <button type="submit" class="btn-confirm btn-full">
                     <i class="fa-solid fa-wand-magic-sparkles"></i> Criar Menu
+                </button>
+            </form>
+        </div>
+
+        <div class="setup-card" id="setup-import-card" style="display:none;">
+            <button type="button" class="btn-cancel" onclick="goBackToSetupChoice()"
+                style="margin-bottom: 20px; width: 100%;">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </button>
+            <div class="setup-header">
+                <h2>Importar Menu</h2>
+                <p>Envia-nos o teu menu ou dados básicos. A nossa equipa trata do resto!</p>
+            </div>
+            <form id="importForm" class="setup-form">
+                <div class="form-group">
+                    <label for="importRestName">Nome do Restaurante</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-store"></i>
+                        <input type="text" id="importRestName" required placeholder="ex: O Tasco do Zé">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Ficheiro do Menu Acual (Opcional)</label>
+                    <div class="file-upload-wrapper" onclick="document.getElementById('importFile').click()"
+                        style="margin-top: 5px;">
+                        <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <div class="upload-text">
+                            <span id="importFileNameDisplay">Clique para selecionar PDF ou Imagem</span>
+                        </div>
+                    </div>
+                    <input type="file" id="importFile" accept=".pdf,image/*" style="display:none;"
+                        onchange="document.getElementById('importFileNameDisplay').textContent = this.files[0] ? this.files[0].name : 'Clique para selecionar PDF ou Imagem'">
+                </div>
+                <div class="form-group">
+                    <label for="importLink">Link do Menu (Opcional)</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-link"></i>
+                        <input type="url" id="importLink" placeholder="ex: https://meumenu.com">
+                    </div>
+                </div>
+                <button type="submit" class="btn-confirm btn-full">
+                    <i class="fa-solid fa-paper-plane"></i> Enviar Pedido
                 </button>
             </form>
         </div>

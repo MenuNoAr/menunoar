@@ -101,8 +101,23 @@ window.toggleDarkMode = () => {
 };
 
 // ─── Setup Wizard ─────────────────────────────────────────────────────────────
-window.generateSlug = (name) => {
-    const slug = name
+window.showSetupForm = (type) => {
+    document.getElementById('setup-choice-card').style.display = 'none';
+    if (type === 'scratch') {
+        document.getElementById('setup-form-card').style.display = 'block';
+    } else {
+        document.getElementById('setup-import-card').style.display = 'block';
+    }
+};
+
+window.goBackToSetupChoice = () => {
+    document.getElementById('setup-form-card').style.display = 'none';
+    document.getElementById('setup-import-card').style.display = 'none';
+    document.getElementById('setup-choice-card').style.display = 'block';
+};
+
+window.generateSlugString = (name) => {
+    return name
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
@@ -110,9 +125,50 @@ window.generateSlug = (name) => {
         .trim()
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-');
+};
+
+window.generateSlug = (name) => {
+    const slug = window.generateSlugString(name);
     const el = document.getElementById('setupSlug');
     if (el) el.value = slug;
 };
+
+document.getElementById('importForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A Enviar...';
+    btn.disabled = true;
+
+    const name = document.getElementById('importRestName').value.trim();
+    let slug = window.generateSlugString(name);
+    if (!slug) slug = 'menu-' + Math.floor(Math.random() * 10000);
+
+    const { data: created, error } = await state.supabase
+        .from('restaurants')
+        .insert([{
+            owner_id: state.currentUser.id,
+            name, slug,
+            description: "A importar menu...",
+            menu_type: 'digital',
+            subscription_plan: 'pro',
+            subscription_status: 'trialing',
+            trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        }])
+        .select()
+        .single();
+
+    if (error) {
+        alert('Erro ao criar pedido. Se calhar o nome já está em uso, tente outro.');
+        btn.innerHTML = orig;
+        btn.disabled = false;
+        return;
+    }
+
+    alert('✅ Pedido recebido com sucesso! A nossa equipa vai importar o menu para si.');
+    localStorage.setItem('just_created_rest', 'true');
+    window.location.reload();
+});
 
 document.getElementById('setupForm').onsubmit = async (e) => {
     e.preventDefault();
