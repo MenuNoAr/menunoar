@@ -74,15 +74,16 @@ export function renderPdfViewer(data) {
     // Use an exact calculation that doesn't trigger scroll
     canvas.style.height = 'calc(100vh - var(--navbar-height))';
     canvas.style.maxHeight = 'calc(100vh - var(--navbar-height))';
-    canvas.style.maxWidth = '100vw'; // full width for pdf
+    canvas.style.maxWidth = '900px'; // Restrict width so it doesn't span the entire monitor
     canvas.style.width = '100%';
-    canvas.style.margin = '0'; // reset margins
+    canvas.style.margin = 'var(--navbar-height) auto 0 auto'; // Push down from navbar, center horizontally
     canvas.style.padding = '0';
     canvas.style.border = 'none';
     canvas.style.display = 'flex';
     canvas.style.flexDirection = 'column';
-    canvas.style.background = 'var(--bg-page)';
+    canvas.style.background = '#ffffff'; // Make sides white
     canvas.style.position = 'relative';
+    canvas.style.overflow = 'hidden'; // kill any internal scroll
     canvas.style.overflow = 'hidden'; // kill any internal scroll
 
     // Hide the Tutorial / Help Button in PDF mode
