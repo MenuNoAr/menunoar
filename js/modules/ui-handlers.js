@@ -295,11 +295,12 @@ window.openQrModal = () => {
     if (modal.classList.contains('open')) { window.closeModal('qrModal'); return; }
     window.closeAllModals();
     modal.classList.add('open');
+    document.getElementById('qrRestaurantName').textContent = state.currentData.name;
     _renderQr();
 };
 
 function _renderQr() {
-    const url = `${window.location.origin}/menu.html?id=${state.currentData.slug}`;
+    const url = `https://menunoar.pt/menu.html?id=${state.currentData.slug}`;
     const opts = {
         width: 280, height: 280, type: 'svg', data: url,
         image: _qrLogoUrl,
@@ -452,6 +453,36 @@ window.deletePdfFile = async () => {
     if (display) display.textContent = 'Clique para selecionar o PDF';
 
     window.togglePdfDetails();
+};
+
+window.promptDeleteRestaurant = async () => {
+    const restName = state.currentData.name;
+    const input = prompt(`Atenção! Esta ação é irreversível. Isto vai apagar o teu restaurante e todo o teu menu.\n\nPara confirmar, por favor escreve o nome exato:\n"${restName}"`);
+
+    if (input === null) return; // user cancelled
+    if (input.trim() !== restName) {
+        if (window.showToast) window.showToast('Nome incorreto. O menu não foi apagado.', 'error');
+        else alert('Nome incorreto. Operação cancelada.');
+        return;
+    }
+
+    try {
+        const { error } = await state.supabase.from('restaurants').delete().eq('id', state.restaurantId);
+        if (error) throw error;
+
+        if (window.showToast) window.showToast('O menu foi apagado com sucesso.', 'success');
+        setTimeout(() => {
+            if (typeof signOut === 'function') {
+                signOut();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }, 1500);
+    } catch (e) {
+        console.error('Error deleting menu:', e);
+        if (window.showToast) window.showToast('Erro ao apagar o menu. Tenta novamente.', 'error');
+        else alert('Erro ao apagar o menu.');
+    }
 };
 
 // ─── Item Modal ───────────────────────────────────────────────────────────────

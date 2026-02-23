@@ -149,7 +149,8 @@
 
         <div class="dashboard-navbar">
             <div class="nav-brand">
-                <img id="dashboardLogo" src="assets/images/logo.svg" alt="MenuNoAr">
+                <img id="dashboardLogo" src="assets/images/logo.svg" alt="MenuNoAr"
+                    onclick="window.location.href='index.html'" style="cursor: pointer;">
                 <span class="divider">|</span>
                 <button id="userDisplay" class="user-name-btn" onclick="openRenameModal()"
                     title="Clica para alterar o nome">
@@ -359,6 +360,19 @@
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeModal('settingsModal')">Cancelar</button>
                     <button type="submit" class="btn-confirm">Guardar Configurações</button>
+                </div>
+
+                <div style="margin-top: 35px; padding-top: 25px; border-top: 1px solid var(--border);">
+                    <h3 style="color:var(--danger); font-size:1.1rem; margin-bottom:10px;"><i
+                            class="fa-solid fa-triangle-exclamation"></i> Zona de Perigo</h3>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Atenção: Apagar o menu
+                        remove permanentemente todos os pratos, categorias, imagens e o teu link público de forma
+                        irreversível.</p>
+                    <button type="button" class="btn-secondary"
+                        style="width:100%; color:var(--danger); border-color:var(--danger);"
+                        onclick="promptDeleteRestaurant()">
+                        <i class="fa-solid fa-trash"></i> Apagar Menu Definitivamente
+                    </button>
                 </div>
             </form>
         </div>
