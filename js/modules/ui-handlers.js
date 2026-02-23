@@ -25,6 +25,8 @@ export function setupInlineEdit(elementId, fieldName) {
             .update({ [fieldName]: newVal })
             .eq('id', state.restaurantId);
         state.currentData[fieldName] = newVal;
+
+        if (fieldName === 'name') window.checkTutorialStep('edit_name');
     });
 
     el.addEventListener('keydown', e => {
@@ -202,6 +204,8 @@ window.addNewCategoryOptimized = async () => {
     const newOrder = [...(state.currentData.category_order || []), name];
     state.currentData.category_order = newOrder;
     renderMenu(state.menuItems);
+
+    window.checkTutorialStep('create_cat');
 
     // Scroll to + focus new tab's editable title
     requestAnimationFrame(() => {
@@ -386,6 +390,7 @@ window.openSettingsModal = () => {
 
     window.closeAllModals();
     modal.classList.add('open');
+    window.checkTutorialStep('settings');
 };
 
 window.togglePdfDetails = () => {
@@ -507,6 +512,7 @@ window.openAddItemModal = (prefillCat = '') => {
     document.getElementById('modalTitle').textContent = 'Adicionar Prato';
     window.closeAllModals();
     document.getElementById('itemModal').classList.add('open');
+    window.checkTutorialStep('add_item');
 };
 
 window.openEditItemModal = (id) => {

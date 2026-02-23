@@ -1,31 +1,122 @@
 /**
- * tutorial.js - Interactive Tutorial System
+ * tutorial.js - Reactive Interactive Tutorial System
  */
 import { scrollToSlide } from './render.js';
 
 let currentTutStep = 0;
+let isTutorialActive = false;
+
 const tutorialSteps = [
-    { title: "Bem-vindo! 👋", text: "Este é o teu painel. Vamos criar o teu menu em segundos.", target: null, icon: "fa-rocket" },
-    { title: "Edição Direta ✍️", text: "Clica em qualquer texto para o editares na hora.", target: "#restNameEditor", icon: "fa-pencil" },
-    { title: "Categorias 📂", text: "Organiza o menu. Arrastas as abas para reordenar.", target: "#categoryNav", icon: "fa-layer-group" },
-    { title: "Novo Prato ✨", text: "Clica aqui para adicionares pratos nesta categoria.", target: ".add-item-btn", icon: "fa-plus" },
-    { title: "Configurações 🎨", text: "Muda o link e cores ou ativa o modo PDF aqui.", target: "button[onclick='openSettingsModal()']", icon: "fa-gear" },
-    { title: "Vê o Menu 🚀", text: "Clica aqui para veres como os clientes verão o teu menu.", target: "#liveLinkBtn", icon: "fa-eye" }
+    {
+        id: 'welcome',
+        title: "Bem-vindo! 👋",
+        text: "Este é o teu painel. Vamos transformar o teu menu num sucesso digital!",
+        target: null,
+        icon: "fa-rocket"
+    },
+    {
+        id: 'edit_name',
+        title: "Edição Direta ✍️",
+        text: "Experimenta clicar no nome do restaurante para o editares agora.",
+        target: "#restNameEditor",
+        icon: "fa-pencil",
+        successText: "Excelente! Todo o texto no menu é editável assim."
+    },
+    {
+        id: 'create_cat',
+        title: "Nova Categoria 📂",
+        text: "Cria uma nova secção (ex: Bebidas ou Sobremesas) clicando no '+'.",
+        target: ".btn-add-cat",
+        icon: "fa-folder-plus",
+        successText: "Boa! Podes criar quantas categorias quiseres."
+    },
+    {
+        id: 'move_cat',
+        title: "Organização 📋",
+        text: "Podes arrastar as abas para mudar a ordem das categorias no menu.",
+        target: ".draggable-tab .handle",
+        icon: "fa-up-down-left-right",
+        successText: "Perfeito! A ordem que vês aqui é a ordem no menu real."
+    },
+    {
+        id: 'add_item',
+        title: "Novo Prato ✨",
+        text: "Adiciona o teu primeiro prato ou bebida nesta categoria.",
+        target: ".add-item-btn",
+        icon: "fa-plus",
+        successText: "Incrível! Podes personalizar fotos, preços e descrições."
+    },
+    {
+        id: 'settings',
+        title: "Configurações 🎨",
+        text: "Personaliza o teu link, cores ou ativa o modo PDF aqui.",
+        target: "button[onclick='openSettingsModal()']",
+        icon: "fa-gear",
+        successText: "Aqui tens o controlo total sobre o aspeto do teu menu."
+    },
+    {
+        id: 'preview',
+        title: "Vê o Menu 🚀",
+        text: "Clica para veres o resultado final tal como os teus clientes o verão!",
+        target: "#liveLinkBtn",
+        icon: "fa-eye"
+    }
 ];
 
 let typeTimeout = null;
 
 export function openTutorial() {
     window.closeAllModals();
+    isTutorialActive = true;
 
-    // Close dropbar if open
     if (document.getElementById('mobileDropbar')?.classList.contains('open')) {
         window.toggleNavDropdown();
     }
 
     currentTutStep = 0;
-    document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow').forEach(el => el.remove());
+    clearOverlays();
     renderStep(0);
+}
+
+function clearOverlays() {
+    document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow').forEach(el => el.remove());
+}
+
+/**
+ * Validates if the user did the right action to advance
+ */
+window.checkTutorialStep = (stepId) => {
+    if (!isTutorialActive) return;
+    const currentStep = tutorialSteps[currentTutStep];
+
+    if (currentStep && currentStep.id === stepId) {
+        if (currentStep.successText) {
+            showSuccessFeedback(currentStep.successText);
+            // Auto-advance after 1.5s
+            setTimeout(() => {
+                if (isTutorialActive) window.nextStep();
+            }, 1800);
+        } else {
+            window.nextStep();
+        }
+    }
+};
+
+function showSuccessFeedback(msg) {
+    const tooltip = document.querySelector('.tutorial-tooltip');
+    if (!tooltip) return;
+
+    // Clear spotlight/arrow during feedback
+    document.querySelector('.tutorial-spotlight')?.style.setProperty('display', 'none');
+    document.querySelector('.tutorial-arrow')?.style.setProperty('opacity', '0');
+
+    tooltip.innerHTML = `
+        <div style="text-align:center; animation: popSuccess 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.49);">
+            <div style="font-size:3rem; margin-bottom:10px;">🎉</div>
+            <h3 style="color:var(--success); justify-content:center; margin-bottom:10px;">Muito bem!</h3>
+            <p style="margin:0; font-weight:600;">${msg}</p>
+        </div>
+    `;
 }
 
 function renderStep(index) {
@@ -45,19 +136,18 @@ function renderStep(index) {
             <div class="tutorial-step-dots">${tutorialSteps.map((_, i) => `<div class="tutorial-dot ${i === index ? 'active' : ''}"></div>`).join('')}</div>
             <div style="display:flex; gap:8px;">
                 ${index > 0 ? `<button class="tutorial-btn-next" style="background:var(--bg-page); color:var(--text); border:1px solid var(--border); padding: 10px 15px;" onclick="prevTutorialPage()">Anterior</button>` : ''}
-                <button class="tutorial-btn-next" style="padding: 10px 15px;" onclick="nextStep()">${index === tutorialSteps.length - 1 ? 'Começar!' : 'Próximo'}</button>
+                <button class="tutorial-btn-next" style="padding: 10px 15px;" onclick="nextStep()">${index === tutorialSteps.length - 1 ? 'Finalizar' : 'Seguinte'}</button>
             </div>
         </div>
     `;
 
-    // Typewriter effect
     const textTarget = tooltip.querySelector('#tutText');
     let i = 0;
     const type = () => {
         if (i < step.text.length) {
             textTarget.textContent += step.text.charAt(i);
             i++;
-            typeTimeout = setTimeout(type, 10); // Faster typewriter
+            typeTimeout = setTimeout(type, 10);
         }
     };
     type();
@@ -65,42 +155,48 @@ function renderStep(index) {
     const isMobile = window.innerWidth <= 850;
     let targetSelector = step.target;
 
-    // Handle mobile dropbar steps
     if (isMobile) {
         if (targetSelector === "button[onclick='openSettingsModal()']") {
             targetSelector = ".mobile-dropbar button[onclick*='openSettingsModal']";
-            if (!document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
         } else if (targetSelector === "#liveLinkBtn") {
             targetSelector = "#liveLinkBtnMobile";
-            if (!document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
-        } else {
-            if (document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
         }
     }
 
     const targetEl = targetSelector ? document.querySelector(targetSelector) : null;
-    if (step.target === '.add-item-btn') scrollToSlide(0, { instant: true });
+
+    // Auto-scroll logic
+    if (step.id === 'add_item' || step.id === 'create_cat') {
+        scrollToSlide(0, { instant: true });
+    }
 
     if (targetEl) {
-        targetEl.scrollIntoView({ behavior: 'auto', block: 'center' });
-        const placement = (targetEl.getBoundingClientRect().top > window.innerHeight / 2) ? 'above' : 'below';
-        let startTime = performance.now();
+        // Ensure dropbar is open if target is inside it
+        if (isMobile && (targetSelector.includes('mobile-dropbar') || targetSelector.includes('Mobile'))) {
+            if (!document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
+        } else if (isMobile && document.getElementById('mobileDropbar').classList.contains('open')) {
+            window.toggleNavDropdown();
+        }
 
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const placement = (targetEl.getBoundingClientRect().top > window.innerHeight / 2) ? 'above' : 'below';
+
+        let startTime = performance.now();
         const sync = (now) => {
             const rect = targetEl.getBoundingClientRect(), padding = 10;
+            if (rect.width === 0) return; // Hidden
             Object.assign(spotlight.style, { opacity: '1', left: `${rect.left - padding}px`, top: `${rect.top - padding}px`, width: `${rect.width + padding * 2}px`, height: `${rect.height + padding * 2}px`, display: 'block', boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.85)' });
             positionTooltipAndArrow(rect, tooltip, arrow, placement);
-            if (now - startTime < 800) requestAnimationFrame(sync);
+            if (now - startTime < 1000) requestAnimationFrame(sync);
         };
         sync(startTime);
         tooltip.style.visibility = 'visible';
-        requestAnimationFrame(sync);
+        tooltip.style.opacity = '1';
     } else {
+        if (isMobile && document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
         Object.assign(spotlight.style, { opacity: '0', display: 'none' });
-        Object.assign(tooltip.style, { transition: 'none', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', opacity: '1', visibility: 'visible' });
+        Object.assign(tooltip.style, { left: '50%', top: '50%', transform: 'translate(-50%, -50%)', opacity: '1', visibility: 'visible' });
         arrow.style.opacity = '0';
-        tooltip.offsetHeight;
-        setTimeout(() => tooltip.style.transition = 'opacity 0.3s ease', 50);
     }
 }
 
@@ -130,6 +226,18 @@ function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
     Object.assign(arrow.style, { opacity: '1', left: `${ax}px`, top: `${ay}px`, transform: `rotate(${ar}deg)` });
 }
 
-window.nextStep = () => currentTutStep < tutorialSteps.length - 1 ? renderStep(++currentTutStep) : window.closeTutorial();
+window.nextStep = () => {
+    if (currentTutStep < tutorialSteps.length - 1) {
+        renderStep(++currentTutStep);
+    } else {
+        window.closeTutorial();
+    }
+};
 window.prevTutorialPage = () => currentTutStep > 0 && renderStep(--currentTutStep);
-window.closeTutorial = () => document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow').forEach(el => { el.style.opacity = '0'; setTimeout(() => el.remove(), 400); });
+window.closeTutorial = () => {
+    isTutorialActive = false;
+    document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow').forEach(el => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 400);
+    });
+};
