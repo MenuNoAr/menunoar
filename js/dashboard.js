@@ -100,6 +100,43 @@ window.toggleDarkMode = () => {
         : 'fa-solid fa-moon';
 };
 
+// ─── Toast Notification System ────────────────────────────────────────────────
+window.showToast = (msg, type = 'success') => {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        Object.assign(container.style, {
+            position: 'fixed', top: '20px', right: '20px', zIndex: '9999',
+            display: 'flex', flexDirection: 'column', gap: '10px'
+        });
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    Object.assign(toast.style, {
+        background: type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#3b82f6'),
+        color: '#fff', padding: '12px 20px', borderRadius: '8px',
+        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', display: 'flex',
+        alignItems: 'center', gap: '10px', fontWeight: '500', fontSize: '0.95rem',
+        opacity: '0', transform: 'translateX(100%)',
+        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', pointerEvents: 'none'
+    });
+
+    toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-circle-exclamation'}"></i> <span>${msg}</span>`;
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(0)';
+    });
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+};
+
 // ─── Setup Wizard ─────────────────────────────────────────────────────────────
 window.showSetupForm = (type) => {
     document.getElementById('setup-choice-card').style.display = 'none';
@@ -147,7 +184,7 @@ document.getElementById('importForm')?.addEventListener('submit', async (e) => {
     // Get the file
     const fileInput = document.getElementById('importFile');
     if (!fileInput.files.length) {
-        alert("Por favor, selecione um ficheiro PDF.");
+        window.showToast("Por favor, selecione um ficheiro PDF.", "error");
         btn.innerHTML = orig;
         btn.disabled = false;
         return;
@@ -158,7 +195,7 @@ document.getElementById('importForm')?.addEventListener('submit', async (e) => {
     const { data: uploadData, error: uploadError } = await uploadFile(file, 'menu-pdf', 'menu-pdfs');
 
     if (uploadError) {
-        alert('Erro ao carregar o PDF: ' + uploadError.message);
+        window.showToast('Erro ao carregar o PDF: ' + uploadError.message, 'error');
         btn.innerHTML = orig;
         btn.disabled = false;
         return;
@@ -182,15 +219,15 @@ document.getElementById('importForm')?.addEventListener('submit', async (e) => {
         .single();
 
     if (error) {
-        alert('Erro ao criar restaurante. O link talvez já esteja em uso, tente outro nome.');
+        window.showToast('Erro ao criar restaurante. O link talvez já esteja em uso, tente outro nome.', 'error');
         btn.innerHTML = orig;
         btn.disabled = false;
         return;
     }
 
-    alert('✅ Menu PDF criado com sucesso!');
+    window.showToast('Menu PDF criado com sucesso!', 'success');
     localStorage.setItem('just_created_rest', 'true');
-    window.location.reload();
+    setTimeout(() => window.location.reload(), 2000);
 });
 
 document.getElementById('setupForm').onsubmit = async (e) => {

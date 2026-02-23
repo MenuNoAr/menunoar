@@ -75,6 +75,11 @@ export function renderPdfViewer(data) {
     canvas.style.display = 'flex';
     canvas.style.flexDirection = 'column';
     canvas.style.background = 'var(--bg-page)';
+    canvas.style.position = 'relative';
+
+    // Hide the Tutorial / Help Button in PDF mode
+    const tutBtn = document.querySelector('[onclick="openTutorial()"]');
+    if (tutBtn) tutBtn.style.display = 'none';
 
     if (!data.pdf_url) {
         canvas.innerHTML = `
@@ -91,7 +96,15 @@ export function renderPdfViewer(data) {
     // Embed the PDF as cleanly as possible.
     // #toolbar=0&navpanes=0 hides the default browser PDF toolbars
     canvas.innerHTML = `
-        <iframe src="${data.pdf_url}#toolbar=0&navpanes=0&scrollbar=0" style="flex:1; width:100%; height:100%; border:none; background: #525659;" allowfullscreen></iframe>
+        <div id="pdfLoading" style="position: absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg-page); z-index:10;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
+            <p style="color: var(--text-muted); font-weight: 500;">A carregar visualizador PDF...</p>
+        </div>
+        <iframe src="${data.pdf_url}#toolbar=0&navpanes=0&scrollbar=0" 
+            style="flex:1; width:100%; height:100%; border:none; background: #525659; opacity: 0; transition: opacity 0.3s;" 
+            allowfullscreen 
+            onload="document.getElementById('pdfLoading').style.display='none'; this.style.opacity='1';">
+        </iframe>
     `;
 }
 
