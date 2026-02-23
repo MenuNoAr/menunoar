@@ -31,9 +31,6 @@ export async function loadData() {
         return;
     }
 
-    document.getElementById('setup-screen').style.display = 'none';
-    document.getElementById('main-dashboard').style.display = 'block';
-
     // Step 3: sync status + fetch items in PARALLEL
     const [syncResult, itemsResult] = await Promise.allSettled([
         fetch('/api/sync_status', {
@@ -76,6 +73,9 @@ export async function loadData() {
         renderMenu(items);
         initHeaderEditing();
     }
+
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('main-dashboard').style.display = 'block';
 
     updateLiveLink(rest.slug);
     _checkSubscription(rest);

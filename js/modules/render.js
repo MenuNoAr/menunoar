@@ -72,6 +72,11 @@ export function renderPdfViewer(data) {
     // Clear and set height
     canvas.innerHTML = '';
     canvas.style.height = 'calc(100vh - var(--navbar-height))';
+    canvas.style.maxWidth = '100vw'; // full width for pdf
+    canvas.style.width = '100%';
+    canvas.style.margin = 'var(--navbar-height) 0 0 0'; // only top margin for navbar
+    canvas.style.padding = '0';
+    canvas.style.border = 'none';
     canvas.style.display = 'flex';
     canvas.style.flexDirection = 'column';
     canvas.style.background = 'var(--bg-page)';
