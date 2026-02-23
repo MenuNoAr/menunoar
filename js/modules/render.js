@@ -207,7 +207,7 @@ export function renderMenu(items) {
 
         const headerHTML = catImg
             ? `<div class="cat-banner editable-trigger" onclick="triggerCatUpload('${cat}')">
-                <img src="${catImg}" loading="lazy" alt="${escapeHTML(cat)}">
+                <img src="${catImg}" loading="lazy" alt="${escapeHTML(cat)}" style="width:100%; height:100%; object-fit:cover;">
                 <div class="cat-banner-overlay">
                     <h2 contenteditable="true" spellcheck="false" class="inline-editable"
                         onclick="event.stopPropagation();"
@@ -385,7 +385,7 @@ export function createItemCard(item) {
             <div class="item-img" onclick="openImageModal('${id}')" 
                 style="${!image_url ? 'width:100px; height:100px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg-page); border:2px dashed var(--border); color:var(--text-muted); border-radius:12px; text-align:center; cursor:pointer;' : ''}">
                 ${image_url
-            ? `<img src="${image_url}" loading="lazy" alt="${escapeHTML(name)}">`
+            ? `<img src="${image_url}" loading="lazy" alt="${escapeHTML(name)}" style="width:100%; height:100%; object-fit:cover; display:block;">`
             : `<i class="fa-solid fa-camera" style="font-size:1.5rem; margin-bottom:5px;"></i><span style="font-size:0.75rem; font-weight:600;">Adicionar<br>Foto</span>`
         }
             </div>
