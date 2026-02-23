@@ -18,7 +18,10 @@ export function updateLiveLink(slug) {
     // Update both desktop and mobile buttons
     ['liveLinkBtn', 'liveLinkBtnMobile'].forEach(id => {
         const btn = document.getElementById(id);
-        if (btn) btn.onclick = () => window.open(url, '_blank');
+        if (btn) btn.onclick = () => {
+            window.open(url, '_blank');
+            window.checkTutorialStep('preview');
+        };
     });
 
     const link = document.getElementById('liveLink');
@@ -73,8 +76,14 @@ function _updateBadge(badgeId, textId, value) {
     const el = document.getElementById(badgeId);
     const span = document.getElementById(textId);
     if (!el || !span) return;
+
     span.textContent = value || 'Adicionar...';
     el.style.opacity = value ? '1' : '0.5';
+
+    // Force icon and text color to be consistent across all badges
+    const icon = el.querySelector('i');
+    if (icon) icon.style.color = 'var(--primary)';
+    span.style.color = 'var(--text)';
 }
 
 // ─── PDF Viewer ───────────────────────────────────────────────────────────────
@@ -288,6 +297,7 @@ export function renderMenu(items) {
                         const newOrder = Array.from(nav.querySelectorAll('.draggable-tab'))
                             .map(t => t.dataset.category);
                         await saveCategoryOrder(newOrder);
+                        window.checkTutorialStep('move_cat');
                         const newIdx = Array.from(nav.querySelectorAll('.tab-btn'))
                             .findIndex(b => b.classList.contains('active'));
                         if (newIdx !== -1) updateState({ currentSlideIndex: newIdx });
