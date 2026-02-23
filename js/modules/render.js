@@ -128,11 +128,13 @@ export function renderPdfViewer(data) {
             <i class="fa-solid fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
             <p style="color: var(--text-muted); font-weight: 500;">A carregar visualizador PDF...</p>
         </div>
-        <iframe src="${data.pdf_url}#toolbar=0&navpanes=0&scrollbar=0&view=Fit" 
-            style="flex:1; width:100%; max-width:900px; margin: 0 auto; height:100%; border:none; background: #ffffff; opacity: 0; transition: opacity 0.3s; display:block; box-sizing: border-box;" 
-            allowfullscreen 
-            onload="document.getElementById('pdfLoading').style.display='none'; this.style.opacity='1';">
-        </iframe>
+        <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:flex-start; background: #ffffff;">
+            <iframe src="${data.pdf_url}#toolbar=0&navpanes=0&scrollbar=0&view=Fit" 
+                style="height: 100%; aspect-ratio: 210 / 297; max-width: 100%; margin: 0; border: none; background: #ffffff; opacity: 0; transition: opacity 0.3s; display: block; box-shadow: 0 0 20px rgba(0,0,0,0.05);" 
+                allowfullscreen 
+                onload="document.getElementById('pdfLoading').style.display='none'; this.style.opacity='1';">
+            </iframe>
+        </div>
     `;
 }
 
