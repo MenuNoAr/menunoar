@@ -430,7 +430,15 @@ document.getElementById('settingsForm').onsubmit = async (e) => {
 
     if (btn) btn.innerHTML = 'Guardar Configurações';
     window.closeModal('settingsModal');
-    loadData();
+
+    // Determine if we need to reload or just update data
+    // Because switching to/from PDF destroys the DOM structure of .editor-canvas, it's safer to always physically reload
+    if (window.showToast) {
+        window.showToast('Configurações guardadas com sucesso!', 'success');
+        setTimeout(() => window.location.reload(), 800);
+    } else {
+        window.location.reload();
+    }
 };
 
 window.deletePdfFile = async () => {
