@@ -13,8 +13,13 @@ const escapeHTML = (str) => str ? String(str).replace(/[&<>"']/g, m => ESC[m]) :
 // ─── Live Link ────────────────────────────────────────────────────────────────
 export function updateLiveLink(slug) {
     const url = `${window.location.origin}/menu.html?id=${slug}`;
-    const btn = document.getElementById('liveLinkBtn');
-    if (btn) btn.onclick = () => window.open(url, '_blank');
+
+    // Update both desktop and mobile buttons
+    ['liveLinkBtn', 'liveLinkBtnMobile'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.onclick = () => window.open(url, '_blank');
+    });
+
     const link = document.getElementById('liveLink');
     if (link) link.href = url;
 }

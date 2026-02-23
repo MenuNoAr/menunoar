@@ -94,12 +94,29 @@ document.getElementById('renameForm')?.addEventListener('submit', (e) => {
 window.toggleDarkMode = () => {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('menu_theme', isDark ? 'dark' : 'light');
-    document.getElementById('dashboardLogo').src = isDark
-        ? 'assets/images/Ilogo.svg'
-        : 'assets/images/logo.svg';
-    document.getElementById('themeIcon').className = isDark
-        ? 'fa-solid fa-sun'
-        : 'fa-solid fa-moon';
+
+    // Update Logo
+    const logo = document.getElementById('dashboardLogo');
+    if (logo) logo.src = isDark ? 'assets/images/Ilogo.svg' : 'assets/images/logo.svg';
+
+    // Update Desktop Icon
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) themeIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+
+    // Update Mobile Icon
+    const themeIconMobile = document.getElementById('themeIconMobile');
+    if (themeIconMobile) themeIconMobile.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+};
+
+window.toggleNavDropdown = () => {
+    const dropbar = document.getElementById('mobileDropbar');
+    const icon = document.getElementById('navMobileIcon');
+    if (!dropbar) return;
+
+    const isOpen = dropbar.classList.toggle('open');
+    if (icon) {
+        icon.className = isOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars-staggered';
+    }
 };
 
 // ─── Toast Notification System ────────────────────────────────────────────────
@@ -288,9 +305,16 @@ window.closeModal = (id) => document.getElementById(id)?.classList.remove('open'
 window.closeAllModals = () =>
     document.querySelectorAll('.edit-modal').forEach(m => m.classList.remove('open'));
 
-// Close modals on backdrop click
+// Close modals or dropbar on backdrop click
 document.addEventListener('mousedown', (e) => {
     if (e.target.classList.contains('edit-modal')) window.closeAllModals();
+
+    // Close mobile dropbar if clicking outside
+    const dropbar = document.getElementById('mobileDropbar');
+    const trigger = document.querySelector('.mobile-nav-trigger');
+    if (dropbar && dropbar.classList.contains('open') && !dropbar.contains(e.target) && !trigger.contains(e.target)) {
+        window.toggleNavDropdown();
+    }
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────

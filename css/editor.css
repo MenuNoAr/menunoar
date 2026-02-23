@@ -192,6 +192,76 @@ button:disabled {
     }
 }
 
+/* --- MOBILE DROPBAR --- */
+.nav-tools-desktop {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-nav-trigger {
+    display: none;
+    background: var(--primary-glow) !important;
+    color: var(--primary) !important;
+    border-radius: 12px;
+}
+
+.mobile-dropbar {
+    position: fixed;
+    top: -400px;
+    left: 0;
+    width: 100%;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    z-index: 9998;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transform: translateY(-100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), top 0s 0.4s;
+    box-shadow: var(--shadow-lg);
+    visibility: hidden;
+}
+
+.mobile-dropbar.open {
+    top: var(--navbar-height);
+    transform: translateY(0);
+    visibility: visible;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), top 0s;
+}
+
+.dropbar-item {
+    width: 100%;
+    justify-content: flex-start !important;
+    padding: 14px 20px !important;
+    background: var(--bg-page) !important;
+    border-radius: 14px;
+    color: var(--text);
+    font-weight: 700;
+    font-size: 1rem !important;
+}
+
+.dark-mode .dropbar-item {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dropbar-item i {
+    width: 24px;
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 850px) {
+    .nav-tools-desktop {
+        display: none;
+    }
+
+    .mobile-nav-trigger {
+        display: flex;
+    }
+}
+
 /* --- NAV ITEM BUTTON STYLING --- */
 .btn-nav {
     color: var(--text-muted);
