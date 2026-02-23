@@ -129,20 +129,83 @@ export function renderPdfViewer(data) {
         return;
     }
 
-    // Embed the PDF as cleanly as possible.
-    // The iframe adopts the max-width, sitting perfectly centered in the white canvas.
-    // #view=Fit guarantees the whole PDF scales to fit inside the given height/width with no scroll!
     canvas.innerHTML = `
-        <div id="pdfLoading" style="position: absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#ffffff; z-index:10;">
-            <i class="fa-solid fa-spinner fa-spin" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
-            <p style="color: var(--text-muted); font-weight: 500;">A carregar visualizador PDF...</p>
+        <div id="pdf-reels-container" style="position:absolute; top:0; left:0; right:0; bottom:0; background: #eaeaeb; overflow-y:scroll; overflow-x:hidden; scroll-snap-type: y mandatory; display: flex; flex-direction: column; align-items: center; -webkit-overflow-scrolling: touch;">
+            <div id="pdfLoading" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); display:flex; flex-direction:column; align-items:center; z-index:100;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:3rem; color:var(--primary); margin-bottom:15px;"></i>
+                <p style="color:var(--text-muted); font-weight:500; font-family: 'Outfit', sans-serif;">A preparar preview do menu...</p>
+            </div>
         </div>
-        <iframe src="${data.pdf_url}#toolbar=0&navpanes=0&scrollbar=0&view=Fit" 
-            style="flex:1; width:100%; max-width:900px; margin: 0 auto; height:100%; border:none; background: #ffffff; opacity: 0; transition: opacity 0.3s; display:block; box-sizing: border-box;" 
-            allowfullscreen 
-            onload="document.getElementById('pdfLoading').style.display='none'; this.style.opacity='1';">
-        </iframe>
     `;
+
+    // Load PDF.js dynamically
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    script.onload = () => {
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const loadingTask = pdfjsLib.getDocument(data.pdf_url);
+        loadingTask.promise.then(async (pdf) => {
+            const container = document.getElementById('pdf-reels-container');
+            const loadingEl = document.getElementById('pdfLoading');
+            if (loadingEl) loadingEl.style.display = 'none';
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                // Reel Slide Wrapper
+                const wrapper = document.createElement('div');
+                wrapper.style.cssText = 'width:100%; height:100%; flex-shrink:0; display:flex; justify-content:center; align-items:center; scroll-snap-align: start; padding: 15px; box-sizing:border-box; position:relative;';
+
+                // Visual indicator for drag/swipe if there are multiple pages
+                if (pdf.numPages > 1 && pageNum < pdf.numPages) {
+                    const swipeHint = document.createElement('div');
+                    swipeHint.innerHTML = '<i class="fa-solid fa-angles-down" style="color:rgba(0,0,0,0.2); font-size:1.5rem; animation: pulse 2s infinite;"></i>';
+                    swipeHint.style.cssText = 'position:absolute; bottom:20px; left:50%; transform:translateX(-50%); z-index:10; pointer-events:none;';
+                    wrapper.appendChild(swipeHint);
+
+                    // Keyframes injected once
+                    if (pageNum === 1 && !document.getElementById('pulse-anim')) {
+                        const style = document.createElement('style');
+                        style.id = 'pulse-anim';
+                        style.innerHTML = '@keyframes pulse { 0% { opacity:0.3; transform:translateY(0); } 50% { opacity:0.8; transform:translateY(10px); } 100% { opacity:0.3; transform:translateY(0); } }';
+                        document.head.appendChild(style);
+                    }
+                }
+
+                const pageCanvas = document.createElement('canvas'); // renamed variable to avoid collision with top-level canvas
+                pageCanvas.style.cssText = 'max-width:100%; max-height:100%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); object-fit:contain; border-radius: 4px; background:#fff; opacity:0; transition: opacity 0.4s;';
+
+                wrapper.appendChild(pageCanvas);
+                container.appendChild(wrapper);
+
+                // Render PDF page to canvas
+                const page = await pdf.getPage(pageNum);
+                // Use scale 2.0 to assure sharpness on high-DPI screens
+                const viewport = page.getViewport({ scale: 2.0 });
+                const context = pageCanvas.getContext('2d');
+                pageCanvas.height = viewport.height;
+                pageCanvas.width = viewport.width;
+
+                const renderContext = { canvasContext: context, viewport: viewport };
+                await page.render(renderContext).promise;
+
+                // Fade in gracefully
+                pageCanvas.style.opacity = '1';
+            }
+        }).catch(e => {
+            console.error(e);
+            const loadingEl = document.getElementById('pdfLoading');
+            if (loadingEl) loadingEl.innerHTML = '<p style="color:var(--danger); font-family:sans-serif;">Erro ao carregar PDF.</p>';
+        });
+    };
+
+    // Only append if it's not already there
+    if (!document.querySelector('script[src*="pdf.min.js"]')) {
+        document.head.appendChild(script);
+    } else {
+        // Force onload if already loaded from previous view
+        script.onload();
+    }
 }
 
 // ─── Menu ─────────────────────────────────────────────────────────────────────

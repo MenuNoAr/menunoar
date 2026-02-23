@@ -22,7 +22,7 @@
 
     <!-- Fonts -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=Inter:wght@400;600&family=Playfair+Display:wght@400;600&family=Oswald:wght@400;600&family=Montserrat:wght@400;600&family=Lato:wght@400;700&family=Raleway:wght@400;600&family=Dancing+Script:wght@400;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         media="print" onload="this.media='all'">
@@ -282,10 +282,22 @@
                 </div>
                 <div class="form-group">
                     <label>Tipo de Fonte</label>
-                    <select id="modalFont">
-                        <option value="Inter">Inter (Padrão)</option>
-                        <option value="Playfair Display">Playfair Display (Elegante)</option>
-                        <option value="Oswald">Oswald (Forte)</option>
+                    <select id="modalFont"
+                        onchange="this.style.fontFamily = this.options[this.selectedIndex].style.fontFamily;">
+                        <option value="Inter" style="font-family: 'Inter', sans-serif;">Inter (Limpa / Padrão)</option>
+                        <option value="Outfit" style="font-family: 'Outfit', sans-serif;">Outfit (Moderna)</option>
+                        <option value="Montserrat" style="font-family: 'Montserrat', sans-serif;">Montserrat
+                            (Geométrica)</option>
+                        <option value="Lato" style="font-family: 'Lato', sans-serif;">Lato (Suave)</option>
+                        <option value="Raleway" style="font-family: 'Raleway', sans-serif;">Raleway (Sofisticada)
+                        </option>
+                        <option value="Playfair Display" style="font-family: 'Playfair Display', serif;">Playfair
+                            Display (Elegante)</option>
+                        <option value="Oswald" style="font-family: 'Oswald', sans-serif;">Oswald (Forte / Expressiva)
+                        </option>
+                        <option value="Dancing Script"
+                            style="font-family: 'Dancing Script', cursive; font-size: 1.1rem;">Dancing Script
+                            (Manuscrita / Clássica)</option>
                     </select>
                 </div>
 
