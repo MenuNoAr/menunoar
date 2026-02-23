@@ -7,7 +7,7 @@ import { state, updateState } from './modules/state.js';
 import { loadData } from './modules/api.js';
 import { openTutorial } from './modules/tutorial.js';
 import { initAuthListener, signOut, getSupabase } from './auth-service.js';
-import { initUploadService } from './upload-service.js';
+import { initUploadService, uploadFile } from './upload-service.js';
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 async function init() {
@@ -137,20 +137,43 @@ document.getElementById('importForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = e.target.querySelector('button[type="submit"]');
     const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A Enviar...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A criar e carregar...';
     btn.disabled = true;
 
     const name = document.getElementById('importRestName').value.trim();
     let slug = window.generateSlugString(name);
     if (!slug) slug = 'menu-' + Math.floor(Math.random() * 10000);
 
+    // Get the file
+    const fileInput = document.getElementById('importFile');
+    if (!fileInput.files.length) {
+        alert("Por favor, selecione um ficheiro PDF.");
+        btn.innerHTML = orig;
+        btn.disabled = false;
+        return;
+    }
+    const file = fileInput.files[0];
+
+    // Upload the file
+    const { data: uploadData, error: uploadError } = await uploadFile(file, 'menu-pdf', 'menu-pdfs');
+
+    if (uploadError) {
+        alert('Erro ao carregar o PDF: ' + uploadError.message);
+        btn.innerHTML = orig;
+        btn.disabled = false;
+        return;
+    }
+
+    const publicUrl = uploadData.publicUrl;
+
     const { data: created, error } = await state.supabase
         .from('restaurants')
         .insert([{
             owner_id: state.currentUser.id,
             name, slug,
-            description: "A importar menu...",
-            menu_type: 'digital',
+            description: "O meu menu em PDF.",
+            menu_type: 'pdf',
+            pdf_url: publicUrl,
             subscription_plan: 'pro',
             subscription_status: 'trialing',
             trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -159,13 +182,13 @@ document.getElementById('importForm')?.addEventListener('submit', async (e) => {
         .single();
 
     if (error) {
-        alert('Erro ao criar pedido. Se calhar o nome já está em uso, tente outro.');
+        alert('Erro ao criar restaurante. O link talvez já esteja em uso, tente outro nome.');
         btn.innerHTML = orig;
         btn.disabled = false;
         return;
     }
 
-    alert('✅ Pedido recebido com sucesso! A nossa equipa vai importar o menu para si.');
+    alert('✅ Menu PDF criado com sucesso!');
     localStorage.setItem('just_created_rest', 'true');
     window.location.reload();
 });

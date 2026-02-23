@@ -126,26 +126,19 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Ficheiro do Menu Acual (Opcional)</label>
+                    <label>Ficheiro do Menu (Formato PDF)</label>
                     <div class="file-upload-wrapper" onclick="document.getElementById('importFile').click()"
                         style="margin-top: 5px;">
-                        <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <div class="upload-icon"><i class="fa-solid fa-file-pdf"></i></div>
                         <div class="upload-text">
-                            <span id="importFileNameDisplay">Clique para selecionar PDF ou Imagem</span>
+                            <span id="importFileNameDisplay">Clique para selecionar o PDF do Menu</span>
                         </div>
                     </div>
-                    <input type="file" id="importFile" accept=".pdf,image/*" style="display:none;"
-                        onchange="document.getElementById('importFileNameDisplay').textContent = this.files[0] ? this.files[0].name : 'Clique para selecionar PDF ou Imagem'">
-                </div>
-                <div class="form-group">
-                    <label for="importLink">Link do Menu (Opcional)</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-link"></i>
-                        <input type="url" id="importLink" placeholder="ex: https://meumenu.com">
-                    </div>
+                    <input type="file" id="importFile" accept=".pdf" required style="display:none;"
+                        onchange="document.getElementById('importFileNameDisplay').textContent = this.files[0] ? this.files[0].name : 'Clique para selecionar o PDF do Menu'">
                 </div>
                 <button type="submit" class="btn-confirm btn-full">
-                    <i class="fa-solid fa-paper-plane"></i> Enviar Pedido
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Criar Menu Rapidamente
                 </button>
             </form>
         </div>
