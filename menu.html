@@ -206,6 +206,14 @@
                             const renderContext = { canvasContext: context, viewport: viewport };
                             await page.render(renderContext).promise;
 
+                            // Free space footer
+                            if (pageNum === pdf.numPages) {
+                                const footer = document.createElement('div');
+                                footer.innerHTML = 'Feito com <b><a href="https://menunoar.pt" target="_blank" style="color:#fff; text-decoration:none;">menunoar.pt</a></b>';
+                                footer.style.cssText = 'position:absolute; bottom:20px; left:50%; transform:translateX(-50%); color:rgba(255,255,255,0.4); font-size:0.8rem; font-family:"Outfit", sans-serif; white-space:nowrap; z-index:10; pointer-events:auto;';
+                                wrapper.appendChild(footer);
+                            }
+
                             // Fade in gracefully
                             canvas.style.opacity = '1';
                         }

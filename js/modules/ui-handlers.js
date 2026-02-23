@@ -361,7 +361,9 @@ window.openSettingsModal = () => {
     if (modal.classList.contains('open')) { window.closeModal('settingsModal'); return; }
 
     document.getElementById('modalSlug').value = state.currentData.slug || '';
-    document.getElementById('modalFont').value = state.currentData.font || 'Inter';
+    const fontSelect = document.getElementById('modalFont');
+    fontSelect.value = state.currentData.font || 'Inter';
+    fontSelect.style.fontFamily = fontSelect.options[fontSelect.selectedIndex]?.style.fontFamily || 'Inter, sans-serif';
     document.getElementById('pdfToggle').checked = state.currentData.menu_type === 'pdf';
     window.togglePdfDetails();
 
