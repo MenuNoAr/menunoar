@@ -48,10 +48,12 @@
                 <p>Já tens um menu ou queres começar do zero?</p>
             </div>
             <div class="setup-actions" style="display:flex; flex-direction:column; gap:15px; margin-top: 20px;">
-                <button type="button" class="btn-confirm btn-full" onclick="showSetupForm('import')">
+                <button type="button" class="btn-confirm btn-full" onclick="showSetupForm('import')"
+                    style="flex: none;">
                     <i class="fa-solid fa-file-import"></i> Já tenho um menu (Importar)
                 </button>
-                <button type="button" class="btn-secondary btn-full" onclick="showSetupForm('scratch')">
+                <button type="button" class="btn-secondary btn-full" onclick="showSetupForm('scratch')"
+                    style="flex: none;">
                     <i class="fa-solid fa-plus"></i> Criar do Zero
                 </button>
             </div>
@@ -113,8 +115,7 @@
                 <i class="fa-solid fa-arrow-left"></i> Voltar
             </button>
             <div class="setup-header">
-                <h2>Importar Menu</h2>
-                <p>Envia-nos o teu menu ou dados básicos. A nossa equipa trata do resto!</p>
+                <h2>Configura o teu menu</h2>
             </div>
             <form id="importForm" class="setup-form">
                 <div class="form-group">
