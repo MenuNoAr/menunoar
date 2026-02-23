@@ -53,7 +53,9 @@ async function init() {
                             colors: ['#1fa8ff', '#16a34a', '#ffffff'],
                         });
                     }
-                    openTutorial();
+                    if (state.currentData?.menu_type !== 'pdf') {
+                        openTutorial();
+                    }
                 }, 1000);
             }
         }, () => {
