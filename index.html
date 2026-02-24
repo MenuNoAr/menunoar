@@ -30,7 +30,7 @@
 <body>
 
     <!-- Floating Navbar -->
-    <nav class="glass-nav">
+    <nav class="main-nav">
         <div class="nav-content">
             <a href="#" class="logo-link">
                 <img src="assets/images/logo.svg" alt="Menu no Ar" class="nav-logo">
@@ -64,109 +64,212 @@
     </div>
 
     <main>
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="container hero-grid">
-                <div class="hero-text">
-                    <span class="pill-badge">A Nova Geração de Menus</span>
-                    <h1>O TEU MENU <br><span class="gradient-text">DIGITAL E ÉPICO.</span></h1>
-                    <p>Adeus PDFs chatos. Olá menus interativos, rápidos e com um design que os teus clientes vão
-                        adorar.</p>
-                    <div class="hero-btns">
-                        <button onclick="document.getElementById('contactos').scrollIntoView()"
-                            class="btn-primary">Quero Experimentar</button>
-                        <button class="btn-secondary"><i class="ph ph-play-circle"></i> Ver Demo</button>
+        <!-- Hero Section - Clean & Professional SaaS -->
+        <section class="hero-section"
+            style="background: radial-gradient(circle at top right, rgba(31, 168, 255, 0.05) 0%, transparent 50%); min-height: 90vh; display: flex; align-items: center; padding-top: 50px;">
+            <div class="container hero-grid" style="grid-template-columns: 1fr 1.2fr; gap: 3rem; align-items: center;">
+                <div class="hero-text" style="padding-right: 2rem;">
+                    <div class="pill-badge"
+                        style="background: rgba(0, 212, 189, 0.1); color: var(--accent); border: 1px solid rgba(0, 212, 189, 0.3); font-family: var(--font-body); border-radius: 8px;">
+                        <i class="ph ph-star" style="margin-right: 5px; position:relative; top:2px;"></i> A escolha dos
+                        melhores restaurantes
                     </div>
-                </div>
-                <div class="hero-visual">
-                    <div class="phone-mockup floating">
-                        <img src="assets\images\example.png" alt="App Preview">
-                        <div class="floating-card c1">
-                            <i class="ph ph-qr-code"></i>
-                            <span>QR Code</span>
-                        </div>
-                        <div class="floating-card c2">
-                            <i class="ph ph-check-circle"></i>
-                            <span>Rápido</span>
-                        </div>
+                    <h1
+                        style="font-size: 3.8rem; line-height: 1.05; font-family: var(--font-body); letter-spacing: -1.5px; text-transform: none; color: var(--text-dark); margin-bottom: 25px; font-weight: 800;">
+                        O Fim dos Menus de Papel. O Início da <span style="color: var(--primary);">Eficiência</span>.
+                    </h1>
+                    <p
+                        style="font-size: 1.25rem; line-height: 1.6; color: var(--text-gray); margin-bottom: 40px; font-weight: 400; max-width: 90%;">
+                        Digitalize o seu restaurante em minutos. Um menu inteligente em PDF ou formato tátil, sem
+                        necessidade de apps externas. Simples para si, intuitivo para o seu cliente.
+                    </p>
+                    <div class="hero-btns" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <a href="signup.html" class="btn-primary"
+                            style="font-size: 1.1rem; padding: 1rem 2.5rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(31, 168, 255, 0.3);">
+                            <i class="ph ph-rocket-launch"></i> Começar Gratuitamente
+                        </a>
+                        <a href="#demo" class="btn-secondary"
+                            style="font-size: 1.1rem; padding: 1rem 2rem; border-radius: 12px; border: 1px solid var(--border); color: var(--text-dark); background: transparent;">
+                            Como Funciona <i class="ph ph-arrow-right"></i>
+                        </a>
                     </div>
-                    <!-- Background blobs -->
-                    <div class="blob b1"></div>
-                    <div class="blob b2"></div>
-                </div>
-            </div>
-        </section>
 
-        <!-- Features Grid -->
-        <section id="funciona" class="features-section">
-            <div class="container">
-                <div class="section-header text-center reveal">
-                    <h2>COMO FUNCIONA?</h2>
-                    <p>Simples, rápido e sem complicações.</p>
+                    <div style="margin-top: 40px; display: flex; align-items: center; gap: 20px;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <div style="display: flex; color: #f59e0b; font-size: 1.2rem;">
+                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i
+                                    class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i
+                                    class="ph-fill ph-star"></i>
+                            </div>
+                            <span style="font-size: 0.85rem; color: var(--text-gray); font-weight: 500;">+500
+                                restaurantes satisfeitos</span>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="features-grid reveal">
-                    <div class="feature-card">
-                        <div class="icon-box blue">
-                            <i class="ph ph-pencil-simple"></i>
-                        </div>
-                        <h3>1. Cria</h3>
-                        <p>Preenche os pratos, preços e fotos no nosso editor super simples.</p>
+                <div class="hero-visual" style="position: relative;">
+                    <div
+                        style="background: white; border-radius: 20px; box-shadow: var(--shadow-xl); border: 1px solid rgba(0,0,0,0.05); overflow: hidden; transform: perspective(1000px) rotateY(-10deg) rotateX(5deg); transition: transform 0.5s ease; position: relative; z-index: 10;">
+                        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            alt="Software Interface" style="width: 100%; display: block; border-radius: 20px;">
                     </div>
-                    <div class="feature-card">
-                        <div class="icon-box purple">
-                            <i class="ph ph-qr-code"></i>
-                        </div>
-                        <h3>2. Imprime</h3>
-                        <p>Recebe os QR Codes ou as nossas placas premium para as mesas.</p>
+                    <!-- Ambient glows replacing old blobs -->
+                    <div
+                        style="position: absolute; top: -10%; right: 10%; width: 400px; height: 400px; background: rgba(31, 168, 255, 0.2); filter: blur(100px); z-index: 1;">
                     </div>
-                    <div class="feature-card">
-                        <div class="icon-box green">
-                            <i class="ph ph-rocket-launch"></i>
-                        </div>
-                        <h3>3. Serve</h3>
-                        <p>Os clientes leem o código e pedem. Sem apps para instalar.</p>
+                    <div
+                        style="position: absolute; bottom: -10%; left: 10%; width: 300px; height: 300px; background: rgba(0, 212, 189, 0.15); filter: blur(100px); z-index: 1;">
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Product Showcase -->
-        <section id="demo" class="showcase-section">
+        <!-- Features Grid - Professional Data-Driven -->
+        <section id="funciona" class="features-section"
+            style="padding: 100px 0; background: var(--white); border-top: 1px solid rgba(0,0,0,0.03);">
             <div class="container">
-                <div class="showcase-grid reveal">
-                    <div class="showcase-info">
-                        <h2>PLACAS QUE DURAM</h2>
-                        <p>Não são autocolantes que se descolam. São placas em acrílico ou madeira, gravadas a laser ou
-                            impressas com qualidade UV.</p>
-                        <ul class="check-list">
-                            <li><i class="ph ph-check-fat"></i> Laváveis e Resistentes</li>
-                            <li><i class="ph ph-check-fat"></i> Design Personalizado</li>
-                            <li><i class="ph ph-check-fat"></i> NFC Opcional</li>
+                <div class="section-header text-center reveal" style="max-width: 700px; margin: 0 auto 60px auto;">
+                    <h2
+                        style="font-family: var(--font-body); font-size: 2.2rem; font-weight: 700; color: var(--text-dark); text-transform: none; letter-spacing: -0.5px; margin-bottom: 15px;">
+                        Desenvolvido a pensar no dono do restaurante</h2>
+                    <p style="font-size: 1.1rem; color: var(--text-gray);">Uma plataforma completa que remove atritos e
+                        otimiza a experiência de consumo.</p>
+                </div>
+
+                <div class="features-grid reveal"
+                    style="grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 0;">
+                    <!-- Feature 1 -->
+                    <div class="feature-card"
+                        style="text-align: left; padding: 40px 30px; border-radius: 16px; background: var(--bg-light); border: 1px solid rgba(0,0,0,0.03); box-shadow: none; transition: transform 0.2s, box-shadow 0.2s;">
+                        <div class="icon-box"
+                            style="margin: 0 0 25px 0; width: 50px; height: 50px; background: rgba(31, 168, 255, 0.1); color: var(--primary); border-radius: 12px; font-size: 1.5rem;">
+                            <i class="ph ph-qr-code"></i>
+                        </div>
+                        <h3
+                            style="font-family: var(--font-body); font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: var(--text-dark); text-transform: none; letter-spacing: 0;">
+                            Acesso Imediato</h3>
+                        <p style="font-size: 1rem; color: var(--text-gray); line-height: 1.6;">Os clientes acedem ao
+                            menu instantaneamente via QR Code na mesa. Sem formulários, sem downloads de aplicações.</p>
+                    </div>
+                    <!-- Feature 2 -->
+                    <div class="feature-card"
+                        style="text-align: left; padding: 40px 30px; border-radius: 16px; background: var(--bg-light); border: 1px solid rgba(0,0,0,0.03); box-shadow: none; transition: transform 0.2s, box-shadow 0.2s;">
+                        <div class="icon-box"
+                            style="margin: 0 0 25px 0; width: 50px; height: 50px; background: rgba(0, 212, 189, 0.1); color: var(--accent); border-radius: 12px; font-size: 1.5rem;">
+                            <i class="ph ph-device-mobile"></i>
+                        </div>
+                        <h3
+                            style="font-family: var(--font-body); font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: var(--text-dark); text-transform: none; letter-spacing: 0;">
+                            Gestão em Tempo Real</h3>
+                        <p style="font-size: 1rem; color: var(--text-gray); line-height: 1.6;">O Prato do Dia acabou?
+                            Atualize o painel no seu telemóvel e o cliente verá imediatamente a indisponibilidade.</p>
+                    </div>
+                    <!-- Feature 3 -->
+                    <div class="feature-card"
+                        style="text-align: left; padding: 40px 30px; border-radius: 16px; background: var(--bg-light); border: 1px solid rgba(0,0,0,0.03); box-shadow: none; transition: transform 0.2s, box-shadow 0.2s;">
+                        <div class="icon-box"
+                            style="margin: 0 0 25px 0; width: 50px; height: 50px; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border-radius: 12px; font-size: 1.5rem;">
+                            <i class="ph ph-translate"></i>
+                        </div>
+                        <h3
+                            style="font-family: var(--font-body); font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: var(--text-dark); text-transform: none; letter-spacing: 0;">
+                            Interface Universal</h3>
+                        <p style="font-size: 1rem; color: var(--text-gray); line-height: 1.6;">O menu formata-se de modo
+                            estético quer num ambiente smartphone ou tablet, proporcionando uma experiência imersiva.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Details / Showcase - Split Horizontal -->
+        <section id="demo" class="showcase-section" style="padding: 100px 0; background: var(--bg-light);">
+            <div class="container">
+                <div class="showcase-grid reveal"
+                    style="grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; background: transparent; padding: 0; box-shadow: none; border: none;">
+                    <div class="showcase-image" style="position: relative;">
+                        <img src="https://images.unsplash.com/photo-1544148103-0773bf10d330?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                            alt="Experiência Mobile"
+                            style="border-radius: 20px; box-shadow: var(--shadow-xl); width: 100%; border: 1px solid rgba(0,0,0,0.05); object-fit: cover; aspect-ratio: 6/7;">
+                        <div
+                            style="position: absolute; bottom: 30px; right: -30px; background: white; padding: 20px 30px; border-radius: 16px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 15px;">
+                            <div
+                                style="background: rgba(22, 163, 74, 0.1); color: #16a34a; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items:center; justify-content:center; font-size: 1.2rem;">
+                                <i class="ph ph-lightning"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 700; color: var(--text-dark); font-family: var(--font-body);">
+                                    Carregamento Flash</div>
+                                <div style="font-size: 0.85rem; color: var(--text-gray);">Menos de 1 segundo</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="showcase-info" style="padding-left: 20px;">
+                        <h2
+                            style="font-family: var(--font-body); font-size: 2.2rem; font-weight: 700; color: var(--text-dark); text-transform: none; letter-spacing: -0.5px; margin-bottom: 20px;">
+                            Design à medida da tua marca
+                        </h2>
+                        <p style="font-size: 1.15rem; color: var(--text-gray); line-height: 1.6; margin-bottom: 30px;">
+                            Sabemos que a identidade do seu restaurante é intocável. O Menu no Ar adapta-se não só com
+                            cores, mas com as fontes mais sofisticadas, seja em formato interativo ou clássico em PDF.
+                        </p>
+                        <ul class="check-list"
+                            style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px;">
+                            <li style="display: flex; align-items: flex-start; gap: 15px;">
+                                <i class="ph-fill ph-check-circle"
+                                    style="color: var(--primary); font-size: 1.5rem; margin-top: 2px;"></i>
+                                <div>
+                                    <strong
+                                        style="color: var(--text-dark); display: block; margin-bottom: 5px; font-family: var(--font-body); font-size: 1.1rem;">Painel
+                                        de Controlo Total</strong>
+                                    <span style="color: var(--text-gray); font-size: 0.95rem;">Gere todo o teu
+                                        inventário e visibilidade com dois toques.</span>
+                                </div>
+                            </li>
+                            <li style="display: flex; align-items: flex-start; gap: 15px;">
+                                <i class="ph-fill ph-check-circle"
+                                    style="color: var(--primary); font-size: 1.5rem; margin-top: 2px;"></i>
+                                <div>
+                                    <strong
+                                        style="color: var(--text-dark); display: block; margin-bottom: 5px; font-family: var(--font-body); font-size: 1.1rem;">Modo
+                                        Clássico em PDF</strong>
+                                    <span style="color: var(--text-gray); font-size: 0.95rem;">Se preferir manter a
+                                        formatação tradicional, carregue um ficheiro PDF em segundos.</span>
+                                </div>
+                            </li>
                         </ul>
                     </div>
-                    <div class="showcase-image">
-                        <img src="https://placehold.co/600x400/f0f8ff/1fa8ff?text=Placas+Premium" alt="Placas QR">
-                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Contact / CTA -->
-        <section id="contactos" class="cta-section">
+        <!-- CTA Section - Elevated & Minimal -->
+        <section id="contactos" class="cta-section" style="padding: 120px 0; background: white;">
             <div class="container">
-                <div class="cta-box reveal">
-                    <div class="cta-content">
-                        <h2>PRONTO PARA INOVAR?</h2>
-                        <p>Deixa-nos o teu email e o nome do restaurante. Entramos em contacto hoje.</p>
+                <div class="cta-box reveal"
+                    style="background: var(--text-dark); border-radius: 24px; padding: 80px 40px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+                    <!-- Decorative subtle grid or lines -->
+                    <div
+                        style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 30px 30px; opacity: 0.5;">
+                    </div>
 
-                        <form id="contactForm" class="inline-form">
-                            <input type="text" name="name" placeholder="Nome do Restaurante" required>
-                            <input type="email" name="email" placeholder="O teu email" required>
-                            <button type="submit" class="btn-primary">Enviar <i
-                                    class="ph ph-paper-plane-right"></i></button>
-                        </form>
-                        <p id="formStatus" class="status-msg"></p>
+                    <div class="cta-content" style="position: relative; z-index: 10; max-width: 600px; margin: 0 auto;">
+                        <h2
+                            style="font-family: var(--font-body); font-size: 2.5rem; font-weight: 800; color: white; text-transform: none; letter-spacing: -1px; margin-bottom: 20px;">
+                            Aumenta a satisfação hoje.
+                        </h2>
+                        <p style="font-size: 1.1rem; color: #cbd5e1; margin-bottom: 40px;">
+                            Cria a tua conta em 30 segundos, sem cartões de crédito. Junta-te à revolução da
+                            hospitalidade em Portugal.
+                        </p>
+
+                        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                            <a href="signup.html" class="btn-primary"
+                                style="font-size: 1.1rem; padding: 1.2rem 3rem; border-radius: 12px; background: var(--primary); width: 100%; max-width: 300px;">
+                                Criar Conta Agora
+                            </a>
+                        </div>
+                        <p style="font-size: 0.85rem; color: #64748b; margin-top: 20px;">Tratamento imediato. Painel de
+                            controlo seguro.</p>
                     </div>
                 </div>
             </div>
