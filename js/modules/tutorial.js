@@ -92,22 +92,38 @@ window.checkTutorialStep = (stepId) => {
         if (stepId.endsWith('_open')) {
             const textTarget = document.getElementById('tutText');
             const tooltip = document.querySelector('.tutorial-tooltip');
+            const isMobile = window.innerWidth <= 850;
 
             if (textTarget && tooltip) {
                 if (currentStep.id === 'settings') {
-                    textTarget.innerHTML = "<b>Muito bem!</b><br>Aqui podes mudar a fonte, as cores ou ativar o modo PDF para o teu menu.";
+                    textTarget.innerHTML = "<b>Muito bem!</b><br>Aqui podes mudar a fonte, as cores ou ativar o modo PDF.";
                 } else {
-                    textTarget.innerHTML = "<b>Muito bem!</b><br>Preenche os campos abaixo e guarda para veres o resultado.";
+                    textTarget.innerHTML = "<b>Muito bem!</b><br>Preenche os detalhes do prato e clica em guardar.";
                 }
 
                 // Move tooltip to corner to not block modal
-                Object.assign(tooltip.style, {
-                    left: isMobile ? '20px' : '30px',
-                    top: 'auto',
-                    bottom: isMobile ? '20px' : '30px',
-                    transform: 'none',
-                    width: isMobile ? 'calc(100vw - 40px)' : '320px'
-                });
+                if (isMobile) {
+                    Object.assign(tooltip.style, {
+                        left: '10px',
+                        right: '10px',
+                        top: 'auto',
+                        bottom: '10px',
+                        transform: 'none',
+                        width: 'calc(100vw - 20px)',
+                        padding: '15px',
+                        zIndex: '20005'
+                    });
+                } else {
+                    Object.assign(tooltip.style, {
+                        left: 'auto',
+                        right: '30px',
+                        top: 'auto',
+                        bottom: '30px',
+                        transform: 'none',
+                        width: '320px',
+                        zIndex: '20005'
+                    });
+                }
 
                 // Hide spotlight/arrow while modal is open
                 document.querySelector('.tutorial-spotlight')?.style.setProperty('display', 'none');
