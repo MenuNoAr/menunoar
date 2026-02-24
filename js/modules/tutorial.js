@@ -73,9 +73,9 @@ function clearOverlays() {
 }
 
 let autoAdvanceTimeout = null;
-/**
- * Validates if the user did the right action to advance
- */
+let currentTargetEl = null;
+let originalZIndex = '';
+
 window.checkTutorialStep = (stepId) => {
     if (!isTutorialActive || isTransitioning) return;
     const currentStep = tutorialSteps[currentTutStep];
@@ -97,31 +97,22 @@ window.checkTutorialStep = (stepId) => {
                 // Move tooltip to corner to not block modal
                 if (isMobile) {
                     Object.assign(tooltip.style, {
-                        left: '10px',
-                        right: '10px',
-                        top: 'auto',
-                        bottom: '10px',
-                        transform: 'none',
-                        width: 'calc(100vw - 20px)',
-                        padding: '15px',
-                        zIndex: '20005'
+                        left: '10px', right: '10px', top: 'auto', bottom: '10px',
+                        transform: 'none', width: 'calc(100vw - 20px)', padding: '15px', zIndex: '20005'
                     });
                 } else {
                     Object.assign(tooltip.style, {
-                        left: 'auto',
-                        right: '50px',
-                        top: '50%',
-                        bottom: 'auto',
-                        transform: 'translateY(-50%)',
-                        width: '400px',
-                        zIndex: '20005',
-                        padding: '24px'
+                        left: 'auto', right: '50px', top: '50%', bottom: 'auto',
+                        transform: 'translateY(-50%)', width: '400px', zIndex: '20005', padding: '24px'
                     });
                 }
 
                 // Hide spotlight/arrow while modal is open
                 document.querySelector('.tutorial-spotlight')?.style.setProperty('display', 'none');
                 document.querySelector('.tutorial-arrow')?.style.setProperty('opacity', '0');
+
+                // Also disable blocker while modal is open so they can interact with the modal
+                document.querySelector('.tutorial-blocker')?.style.setProperty('display', 'none');
             }
             return;
         }
@@ -130,7 +121,7 @@ window.checkTutorialStep = (stepId) => {
         showSuccessFeedback();
         autoAdvanceTimeout = setTimeout(() => {
             if (isTutorialActive) window.nextStep();
-        }, 1200);
+        }, 800); // Faster advance
     }
 };
 
@@ -144,6 +135,12 @@ function showSuccessFeedback() {
 function renderStep(index) {
     if (typeTimeout) clearTimeout(typeTimeout);
 
+    // Reset previous target z-index
+    if (currentTargetEl) {
+        currentTargetEl.style.zIndex = originalZIndex;
+        currentTargetEl.classList.remove('tutorial-active-target');
+    }
+
     // Ensure UI is clean before showing next/prev step
     if (window.closeAllModals) window.closeAllModals();
     if (window.closeModal) window.closeModal('mobileDropbar');
@@ -152,12 +149,16 @@ function renderStep(index) {
     const step = tutorialSteps[index];
 
     let spotlight = document.querySelector('.tutorial-spotlight') || createEl('div', 'tutorial-spotlight');
-    let tooltip = document.querySelector('.tutorial-tooltip') || createEl('div', 'tutorial-tooltip', { opacity: '0', visibility: 'hidden', transition: 'none' });
+    let tooltip = document.querySelector('.tutorial-tooltip') || createEl('div', 'tutorial-tooltip', { opacity: '0', visibility: 'hidden' });
     let arrow = document.querySelector('.tutorial-arrow') || createEl('div', 'tutorial-arrow', {}, `<svg viewBox="0 0 24 24" width="40" height="40"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" fill="var(--primary)"/></svg>`);
+    let blocker = document.querySelector('.tutorial-blocker') || createEl('div', 'tutorial-blocker', {
+        position: 'fixed', inset: '0', zIndex: '20000', background: 'transparent', pointerEvents: 'auto'
+    });
 
-    // Reset spotlight/arrow display in case they were hidden by checkTutorialStep
+    // Reset spotlight/arrow display
     spotlight.style.display = 'block';
     arrow.style.opacity = '1';
+    blocker.style.display = 'block';
 
     tooltip.innerHTML = `
         <div class="tutorial-header"><h3><i class="fa-solid ${step.icon}"></i> ${step.title}</h3></div>
@@ -178,7 +179,7 @@ function renderStep(index) {
         if (i < step.text.length) {
             textTarget.textContent += step.text.charAt(i);
             i++;
-            typeTimeout = setTimeout(type, 10);
+            typeTimeout = setTimeout(type, 8);
         }
     };
     type();
@@ -195,6 +196,7 @@ function renderStep(index) {
     }
 
     const targetEl = targetSelector ? document.querySelector(targetSelector) : null;
+    currentTargetEl = targetEl;
 
     // Auto-scroll logic
     if (step.id === 'add_item' || step.id === 'create_cat') {
@@ -202,6 +204,11 @@ function renderStep(index) {
     }
 
     if (targetEl) {
+        // Bring target to front
+        originalZIndex = window.getComputedStyle(targetEl).zIndex;
+        targetEl.style.zIndex = '20001';
+        targetEl.classList.add('tutorial-active-target');
+
         // Ensure dropbar is open if target is inside it
         if (isMobile && (targetSelector.includes('mobile-dropbar') || targetSelector.includes('Mobile'))) {
             if (!document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
@@ -212,28 +219,33 @@ function renderStep(index) {
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         const placement = (targetEl.getBoundingClientRect().top > window.innerHeight / 2) ? 'above' : 'below';
 
-        let startTime = performance.now();
-        const sync = (now) => {
+        const sync = () => {
+            if (!isTutorialActive || currentTargetEl !== targetEl) return;
             const rect = targetEl.getBoundingClientRect(), padding = 10;
-            if (rect.width === 0) return; // Hidden
-            Object.assign(spotlight.style, { opacity: '1', left: `${rect.left - padding}px`, top: `${rect.top - padding}px`, width: `${rect.width + padding * 2}px`, height: `${rect.height + padding * 2}px`, display: 'block', boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.85)' });
-            positionTooltipAndArrow(rect, tooltip, arrow, placement);
-            if (now - startTime < 1000) requestAnimationFrame(sync);
+            if (rect.width > 0) {
+                Object.assign(spotlight.style, {
+                    opacity: '1', left: `${rect.left - padding}px`, top: `${rect.top - padding}px`,
+                    width: `${rect.width + padding * 2}px`, height: `${rect.height + padding * 2}px`,
+                    display: 'block', boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.8)'
+                });
+                positionTooltipAndArrow(rect, tooltip, arrow, placement);
+            }
+            requestAnimationFrame(sync);
         };
-        sync(startTime);
+        requestAnimationFrame(sync);
+
         tooltip.style.visibility = 'visible';
         tooltip.style.opacity = '1';
     } else {
         if (isMobile && document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
         Object.assign(spotlight.style, { opacity: '0', display: 'none' });
         Object.assign(tooltip.style, {
-            left: '50%', right: 'auto',
-            top: '50%', bottom: 'auto',
-            transform: 'translate(-50%, -50%)',
-            opacity: '1', visibility: 'visible',
+            left: '50%', right: 'auto', top: '50%', bottom: 'auto',
+            transform: 'translate(-50%, -50%)', opacity: '1', visibility: 'visible',
             width: isMobile ? 'calc(100vw - 40px)' : '540px'
         });
         arrow.style.opacity = '0';
+        blocker.style.display = 'block'; // Block even if no target for safety
     }
 }
 
@@ -293,8 +305,16 @@ window.nextStep = () => {
 window.prevTutorialPage = () => currentTutStep > 0 && renderStep(--currentTutStep);
 window.closeTutorial = () => {
     isTutorialActive = false;
-    document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow').forEach(el => {
+
+    // Reset target z-index
+    if (currentTargetEl) {
+        currentTargetEl.style.zIndex = originalZIndex;
+        currentTargetEl.classList.remove('tutorial-active-target');
+        currentTargetEl = null;
+    }
+
+    document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow, .tutorial-blocker').forEach(el => {
         el.style.opacity = '0';
-        setTimeout(() => el.remove(), 400);
+        setTimeout(() => el.remove(), 300);
     });
 };
