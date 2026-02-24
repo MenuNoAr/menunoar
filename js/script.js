@@ -22,6 +22,12 @@ async function initSupabase() {
 
         supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
         console.log('Supabase initialized via Vercel Env Vars');
+
+        // Check for session and redirect
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+            window.location.replace('dashboard.html');
+        }
     } catch (error) {
         console.error('Erro a inicializar:', error);
     }

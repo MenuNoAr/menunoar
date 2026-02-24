@@ -224,25 +224,6 @@
         });
     </script>
 
-    <script type="module">
-        import { getSupabase } from './js/auth-service.js';
-
-        async function initNavUser() {
-            try {
-                const sb = await getSupabase();
-                if (!sb) return;
-
-                const { data: { session } } = await sb.auth.getSession();
-
-                if (session && session.user) {
-                    window.location.href = 'dashboard.html';
-                }
-            } catch (e) {
-                console.error("Nav Auth Check Failed", e);
-            }
-        }
-
-        initNavUser();
     </script>
 </body>
 
