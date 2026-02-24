@@ -257,9 +257,9 @@ document.getElementById('setupForm').onsubmit = async (e) => {
     btn.disabled = true;
 
     const name = document.getElementById('setupName').value.trim();
-    const slug = document.getElementById('setupSlug').value.trim();
+    let slug = window.generateSlugString(name);
+    if (!slug) slug = 'menu-' + Math.floor(Math.random() * 10000);
     const desc = document.getElementById('setupDesc').value.trim();
-    const withDemo = document.getElementById('setupDemo').checked;
 
     const { data: created, error } = await state.supabase
         .from('restaurants')
@@ -284,15 +284,6 @@ document.getElementById('setupForm').onsubmit = async (e) => {
         btn.innerHTML = orig;
         btn.disabled = false;
         return;
-    }
-
-    if (withDemo && created) {
-        await state.supabase.from('menu_items').insert([
-            { restaurant_id: created.id, name: 'Bacalhau à Lagareiro', description: 'Lombo alto, batatas a murro e muito azeite.', price: 18.50, category: 'Pratos Principais', available: true },
-            { restaurant_id: created.id, name: 'Arroz de Marisco', description: 'Arroz malandrinho recheado de mar.', price: 22.00, category: 'Pratos Principais', available: true },
-            { restaurant_id: created.id, name: 'Cheesecake', description: 'Delicioso com frutos vermelhos.', price: 4.50, category: 'Sobremesas', available: true },
-            { restaurant_id: created.id, name: 'Limonada Caseira', description: 'Feita com limões do nosso quintal.', price: 3.00, category: 'Bebidas', available: true },
-        ]);
     }
 
     localStorage.setItem('just_created_rest', 'true');

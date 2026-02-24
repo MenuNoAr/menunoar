@@ -73,18 +73,8 @@
                     <label for="setupName">Nome do Restaurante</label>
                     <div class="input-with-icon">
                         <i class="fa-solid fa-store"></i>
-                        <input type="text" id="setupName" placeholder="ex: O Tasco do Zé" required
-                            oninput="generateSlug(this.value)">
+                        <input type="text" id="setupName" placeholder="ex: O Tasco do Zé" required>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="setupSlug">Link Personalizado</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-link"></i>
-                        <input type="text" id="setupSlug" placeholder="ex: o-tasco-do-ze" required>
-                    </div>
-                    <small>menunoar.com/menu.html?id=<b id="slugPreview">slug</b></small>
                 </div>
 
                 <div class="form-group">
@@ -93,14 +83,6 @@
                         <i class="fa-solid fa-align-left"></i>
                         <textarea id="setupDesc" rows="2" placeholder="Descreve o teu espaço..."></textarea>
                     </div>
-                </div>
-
-                <div class="form-checkbox-group">
-                    <input type="checkbox" id="setupDemo" checked>
-                    <label for="setupDemo">
-                        <strong>Adicionar pratos de exemplo?</strong>
-                        <span>Cria categorias e pratos iniciais para te ajudar a começar.</span>
-                    </label>
                 </div>
 
                 <button type="submit" class="btn-confirm btn-full">

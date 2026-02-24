@@ -491,20 +491,19 @@ window.togglePdfDetails = () => {
     const isPdf = document.getElementById('pdfToggle').checked;
     document.getElementById('pdfDetails').style.display = isPdf ? 'block' : 'none';
 
-    // Disable font selection in PDF mode
+    // Completely hide font selection in PDF mode
     const fontSelect = document.getElementById('modalFont');
     if (fontSelect) {
-        fontSelect.disabled = isPdf;
-        fontSelect.title = isPdf ? "Fonte não aplicável no modo PDF" : "";
-        fontSelect.style.opacity = isPdf ? '0.5' : '1';
+        const formGroup = fontSelect.closest('.form-group');
+        if (formGroup) {
+            formGroup.style.display = isPdf ? 'none' : '';
+        }
     }
 
-    // Disable Dark Mode toggles in PDF mode
+    // Completely hide Dark Mode toggles in PDF mode
     const themeBtns = document.querySelectorAll('button[onclick*="toggleDarkMode"]');
     themeBtns.forEach(btn => {
-        btn.disabled = isPdf;
-        btn.style.opacity = isPdf ? '0.3' : '1';
-        btn.title = isPdf ? "Tema indisponível no modo PDF" : "Alternar Tema";
+        btn.style.display = isPdf ? 'none' : '';
     });
 
     // Show existing PDF block if applicable

@@ -68,10 +68,12 @@ export async function loadData() {
     // Render all UI
     if (rest.menu_type === 'pdf') {
         renderPdfViewer(rest);
+        document.querySelectorAll('button[onclick*="toggleDarkMode"]').forEach(btn => btn.style.display = 'none');
     } else {
         renderHeader(rest);
         renderMenu(items);
         initHeaderEditing();
+        document.querySelectorAll('button[onclick*="toggleDarkMode"]').forEach(btn => btn.style.display = '');
     }
 
     document.getElementById('setup-screen').style.display = 'none';
