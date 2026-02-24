@@ -39,9 +39,9 @@
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
 }
 
-.dark-mode .glass-nav {
-    background: rgba(30, 41, 59, 0.8);
-    border-color: rgba(255, 255, 255, 0.1);
+.dark-mode .main-nav {
+    background: rgba(30, 41, 59, 0.98);
+    border-color: rgba(255, 255, 255, 0.05);
 }
 
 .dark-mode .nav-links a,
@@ -185,27 +185,30 @@ p {
     font-size: 0.9rem;
 }
 
-/* Navbar - Glassmorphism */
-.glass-nav {
+/* Navbar - Fixed Full Width */
+.main-nav {
     position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 1200px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 100px;
-    padding: 0.8rem 2rem;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     z-index: 1000;
     box-shadow: var(--shadow-sm);
+    height: 80px;
+    display: flex;
+    align-items: center;
 }
 
 .nav-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
 }
 
 .nav-logo {
@@ -287,7 +290,7 @@ p {
 
 /* Sections */
 main {
-    padding-top: 140px;
+    padding-top: 80px;
     /* Space for nav */
 }
 
@@ -618,38 +621,18 @@ footer {
 @media (max-width: 768px) {
 
     /* Conventional Full Width Navbar for Mobile */
-    .glass-nav {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        transform: none !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        border-radius: 0 !important;
-        border: none !important;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        padding: 0.8rem 1.5rem;
-        background: #ffffff !important;
-        /* Solid background for stability */
-        backdrop-filter: none !important;
-        /* Avoid rendering bugs */
-        z-index: 99999 !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+    .main-nav {
         height: 70px;
-        /* Fixed height */
+        background: #ffffff !important;
+        backdrop-filter: none;
     }
 
     .nav-content {
-        width: 100%;
-        /* Ensure content spreads */
+        padding: 0 1.5rem;
     }
 
     .nav-logo {
         height: 40px;
-        /* Smaller logo on mobile */
     }
 
     main {
