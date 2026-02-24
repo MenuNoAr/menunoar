@@ -79,11 +79,12 @@ function clearOverlays() {
     document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow').forEach(el => el.remove());
 }
 
+let autoAdvanceTimeout = null;
 /**
  * Validates if the user did the right action to advance
  */
 window.checkTutorialStep = (stepId) => {
-    if (!isTutorialActive) return;
+    if (!isTutorialActive || isTransitioning) return;
     const currentStep = tutorialSteps[currentTutStep];
 
     if (currentStep && (currentStep.id === stepId || stepId.startsWith(currentStep.id))) {
@@ -115,8 +116,9 @@ window.checkTutorialStep = (stepId) => {
             return;
         }
 
+        if (autoAdvanceTimeout) clearTimeout(autoAdvanceTimeout);
         showSuccessFeedback();
-        setTimeout(() => {
+        autoAdvanceTimeout = setTimeout(() => {
             if (isTutorialActive) window.nextStep();
         }, 1200);
     }
@@ -236,9 +238,24 @@ function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
     Object.assign(arrow.style, { opacity: '1', left: `${ax}px`, top: `${ay}px`, transform: `rotate(${ar}deg)` });
 }
 
+let isTransitioning = false;
 window.nextStep = () => {
+    if (isTransitioning) return;
+    if (autoAdvanceTimeout) clearTimeout(autoAdvanceTimeout);
+
+    // Force save if we are on an editable step by blurring the target
+    const step = tutorialSteps[currentTutStep];
+    if (step && step.target) {
+        const targetEl = document.querySelector(step.target);
+        if (targetEl && (targetEl.contentEditable === 'true' || targetEl.tagName === 'INPUT' || targetEl.tagName === 'TEXTAREA')) {
+            targetEl.blur();
+        }
+    }
+
     if (currentTutStep < tutorialSteps.length - 1) {
+        isTransitioning = true;
         renderStep(++currentTutStep);
+        setTimeout(() => { isTransitioning = false; }, 400);
     } else {
         window.closeTutorial();
     }
