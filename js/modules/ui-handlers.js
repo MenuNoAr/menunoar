@@ -372,20 +372,27 @@ window.openSettingsModal = () => {
     document.getElementById('pdfToggle').checked = state.currentData.menu_type === 'pdf';
     window.togglePdfDetails();
 
-    // Plan label
+    // Plan label and Upgrade Button
     const planText = document.getElementById('currentPlanText');
+    const upgradeBtn = document.querySelector('.edit-modal-content a[href="subscription.html"]');
+
     if (planText) {
         const { subscription_status: status, stripe_customer_id: cid, trial_ends_at } = state.currentData;
-        if (cid && (status === 'active' || status === 'trialing')) {
+        const isActiveOrPaid = cid && (status === 'active' || status === 'trialing');
+
+        if (isActiveOrPaid) {
             planText.textContent = 'Profissional (Membro Premium)';
             planText.style.color = '#16a34a';
+            if (upgradeBtn) upgradeBtn.innerHTML = '<i class="fa-solid fa-gear"></i> Gerir';
         } else if (status === 'trialing') {
             const days = Math.ceil((new Date(trial_ends_at) - Date.now()) / 86_400_000);
             planText.textContent = days > 0 ? `Teste Grátis (${days} dias restantes)` : 'Teste Expirado';
             planText.style.color = days > 0 ? '#16a34a' : '#ef4444';
+            if (upgradeBtn) upgradeBtn.innerHTML = '<i class="fa-solid fa-crown"></i> Upgrade';
         } else {
             planText.textContent = status === 'active' ? 'Profissional (Ativo)' : 'Sem Plano Ativo';
             planText.style.color = status === 'active' ? '#16a34a' : '#6b7280';
+            if (upgradeBtn) upgradeBtn.innerHTML = '<i class="fa-solid fa-crown"></i> Upgrade';
         }
     }
 

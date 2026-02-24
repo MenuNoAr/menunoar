@@ -103,9 +103,16 @@ function _checkSubscription(rest) {
         }
     }
 
-    // Hide upgrade button for paying users
-    if (isActive || isPaidTrial) {
-        document.querySelector('a[href="subscription.html"]')?.style.setProperty('display', 'none');
+    // Update upgrade button for paying users
+    const upgradeBtn = document.querySelector('.edit-modal-content a[href="subscription.html"]');
+    if (upgradeBtn) {
+        if (isActive || isPaidTrial) {
+            upgradeBtn.innerHTML = '<i class="fa-solid fa-gear"></i> Gerir';
+            upgradeBtn.style.display = 'inline-flex';
+        } else {
+            upgradeBtn.innerHTML = '<i class="fa-solid fa-crown"></i> Upgrade';
+            upgradeBtn.style.display = 'inline-flex';
+        }
     }
 
     // Show expired blocker
