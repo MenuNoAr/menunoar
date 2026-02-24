@@ -249,7 +249,7 @@
 
         // Check session
         initAuthListener((user) => {
-            window.location.href = 'dashboard.html';
+            window.location.replace('dashboard.html');
         });
 
         const form = document.getElementById('loginForm');

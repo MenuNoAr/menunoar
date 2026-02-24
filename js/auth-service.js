@@ -78,7 +78,7 @@ export async function signInWithGoogle() {
     return await sb.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: 'https://menunoar.pt/dashboard.html'
+            redirectTo: window.location.origin + '/dashboard.html'
         }
     });
 }
