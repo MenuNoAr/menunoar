@@ -34,25 +34,22 @@ const tutorialSteps = [
         id: 'move_cat',
         title: "Organização 📋",
         text: "Podes arrastar as abas para mudar a ordem das categorias no menu.",
-        target: ".draggable-tab .handle",
-        icon: "fa-up-down-left-right",
-        successText: "Perfeito! A ordem que vês aqui é a ordem no menu real."
+        target: "#categoryNav",
+        icon: "fa-up-down-left-right"
     },
     {
         id: 'add_item',
         title: "Novo Prato ✨",
         text: "Adiciona o teu primeiro prato ou bebida nesta categoria.",
         target: ".add-item-btn",
-        icon: "fa-plus",
-        successText: "Incrível! Podes personalizar fotos, preços e descrições."
+        icon: "fa-plus"
     },
     {
         id: 'settings',
         title: "Configurações 🎨",
         text: "Personaliza o teu link, cores ou ativa o modo PDF aqui.",
         target: "button[onclick='openSettingsModal()']",
-        icon: "fa-gear",
-        successText: "Aqui tens o controlo total sobre o aspeto do teu menu."
+        icon: "fa-gear"
     },
     {
         id: 'preview',
@@ -89,34 +86,31 @@ window.checkTutorialStep = (stepId) => {
     if (!isTutorialActive) return;
     const currentStep = tutorialSteps[currentTutStep];
 
-    if (currentStep && currentStep.id === stepId) {
-        if (currentStep.successText) {
-            showSuccessFeedback(currentStep.successText);
-            // Auto-advance after 1.5s
-            setTimeout(() => {
-                if (isTutorialActive) window.nextStep();
-            }, 1800);
-        } else {
-            window.nextStep();
+    if (currentStep && (currentStep.id === stepId || stepId.startsWith(currentStep.id))) {
+        // Special case for modal openings
+        if (stepId.endsWith('_open')) {
+            const textTarget = document.getElementById('tutText');
+            if (textTarget) {
+                textTarget.innerHTML = "<b>Muito bem!</b><br>Preenche os campos seguintes e guarda.";
+                // Hide spotlight while modal is open
+                document.querySelector('.tutorial-spotlight')?.style.setProperty('display', 'none');
+                document.querySelector('.tutorial-arrow')?.style.setProperty('opacity', '0');
+            }
+            return;
         }
+
+        showSuccessFeedback();
+        setTimeout(() => {
+            if (isTutorialActive) window.nextStep();
+        }, 1200);
     }
 };
 
-function showSuccessFeedback(msg) {
-    const tooltip = document.querySelector('.tutorial-tooltip');
-    if (!tooltip) return;
-
-    // Clear spotlight/arrow during feedback
-    document.querySelector('.tutorial-spotlight')?.style.setProperty('display', 'none');
-    document.querySelector('.tutorial-arrow')?.style.setProperty('opacity', '0');
-
-    tooltip.innerHTML = `
-        <div style="text-align:center; animation: popSuccess 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.49);">
-            <div style="font-size:3rem; margin-bottom:10px;">🎉</div>
-            <h3 style="color:var(--success); justify-content:center; margin-bottom:10px;">Muito bem!</h3>
-            <p style="margin:0; font-weight:600;">${msg}</p>
-        </div>
-    `;
+function showSuccessFeedback() {
+    const textTarget = document.getElementById('tutText');
+    if (textTarget) {
+        textTarget.innerHTML = '<span style="color:var(--success); font-weight:700; font-size:1.2rem; display:block; margin-top:10px; animation: popSuccess 0.4s cubic-bezier(0.17, 0.89, 0.32, 1.49);">🎉 Muito bem!</span>';
+    }
 }
 
 function renderStep(index) {

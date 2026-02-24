@@ -391,7 +391,7 @@ window.openSettingsModal = () => {
 
     window.closeAllModals();
     modal.classList.add('open');
-    window.checkTutorialStep('settings');
+    window.checkTutorialStep('settings_open');
 };
 
 window.togglePdfDetails = () => {
@@ -451,6 +451,7 @@ document.getElementById('settingsForm').onsubmit = async (e) => {
 
     if (btn) btn.innerHTML = 'Guardar Configurações';
     window.closeModal('settingsModal');
+    window.checkTutorialStep('settings');
 
     // Determine if we need to reload or just update data
     // Because switching to/from PDF destroys the DOM structure of .editor-canvas, it's safer to always physically reload
@@ -513,7 +514,7 @@ window.openAddItemModal = (prefillCat = '') => {
     document.getElementById('modalTitle').textContent = 'Adicionar Prato';
     window.closeAllModals();
     document.getElementById('itemModal').classList.add('open');
-    window.checkTutorialStep('add_item');
+    window.checkTutorialStep('add_item_open');
 };
 
 window.openEditItemModal = (id) => {
@@ -550,5 +551,6 @@ document.getElementById('itemEditForm').onsubmit = async (e) => {
     }
 
     window.closeModal('itemModal');
+    window.checkTutorialStep('add_item');
     loadData();
 };
