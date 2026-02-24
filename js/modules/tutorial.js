@@ -31,13 +31,6 @@ const tutorialSteps = [
         successText: "Boa! Podes criar quantas categorias quiseres."
     },
     {
-        id: 'move_cat',
-        title: "Organização 📋",
-        text: "Podes arrastar as abas para mudar a ordem das categorias no menu.",
-        target: "#categoryNav",
-        icon: "fa-up-down-left-right"
-    },
-    {
         id: 'add_item',
         title: "Novo Prato ✨",
         text: "Adiciona o teu primeiro prato ou bebida nesta categoria.",
