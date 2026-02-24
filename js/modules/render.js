@@ -122,9 +122,9 @@ export function renderPdfViewer(data) {
     // Kill the outer page scroll so the only scroll is inside the PDF
     document.body.style.overflow = 'hidden';
 
-    // Hide the Tutorial / Help Button in PDF mode
-    const tutBtn = document.querySelector('[onclick="openTutorial()"]');
-    if (tutBtn) tutBtn.style.display = 'none';
+    // Hide the Tutorial / Help Buttons in PDF mode
+    const tutBtns = document.querySelectorAll('[onclick="openTutorial()"]');
+    tutBtns.forEach(btn => btn.style.display = 'none');
 
     if (!data.pdf_url) {
         canvas.innerHTML = `

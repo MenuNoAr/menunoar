@@ -299,7 +299,8 @@ window.openQrModal = () => {
     if (modal.classList.contains('open')) { window.closeModal('qrModal'); return; }
     window.closeAllModals();
     modal.classList.add('open');
-    document.getElementById('qrRestaurantName').textContent = state.currentData.name;
+    const nameEl = document.getElementById('qrRestaurantName');
+    if (nameEl) nameEl.textContent = state.currentData.name;
     _renderQr();
 };
 
