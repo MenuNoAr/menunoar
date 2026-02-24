@@ -143,12 +143,21 @@ function showSuccessFeedback() {
 
 function renderStep(index) {
     if (typeTimeout) clearTimeout(typeTimeout);
+
+    // Ensure UI is clean before showing next/prev step
+    if (window.closeAllModals) window.closeAllModals();
+    if (window.closeModal) window.closeModal('mobileDropbar');
+
     currentTutStep = index;
     const step = tutorialSteps[index];
 
     let spotlight = document.querySelector('.tutorial-spotlight') || createEl('div', 'tutorial-spotlight');
     let tooltip = document.querySelector('.tutorial-tooltip') || createEl('div', 'tutorial-tooltip', { opacity: '0', visibility: 'hidden', transition: 'none' });
     let arrow = document.querySelector('.tutorial-arrow') || createEl('div', 'tutorial-arrow', {}, `<svg viewBox="0 0 24 24" width="40" height="40"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" fill="var(--primary)"/></svg>`);
+
+    // Reset spotlight/arrow display in case they were hidden by checkTutorialStep
+    spotlight.style.display = 'block';
+    arrow.style.opacity = '1';
 
     tooltip.innerHTML = `
         <div class="tutorial-header"><h3><i class="fa-solid ${step.icon}"></i> ${step.title}</h3></div>
