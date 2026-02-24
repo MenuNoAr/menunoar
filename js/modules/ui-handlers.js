@@ -425,7 +425,6 @@ document.getElementById('settingsForm').onsubmit = async (e) => {
     let isPdf = document.getElementById('pdfToggle').checked;
 
     const updates = {
-        slug: document.getElementById('modalSlug').value,
         font: document.getElementById('modalFont').value,
         menu_type: isPdf ? 'pdf' : 'digital',
     };
