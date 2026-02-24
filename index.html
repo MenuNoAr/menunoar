@@ -7,30 +7,7 @@
     <title>Menu no Ar - A tua ementa digital</title>
 
     <!-- Auto-Redirect logged in users -->
-    <script>
-        (function () {
-            try {
-                if (!window.location.search.includes('noredirect=1')) {
-                    const storageKey = Object.keys(localStorage).find(key => key.includes('-auth-token'));
-                    if (storageKey) {
-                        const session = JSON.parse(localStorage.getItem(storageKey));
-                        if (session && session.access_token) {
-                            window.location.replace('dashboard.html');
-                        }
-                    }
-                }
-            } catch (e) { console.error("Fast redirect error", e); }
-        })();
-    </script>
-
-    <script type="module">
-        import { initAuthListener } from './js/auth-service.js';
-        initAuthListener((user) => {
-            if (user && !window.location.search.includes('noredirect=1')) {
-                window.location.replace('dashboard.html');
-            }
-        });
-    </script>
+    <!-- Styles and Configurations -->
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
