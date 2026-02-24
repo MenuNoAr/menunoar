@@ -392,7 +392,8 @@
                                 <p
                                     style="font-size:0.8rem; color:var(--text-muted); margin-top:10px; display:flex; gap:6px;">
                                     <i class="fa-solid fa-circle-info" style="margin-top:2px;"></i> Ligar isto desativa
-                                    o menu tátil (digital) original.</p>
+                                    o menu tátil (digital) original.
+                                </p>
                             </div>
 
                             <button type="submit" class="btn-confirm btn-full" style="margin-top: 25px;"><i
@@ -455,17 +456,12 @@
                             </div>
                         </div>
 
-                        <div style="margin-top: 40px; padding-top: 25px; border-top: 1px solid var(--border);">
-                            <h3 style="color:var(--danger); font-size:1.1rem; margin-bottom:10px;"><i
-                                    class="fa-solid fa-triangle-exclamation"></i> Zona Perigosa</h3>
-                            <p
-                                style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px; line-height: 1.6;">
-                                Apagar ou desvincular o teu restaurante é permanente. O teu painel e QR code ficarão
-                                inativos imediatamente.</p>
-                            <button type="button" class="btn-secondary"
-                                style="width:100%; color:var(--danger); border-color:rgba(239, 68, 68, 0.2); background: rgba(239,68,68,0.05);"
+                        <div style="margin-top: 30px; text-align: center;">
+                            <button type="button"
+                                style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer; text-decoration:underline; opacity: 0.7; transition: opacity 0.2s;"
+                                onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'"
                                 onclick="promptDeleteRestaurant()">
-                                <i class="fa-solid fa-trash"></i> Encerrar Operação Totalmente
+                                Apagar restaurante permanentemente
                             </button>
                         </div>
                     </div>

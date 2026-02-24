@@ -29,7 +29,14 @@ async function getSupabase() {
     if (!config) return null;
 
     if (window.supabase) {
-        supabaseInstance = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+        supabaseInstance = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true,
+                storage: window.localStorage
+            }
+        });
         configLoaded = true;
         return supabaseInstance;
     } else {

@@ -491,6 +491,22 @@ window.togglePdfDetails = () => {
     const isPdf = document.getElementById('pdfToggle').checked;
     document.getElementById('pdfDetails').style.display = isPdf ? 'block' : 'none';
 
+    // Disable font selection in PDF mode
+    const fontSelect = document.getElementById('modalFont');
+    if (fontSelect) {
+        fontSelect.disabled = isPdf;
+        fontSelect.title = isPdf ? "Fonte não aplicável no modo PDF" : "";
+        fontSelect.style.opacity = isPdf ? '0.5' : '1';
+    }
+
+    // Disable Dark Mode toggles in PDF mode
+    const themeBtns = document.querySelectorAll('button[onclick*="toggleDarkMode"]');
+    themeBtns.forEach(btn => {
+        btn.disabled = isPdf;
+        btn.style.opacity = isPdf ? '0.3' : '1';
+        btn.title = isPdf ? "Tema indisponível no modo PDF" : "Alternar Tema";
+    });
+
     // Show existing PDF block if applicable
     const pdfUrl = state.currentData?.pdf_url;
     if (pdfUrl) {
@@ -583,13 +599,9 @@ window.promptDeleteRestaurant = async () => {
         const { error } = await state.supabase.from('restaurants').delete().eq('id', state.restaurantId);
         if (error) throw error;
 
-        if (window.showToast) window.showToast('O menu foi apagado com sucesso.', 'success');
+        if (window.showToast) window.showToast('O menu foi apagado com sucesso!', 'success');
         setTimeout(() => {
-            if (typeof signOut === 'function') {
-                signOut();
-            } else {
-                window.location.href = 'index.html';
-            }
+            window.location.reload();
         }, 1500);
     } catch (e) {
         console.error('Error deleting menu:', e);
