@@ -235,54 +235,7 @@
                 const { data: { session } } = await sb.auth.getSession();
 
                 if (session && session.user) {
-                    const navContainer = document.getElementById('navActions');
-                    if (!navContainer) return;
-
-                    // 1. Fetch User Avatar (Google or Generic)
-                    let avatarHtml = `<i class="ph ph-user" style="font-size: 20px;"></i>`;
-
-                    if (session.user.user_metadata.avatar_url) {
-                        avatarHtml = `<img src="${session.user.user_metadata.avatar_url}" alt="User" style="width:100%; height:100%; object-fit:cover;">`;
-                    }
-
-                    // 2. Replace Navbar Content
-                    navContainer.innerHTML = `
-                        <a href="dashboard.html" class="user-pill" title="Ir para o Dashboard">
-                            <span id="navGreetName" style="font-weight:600; font-size:0.9rem; margin-right:8px; color:var(--text); cursor:pointer;">Olá!</span>
-                            <div class="user-avatar" style="width: 38px; height: 38px; background: #eee; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #555;">
-                                ${avatarHtml}
-                            </div>
-                        </a>
-                    `;
-
-                    // Fill in the greeting name
-                    const savedName = localStorage.getItem('user_display_name');
-                    const rawName = session.user.user_metadata?.full_name
-                        ?? session.user.user_metadata?.name
-                        ?? session.user.email.split('@')[0];
-                    const firstName = savedName || rawName.replace(/[._]/g, ' ').trim().split(' ')[0];
-                    const greetSpan = document.getElementById('navGreetName');
-                    if (greetSpan && firstName) greetSpan.textContent = 'Olá, ' + firstName + '!';
-
-                    // Add style for user-pill dynamically
-                    const style = document.createElement('style');
-                    style.textContent = `
-                        .user-pill {
-                            display: flex; align-items: center;
-                            background: rgba(255,255,255,0.8);
-                            padding: 5px 5px 5px 15px;
-                            border-radius: 50px;
-                            text-decoration: none;
-                            border: 1px solid rgba(0,0,0,0.1);
-                            transition: all 0.2s;
-                        }
-                        .user-pill:hover {
-                            background: #fff;
-                            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-                            transform: translateY(-1px);
-                        }
-                    `;
-                    document.head.appendChild(style);
+                    window.location.href = 'dashboard.html';
                 }
             } catch (e) {
                 console.error("Nav Auth Check Failed", e);
