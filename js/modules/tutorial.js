@@ -116,12 +116,13 @@ window.checkTutorialStep = (stepId) => {
                 } else {
                     Object.assign(tooltip.style, {
                         left: 'auto',
-                        right: '30px',
-                        top: 'auto',
-                        bottom: '30px',
-                        transform: 'none',
-                        width: '320px',
-                        zIndex: '20005'
+                        right: '50px',
+                        top: '50%',
+                        bottom: 'auto',
+                        transform: 'translateY(-50%)',
+                        width: '400px',
+                        zIndex: '20005',
+                        padding: '24px'
                     });
                 }
 
@@ -223,7 +224,13 @@ function renderStep(index) {
     } else {
         if (isMobile && document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
         Object.assign(spotlight.style, { opacity: '0', display: 'none' });
-        Object.assign(tooltip.style, { left: '50%', top: '50%', transform: 'translate(-50%, -50%)', opacity: '1', visibility: 'visible' });
+        Object.assign(tooltip.style, {
+            left: '50%', right: 'auto',
+            top: '50%', bottom: 'auto',
+            transform: 'translate(-50%, -50%)',
+            opacity: '1', visibility: 'visible',
+            width: isMobile ? 'calc(100vw - 40px)' : '540px'
+        });
         arrow.style.opacity = '0';
     }
 }
@@ -250,7 +257,12 @@ function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
     } else {
         ty = rect.bottom + margin + 10; ay = rect.bottom + margin - 15; ar = 0;
     }
-    Object.assign(tooltip.style, { left: `${tx}px`, top: `${ty}px`, transform: 'none' });
+    Object.assign(tooltip.style, {
+        left: `${tx}px`, right: 'auto',
+        top: `${ty}px`, bottom: 'auto',
+        transform: 'none',
+        width: tooltipWidth + 'px'
+    });
     Object.assign(arrow.style, { opacity: '1', left: `${ax}px`, top: `${ay}px`, transform: `rotate(${ar}deg)` });
 }
 
