@@ -174,7 +174,7 @@
                     <button class="btn-nav" onclick="toggleDarkMode()" title="Tema">
                         <i class="fa-solid fa-moon" id="themeIcon"></i>
                     </button>
-                    <button class="btn-nav" onclick="window.location.href='subscription.html'" title="Planos">
+                    <button class="btn-nav" onclick="openSettingsTab('billing')" title="Planos">
                         <i class="fa-solid fa-crown" style="color:var(--primary);"></i> <span
                             class="desktop-only">Premium</span>
                     </button>
@@ -212,7 +212,7 @@
             <button class="dropbar-item" onclick="toggleDarkMode(); toggleNavDropdown()">
                 <i class="fa-solid fa-moon" id="themeIconMobile"></i> <span>Mudar Tema</span>
             </button>
-            <button class="dropbar-item" onclick="window.location.href='subscription.html'">
+            <button class="dropbar-item" onclick="openSettingsTab('billing'); toggleNavDropdown()">
                 <i class="fa-solid fa-crown" style="color:var(--primary);"></i> <span>Premium</span>
             </button>
             <button class="dropbar-item btn-danger-soft" onclick="signOut()">
@@ -268,129 +268,209 @@
         </main>
     </div>
 
-    <!-- SETTINGS MODAL -->
+    <!-- SETTINGS MODAL (TABBED) -->
     <div id="settingsModal" class="edit-modal">
-        <div class="edit-modal-content">
-            <h2 style="margin-bottom:20px; color:var(--color-text);">Configurações</h2>
-            <form id="settingsForm">
-                <div class="form-group">
-                    <label>Link do Menu (Slug)</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-link"></i>
-                        <input type="text" id="modalSlug" readonly
-                            style="background: var(--bg-light); color: var(--text-muted); cursor: not-allowed;"
-                            title="O link do teu menu.">
+        <div class="edit-modal-content settings-modal-modern"
+            style="max-width: 750px; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+
+            <div class="settings-layout" style="display: flex; min-height: 500px; max-height: 85vh;">
+                <!-- Sidebar Nav -->
+                <div class="settings-sidebar"
+                    style="width: 240px; background: var(--bg-page); border-right: 1px solid var(--border); padding: 30px 20px;">
+                    <h2 style="font-size: 1.3rem; margin-bottom: 25px; padding-left: 10px; color: var(--text);">
+                        Preferências</h2>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button type="button" class="tab-btn-settings active" onclick="switchSettingsTab('general')"
+                            id="tab-btn-general"
+                            style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; width: 100%; text-align: left; background: transparent; border: none; border-radius: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; font-weight: 600;">
+                            <i class="fa-solid fa-store" style="width: 20px; text-align: center;"></i> O Meu Menu
+                        </button>
+                        <button type="button" class="tab-btn-settings" onclick="switchSettingsTab('billing')"
+                            id="tab-btn-billing"
+                            style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; width: 100%; text-align: left; background: transparent; border: none; border-radius: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; font-weight: 600;">
+                            <i class="fa-solid fa-credit-card" style="width: 20px; text-align: center;"></i> Faturação &
+                            Plano
+                        </button>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Tipo de Fonte</label>
-                    <select id="modalFont"
-                        onchange="this.style.fontFamily = this.options[this.selectedIndex].style.fontFamily;">
-                        <option value="Inter" style="font-family: 'Inter', sans-serif;">Inter (Limpa / Padrão)</option>
-                        <option value="Outfit" style="font-family: 'Outfit', sans-serif;">Outfit (Moderna)</option>
-                        <option value="Montserrat" style="font-family: 'Montserrat', sans-serif;">Montserrat
-                            (Geométrica)</option>
-                        <option value="Lato" style="font-family: 'Lato', sans-serif;">Lato (Suave)</option>
-                        <option value="Raleway" style="font-family: 'Raleway', sans-serif;">Raleway (Sofisticada)
-                        </option>
-                        <option value="Playfair Display" style="font-family: 'Playfair Display', serif;">Playfair
-                            Display (Elegante)</option>
-                        <option value="Oswald" style="font-family: 'Oswald', sans-serif;">Oswald (Forte / Expressiva)
-                        </option>
-                        <option value="Dancing Script"
-                            style="font-family: 'Dancing Script', cursive; font-size: 1.1rem;">Dancing Script
-                            (Manuscrita / Clássica)</option>
-                    </select>
-                </div>
 
-                <div class="form-group"
-                    style="background:var(--bg-light); padding:15px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <label style="margin:0; font-size:0.9rem;">Teu Plano</label>
-                        <div id="currentPlanText" style="font-weight:700; color:var(--primary);">A carregar...</div>
-                    </div>
-                    <a href="subscription.html" class="btn-secondary small" style="text-decoration:none;">
-                        <i class="fa-solid fa-crown"></i> Upgrade
-                    </a>
-                </div>
+                <!-- Content Area -->
+                <div class="settings-content" style="flex: 1; padding: 35px; overflow-y: auto;">
 
-                <div class="form-group"
-                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:var(--bg-page); padding:10px; border-radius:10px;">
-                    <label style="margin:0; display:flex; align-items:center; gap:8px;">
-                        <i class="fa-solid fa-file-pdf"></i> Ativar Menu PDF
-                    </label>
-                    <label class="switch">
-                        <input type="checkbox" id="pdfToggle" onchange="togglePdfDetails()">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+                    <!-- TAB: GENERAL -->
+                    <div id="tab-general" class="settings-tab-pane active" style="display: block;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                            <h3 style="color: var(--text); font-size: 1.4rem;">Geral</h3>
+                            <button type="button" class="btn-secondary small" onclick="closeModal('settingsModal')"><i
+                                    class="fa-solid fa-xmark"></i> Fechar</button>
+                        </div>
 
-                <div class="form-group" id="pdfDetails" style="display:none; animation: fadeIn 0.3s;">
-                    <label>Ficheiro PDF do Menu</label>
-
-                    <div id="pdfUploadState">
-                        <div class="file-upload-wrapper" onclick="document.getElementById('pdfUploadInput').click()">
-                            <div class="upload-icon">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <form id="settingsForm">
+                            <div class="form-group">
+                                <label>Link do Menu (Slug)</label>
+                                <div class="input-with-icon">
+                                    <i class="fa-solid fa-link"></i>
+                                    <input type="text" id="modalSlug" readonly
+                                        style="background: var(--bg-page); color: var(--text-muted); cursor: not-allowed;"
+                                        title="O link do teu menu.">
+                                </div>
                             </div>
-                            <div class="upload-text">
-                                <span id="pdfFileNameDisplay">Clique para selecionar o PDF</span>
-                                <small>Tamanho máx: 10MB</small>
+                            <div class="form-group">
+                                <label>Estilo do Menu (Letra)</label>
+                                <select id="modalFont"
+                                    onchange="this.style.fontFamily = this.options[this.selectedIndex].style.fontFamily;">
+                                    <option value="Inter" style="font-family: 'Inter', sans-serif;">Inter (Limpa /
+                                        Padrão)</option>
+                                    <option value="Outfit" style="font-family: 'Outfit', sans-serif;">Outfit (Moderna)
+                                    </option>
+                                    <option value="Montserrat" style="font-family: 'Montserrat', sans-serif;">Montserrat
+                                        (Geométrica)</option>
+                                    <option value="Lato" style="font-family: 'Lato', sans-serif;">Lato (Suave)</option>
+                                    <option value="Raleway" style="font-family: 'Raleway', sans-serif;">Raleway
+                                        (Sofisticada)</option>
+                                    <option value="Playfair Display" style="font-family: 'Playfair Display', serif;">
+                                        Playfair Display (Elegante)</option>
+                                    <option value="Oswald" style="font-family: 'Oswald', sans-serif;">Oswald (Forte /
+                                        Expressiva)</option>
+                                    <option value="Dancing Script"
+                                        style="font-family: 'Dancing Script', cursive; font-size: 1.1rem;">Dancing
+                                        Script (Manuscrita)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group"
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:var(--bg-page); padding:15px; border-radius:12px; border: 1px solid var(--border);">
+                                <label style="margin:0; display:flex; align-items:center; gap:8px; font-weight:600;">
+                                    <i class="fa-solid fa-file-pdf" style="color: var(--danger);"></i> Ativar Menu por
+                                    PDF
+                                </label>
+                                <label class="switch">
+                                    <input type="checkbox" id="pdfToggle" onchange="togglePdfDetails()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="form-group" id="pdfDetails"
+                                style="display:none; animation: fadeIn 0.3s; padding: 20px; border: 2px dashed var(--border); border-radius: 12px;">
+                                <label style="margin-bottom: 10px; display: block;">Ficheiro PDF do Menu</label>
+                                <div id="pdfUploadState">
+                                    <div class="file-upload-wrapper"
+                                        onclick="document.getElementById('pdfUploadInput').click()">
+                                        <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                                        <div class="upload-text">
+                                            <span id="pdfFileNameDisplay">Clica para fazer upload do PDF</span>
+                                            <small>Tamanho máx: 10MB</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="pdfActionsState"
+                                    style="display:none; background: var(--bg-page); padding: 15px; border-radius: 12px; margin-top: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                        <i class="fa-solid fa-file-pdf" style="font-size: 2rem; color: #ef4444;"></i>
+                                        <div style="flex: 1; overflow: hidden;">
+                                            <div style="font-weight: 700; font-size: 0.95rem; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
+                                                id="pdfCurrentFileName">Menu.pdf</div>
+                                            <div style="font-size: 0.8rem; color: var(--text-muted);"><a href="#"
+                                                    id="pdfViewLink" target="_blank"
+                                                    style="color: var(--primary); text-decoration: none;">Abrir
+                                                    Documento atual</a></div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button type="button" class="btn-secondary small" style="flex: 1;"
+                                            onclick="document.getElementById('pdfUploadInput').click()"><i
+                                                class="fa-solid fa-pen"></i> Alterar</button>
+                                        <button type="button" class="btn-secondary small"
+                                            style="flex: 1; color: #ef4444; border-color: #fee2e2;"
+                                            onclick="window.deletePdfFile()"><i class="fa-solid fa-trash"></i>
+                                            Apagar</button>
+                                    </div>
+                                </div>
+                                <input type="file" id="pdfUploadInput" style="display:none;" accept="application/pdf"
+                                    onchange="handlePdfSelect(this)">
+                                <p
+                                    style="font-size:0.8rem; color:var(--text-muted); margin-top:10px; display:flex; gap:6px;">
+                                    <i class="fa-solid fa-circle-info" style="margin-top:2px;"></i> Ligar isto desativa
+                                    o menu tátil (digital) original.</p>
+                            </div>
+
+                            <button type="submit" class="btn-confirm btn-full" style="margin-top: 25px;"><i
+                                    class="fa-solid fa-check"></i> Guardar Atualizações</button>
+                        </form>
+                    </div>
+
+                    <!-- TAB: BILLING -->
+                    <div id="tab-billing" class="settings-tab-pane" style="display: none;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                            <h3 style="color: var(--text); font-size: 1.4rem;">Faturação</h3>
+                            <button type="button" class="btn-secondary small" onclick="closeModal('settingsModal')"><i
+                                    class="fa-solid fa-xmark"></i> Fechar</button>
+                        </div>
+
+                        <div
+                            style="background: var(--bg-card); padding: 30px; border-radius: 16px; border: 2px solid var(--primary); margin-bottom: 30px; position:relative; box-shadow: 0 10px 30px rgba(31,168,255,0.08);">
+                            <div
+                                style="position: absolute; top: -14px; right: 25px; background: var(--primary); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(31,168,255,0.3);">
+                                MENU NO AR PRO
+                            </div>
+
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px;">
+                                <div>
+                                    <h4
+                                        style="font-size: 1.6rem; color: var(--text); margin-bottom:5px; font-weight: 800;">
+                                        Plano Profissional</h4>
+                                    <div id="billingStatusText"
+                                        style="font-weight: 600; color: var(--text-muted); font-size: 1rem;"><i
+                                            class="fa-solid fa-circle-notch fa-spin"></i> A analisar a tua licença...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <ul class="check-list"
+                                style="margin-bottom: 30px; font-size:0.95rem; display:flex; flex-direction:column; gap:12px; color: var(--text-muted); list-style: none;">
+                                <li style="display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-rocket"
+                                        style="color:var(--primary); font-size:1.1rem; width: 20px;"></i> Menus digitais
+                                    e PDFs Ilimitados</li>
+                                <li style="display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-qrcode"
+                                        style="color:var(--primary); font-size:1.1rem; width: 20px;"></i> Códigos QR e
+                                    Visitas Ilimitadas</li>
+                                <li style="display:flex; align-items:center; gap:10px;"><i
+                                        class="fa-solid fa-shield-halved"
+                                        style="color:var(--primary); font-size:1.1rem; width: 20px;"></i> Remoção de
+                                    menções do MenuNoAr</li>
+                            </ul>
+
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <button id="btnActionBilling" type="button" class="btn-primary"
+                                    style="width: 100%; height: 50px; font-size: 1.05rem;"
+                                    onclick="window.handleBillingAction()">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> A carregar...
+                                </button>
+                                <p
+                                    style="font-size: 0.8rem; text-align: center; color: var(--text-muted); margin-top: 5px;">
+                                    Cancela facilmente a qualquer momento.</p>
                             </div>
                         </div>
-                    </div>
 
-                    <div id="pdfActionsState"
-                        style="display:none; background: var(--bg-page); padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-top: 10px;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                            <i class="fa-solid fa-file-pdf" style="font-size: 2rem; color: #ef4444;"></i>
-                            <div style="flex: 1; overflow: hidden;">
-                                <div style="font-weight: 700; font-size: 0.95rem; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
-                                    id="pdfCurrentFileName">Menu.pdf</div>
-                                <div style="font-size: 0.8rem; color: var(--text-muted);"><a href="#" id="pdfViewLink"
-                                        target="_blank" style="color: var(--primary);">Ver PDF Atual</a></div>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button type="button" class="btn-secondary small" style="flex: 1;"
-                                onclick="document.getElementById('pdfUploadInput').click()">
-                                <i class="fa-solid fa-pen"></i> Alterar
+                        <div style="margin-top: 40px; padding-top: 25px; border-top: 1px solid var(--border);">
+                            <h3 style="color:var(--danger); font-size:1.1rem; margin-bottom:10px;"><i
+                                    class="fa-solid fa-triangle-exclamation"></i> Zona Perigosa</h3>
+                            <p
+                                style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px; line-height: 1.6;">
+                                Apagar ou desvincular o teu restaurante é permanente. O teu painel e QR code ficarão
+                                inativos imediatamente.</p>
+                            <button type="button" class="btn-secondary"
+                                style="width:100%; color:var(--danger); border-color:rgba(239, 68, 68, 0.2); background: rgba(239,68,68,0.05);"
+                                onclick="promptDeleteRestaurant()">
+                                <i class="fa-solid fa-trash"></i> Encerrar Operação Totalmente
                             </button>
-                            <button type="button" class="btn-secondary small"
-                                style="flex: 1; color: #ef4444; border-color: #fee2e2;"
-                                onclick="window.deletePdfFile()">
-                                <i class="fa-solid fa-trash"></i> Apagar
-                            </button>
                         </div>
                     </div>
-
-                    <input type="file" id="pdfUploadInput" style="display:none;" accept="application/pdf"
-                        onchange="handlePdfSelect(this)">
-
-                    <p style="font-size:0.8rem; color:#888; margin-top:8px; display:flex; gap:5px;">
-                        <i class="fa-solid fa-circle-info"></i>
-                        Se ativo, os clientes verão o PDF em vez do menu digital.
-                    </p>
                 </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModal('settingsModal')">Cancelar</button>
-                    <button type="submit" class="btn-confirm">Guardar Configurações</button>
-                </div>
-
-                <div style="margin-top: 35px; padding-top: 25px; border-top: 1px solid var(--border);">
-                    <h3 style="color:var(--danger); font-size:1.1rem; margin-bottom:10px;"><i
-                            class="fa-solid fa-triangle-exclamation"></i> Zona de Perigo</h3>
-                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Atenção: Apagar o menu
-                        remove permanentemente todos os pratos, categorias, imagens e o teu link público de forma
-                        irreversível.</p>
-                    <button type="button" class="btn-secondary"
-                        style="width:100%; color:var(--danger); border-color:var(--danger);"
-                        onclick="promptDeleteRestaurant()">
-                        <i class="fa-solid fa-trash"></i> Apagar Menu Definitivamente
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 

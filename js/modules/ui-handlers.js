@@ -361,6 +361,29 @@ window.downloadQr = () =>
     _qrCode?.download({ name: `menu-${state.currentData.slug}-qr`, extension: 'png' });
 
 // ─── Settings Modal ───────────────────────────────────────────────────────────
+window.switchSettingsTab = (tabMap) => {
+    document.querySelectorAll('.settings-tab-pane').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tab-btn-settings').forEach(el => {
+        el.style.background = 'transparent';
+        el.style.color = 'var(--text-muted)';
+        el.style.fontWeight = '600';
+        el.innerHTML = el.innerHTML.replace('color: var(--primary)', 'color: inherit');
+    });
+
+    document.getElementById(`tab-${tabMap}`).style.display = 'block';
+    const btn = document.getElementById(`tab-btn-${tabMap}`);
+    if (btn) {
+        btn.style.background = 'var(--primary-glow)';
+        btn.style.color = 'var(--primary)';
+        btn.style.fontWeight = '700';
+    }
+};
+
+window.openSettingsTab = (tabMap) => {
+    window.openSettingsModal();
+    window.switchSettingsTab(tabMap);
+};
+
 window.openSettingsModal = () => {
     const modal = document.getElementById('settingsModal');
     if (modal.classList.contains('open')) { window.closeModal('settingsModal'); return; }
@@ -372,33 +395,96 @@ window.openSettingsModal = () => {
     document.getElementById('pdfToggle').checked = state.currentData.menu_type === 'pdf';
     window.togglePdfDetails();
 
-    // Plan label and Upgrade Button
-    const planText = document.getElementById('currentPlanText');
-    const upgradeBtn = document.querySelector('.edit-modal-content a[href="subscription.html"]');
+    // Reset tabs to general
+    window.switchSettingsTab('general');
 
-    if (planText) {
-        const { subscription_status: status, stripe_customer_id: cid, trial_ends_at } = state.currentData;
-        const isActiveOrPaid = cid && (status === 'active' || status === 'trialing');
-
-        if (isActiveOrPaid) {
-            planText.textContent = 'Profissional (Membro Premium)';
-            planText.style.color = '#16a34a';
-            if (upgradeBtn) upgradeBtn.innerHTML = '<i class="fa-solid fa-gear"></i> Gerir';
-        } else if (status === 'trialing') {
-            const days = Math.ceil((new Date(trial_ends_at) - Date.now()) / 86_400_000);
-            planText.textContent = days > 0 ? `Teste Grátis (${days} dias restantes)` : 'Teste Expirado';
-            planText.style.color = days > 0 ? '#16a34a' : '#ef4444';
-            if (upgradeBtn) upgradeBtn.innerHTML = '<i class="fa-solid fa-crown"></i> Upgrade';
-        } else {
-            planText.textContent = status === 'active' ? 'Profissional (Ativo)' : 'Sem Plano Ativo';
-            planText.style.color = status === 'active' ? '#16a34a' : '#6b7280';
-            if (upgradeBtn) upgradeBtn.innerHTML = '<i class="fa-solid fa-crown"></i> Upgrade';
-        }
-    }
+    // Load Billing Status
+    window._loadBillingStatus();
 
     window.closeAllModals();
     modal.classList.add('open');
     window.checkTutorialStep('settings_open');
+};
+
+window._loadBillingStatus = async () => {
+    const planText = document.getElementById('billingStatusText');
+    const btn = document.getElementById('btnActionBilling');
+    if (!planText || !btn) return;
+
+    if (!state.currentData || !state.currentUser) return;
+
+    const { subscription_status: status, stripe_customer_id: cid, trial_ends_at } = state.currentData;
+    const isActive = status === 'active';
+    const isPaidTrial = status === 'trialing' && !!cid;
+
+    if (isActive || isPaidTrial) {
+        planText.innerHTML = '<i class="fa-solid fa-circle-check"></i> Profissional (Membro Premium)';
+        planText.style.color = 'var(--success)';
+        btn.innerHTML = '<i class="fa-solid fa-gear"></i> Gerir Pagamento / Cancelar';
+        btn.className = 'btn-secondary';
+        btn.onclick = async () => {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A preparar portal...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/create_portal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: state.currentUser.id,
+                        returnUrl: window.location.href
+                    })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.url) {
+                    window.location.href = data.url;
+                } else {
+                    alert("Erro ao abrir portal: " + (data.error || "Tenta novamente."));
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error("Portal Error", err);
+                alert("Erro de ligação. Tenta novamente.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+    } else {
+        const days = Math.ceil((new Date(trial_ends_at) - Date.now()) / 86_400_000);
+        if (days > 0) {
+            planText.innerHTML = `<i class="fa-solid fa-clock"></i> Teste Grátis (${days} dias restantes)`;
+            planText.style.color = '#eab308'; // yellow
+            btn.innerHTML = '<i class="fa-solid fa-rocket"></i> Fazer Upgrade Agora';
+            btn.className = 'btn-primary';
+        } else {
+            planText.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Teste Expirado';
+            planText.style.color = 'var(--danger)';
+            btn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Reativar Plano';
+            btn.className = 'btn-primary';
+        }
+
+        btn.onclick = async () => {
+            try {
+                const configRes = await fetch('/api/config');
+                const config = await configRes.json();
+                if (config && config.stripePaymentLink) {
+                    const params = new URLSearchParams();
+                    params.append('prefilled_email', state.currentUser.email);
+                    params.append('client_reference_id', state.currentUser.id);
+                    params.append('ts', Date.now());
+                    window.location.href = `${config.stripePaymentLink}?${params.toString()}`;
+                } else {
+                    alert("Link de pagamento incorreto no servidor.");
+                }
+            } catch (e) {
+                console.error("Erro a ir buscar o link:", e);
+                alert("Erro ao tentar ir para a página de pagamentos.");
+            }
+        };
+    }
 };
 
 window.togglePdfDetails = () => {
