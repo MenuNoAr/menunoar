@@ -47,7 +47,7 @@ const tutorialSteps = [
     {
         id: 'settings',
         title: "Configurações 🎨",
-        text: "Personaliza o teu link, cores ou ativa o modo PDF aqui.",
+        text: "Muda a fonte, cores ou ativa o modo PDF para o teu menu aqui.",
         target: "button[onclick='openSettingsModal()']",
         icon: "fa-gear"
     },
@@ -90,9 +90,25 @@ window.checkTutorialStep = (stepId) => {
         // Special case for modal openings
         if (stepId.endsWith('_open')) {
             const textTarget = document.getElementById('tutText');
-            if (textTarget) {
-                textTarget.innerHTML = "<b>Muito bem!</b><br>Preenche os campos seguintes e guarda.";
-                // Hide spotlight while modal is open
+            const tooltip = document.querySelector('.tutorial-tooltip');
+
+            if (textTarget && tooltip) {
+                if (currentStep.id === 'settings') {
+                    textTarget.innerHTML = "<b>Muito bem!</b><br>Aqui podes mudar a fonte, as cores ou ativar o modo PDF para o teu menu.";
+                } else {
+                    textTarget.innerHTML = "<b>Muito bem!</b><br>Preenche os campos abaixo e guarda para veres o resultado.";
+                }
+
+                // Move tooltip to corner to not block modal
+                Object.assign(tooltip.style, {
+                    left: isMobile ? '20px' : '30px',
+                    top: 'auto',
+                    bottom: isMobile ? '20px' : '30px',
+                    transform: 'none',
+                    width: isMobile ? 'calc(100vw - 40px)' : '320px'
+                });
+
+                // Hide spotlight/arrow while modal is open
                 document.querySelector('.tutorial-spotlight')?.style.setProperty('display', 'none');
                 document.querySelector('.tutorial-arrow')?.style.setProperty('opacity', '0');
             }
