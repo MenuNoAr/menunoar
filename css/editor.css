@@ -1490,3 +1490,20 @@ img {
         opacity: 1;
     }
 }
+
+.tutorial-blocker {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    background: transparent;
+    pointer-events: auto;
+}
+
+.tutorial-active-target {
+    z-index: 20005 !important;
+    pointer-events: auto !important;
+}
+
+.tutorial-active-target * {
+    pointer-events: auto !important;
+}

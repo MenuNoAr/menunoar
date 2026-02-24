@@ -151,9 +151,9 @@ function renderStep(index) {
     let spotlight = document.querySelector('.tutorial-spotlight') || createEl('div', 'tutorial-spotlight');
     let tooltip = document.querySelector('.tutorial-tooltip') || createEl('div', 'tutorial-tooltip', { opacity: '0', visibility: 'hidden' });
     let arrow = document.querySelector('.tutorial-arrow') || createEl('div', 'tutorial-arrow', {}, `<svg viewBox="0 0 24 24" width="40" height="40"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" fill="var(--primary)"/></svg>`);
-    let blocker = document.querySelector('.tutorial-blocker') || createEl('div', 'tutorial-blocker', {
-        position: 'fixed', inset: '0', zIndex: '20000', background: 'transparent', pointerEvents: 'auto'
-    });
+
+    // The blocker is actually what prevents clicking outside the target
+    let blocker = document.querySelector('.tutorial-blocker') || createEl('div', 'tutorial-blocker');
 
     // Reset spotlight/arrow display
     spotlight.style.display = 'block';
@@ -163,7 +163,7 @@ function renderStep(index) {
     tooltip.innerHTML = `
         <div class="tutorial-header"><h3><i class="fa-solid ${step.icon}"></i> ${step.title}</h3></div>
         <p id="tutText" style="min-height: 3em;"></p>
-        <div class="tutorial-actions">
+        <div class="tutorial-actions" style="position:relative; z-index:20006;">
             <button class="tutorial-btn-skip" onclick="closeTutorial()">Sair</button>
             <div class="tutorial-step-dots">${tutorialSteps.map((_, i) => `<div class="tutorial-dot ${i === index ? 'active' : ''}"></div>`).join('')}</div>
             <div style="display:flex; gap:8px;">
@@ -219,8 +219,12 @@ function renderStep(index) {
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         const placement = (targetEl.getBoundingClientRect().top > window.innerHeight / 2) ? 'above' : 'below';
 
+        let syncFrameId = null;
         const sync = () => {
-            if (!isTutorialActive || currentTargetEl !== targetEl) return;
+            if (!isTutorialActive || currentTargetEl !== targetEl) {
+                if (syncFrameId) cancelAnimationFrame(syncFrameId);
+                return;
+            }
             const rect = targetEl.getBoundingClientRect(), padding = 10;
             if (rect.width > 0) {
                 Object.assign(spotlight.style, {
@@ -230,9 +234,9 @@ function renderStep(index) {
                 });
                 positionTooltipAndArrow(rect, tooltip, arrow, placement);
             }
-            requestAnimationFrame(sync);
+            syncFrameId = requestAnimationFrame(sync);
         };
-        requestAnimationFrame(sync);
+        syncFrameId = requestAnimationFrame(sync);
 
         tooltip.style.visibility = 'visible';
         tooltip.style.opacity = '1';

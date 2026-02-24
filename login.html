@@ -248,7 +248,10 @@
         import { initAuthListener, signIn, signInWithGoogle } from './js/auth-service.js';
 
         // Check session
+        let isRedirecting = false;
         initAuthListener((user) => {
+            if (isRedirecting) return;
+            isRedirecting = true;
             window.location.replace('dashboard.html');
         });
 

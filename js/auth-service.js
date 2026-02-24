@@ -104,21 +104,39 @@ export async function initAuthListener(onAuth, onNoAuth) {
     const sb = await getSupabase();
     if (!sb) return;
 
-    // Check initial session immediately
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-        if (onAuth) onAuth(session.user);
-    } else {
-        if (onNoAuth) onNoAuth();
-    }
+    let initialCheckDone = false;
 
     sb.auth.onAuthStateChange((event, currentSession) => {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-            if (currentSession && onAuth) onAuth(currentSession.user);
+        // Events that imply a valid session
+        const hasUser = !!currentSession?.user;
+
+        if (hasUser && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED' || event === 'INITIAL_SESSION')) {
+            if (onAuth) onAuth(currentSession.user);
+            initialCheckDone = true;
         } else if (event === 'SIGNED_OUT') {
             if (onNoAuth) onNoAuth();
+            initialCheckDone = true;
+        }
+
+        // Fallback for cases where no valid session is found on init
+        if (!initialCheckDone && event === 'INITIAL_SESSION' && !hasUser) {
+            if (onNoAuth) onNoAuth();
+            initialCheckDone = true;
         }
     });
+
+    // Fallback timeout in case onAuthStateChange is slow to fire (unlikely but safe)
+    setTimeout(async () => {
+        if (!initialCheckDone) {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session) {
+                if (onAuth) onAuth(session.user);
+            } else {
+                if (onNoAuth) onNoAuth();
+            }
+            initialCheckDone = true;
+        }
+    }, 1500);
 }
 
 // Public access to instance getter for other scripts
