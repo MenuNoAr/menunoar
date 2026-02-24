@@ -113,12 +113,39 @@ async function checkSubscription(user) {
 
 function renderActiveState(btn, textElement) {
     // Button
-    btn.innerHTML = `<i class="fa-solid fa-check"></i> Plano Ativo`;
+    btn.innerHTML = `<i class="fa-solid fa-gear"></i> Gerir Assinatura`;
     btn.className = 'btn-secondary'; // Remove primary
-    btn.style.cursor = 'default';
-    btn.onclick = (e) => {
+    btn.style.cursor = 'pointer';
+    btn.onclick = async (e) => {
         e.preventDefault();
-        alert("A tua subscrição já está ativa e segura!");
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> A preparar portal...`;
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/create_portal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: currentUser.id,
+                    returnUrl: window.location.href
+                })
+            });
+            const data = await res.json();
+
+            if (res.ok && data.url) {
+                window.location.href = data.url;
+            } else {
+                alert("Erro ao abrir portal: " + (data.error || "Tenta novamente."));
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            console.error("Portal Error", err);
+            alert("Erro de ligação. Tenta novamente.");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     };
 
     // Text
