@@ -78,8 +78,6 @@ body {
     background-color: var(--bg-light);
     color: var(--text-dark);
     line-height: 1.6;
-    overflow-x: clip;
-    /* Fix: 'clip' prevents horizontal scrollbars without breaking 'position: fixed' on mobile browsers (hiding navbar issue) */
 }
 
 /* Typography */
@@ -303,6 +301,7 @@ section {
     align-items: center;
     min-height: 80vh;
     background: radial-gradient(circle at top right, #e0f2fe 0%, transparent 40%);
+    overflow: hidden;
 }
 
 .hero-grid {
