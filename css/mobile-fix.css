@@ -6,163 +6,175 @@
 
 @media (max-width: 850px) {
 
-    /* 1. Global Reset & Scroll Behavior */
+    /* 1. Global Scrolling & Clickability */
+    html,
     body {
-        /* Allow page-level scroll if needed, but the canvas usually handles it */
-        overflow: auto !important;
-        pointer-events: auto !important;
-        -webkit-overflow-scrolling: touch;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        /* Always allow vertical scroll */
+        height: auto !important;
+        position: relative !important;
     }
 
-    /* 2. Fix the "Unclickable" Navbar */
+    /* 2. Simple & Robust Navbar */
     .dashboard-navbar {
-        height: 60px !important;
-        padding: 0 12px !important;
-        background: var(--bg-card) !important;
-        z-index: 200000 !important;
-        /* Absolute top */
-        display: flex !important;
-        pointer-events: auto !important;
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
         width: 100% !important;
+        height: 60px !important;
+        padding: 0 12px !important;
+        z-index: 99999 !important;
+        /* Top of page */
+        background: var(--bg-card) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+        display: flex !important;
+        pointer-events: auto !important;
     }
 
+    /* Hide PC-only elements with extreme priority */
     .nav-tools-desktop,
-    #trialTimer,
     .desktop-only,
     .nav-brand .divider,
-    .user-name-btn {
+    .nav-brand .user-name-btn,
+    #trialTimer {
         display: none !important;
     }
 
-    .mobile-nav-trigger,
-    .mobile-help-trigger {
+    .nav-tools {
         display: flex !important;
-        width: 42px !important;
-        height: 42px !important;
+        gap: 10px !important;
+    }
+
+    /* Mobile-Specific Icons */
+    .mobile-help-trigger,
+    .mobile-nav-trigger {
+        display: flex !important;
+        width: 40px !important;
+        height: 40px !important;
         align-items: center;
         justify-content: center;
         background: var(--primary-glow) !important;
         color: var(--primary) !important;
-        border-radius: 12px !important;
-        pointer-events: auto !important;
+        border-radius: 10px;
     }
 
-    /* 3. Mobile Menu (Dropbar) */
+    /* 3. The Dashboard Canvas (Must Scroll) */
+    .editor-canvas {
+        margin-top: 70px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding: 0 10px !important;
+        display: block !important;
+    }
+
+    /* 4. Tutorial Banner (Simplified Top Banner) */
+    .tutorial-tooltip {
+        position: fixed !important;
+        top: 60px !important;
+        /* Right below navbar */
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 99998 !important;
+        /* Just below navbar */
+        background: var(--bg-card) !important;
+        padding: 15px !important;
+        border-radius: 0 0 15px 15px !important;
+        border-bottom: 3px solid var(--primary) !important;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .tutorial-header h3 {
+        font-size: 1rem !important;
+    }
+
+    .tutorial-tooltip p {
+        font-size: 0.85rem !important;
+        line-height: 1.4 !important;
+    }
+
+    /* 5. Mobile Menu (Dropbar) */
     .mobile-dropbar {
         position: fixed !important;
         top: 60px !important;
         left: 0 !important;
         width: 100% !important;
-        z-index: 195000 !important;
+        z-index: 100000 !important;
+        /* Top of everything */
         background: var(--bg-card) !important;
-        flex-direction: column !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+        border-bottom: 2px solid var(--primary) !important;
         display: none;
-        pointer-events: auto !important;
     }
 
     .mobile-dropbar.open {
         display: flex !important;
+        flex-direction: column;
     }
 
-    /* 4. Tutorial System (Crucial Fixes) */
-
-    /* THE BANNER: Must be clickable! */
-    .tutorial-tooltip {
-        position: fixed !important;
-        width: 100% !important;
-        left: 0 !important;
-        z-index: 210000 !important;
-        /* Above Navbar and Modals to ensure clickability */
-        background: var(--bg-card) !important;
-        pointer-events: auto !important;
-        display: block !important;
-        box-shadow: 0 0 32px rgba(0, 0, 0, 0.5) !important;
+    .dropbar-item {
+        padding: 16px 20px !important;
+        border-bottom: 1px solid var(--border);
+        font-weight: 600;
+        display: flex !important;
+        align-items: center;
+        gap: 12px;
     }
 
-    .tutorial-tooltip.is-top {
-        top: 60px !important;
-        border-bottom: 4px solid var(--primary) !important;
-        border-radius: 0 0 24px 24px !important;
-    }
-
-    .tutorial-tooltip.is-bottom {
-        bottom: 0 !important;
-        top: auto !important;
-        border-top: 4px solid var(--primary) !important;
-        border-radius: 24px 24px 0 0 !important;
-    }
-
-    /* THE BLOCKER: Allow scroll but block clicks */
+    /* 6. Interaction Layers (Safe Reset) */
     .tutorial-blocker {
-        z-index: 170000 !important;
-        background: rgba(0, 0, 0, 0.3) !important;
+        z-index: 10000 !important;
+        background: rgba(0, 0, 0, 0.1) !important;
         pointer-events: none !important;
-        /* LET THE TOUCH PASS TO THE CANVAS FOR SCROLLING */
+        /* Never block scroll */
     }
 
-    /* THE CANVAS: Must scroll even in tutorial */
-    .editor-canvas {
-        margin-top: 60px !important;
-        height: calc(100vh - 60px) !important;
-        width: 100% !important;
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        pointer-events: auto !important;
-        /* Enable touch reach */
-        position: relative !important;
-        display: block !important;
-    }
-
-    /* BLOCK CLICKS ON CANVAS CHILDREN DURING TUTORIAL */
-    body.tutorial-active .editor-canvas>*:not(.tutorial-active-target) {
+    .tutorial-spotlight {
+        z-index: 10001 !important;
         pointer-events: none !important;
     }
 
     .tutorial-active-target {
-        z-index: 180000 !important;
+        z-index: 10002 !important;
         position: relative !important;
         pointer-events: auto !important;
+        /* Always allow clicking the highlighted element */
     }
 
-    .tutorial-spotlight {
-        z-index: 175000 !important;
-        pointer-events: none !important;
-    }
-
-    /* 5. Modals */
+    /* 7. Bottom Sheets (Modals) */
     .edit-modal {
-        z-index: 205000 !important;
+        display: flex !important;
         align-items: flex-end !important;
-        pointer-events: none !important;
-        /* Only clickable when open */
+        padding: 0 !important;
+        z-index: 110000 !important;
     }
 
-    .edit-modal.open {
-        pointer-events: auto !important;
-        display: flex !important;
+    .edit-modal:not(.open) {
+        visibility: hidden !important;
+        pointer-events: none !important;
     }
 
     .edit-modal-content {
-        border-radius: 24px 24px 0 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        border-radius: 20px 20px 0 0 !important;
         max-height: 85vh !important;
         transform: translateY(100%);
-        pointer-events: auto !important;
+        transition: transform 0.4s ease;
     }
 
-    /* 6. Fix for Tutorial Buttons explicitly */
-    .tutorial-actions button,
-    .tutorial-btn-next,
-    .tutorial-btn-skip {
-        pointer-events: auto !important;
-        cursor: pointer !important;
+    .edit-modal.open .edit-modal-content {
+        transform: translateY(0) !important;
     }
 
+    /* 8. Fix Item Actions on Tap */
     .item-actions {
         opacity: 1 !important;
-        background: rgba(255, 255, 255, 0.9) !important;
-        border-radius: 12px !important;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        padding: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 }
