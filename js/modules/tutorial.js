@@ -115,7 +115,8 @@ window.checkTutorialStep = (stepId) => {
 
                 // Move tooltip on mobile/desktop
                 if (isMobile) {
-                    // Let CSS handle it via !important
+                    tooltip.classList.remove('is-bottom');
+                    tooltip.classList.add('is-top');
                     tooltip.style.opacity = '1';
                     tooltip.style.visibility = 'visible';
                 } else {
@@ -316,8 +317,17 @@ function createEl(tag, className, styles = {}, html = '') {
 
 function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
     if (isMobileDevice()) {
-        arrow.style.opacity = '0'; // Hide arrow on mobile top banner
-        return; // Let CSS handle fixed top position
+        arrow.style.opacity = '0';
+        tooltip.classList.remove('is-top', 'is-bottom');
+
+        // Dynamic positioning on mobile:
+        // If target is on top half, show tooltip at bottom. Otherwise top.
+        if (rect.top < window.innerHeight / 2) {
+            tooltip.classList.add('is-bottom');
+        } else {
+            tooltip.classList.add('is-top');
+        }
+        return; // Let CSS handle fixed positions
     }
     const margin = 20, tooltipWidth = 540;
     const tooltipHeight = tooltip.offsetHeight;
