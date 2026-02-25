@@ -315,7 +315,11 @@ function createEl(tag, className, styles = {}, html = '') {
 
 function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
     const isMobile = window.innerWidth <= 850;
-    const margin = 20, tooltipWidth = isMobile ? Math.min(window.innerWidth - 40, 340) : 540;
+    if (isMobile) {
+        arrow.style.opacity = '0'; // Hide arrow on mobile top banner
+        return; // Let CSS handle fixed top position
+    }
+    const margin = 20, tooltipWidth = 540;
     const tooltipHeight = tooltip.offsetHeight;
     let tx = rect.left + rect.width / 2 - tooltipWidth / 2;
     tx = Math.max(20, Math.min(tx, window.innerWidth - tooltipWidth - 20));

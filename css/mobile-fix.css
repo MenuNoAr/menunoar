@@ -71,33 +71,95 @@
 @media (max-width: 850px) {
     body {
         font-size: 14px;
-        /* Remove explicit overflow: hidden here as it might break some scrolls */
+        overflow: hidden !important;
+        /* Lock body while in dashboard */
     }
 
-    /* Modal Structure */
+    /* --- TUTORIAL: TOP BAR (PREVENTS OVERLAPPING) --- */
+    .tutorial-tooltip {
+        position: fixed !important;
+        width: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: 0 !important;
+        /* FIXED TOP */
+        bottom: auto !important;
+        transform: none !important;
+        padding: 12px 15px !important;
+        border-radius: 0 0 24px 24px !important;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5) !important;
+        z-index: 150000 !important;
+        /* ABOVE ABSOLUTELY EVERYTHING */
+        border: none !important;
+        border-bottom: 4px solid var(--primary) !important;
+        background: var(--bg-card) !important;
+        display: block !important;
+    }
+
+    .tutorial-header h3 {
+        font-size: 1rem !important;
+        margin-bottom: 5px !important;
+        color: var(--primary) !important;
+    }
+
+    .tutorial-tooltip p {
+        font-size: 0.85rem !important;
+        line-height: 1.4 !important;
+        margin-bottom: 12px !important;
+        color: var(--text) !important;
+    }
+
+    .tutorial-actions {
+        padding-top: 5px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    .tutorial-btn-next {
+        height: 38px !important;
+        padding: 0 16px !important;
+        font-size: 0.85rem !important;
+        background: var(--primary) !important;
+        color: white !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+    }
+
+    .tutorial-btn-skip {
+        font-size: 0.8rem !important;
+        opacity: 0.7 !important;
+    }
+
+    /* --- MODALS: BOTTOM SHEET (PREVENTS OVERLAPPING) --- */
     .edit-modal {
-        padding: 5px !important;
+        padding: 0 !important;
         align-items: flex-end !important;
-        /* Modals come from bottom on mobile */
+        /* Pop from bottom */
+        z-index: 100000 !important;
     }
 
     .edit-modal-content {
-        padding: 20px !important;
+        padding: 24px 20px !important;
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
-        border-radius: 24px 24px 0 0 !important;
-        /* App-like bottom sheet */
-        max-height: 92vh !important;
-        transform: translateY(100px);
+        border-radius: 30px 30px 0 0 !important;
+        /* Rounded top only */
+        max-height: 80vh !important;
+        /* 80vh to leave room for tutorial at top */
+        bottom: 0 !important;
+        transform: translateY(100%);
         transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.25);
     }
 
     .edit-modal.open .edit-modal-content {
         transform: translateY(0);
     }
 
-    /* Settings Modal Split */
+    /* Settings Tabs Scrollable */
     .settings-layout {
         flex-direction: column !important;
         min-height: auto !important;
@@ -112,7 +174,9 @@
         background: var(--bg-card) !important;
         position: sticky;
         top: 0;
-        z-index: 100;
+        /* Sticky within modal context if possible, otherwise just top */
+        z-index: 10;
+        margin-bottom: 10px;
     }
 
     .settings-sidebar-title {
@@ -122,10 +186,9 @@
     .settings-sidebar-tabs {
         flex-direction: row !important;
         overflow-x: auto !important;
-        padding-bottom: 5px !important;
-        gap: 8px !important;
-        scrollbar-width: none !important;
         -webkit-overflow-scrolling: touch;
+        gap: 8px !important;
+        padding-bottom: 4px;
     }
 
     .settings-sidebar-tabs::-webkit-scrollbar {
@@ -134,132 +197,77 @@
 
     .tab-btn-settings {
         flex-shrink: 0 !important;
-        width: auto !important;
-        padding: 8px 14px !important;
-        font-size: 0.8rem !important;
+        padding: 8px 16px !important;
+        font-size: 0.85rem !important;
         background: var(--bg-page) !important;
-    }
-
-    .tab-btn-settings span {
-        display: inline !important;
+        width: auto !important;
+        border-radius: 10px !important;
     }
 
     .settings-content {
-        padding: 15px !important;
-        overflow-y: visible !important;
+        padding: 10px 0 !important;
     }
 
-    /* Tutorial Visibility Logic - FORCE BOTTOM ON MOBILE */
-    .tutorial-tooltip {
-        width: calc(100% - 20px) !important;
-        left: 10px !important;
-        right: 10px !important;
-        bottom: 10px !important;
-        top: auto !important;
-        transform: none !important;
-        padding: 15px !important;
-        border-radius: 20px !important;
-        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4) !important;
-        z-index: 110000 !important;
+    /* Form Optimizations */
+    .form-group label {
+        font-size: 0.75rem !important;
+        margin-bottom: 4px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .tutorial-tooltip img {
-        display: none;
+    .modal-actions {
+        flex-direction: column !important;
+        gap: 10px !important;
+        margin-top: 25px !important;
     }
 
-    .tutorial-tooltip h3 {
+    .btn-confirm,
+    .btn-cancel {
+        width: 100% !important;
+        height: 52px !important;
         font-size: 1rem !important;
-        margin-bottom: 5px !important;
+        border-radius: 14px !important;
     }
 
-    .tutorial-tooltip p {
-        font-size: 0.85rem !important;
-        margin-bottom: 12px !important;
-        line-height: 1.4 !important;
-    }
-
-    .tutorial-actions {
-        padding-top: 5px !important;
-    }
-
-    /* Navbar fixes */
+    /* Dashboard UI Elements */
     .dashboard-navbar {
         height: 60px !important;
         padding: 0 12px !important;
     }
 
     .nav-brand img {
-        height: 24px !important;
+        height: 28px !important;
     }
 
-    /* Action Buttons in Grid */
     .item-actions {
         opacity: 1 !important;
-        transform: scale(0.85) !important;
-        top: 4px !important;
-        right: 4px !important;
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 8px;
-        padding: 2px;
-    }
-
-    /* Modal Actions Stacking */
-    .modal-actions {
-        flex-direction: column !important;
-        gap: 10px !important;
-        margin-top: 20px !important;
-    }
-
-    .modal-actions button,
-    .modal-actions .btn-confirm,
-    .modal-actions .btn-cancel {
-        width: 100% !important;
-        flex: none !important;
-        height: 50px !important;
-    }
-
-    /* Form Fields on Mobile */
-    .form-group {
-        margin-bottom: 12px !important;
-    }
-
-    .form-group label {
-        font-size: 0.8rem !important;
-        margin-bottom: 4px !important;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        font-size: 16px !important;
-        /* Prevent iOS zoom */
-        padding: 10px 12px !important;
-    }
-
-    .desktop-only {
-        display: none !important;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 10px;
+        padding: 4px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 }
 
 .tutorial-blocker {
     position: fixed;
     inset: 0;
-    z-index: 20000;
+    z-index: 140000;
+    /* Just below tutorial tooltip */
     background: transparent;
     pointer-events: auto;
 }
 
 .tutorial-active .tutorial-blocker {
-    background: rgba(0, 0, 0, 0.1) !important;
+    background: rgba(0, 0, 0, 0.2) !important;
 }
 
 .tutorial-parent-boost {
-    z-index: 20001 !important;
-    pointer-events: none !important;
+    z-index: 140001 !important;
 }
 
 .tutorial-active-target {
     position: relative !important;
-    z-index: 20005 !important;
+    z-index: 140002 !important;
     pointer-events: auto !important;
 }
