@@ -181,12 +181,16 @@
         z-index: 140000 !important;
     }
 
+    .tutorial-spotlight {
+        z-index: 145000 !important;
+    }
+
     .tutorial-parent-boost {
-        z-index: 140001 !important;
+        z-index: 145001 !important;
     }
 
     .tutorial-active-target {
-        z-index: 140002 !important;
+        z-index: 145002 !important;
         position: relative !important;
     }
 }

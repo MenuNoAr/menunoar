@@ -215,7 +215,7 @@ function renderStep(index) {
     };
     type();
 
-    const isMobile = window.innerWidth <= 850;
+    const isMobile = isMobileDevice();
     let targetSelector = step.target;
 
     if (isMobile) {
