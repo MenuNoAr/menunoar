@@ -138,9 +138,13 @@ window.checkTutorialStep = (stepId) => {
 
         if (autoAdvanceTimeout) clearTimeout(autoAdvanceTimeout);
         showSuccessFeedback();
+
+        // Speed up for settings step because it triggers a page reload
+        const delay = currentStep.id === 'settings' ? 0 : 500;
+
         autoAdvanceTimeout = setTimeout(() => {
             if (isTutorialActive) window.nextStep();
-        }, 500); // Slightly faster than the page reload (800ms)
+        }, delay);
     }
 };
 
