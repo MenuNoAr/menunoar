@@ -74,6 +74,7 @@ function clearOverlays() {
 
 let autoAdvanceTimeout = null;
 let currentTargetEl = null;
+let boostedParents = [];
 let originalZIndex = '';
 
 window.checkTutorialStep = (stepId) => {
@@ -135,11 +136,14 @@ function showSuccessFeedback() {
 function renderStep(index) {
     if (typeTimeout) clearTimeout(typeTimeout);
 
-    // Reset previous target z-index
+    // Reset previous target z-index and boosted parents
     if (currentTargetEl) {
         currentTargetEl.style.zIndex = originalZIndex;
         currentTargetEl.classList.remove('tutorial-active-target');
+        currentTargetEl = null;
     }
+    boostedParents.forEach(p => p.classList.remove('tutorial-parent-boost'));
+    boostedParents = [];
 
     // Ensure UI is clean before showing next/prev step
     if (window.closeAllModals) window.closeAllModals();
@@ -204,10 +208,20 @@ function renderStep(index) {
     }
 
     if (targetEl) {
-        // Bring target to front
-        originalZIndex = window.getComputedStyle(targetEl).zIndex;
-        targetEl.style.zIndex = '20001';
+        // Bring target and its fixed/sticky ancestors to front
+        originalZIndex = targetEl.style.zIndex;
+        targetEl.style.zIndex = '20005';
         targetEl.classList.add('tutorial-active-target');
+
+        let parent = targetEl.parentElement;
+        while (parent && parent !== document.body) {
+            const s = window.getComputedStyle(parent);
+            if (s.position === 'fixed' || s.position === 'sticky' || (s.zIndex !== 'auto' && s.zIndex !== '0')) {
+                parent.classList.add('tutorial-parent-boost');
+                boostedParents.push(parent);
+            }
+            parent = parent.parentElement;
+        }
 
         // Ensure dropbar is open if target is inside it
         if (isMobile && (targetSelector.includes('mobile-dropbar') || targetSelector.includes('Mobile'))) {
@@ -310,12 +324,14 @@ window.prevTutorialPage = () => currentTutStep > 0 && renderStep(--currentTutSte
 window.closeTutorial = () => {
     isTutorialActive = false;
 
-    // Reset target z-index
+    // Reset target z-index and parents
     if (currentTargetEl) {
         currentTargetEl.style.zIndex = originalZIndex;
         currentTargetEl.classList.remove('tutorial-active-target');
         currentTargetEl = null;
     }
+    boostedParents.forEach(p => p.classList.remove('tutorial-parent-boost'));
+    boostedParents = [];
 
     document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow, .tutorial-blocker').forEach(el => {
         el.style.opacity = '0';

@@ -1499,6 +1499,11 @@ img {
     pointer-events: auto;
 }
 
+.tutorial-parent-boost {
+    z-index: 20001 !important;
+    pointer-events: none !important;
+}
+
 .tutorial-active-target {
     z-index: 20005 !important;
     pointer-events: auto !important;
