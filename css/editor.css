@@ -702,6 +702,7 @@ button:disabled {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     backdrop-filter: blur(25px);
     gap: 12px;
+    pointer-events: auto !important;
 }
 
 /* body.tutorial-active .dashboard-navbar { pointer-events: none; } */
@@ -1437,7 +1438,8 @@ img {
 
 .tutorial-parent-boost {
     z-index: 20001 !important;
-    pointer-events: none !important;
+    /* pointer-events: none !important; */
+    /* REMOVED: This was breaking target children */
 }
 
 .tutorial-active-target {

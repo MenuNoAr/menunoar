@@ -5,246 +5,161 @@
 */
 
 @media (max-width: 850px) {
+
+    /* 1. Global Reset for Mobile Interaction */
     body {
         overflow: hidden !important;
+        pointer-events: auto !important;
     }
 
-    /* --- DASHBOARD NAVBAR (Compact) --- */
+    /* 2. Fix the "Unclickable" Navbar & Nav Tools */
     .dashboard-navbar {
         height: 60px !important;
         padding: 0 12px !important;
-        gap: 8px !important;
+        background: var(--bg-card) !important;
+        z-index: 200000 !important;
+        /* Above EVERYTHING */
+        display: flex !important;
         pointer-events: auto !important;
-        /* Ensure interactions aren't blocked */
-    }
-
-    .nav-brand img {
-        height: 28px !important;
     }
 
     .nav-tools {
-        gap: 6px !important;
+        display: flex !important;
+        gap: 8px !important;
+        pointer-events: auto !important;
     }
 
-    .nav-tools-desktop {
+    /* 3. Eliminate "Repeated Buttons" (Desktop buttons MUST die on mobile) */
+    .nav-tools-desktop,
+    .desktop-only,
+    .user-name-btn,
+    .nav-brand .divider,
+    #trialTimer {
         display: none !important;
-        /* Hide desktop buttons on mobile */
     }
 
+    /* 4. Mobile-Specific Triggers (Force Visibility) */
     .mobile-nav-trigger,
     .mobile-help-trigger {
         display: flex !important;
-        /* Show mobile triggers */
-        height: 40px !important;
-        width: 40px !important;
-        padding: 0 !important;
-        font-size: 1.1rem !important;
+        height: 42px !important;
+        width: 42px !important;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px !important;
+        background: var(--primary-glow) !important;
+        color: var(--primary) !important;
+        font-size: 1.2rem !important;
+        pointer-events: auto !important;
     }
 
-    .btn-nav {
-        padding: 8px !important;
-        font-size: 0.8rem !important;
-    }
-
-    #trialTimer,
-    .desktop-only,
-    .nav-brand .user-name-btn,
-    .nav-brand .divider {
-        display: none !important;
-    }
-
-    /* --- MOBILE DROPBAR (MODERN MENU) --- */
+    /* 5. Mobile Menu (Side/Dropbar) */
     .mobile-dropbar {
+        position: fixed !important;
+        top: 60px !important;
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 190000 !important;
+        background: var(--bg-card) !important;
+        border-bottom: 2px solid var(--primary) !important;
+        flex-direction: column !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
         display: none;
-        position: fixed;
-        top: 60px;
-        left: 0;
-        width: 100%;
-        background: var(--bg-card);
-        border-bottom: 2px solid var(--primary);
-        z-index: 90000;
-        flex-direction: column;
-        padding: 10px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
     .mobile-dropbar.open {
-        display: flex;
+        display: flex !important;
     }
 
     .dropbar-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 15px 20px;
-        width: 100%;
-        color: var(--text);
-        font-size: 1rem;
-        font-weight: 600;
-        border-bottom: 1px solid var(--border);
+        display: flex !important;
+        padding: 18px 20px !important;
+        border-bottom: 1px solid var(--border) !important;
+        font-weight: 600 !important;
+        color: var(--text) !important;
+        pointer-events: auto !important;
     }
 
-    .dropbar-item i {
-        color: var(--primary);
-        width: 25px;
-    }
-
-    /* --- TUTORIAL: DYNAMIC BANNER (TOP/BOTTOM) --- */
+    /* 6. Tutorial UI (Dynamic Position) */
     .tutorial-tooltip {
         position: fixed !important;
         width: 100% !important;
         left: 0 !important;
-        right: 0 !important;
-        transform: none !important;
-        padding: 12px 15px !important;
-        z-index: 150000 !important;
-        border: none !important;
+        z-index: 180000 !important;
         background: var(--bg-card) !important;
-        display: block !important;
-        box-shadow: 0 0 25px rgba(0, 0, 0, 0.4) !important;
-        transition: top 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-            bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-            opacity 0.3s ease !important;
+        pointer-events: auto !important;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.4) !important;
     }
 
     .tutorial-tooltip.is-top {
-        top: 0 !important;
-        bottom: auto !important;
-        border-radius: 0 0 24px 24px !important;
+        top: 60px !important;
+        border-radius: 0 0 20px 20px !important;
         border-bottom: 4px solid var(--primary) !important;
     }
 
     .tutorial-tooltip.is-bottom {
-        top: auto !important;
         bottom: 0 !important;
-        border-radius: 24px 24px 0 0 !important;
+        border-radius: 20px 20px 0 0 !important;
         border-top: 4px solid var(--primary) !important;
     }
 
-    .tutorial-header h3 {
-        font-size: 0.95rem !important;
-    }
-
-    .tutorial-tooltip p {
-        font-size: 0.82rem !important;
-        line-height: 1.4 !important;
-        margin-bottom: 8px !important;
-    }
-
-    /* --- MODALS: BOTTOM SHEET (NATURAL MOBILE FEEL) --- */
-    .edit-modal {
-        padding: 0 !important;
-        align-items: flex-end !important;
-        z-index: 100000 !important;
-    }
-
-    .edit-modal-content {
-        padding: 24px 20px !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        border-radius: 24px 24px 0 0 !important;
-        max-height: 82vh !important;
-        bottom: 0 !important;
-        transform: translateY(100%);
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2) !important;
-    }
-
-    .edit-modal.open .edit-modal-content {
-        transform: translateY(0);
-    }
-
-    /* --- SETTINGS: SCROLLABLE TABS --- */
-    .settings-layout {
-        flex-direction: column !important;
-    }
-
-    .settings-sidebar {
-        width: 100% !important;
-        padding: 10px 15px !important;
-        border-right: none !important;
-        border-bottom: 1px solid var(--border) !important;
-        background: var(--bg-card) !important;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        margin-bottom: 5px;
-    }
-
-    .settings-sidebar-title {
-        display: none !important;
-    }
-
-    .settings-sidebar-tabs {
-        flex-direction: row !important;
-        overflow-x: auto !important;
-        gap: 8px !important;
-        padding-bottom: 4px;
-        scrollbar-width: none;
-    }
-
-    .settings-sidebar-tabs::-webkit-scrollbar {
-        display: none;
-    }
-
-    .tab-btn-settings {
-        flex-shrink: 0 !important;
-        width: auto !important;
-        padding: 8px 16px !important;
-        font-size: 0.85rem !important;
-    }
-
-    /* --- EDITOR CANVAS (FULL SCREEN ON MOBILE) --- */
-    .editor-canvas {
-        width: 100% !important;
-        margin-top: 60px !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        height: calc(100vh - 60px) !important;
-    }
-
-    /* --- FORM & ACTIONS --- */
-    .modal-actions {
-        flex-direction: column !important;
-        gap: 10px !important;
-    }
-
-    .btn-confirm,
-    .btn-cancel {
-        width: 100% !important;
-        height: 52px !important;
-        font-size: 1rem !important;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        font-size: 16px !important;
-    }
-
-    .item-actions {
-        opacity: 1 !important;
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 10px;
-        padding: 4px;
-    }
-
-    /* --- TUTORIAL HELPERS (MOBILE Z-INDEX) --- */
+    /* 7. Protection Layers (The Blocker) */
     .tutorial-blocker {
-        z-index: 140000 !important;
+        z-index: 170000 !important;
+        /* Below tooltip and navbar */
+        background: rgba(0, 0, 0, 0.2) !important;
+        pointer-events: auto !important;
     }
 
     .tutorial-spotlight {
-        z-index: 145000 !important;
-    }
-
-    .tutorial-parent-boost {
-        z-index: 145001 !important;
+        z-index: 171000 !important;
+        pointer-events: none !important;
     }
 
     .tutorial-active-target {
-        z-index: 145002 !important;
+        z-index: 175000 !important;
         position: relative !important;
+        pointer-events: auto !important;
+    }
+
+    /* 8. Fix Modals Overlaying Background unnecessarily */
+    .edit-modal:not(.open) {
+        pointer-events: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+
+    .edit-modal.open {
+        z-index: 210000 !important;
+        display: flex !important;
+        align-items: flex-end !important;
+        pointer-events: auto !important;
+    }
+
+    .edit-modal-content {
+        border-radius: 24px 24px 0 0 !important;
+        max-height: 85vh !important;
+        width: 100% !important;
+        transform: translateY(100%);
+        pointer-events: auto !important;
+    }
+
+    .edit-modal.open .edit-modal-content {
+        transform: translateY(0) !important;
+    }
+
+    /* 9. Canvas Layout */
+    .editor-canvas {
+        margin-top: 60px !important;
+        height: calc(100vh - 60px) !important;
+        width: 100% !important;
+        pointer-events: auto !important;
+    }
+
+    /* Ensure tutorial action buttons are clickable and visible */
+    .tutorial-btn-next,
+    .tutorial-btn-skip {
+        pointer-events: auto !important;
+        z-index: 10 !important;
     }
 }
