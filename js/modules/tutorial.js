@@ -55,18 +55,26 @@ const tutorialSteps = [
 
 let typeTimeout = null;
 
-export function openTutorial() {
+export function openTutorial(forceResume = false) {
     window.closeAllModals();
     isTutorialActive = true;
-    document.body.classList.add('tutorial-active'); // Add class for CSS overrides
+    document.body.classList.add('tutorial-active');
 
     if (document.getElementById('mobileDropbar')?.classList.contains('open')) {
         window.toggleNavDropdown();
     }
 
-    currentTutStep = 0;
+    // Try to resume if it was already running before a reload
+    const savedStep = localStorage.getItem('tutorial_step');
+    if (forceResume && savedStep !== null) {
+        currentTutStep = parseInt(savedStep, 10);
+    } else {
+        currentTutStep = 0;
+        localStorage.setItem('tutorial_step', '0');
+    }
+
     clearOverlays();
-    renderStep(0);
+    renderStep(currentTutStep);
 }
 
 function clearOverlays() {
@@ -132,7 +140,7 @@ window.checkTutorialStep = (stepId) => {
         showSuccessFeedback();
         autoAdvanceTimeout = setTimeout(() => {
             if (isTutorialActive) window.nextStep();
-        }, 800);
+        }, 500); // Slightly faster than the page reload (800ms)
     }
 };
 
@@ -146,6 +154,8 @@ function showSuccessFeedback() {
 function renderStep(index) {
     if (typeTimeout) clearTimeout(typeTimeout);
     isModalOverride = false; // RESET MODAL STATE ON NEW STEP
+    localStorage.setItem('tutorial_step', index.toString()); // PERSIST STATE
+    localStorage.setItem('tutorial_running', 'true'); // FLAG FOR RELOAD RESUME
 
     // Reset previous target z-index and boosted parents
     if (currentTargetEl) {
@@ -334,6 +344,8 @@ window.prevTutorialPage = () => currentTutStep > 0 && renderStep(--currentTutSte
 window.closeTutorial = () => {
     isTutorialActive = false;
     document.body.classList.remove('tutorial-active');
+    localStorage.removeItem('tutorial_step');
+    localStorage.removeItem('tutorial_running');
 
     // Reset target z-index and parents
     if (currentTargetEl) {

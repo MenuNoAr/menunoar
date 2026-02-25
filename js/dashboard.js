@@ -57,6 +57,13 @@ async function init() {
                         openTutorial();
                     }
                 }, 1000);
+            } else if (localStorage.getItem('tutorial_running') === 'true') {
+                // Resume tutorial if it was running before a reload
+                setTimeout(() => {
+                    if (state.currentData?.menu_type !== 'pdf') {
+                        window.openTutorial(true);
+                    }
+                }, 1000);
             }
         }, () => {
             window.location.href = 'login.html';
