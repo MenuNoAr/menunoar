@@ -77,6 +77,9 @@ let currentTargetEl = null;
 let boostedParents = [];
 let originalZIndex = '';
 
+let isTransitioning = false;
+let isModalOverride = false; // Flag to pause spotlight/blocker when a modal is open
+
 window.checkTutorialStep = (stepId) => {
     if (!isTutorialActive || isTransitioning) return;
     const currentStep = tutorialSteps[currentTutStep];
@@ -84,6 +87,7 @@ window.checkTutorialStep = (stepId) => {
     if (currentStep && (currentStep.id === stepId || stepId.startsWith(currentStep.id))) {
         // Special case for modal openings
         if (stepId.endsWith('_open')) {
+            isModalOverride = true; // PAUSE THE LOOP
             const textTarget = document.getElementById('tutText');
             const tooltip = document.querySelector('.tutorial-tooltip');
             const isMobile = window.innerWidth <= 850;
@@ -111,12 +115,14 @@ window.checkTutorialStep = (stepId) => {
                     });
                 }
 
-                // Hide spotlight/arrow while modal is open
-                document.querySelector('.tutorial-spotlight')?.style.setProperty('display', 'none');
-                document.querySelector('.tutorial-arrow')?.style.setProperty('opacity', '0');
+                // Hide spotlight/arrow/blocker explicitly and keep them hidden
+                const spotlight = document.querySelector('.tutorial-spotlight');
+                const arrow = document.querySelector('.tutorial-arrow');
+                const blocker = document.querySelector('.tutorial-blocker');
 
-                // Disable blocker while modal is open
-                document.querySelector('.tutorial-blocker')?.style.setProperty('display', 'none');
+                if (spotlight) spotlight.style.display = 'none';
+                if (arrow) arrow.style.opacity = '0';
+                if (blocker) blocker.style.display = 'none';
             }
             return;
         }
@@ -138,6 +144,7 @@ function showSuccessFeedback() {
 
 function renderStep(index) {
     if (typeTimeout) clearTimeout(typeTimeout);
+    isModalOverride = false; // RESET MODAL STATE ON NEW STEP
 
     // Reset previous target z-index and boosted parents
     if (currentTargetEl) {
@@ -239,7 +246,7 @@ function renderStep(index) {
 
         let syncFrameId = null;
         const sync = () => {
-            if (!isTutorialActive || currentTargetEl !== targetEl) {
+            if (!isTutorialActive || currentTargetEl !== targetEl || isModalOverride) {
                 if (syncFrameId) cancelAnimationFrame(syncFrameId);
                 return;
             }
@@ -301,8 +308,6 @@ function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
     });
     Object.assign(arrow.style, { opacity: '1', left: `${ax}px`, top: `${ay}px`, transform: `rotate(${ar}deg)` });
 }
-
-let isTransitioning = false;
 window.nextStep = () => {
     if (isTransitioning) return;
     if (autoAdvanceTimeout) clearTimeout(autoAdvanceTimeout);
