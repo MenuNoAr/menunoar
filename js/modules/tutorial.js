@@ -89,22 +89,25 @@ window.checkTutorialStep = (stepId) => {
             const isMobile = window.innerWidth <= 850;
 
             if (textTarget && tooltip) {
+                // Combine success feedback with next instruction
+                const successIcon = '<span style="color:var(--success); font-weight:700; display:block; margin-bottom:8px; animation: popSuccess 0.4s cubic-bezier(0.17, 0.89, 0.32, 1.49);">🎉 Excelente!</span>';
+
                 if (currentStep.id === 'settings') {
-                    textTarget.innerHTML = "<b>Muito bem!</b><br>Aqui podes mudar a fonte, as cores ou ativar o modo PDF.";
+                    textTarget.innerHTML = successIcon + "Aqui podes mudar a fonte, as cores ou ativar o modo PDF.";
                 } else {
-                    textTarget.innerHTML = "<b>Muito bem!</b><br>Preenche os detalhes do prato e clica em guardar.";
+                    textTarget.innerHTML = successIcon + "Preenche os detalhes do prato e clica em guardar.";
                 }
 
                 // Move tooltip to corner to not block modal
                 if (isMobile) {
                     Object.assign(tooltip.style, {
                         left: '10px', right: '10px', top: 'auto', bottom: '10px',
-                        transform: 'none', width: 'calc(100vw - 20px)', padding: '15px', zIndex: '20005'
+                        transform: 'none', width: 'calc(100vw - 20px)', padding: '15px', zIndex: '20005', opacity: '1', visibility: 'visible'
                     });
                 } else {
                     Object.assign(tooltip.style, {
                         left: 'auto', right: '50px', top: '50%', bottom: 'auto',
-                        transform: 'translateY(-50%)', width: '400px', zIndex: '20005', padding: '24px'
+                        transform: 'translateY(-50%)', width: '400px', zIndex: '20005', padding: '24px', opacity: '1', visibility: 'visible'
                     });
                 }
 
@@ -112,7 +115,7 @@ window.checkTutorialStep = (stepId) => {
                 document.querySelector('.tutorial-spotlight')?.style.setProperty('display', 'none');
                 document.querySelector('.tutorial-arrow')?.style.setProperty('opacity', '0');
 
-                // Also disable blocker while modal is open so they can interact with the modal
+                // Disable blocker while modal is open
                 document.querySelector('.tutorial-blocker')?.style.setProperty('display', 'none');
             }
             return;
@@ -122,7 +125,7 @@ window.checkTutorialStep = (stepId) => {
         showSuccessFeedback();
         autoAdvanceTimeout = setTimeout(() => {
             if (isTutorialActive) window.nextStep();
-        }, 800); // Faster advance
+        }, 800);
     }
 };
 
@@ -216,7 +219,8 @@ function renderStep(index) {
         let parent = targetEl.parentElement;
         while (parent && parent !== document.body) {
             const s = window.getComputedStyle(parent);
-            if (s.position === 'fixed' || s.position === 'sticky' || (s.zIndex !== 'auto' && s.zIndex !== '0')) {
+            // Boost any positioned parent to ensure stacking context doesn't trap the target
+            if (s.position !== 'static' || (s.zIndex !== 'auto' && s.zIndex !== '0')) {
                 parent.classList.add('tutorial-parent-boost');
                 boostedParents.push(parent);
             }
