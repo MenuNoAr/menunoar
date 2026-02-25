@@ -280,9 +280,8 @@ function renderStep(index) {
         tooltip.style.visibility = 'visible';
         tooltip.style.opacity = '1';
 
-        // Custom mobile hide spotlight logic if tooltip is large
+        // Show spotlight even on mobile, but keep arrow hidden if preferred
         if (isMobile) {
-            spotlight.style.opacity = '0';
             arrow.style.opacity = '0';
         }
     } else {
