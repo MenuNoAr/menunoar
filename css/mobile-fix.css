@@ -14,6 +14,8 @@
         height: 60px !important;
         padding: 0 12px !important;
         gap: 8px !important;
+        pointer-events: auto !important;
+        /* Ensure interactions aren't blocked */
     }
 
     .nav-brand img {
@@ -22,6 +24,21 @@
 
     .nav-tools {
         gap: 6px !important;
+    }
+
+    .nav-tools-desktop {
+        display: none !important;
+        /* Hide desktop buttons on mobile */
+    }
+
+    .mobile-nav-trigger,
+    .mobile-help-trigger {
+        display: flex !important;
+        /* Show mobile triggers */
+        height: 40px !important;
+        width: 40px !important;
+        padding: 0 !important;
+        font-size: 1.1rem !important;
     }
 
     .btn-nav {
@@ -34,6 +51,42 @@
     .nav-brand .user-name-btn,
     .nav-brand .divider {
         display: none !important;
+    }
+
+    /* --- MOBILE DROPBAR (MODERN MENU) --- */
+    .mobile-dropbar {
+        display: none;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        background: var(--bg-card);
+        border-bottom: 2px solid var(--primary);
+        z-index: 90000;
+        flex-direction: column;
+        padding: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .mobile-dropbar.open {
+        display: flex;
+    }
+
+    .dropbar-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 20px;
+        width: 100%;
+        color: var(--text);
+        font-size: 1rem;
+        font-weight: 600;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .dropbar-item i {
+        color: var(--primary);
+        width: 25px;
     }
 
     /* --- TUTORIAL: DYNAMIC BANNER (TOP/BOTTOM) --- */
@@ -75,6 +128,7 @@
     .tutorial-tooltip p {
         font-size: 0.82rem !important;
         line-height: 1.4 !important;
+        margin-bottom: 8px !important;
     }
 
     /* --- MODALS: BOTTOM SHEET (NATURAL MOBILE FEEL) --- */

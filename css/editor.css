@@ -153,6 +153,26 @@ button:disabled {
     }
 }
 
+.nav-tools-desktop {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-nav-trigger,
+.mobile-help-trigger {
+    display: none;
+    /* Hidden by default on PC */
+    background: var(--primary-glow) !important;
+    color: var(--primary) !important;
+    border-radius: 12px;
+}
+
+.mobile-dropbar {
+    display: none;
+    /* Hidden by default */
+}
+
 /* --- NAV ITEM BUTTON STYLING --- */
 .btn-nav {
     color: var(--text-muted);
@@ -684,9 +704,9 @@ button:disabled {
     gap: 12px;
 }
 
-body.tutorial-active .dashboard-navbar {
-    pointer-events: none;
-}
+/* body.tutorial-active .dashboard-navbar { pointer-events: none; } */
+/* Disabling global block to allow nav interactions while keeping target highlight */
+
 
 body.tutorial-active .dashboard-navbar .tutorial-active-target,
 body.tutorial-active .dashboard-navbar .tutorial-active-target * {
@@ -1422,7 +1442,7 @@ img {
 
 .tutorial-active-target {
     position: relative !important;
-    z-index: 20005 !important;
+    z-index: 145002 !important;
     pointer-events: auto !important;
 }
 
