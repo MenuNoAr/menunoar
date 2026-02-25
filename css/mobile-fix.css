@@ -89,7 +89,7 @@
         line-height: 1.4 !important;
     }
 
-    /* 5. Mobile Menu (Dropbar) */
+    /* 5. Mobile Menu (Dropbar) - ANIMATED & FLUID */
     .mobile-dropbar {
         position: fixed !important;
         top: 60px !important;
@@ -97,23 +97,39 @@
         width: 100% !important;
         z-index: 100000 !important;
         background: var(--bg-card) !important;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
         border-bottom: 2px solid var(--primary) !important;
-        display: none;
+
+        /* Performance & Animation */
+        display: flex !important;
+        flex-direction: column;
+        transform: translateY(-110%);
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 0.3s ease,
+            visibility 0.4s !important;
+        will-change: transform, opacity;
     }
 
     .mobile-dropbar.open {
-        display: flex !important;
-        flex-direction: column;
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
     }
 
     .dropbar-item {
-        padding: 16px 20px !important;
+        padding: 18px 20px !important;
         border-bottom: 1px solid var(--border);
         font-weight: 600;
         display: flex !important;
         align-items: center;
         gap: 12px;
+        transition: background 0.2s;
+    }
+
+    .dropbar-item:active {
+        background: var(--bg-page);
     }
 
     /* 6. Interaction Layers */
@@ -134,16 +150,18 @@
         pointer-events: auto !important;
     }
 
-    /* 7. Bottom Sheets (Modals) */
+    /* 7. Bottom Sheets (Modals) - SMOOTHER TRANSITIONS */
     .edit-modal {
         display: flex !important;
         align-items: flex-end !important;
         padding: 0 !important;
         z-index: 110000 !important;
+        transition: opacity 0.3s ease, visibility 0.3s;
     }
 
     .edit-modal:not(.open) {
         visibility: hidden !important;
+        opacity: 0;
         pointer-events: none !important;
     }
 
@@ -153,9 +171,10 @@
         border-radius: 24px 24px 0 0 !important;
         max-height: 90vh !important;
         transform: translateY(100%);
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
         overflow-y: auto !important;
         background: var(--bg-card) !important;
+        will-change: transform;
     }
 
     .edit-modal.open .edit-modal-content {

@@ -113,10 +113,16 @@ window.toggleDarkMode = () => {
     if (themeIconMobile) themeIconMobile.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
 };
 
-window.toggleNavDropdown = () => {
+window.toggleNavDropdown = (forceClose = false) => {
     const dropbar = document.getElementById('mobileDropbar');
     const icon = document.getElementById('navMobileIcon');
     if (!dropbar) return;
+
+    if (forceClose) {
+        dropbar.classList.remove('open');
+        if (icon) icon.className = 'fa-solid fa-bars-staggered';
+        return;
+    }
 
     const isOpen = dropbar.classList.toggle('open');
     if (icon) {
