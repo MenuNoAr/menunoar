@@ -71,27 +71,7 @@ button:disabled {
     cursor: not-allowed;
 }
 
-.dashboard-navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: var(--navbar-height);
-    background: var(--bg-card);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    z-index: 10000;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-    backdrop-filter: blur(25px);
-    gap: 12px;
-}
 
-.dark-mode .dashboard-navbar {
-    background: rgba(18, 18, 18, 0.9);
-}
 
 .nav-brand {
     display: flex;
@@ -838,6 +818,37 @@ button:disabled {
     opacity: 1;
 }
 
+.dashboard-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--navbar-height);
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 95000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    backdrop-filter: blur(25px);
+    gap: 12px;
+}
+
+body.tutorial-active .dashboard-navbar {
+    pointer-events: none;
+}
+
+body.tutorial-active .dashboard-navbar .tutorial-active-target,
+body.tutorial-active .dashboard-navbar .tutorial-active-target * {
+    pointer-events: auto !important;
+}
+
+.dark-mode .dashboard-navbar {
+    background: rgba(18, 18, 18, 0.9);
+}
+
 .action-btn {
     width: 32px;
     height: 32px;
@@ -864,7 +875,7 @@ button:disabled {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 20000;
+    z-index: 100000;
     opacity: 0;
     pointer-events: none;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1373,7 +1384,7 @@ img {
 
 .tutorial-tooltip {
     position: fixed;
-    z-index: 20005;
+    z-index: 110000;
     background: var(--bg-card);
     padding: 24px;
     border-radius: 20px;

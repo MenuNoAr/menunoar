@@ -58,6 +58,7 @@ let typeTimeout = null;
 export function openTutorial() {
     window.closeAllModals();
     isTutorialActive = true;
+    document.body.classList.add('tutorial-active'); // Add class for CSS overrides
 
     if (document.getElementById('mobileDropbar')?.classList.contains('open')) {
         window.toggleNavDropdown();
@@ -106,12 +107,12 @@ window.checkTutorialStep = (stepId) => {
                 if (isMobile) {
                     Object.assign(tooltip.style, {
                         left: '10px', right: '10px', top: 'auto', bottom: '10px',
-                        transform: 'none', width: 'calc(100vw - 20px)', padding: '15px', zIndex: '20005', opacity: '1', visibility: 'visible'
+                        transform: 'none', width: 'calc(100vw - 20px)', padding: '15px', zIndex: '110000', opacity: '1', visibility: 'visible'
                     });
                 } else {
                     Object.assign(tooltip.style, {
                         left: 'auto', right: '50px', top: '50%', bottom: 'auto',
-                        transform: 'translateY(-50%)', width: '400px', zIndex: '20005', padding: '24px', opacity: '1', visibility: 'visible'
+                        transform: 'translateY(-50%)', width: '400px', zIndex: '110000', padding: '24px', opacity: '1', visibility: 'visible'
                     });
                 }
 
@@ -332,6 +333,7 @@ window.nextStep = () => {
 window.prevTutorialPage = () => currentTutStep > 0 && renderStep(--currentTutStep);
 window.closeTutorial = () => {
     isTutorialActive = false;
+    document.body.classList.remove('tutorial-active');
 
     // Reset target z-index and parents
     if (currentTargetEl) {
