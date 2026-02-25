@@ -111,12 +111,11 @@ window.checkTutorialStep = (stepId) => {
                     textTarget.innerHTML = successIcon + "Preenche os detalhes do prato e clica em guardar.";
                 }
 
-                // Move tooltip to corner to not block modal
+                // Move tooltip on mobile/desktop
                 if (isMobile) {
-                    Object.assign(tooltip.style, {
-                        left: '10px', right: '10px', top: 'auto', bottom: '10px',
-                        transform: 'none', width: 'calc(100vw - 20px)', padding: '15px', zIndex: '110000', opacity: '1', visibility: 'visible'
-                    });
+                    // Let CSS handle it via !important
+                    tooltip.style.opacity = '1';
+                    tooltip.style.visibility = 'visible';
                 } else {
                     Object.assign(tooltip.style, {
                         left: 'auto', right: '50px', top: '50%', bottom: 'auto',
@@ -280,14 +279,26 @@ function renderStep(index) {
 
         tooltip.style.visibility = 'visible';
         tooltip.style.opacity = '1';
+
+        // Custom mobile hide spotlight logic if tooltip is large
+        if (isMobile) {
+            spotlight.style.opacity = '0';
+            arrow.style.opacity = '0';
+        }
     } else {
         if (isMobile && document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
         Object.assign(spotlight.style, { opacity: '0', display: 'none' });
-        Object.assign(tooltip.style, {
-            left: '50%', right: 'auto', top: '50%', bottom: 'auto',
-            transform: 'translate(-50%, -50%)', opacity: '1', visibility: 'visible',
-            width: isMobile ? 'calc(100vw - 40px)' : '540px'
-        });
+
+        if (isMobile) {
+            tooltip.style.opacity = '1';
+            tooltip.style.visibility = 'visible';
+        } else {
+            Object.assign(tooltip.style, {
+                left: '50%', right: 'auto', top: '50%', bottom: 'auto',
+                transform: 'translate(-50%, -50%)', opacity: '1', visibility: 'visible',
+                width: '540px'
+            });
+        }
         arrow.style.opacity = '0';
         blocker.style.display = 'block'; // Block even if no target for safety
     }
