@@ -1,77 +1,72 @@
 /* 
    ==========================================================================
-   MOBILE-ONLY DASHBOARD OVERRIDES 
-   (Only applies to screen widths <= 850px)
+   MOBILE-ONLY DASHBOARD OVERRIDES (Strictly <= 850px)
    ========================================================================== 
 */
 
 @media (max-width: 850px) {
-
-    /* Prevent main page scrolling while dashboard is active */
     body {
         overflow: hidden !important;
     }
 
-    /* --- TUTORIAL: FIXED TOP INSTRUCTION BANNER --- */
+    /* --- DASHBOARD NAVBAR (Compact) --- */
+    .dashboard-navbar {
+        height: 60px !important;
+        padding: 0 12px !important;
+        gap: 8px !important;
+    }
+
+    .nav-brand img {
+        height: 28px !important;
+    }
+
+    .nav-tools {
+        gap: 6px !important;
+    }
+
+    .btn-nav {
+        padding: 8px !important;
+        font-size: 0.8rem !important;
+    }
+
+    #trialTimer,
+    .desktop-only,
+    .nav-brand .user-name-btn,
+    .nav-brand .divider {
+        display: none !important;
+    }
+
+    /* --- TUTORIAL: TOP BAR NAVIGATION --- */
     .tutorial-tooltip {
         position: fixed !important;
         width: 100% !important;
         left: 0 !important;
         right: 0 !important;
         top: 0 !important;
-        /* FIXED TOP */
         bottom: auto !important;
         transform: none !important;
         padding: 12px 15px !important;
         border-radius: 0 0 24px 24px !important;
-        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5) !important;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4) !important;
         z-index: 150000 !important;
-        /* Above everything else */
         border: none !important;
         border-bottom: 4px solid var(--primary) !important;
         background: var(--bg-card) !important;
-        display: block !important;
     }
 
     .tutorial-header h3 {
-        font-size: 1rem !important;
-        margin-bottom: 5px !important;
-        color: var(--primary) !important;
+        font-size: 0.95rem !important;
     }
 
     .tutorial-tooltip p {
-        font-size: 0.85rem !important;
+        font-size: 0.82rem !important;
         line-height: 1.4 !important;
-        margin-bottom: 12px !important;
-        color: var(--text) !important;
     }
 
-    .tutorial-actions {
-        padding-top: 5px !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-    }
-
-    .tutorial-btn-next {
-        height: 38px !important;
-        padding: 0 16px !important;
-        font-size: 0.85rem !important;
-        background: var(--primary) !important;
-        color: white !important;
-        border-radius: 12px !important;
-        font-weight: 700 !important;
-    }
-
-    .tutorial-btn-skip {
-        font-size: 0.8rem !important;
-    }
-
-    /* --- MODALS: BOTTOM SHEET REDESIGN --- */
+    /* --- MODALS: BOTTOM SHEET (NATURAL MOBILE FEEL) --- */
     .edit-modal {
         padding: 0 !important;
         align-items: flex-end !important;
-        /* Slide up from bottom */
         z-index: 100000 !important;
     }
 
@@ -80,21 +75,19 @@
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
-        border-radius: 30px 30px 0 0 !important;
-        /* Rounded top only */
-        max-height: 80vh !important;
-        /* Leave room for tutorial banner at top */
+        border-radius: 24px 24px 0 0 !important;
+        max-height: 82vh !important;
         bottom: 0 !important;
         transform: translateY(100%);
         transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.25) !important;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2) !important;
     }
 
     .edit-modal.open .edit-modal-content {
         transform: translateY(0);
     }
 
-    /* --- SETTINGS: RESPONSIVE HORIZONTAL TABS --- */
+    /* --- SETTINGS: SCROLLABLE TABS --- */
     .settings-layout {
         flex-direction: column !important;
     }
@@ -108,7 +101,7 @@
         position: sticky;
         top: 0;
         z-index: 10;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
     }
 
     .settings-sidebar-title {
@@ -118,9 +111,8 @@
     .settings-sidebar-tabs {
         flex-direction: row !important;
         overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
         gap: 8px !important;
-        padding-bottom: 5px;
+        padding-bottom: 4px;
         scrollbar-width: none;
     }
 
@@ -130,51 +122,21 @@
 
     .tab-btn-settings {
         flex-shrink: 0 !important;
+        width: auto !important;
         padding: 8px 16px !important;
         font-size: 0.85rem !important;
-        background: var(--bg-page) !important;
-        width: auto !important;
-        border-radius: 10px !important;
     }
 
-    .settings-content {
-        padding: 10px 0 !important;
+    /* --- EDITOR CANVAS (FULL SCREEN ON MOBILE) --- */
+    .editor-canvas {
+        width: 100% !important;
+        margin-top: 60px !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        height: calc(100vh - 60px) !important;
     }
 
-    /* --- GLOBAL TUTORIAL OVERRIDES (MOBILE ONLY) --- */
-    /* Higher z-indexes to work with mobile's top-fixed tutorial and bottom sheets */
-    .tutorial-blocker {
-        z-index: 140000 !important;
-    }
-
-    .tutorial-parent-boost {
-        z-index: 140001 !important;
-    }
-
-    .tutorial-active-target {
-        z-index: 140002 !important;
-        position: relative !important;
-    }
-
-    /* --- DASHBOARD UI CLEANUP --- */
-    .dashboard-navbar {
-        height: 60px !important;
-        padding: 0 12px !important;
-    }
-
-    .nav-brand img {
-        height: 28px !important;
-    }
-
-    .item-actions {
-        opacity: 1 !important;
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 10px;
-        padding: 4px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Action Buttons Stacking */
+    /* --- FORM & ACTIONS --- */
     .modal-actions {
         flex-direction: column !important;
         gap: 10px !important;
@@ -191,6 +153,26 @@
     .form-group select,
     .form-group textarea {
         font-size: 16px !important;
-        /* Prevents auto-zoom on iOS */
+    }
+
+    .item-actions {
+        opacity: 1 !important;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        padding: 4px;
+    }
+
+    /* --- TUTORIAL HELPERS (MOBILE Z-INDEX) --- */
+    .tutorial-blocker {
+        z-index: 140000 !important;
+    }
+
+    .tutorial-parent-boost {
+        z-index: 140001 !important;
+    }
+
+    .tutorial-active-target {
+        z-index: 140002 !important;
+        position: relative !important;
     }
 }

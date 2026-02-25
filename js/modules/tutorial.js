@@ -89,6 +89,8 @@ let originalZIndex = '';
 let isTransitioning = false;
 let isModalOverride = false; // Flag to pause spotlight/blocker when a modal is open
 
+const isMobileDevice = () => window.innerWidth <= 850;
+
 window.checkTutorialStep = (stepId) => {
     if (!isTutorialActive || isTransitioning) return;
     const currentStep = tutorialSteps[currentTutStep];
@@ -99,7 +101,7 @@ window.checkTutorialStep = (stepId) => {
             isModalOverride = true; // PAUSE THE LOOP
             const textTarget = document.getElementById('tutText');
             const tooltip = document.querySelector('.tutorial-tooltip');
-            const isMobile = window.innerWidth <= 850;
+            const isMobile = isMobileDevice();
 
             if (textTarget && tooltip) {
                 // Combine success feedback with next instruction
@@ -313,8 +315,7 @@ function createEl(tag, className, styles = {}, html = '') {
 }
 
 function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
-    const isMobile = window.innerWidth <= 850;
-    if (isMobile) {
+    if (isMobileDevice()) {
         arrow.style.opacity = '0'; // Hide arrow on mobile top banner
         return; // Let CSS handle fixed top position
     }
