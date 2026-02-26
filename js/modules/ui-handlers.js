@@ -395,11 +395,11 @@ window.openSettingsModal = () => {
     document.getElementById('pdfToggle').checked = state.currentData.menu_type === 'pdf';
     window.togglePdfDetails();
 
-    // Reset tabs to general
-    window.switchSettingsTab('general');
-
-    // Load Billing Status
-    window._loadBillingStatus();
+    // Reset tabs and load data with a tiny delay to allow animation to start smoothly
+    setTimeout(() => {
+        window.switchSettingsTab('general');
+        window._loadBillingStatus();
+    }, 50);
 
     window.closeAllModals();
     modal.classList.add('open');

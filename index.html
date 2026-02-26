@@ -3,16 +3,26 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menu no Ar - A tua ementa digital</title>
 
-    <!-- Auto-Redirect logged in users -->
-    <!-- Styles and Configurations -->
+    <!-- Auto-Redirect logged in users (Ultra-Fast Path) -->
+    <script>
+        (function () {
+            try {
+                const k = Object.keys(localStorage).find(x => x.includes('-auth-token'));
+                if (k) {
+                    const s = JSON.parse(localStorage.getItem(k));
+                    if (s && s.access_token) window.location.replace('dashboard.html');
+                }
+            } catch (e) { }
+        })();
+    </script>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
 
-    <!-- Fonts -->
+    <!-- Fonts - Optimized -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -22,9 +32,9 @@
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script> <!-- Modern Icons -->
+    <!-- Critical Scripts - Deferred for better FCP -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
 </head>
 
 <body>
@@ -33,7 +43,7 @@
     <nav class="main-nav">
         <div class="nav-content">
             <a href="#" class="logo-link">
-                <img src="assets/images/logo.svg" alt="Menu no Ar" class="nav-logo">
+                <img src="assets/images/logo.svg" alt="Menu no Ar" class="nav-logo" width="150" height="60">
             </a>
 
             <div class="nav-links">
@@ -48,7 +58,7 @@
                 <a href="signup.html" class="btn-primary small">Criar Conta</a>
             </div>
 
-            <button class="mobile-toggle">
+            <button class="mobile-toggle" aria-label="Menu">
                 <i class="ph ph-list"></i>
             </button>
         </div>
@@ -60,220 +70,145 @@
         <a href="#demo">Exemplos</a>
         <a href="#planos">Preços</a>
         <a href="login.html">Entrar</a>
-        <a href="signup.html" style="color:var(--primary);">Criar Conta</a>
+        <a href="signup.html" class="btn-primary-text">Criar Conta</a>
     </div>
 
     <main>
-        <!-- Hero Section - Clean & Professional SaaS -->
-        <section class="hero-section"
-            style="background: radial-gradient(circle at top right, rgba(31, 168, 255, 0.05) 0%, transparent 50%); min-height: 90vh; display: flex; align-items: center; padding-top: 50px;">
-            <div class="container hero-grid" style="grid-template-columns: 1fr 1.2fr; gap: 3rem; align-items: center;">
-                <div class="hero-text" style="padding-right: 2rem;">
-                    <h1
-                        style="font-size: 3.8rem; line-height: 1.05; font-family: var(--font-body); letter-spacing: -1.5px; text-transform: none; color: var(--text-dark); margin-bottom: 25px; font-weight: 800;">
-                        O Fim dos Menus de Papel. O Início da <span style="color: var(--primary);">Eficiência</span>.
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container hero-grid">
+                <div class="hero-text">
+                    <div class="pill-badge">
+                        <i class="ph ph-star"></i> A escolha dos melhores restaurantes
+                    </div>
+                    <h1>O Fim dos Menus de Papel. O Início da <span class="text-primary">Eficiência</span>.
                     </h1>
-                    <p
-                        style="font-size: 1.25rem; line-height: 1.6; color: var(--text-gray); margin-bottom: 40px; font-weight: 400; max-width: 90%;">
-                        Digitalize o seu restaurante em minutos. Um menu inteligente em PDF ou formato tátil, sem
-                        necessidade de apps externas. Simples para si, intuitivo para o seu cliente.
-                    </p>
-                    <div class="hero-btns" style="display: flex; gap: 15px; flex-wrap: wrap;">
-                        <a href="signup.html" class="btn-primary"
-                            style="font-size: 1.1rem; padding: 1rem 2.5rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(31, 168, 255, 0.3);">
+                    <p>Digitalize o seu restaurante em minutos. Um menu inteligente em PDF ou formato tátil, sem
+                        necessidade de apps externas.</p>
+                    <div class="hero-btns">
+                        <a href="signup.html" class="btn-primary">
                             <i class="ph ph-rocket-launch"></i> Começar Gratuitamente
                         </a>
-                        <a href="#demo" class="btn-secondary"
-                            style="font-size: 1.1rem; padding: 1rem 2rem; border-radius: 12px; border: 1px solid var(--border); color: var(--text-dark); background: transparent;">
+                        <a href="#demo" class="btn-secondary">
                             Como Funciona <i class="ph ph-arrow-right"></i>
                         </a>
                     </div>
 
-                    <div style="margin-top: 40px; display: flex; align-items: center; gap: 20px;">
-                        <div style="display: flex; flex-direction: column; gap: 5px;">
-                            <div style="display: flex; color: #f59e0b; font-size: 1.2rem;">
+                    <div class="hero-rating">
+                        <div class="rating-stars-container">
+                            <div class="rating-stars">
                                 <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i
                                     class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i
                                     class="ph-fill ph-star"></i>
                             </div>
-                            <span style="font-size: 0.85rem; color: var(--text-gray); font-weight: 500;">+500
+                            <span class="rating-text">+500
                                 restaurantes satisfeitos</span>
                         </div>
                     </div>
                 </div>
-                <div class="hero-visual" style="position: relative;">
-                    <div
-                        style="background: white; border-radius: 20px; box-shadow: var(--shadow-xl); border: 1px solid rgba(0,0,0,0.05); overflow: hidden; transform: perspective(1000px) rotateY(-10deg) rotateX(5deg); transition: transform 0.5s ease; position: relative; z-index: 10;">
-                        <img src="assets\images\dashboard.png"
-                            alt="Software Interface" style="width: 100%; display: block; border-radius: 20px;">
-                    </div>
+                <div class="hero-visual">
+                    <img src="assets/images/dashboard.png" alt="Software Interface" width="600" height="400"
+                        loading="lazy">
                     <!-- Ambient glows replacing old blobs -->
-                    <div
-                        style="position: absolute; top: -10%; right: 10%; width: 400px; height: 400px; background: rgba(31, 168, 255, 0.2); filter: blur(100px); z-index: 1;">
-                    </div>
-                    <div
-                        style="position: absolute; bottom: -10%; left: 10%; width: 300px; height: 300px; background: rgba(0, 212, 189, 0.15); filter: blur(100px); z-index: 1;">
-                    </div>
+                    <div class="hero-glow-1"></div>
+                    <div class="hero-glow-2"></div>
                 </div>
             </div>
         </section>
 
-        <!-- Features Grid - Professional Data-Driven -->
-        <section id="funciona" class="features-section"
-            style="padding: 100px 0; background: var(--white); border-top: 1px solid rgba(0,0,0,0.03);">
+        <!-- Features Grid -->
+        <section id="funciona" class="features-section">
             <div class="container">
-                <div class="section-header text-center reveal" style="max-width: 700px; margin: 0 auto 60px auto;">
-                    <h2
-                        style="font-family: var(--font-body); font-size: 2.2rem; font-weight: 700; color: var(--text-dark); text-transform: none; letter-spacing: -0.5px; margin-bottom: 15px;">
-                        Desenvolvido a pensar no dono do restaurante</h2>
-                    <p style="font-size: 1.1rem; color: var(--text-gray);">Uma plataforma completa que remove atritos e
-                        otimiza a experiência de consumo.</p>
+                <div class="section-header text-center reveal">
+                    <h2>Desenvolvido a pensar no dono do restaurante</h2>
+                    <p>Uma plataforma completa que remove atritos e otimiza a experiência de consumo.</p>
                 </div>
 
-                <div class="features-grid reveal"
-                    style="grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 0;">
+                <div class="features-grid reveal">
                     <!-- Feature 1 -->
-                    <div class="feature-card"
-                        style="text-align: left; padding: 40px 30px; border-radius: 16px; background: var(--bg-light); border: 1px solid rgba(0,0,0,0.03); box-shadow: none; transition: transform 0.2s, box-shadow 0.2s;">
-                        <div class="icon-box"
-                            style="margin: 0 0 25px 0; width: 50px; height: 50px; background: rgba(31, 168, 255, 0.1); color: var(--primary); border-radius: 12px; font-size: 1.5rem;">
+                    <div class="feature-card">
+                        <div class="icon-box icon-box-primary">
                             <i class="ph ph-qr-code"></i>
                         </div>
-                        <h3
-                            style="font-family: var(--font-body); font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: var(--text-dark); text-transform: none; letter-spacing: 0;">
-                            Acesso Imediato</h3>
-                        <p style="font-size: 1rem; color: var(--text-gray); line-height: 1.6;">Os clientes acedem ao
-                            menu instantaneamente via QR Code na mesa. Sem formulários, sem downloads de aplicações.</p>
+                        <h3>Acesso Imediato</h3>
+                        <p>Os clientes acedem ao menu instantaneamente via QR Code. Sem formulários ou downloads.</p>
                     </div>
                     <!-- Feature 2 -->
-                    <div class="feature-card"
-                        style="text-align: left; padding: 40px 30px; border-radius: 16px; background: var(--bg-light); border: 1px solid rgba(0,0,0,0.03); box-shadow: none; transition: transform 0.2s, box-shadow 0.2s;">
-                        <div class="icon-box"
-                            style="margin: 0 0 25px 0; width: 50px; height: 50px; background: rgba(0, 212, 189, 0.1); color: var(--accent); border-radius: 12px; font-size: 1.5rem;">
+                    <div class="feature-card">
+                        <div class="icon-box icon-box-accent">
                             <i class="ph ph-device-mobile"></i>
                         </div>
-                        <h3
-                            style="font-family: var(--font-body); font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: var(--text-dark); text-transform: none; letter-spacing: 0;">
-                            Gestão em Tempo Real</h3>
-                        <p style="font-size: 1rem; color: var(--text-gray); line-height: 1.6;">O Prato do Dia acabou?
-                            Atualize o painel no seu telemóvel e o cliente verá imediatamente a indisponibilidade.</p>
+                        <h3>Gestão em Tempo Real</h3>
+                        <p>O Prato do Dia acabou? Atualize no telemóvel e o cliente vê imediatamente a alteração.</p>
                     </div>
                     <!-- Feature 3 -->
-                    <div class="feature-card"
-                        style="text-align: left; padding: 40px 30px; border-radius: 16px; background: var(--bg-light); border: 1px solid rgba(0,0,0,0.03); box-shadow: none; transition: transform 0.2s, box-shadow 0.2s;">
-                        <div class="icon-box"
-                            style="margin: 0 0 25px 0; width: 50px; height: 50px; background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border-radius: 12px; font-size: 1.5rem;">
+                    <div class="feature-card">
+                        <div class="icon-box icon-box-purple">
                             <i class="ph ph-translate"></i>
                         </div>
-                        <h3
-                            style="font-family: var(--font-body); font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; color: var(--text-dark); text-transform: none; letter-spacing: 0;">
-                            Interface Universal</h3>
-                        <p style="font-size: 1rem; color: var(--text-gray); line-height: 1.6;">O menu formata-se de modo
-                            estético quer num ambiente smartphone ou tablet, proporcionando uma experiência imersiva.
-                        </p>
+                        <h3>Interface Universal</h3>
+                        <p>O menu formata-se de modo estético em qualquer smartphone ou tablet.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Product Details / Showcase - Split Horizontal -->
-        <section id="demo" class="showcase-section" style="padding: 100px 0; background: var(--bg-light);">
+        <!-- Product Details / Showcase -->
+        <section id="demo" class="showcase-section">
             <div class="container">
-                <div class="showcase-grid reveal"
-                    style="grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; background: transparent; padding: 0; box-shadow: none; border: none;">
-                    <div class="showcase-image" style="position: relative;">
-                        <img src="https://images.unsplash.com/photo-1544148103-0773bf10d330?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Experiência Mobile"
-                            style="border-radius: 20px; box-shadow: var(--shadow-xl); width: 100%; border: 1px solid rgba(0,0,0,0.05); object-fit: cover; aspect-ratio: 6/7;">
-                        <div
-                            style="position: absolute; bottom: 30px; right: -30px; background: white; padding: 20px 30px; border-radius: 16px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 15px;">
-                            <div
-                                style="background: rgba(22, 163, 74, 0.1); color: #16a34a; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items:center; justify-content:center; font-size: 1.2rem;">
+                <div class="showcase-grid reveal">
+                    <div class="showcase-image">
+                        <img src="https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=600&q=80"
+                            alt="Experiência Mobile" loading="lazy" width="600" height="700">
+                        <div class="showcase-badge">
+                            <div class="badge-icon-container">
                                 <i class="ph ph-lightning"></i>
                             </div>
                             <div>
-                                <div style="font-weight: 700; color: var(--text-dark); font-family: var(--font-body);">
-                                    Carregamento Flash</div>
-                                <div style="font-size: 0.85rem; color: var(--text-gray);">Menos de 1 segundo</div>
+                                <div class="badge-title">Carregamento Flash</div>
+                                <div class="badge-subtitle">Menos de 1 segundo</div>
                             </div>
                         </div>
                     </div>
-                    <div class="showcase-info" style="padding-left: 20px;">
-                        <h2
-                            style="font-family: var(--font-body); font-size: 2.2rem; font-weight: 700; color: var(--text-dark); text-transform: none; letter-spacing: -0.5px; margin-bottom: 20px;">
-                            Design à medida da tua marca
-                        </h2>
-                        <p style="font-size: 1.15rem; color: var(--text-gray); line-height: 1.6; margin-bottom: 30px;">
-                            Sabemos que a identidade do seu restaurante é intocável. O Menu no Ar adapta-se não só com
-                            cores, mas com as fontes mais sofisticadas, seja em formato interativo ou clássico em PDF.
-                        </p>
-                        <ul class="check-list"
-                            style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px;">
-                            <li style="display: flex; align-items: flex-start; gap: 15px;">
-                                <i class="ph-fill ph-check-circle"
-                                    style="color: var(--primary); font-size: 1.5rem; margin-top: 2px;"></i>
-                                <div>
-                                    <strong
-                                        style="color: var(--text-dark); display: block; margin-bottom: 5px; font-family: var(--font-body); font-size: 1.1rem;">Painel
-                                        de Controlo Total</strong>
-                                    <span style="color: var(--text-gray); font-size: 0.95rem;">Gere todo o teu
-                                        inventário e visibilidade com dois toques.</span>
-                                </div>
-                            </li>
-                            <li style="display: flex; align-items: flex-start; gap: 15px;">
-                                <i class="ph-fill ph-check-circle"
-                                    style="color: var(--primary); font-size: 1.5rem; margin-top: 2px;"></i>
-                                <div>
-                                    <strong
-                                        style="color: var(--text-dark); display: block; margin-bottom: 5px; font-family: var(--font-body); font-size: 1.1rem;">Modo
-                                        Clássico em PDF</strong>
-                                    <span style="color: var(--text-gray); font-size: 0.95rem;">Se preferir manter a
-                                        formatação tradicional, carregue um ficheiro PDF em segundos.</span>
-                                </div>
-                            </li>
+                    <div class="showcase-info">
+                        <h2>Design à medida da tua marca</h2>
+                        <p>O Menu no Ar adapta-se não só com cores, mas com fontes sofisticadas, seja em formato
+                            interativo ou PDF.</p>
+                        <ul class="check-list">
+                            <li><i class="ph-fill ph-check-circle"></i> Painel de
+                                Controlo Total</li>
+                            <li><i class="ph-fill ph-check-circle"></i> Modo Clássico em
+                                PDF</li>
                         </ul>
                     </div>
                 </div>
             </div>
             <!-- Advantages Extra Section -->
-            <section class="advantages-section" style="padding: 60px 0; background: var(--bg-light);">
+            <section class="advantages-section">
                 <div class="container">
-                    <div class="reveal"
-                        style="background: white; border-radius: 24px; padding: 50px; border: 1px solid rgba(0,0,0,0.03); box-shadow: var(--shadow-sm);">
-                        <h3
-                            style="font-family: var(--font-body); font-size: 1.8rem; font-weight: 700; color: var(--text-dark); text-transform: none; text-align: center; margin-bottom: 40px;">
-                            Porquê escolher um menu digital?</h3>
-                        <div
-                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
-                            <div style="display: flex; gap: 15px;">
-                                <div style="color: var(--primary); font-size: 2rem;"><i class="ph ph-chart-line-up"></i>
+                    <div class="reveal advantages-card">
+                        <h3 class="advantages-title">Porquê escolher um menu digital?</h3>
+                        <div class="advantages-grid">
+                            <div class="advantage-item">
+                                <div class="advantage-icon icon-primary"><i class="ph ph-chart-line-up"></i>
                                 </div>
-                                <div>
-                                    <h4
-                                        style="font-family: var(--font-body); font-size: 1.1rem; color: var(--text-dark); text-transform: none; font-weight: 700; margin-bottom: 5px;">
-                                        Aumenta Faturação</h4>
-                                    <p style="font-size: 0.95rem; color: var(--text-gray);">Menus atrativos com
-                                        fotografias reais induzem o cliente a pedir mais.</p>
+                                <div class="advantage-content">
+                                    <h4>Aumenta Faturação</h4>
+                                    <p>Menus atrativos com fotografias reais induzem o cliente a pedir mais.</p>
                                 </div>
                             </div>
-                            <div style="display: flex; gap: 15px;">
-                                <div style="color: var(--accent); font-size: 2rem;"><i class="ph ph-clock"></i></div>
-                                <div>
-                                    <h4
-                                        style="font-family: var(--font-body); font-size: 1.1rem; color: var(--text-dark); text-transform: none; font-weight: 700; margin-bottom: 5px;">
-                                        Poupa Tempo</h4>
-                                    <p style="font-size: 0.95rem; color: var(--text-gray);">Atualize preços e
-                                        dispoinibilidades num clique, sem contactar gráficas.</p>
+                            <div class="advantage-item">
+                                <div class="advantage-icon icon-accent"><i class="ph ph-clock"></i></div>
+                                <div class="advantage-content">
+                                    <h4>Poupa Tempo</h4>
+                                    <p>Atualize preços e dispoinibilidades num clique, sem contactar gráficas.</p>
                                 </div>
                             </div>
-                            <div style="display: flex; gap: 15px;">
-                                <div style="color: #f59e0b; font-size: 2rem;"><i class="ph ph-leaf"></i></div>
-                                <div>
-                                    <h4
-                                        style="font-family: var(--font-body); font-size: 1.1rem; color: var(--text-dark); text-transform: none; font-weight: 700; margin-bottom: 5px;">
-                                        Sustentável</h4>
-                                    <p style="font-size: 0.95rem; color: var(--text-gray);">Menos papel impresso = mais
-                                        ecológico e melhor para as suas margens.</p>
+                            <div class="advantage-item">
+                                <div class="advantage-icon icon-orange"><i class="ph ph-leaf"></i></div>
+                                <div class="advantage-content">
+                                    <h4>Sustentável</h4>
+                                    <p>Menos papel impresso = mais ecológico e melhor para as suas margens.</p>
                                 </div>
                             </div>
                         </div>
@@ -282,98 +217,63 @@
             </section>
 
             <!-- Pricing Section -->
-            <section id="planos" class="pricing-section"
-                style="padding: 100px 0; background: white; border-top: 1px solid rgba(0,0,0,0.03);">
+            <section id="planos" class="pricing-section">
                 <div class="container">
-                    <div class="section-header text-center reveal" style="max-width: 700px; margin: 0 auto 50px auto;">
-                        <h2
-                            style="font-family: var(--font-body); font-size: 2.2rem; font-weight: 700; color: var(--text-dark); text-transform: none; letter-spacing: -0.5px; margin-bottom: 15px;">
-                            Sem surpresas. Preço único.</h2>
-                        <p style="font-size: 1.1rem; color: var(--text-gray);">Trabalhamos duro para manter uma
-                            subscrição acessível com acesso total, sem comissões ocultas.</p>
+                    <div class="section-header text-center reveal">
+                        <h2>Sem surpresas. Preço único.</h2>
+                        <p>Subscrição acessível com acesso total, sem comissões ocultas.</p>
                     </div>
 
-                    <div class="reveal" style="max-width: 450px; margin: 0 auto;">
-                        <div
-                            style="background: white; border-radius: 20px; border: 2px solid var(--primary); padding: 40px; box-shadow: 0 20px 40px -10px rgba(31, 168, 255, 0.15); text-align: center; position: relative;">
-                            <div
-                                style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--gradient-hero); color: white; padding: 5px 20px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px;">
-                                1 MÊS GRÁTIS</div>
+                    <div class="reveal">
+                        <div class="pricing-card">
+                            <div class="pricing-badge">1 MÊS GRÁTIS</div>
 
-                            <h3
-                                style="font-family: var(--font-body); font-size: 1.5rem; text-transform: none; margin-bottom: 10px; color: var(--text-dark);">
-                                Plano Profissional</h3>
-                            <div
-                                style="display: flex; align-items: baseline; justify-content: center; gap: 5px; margin-bottom: 20px;">
-                                <span style="font-size: 3rem; font-weight: 800; color: var(--text-dark);">15€</span>
-                                <span style="font-size: 1.1rem; color: var(--text-gray); font-weight: 500;">/ mês</span>
+                            <h3>Plano Profissional</h3>
+                            <div class="pricing-price">
+                                <span class="amount">15€</span>
+                                <span class="price-period">/ mês</span>
                             </div>
-                            <p style="font-size: 0.95rem; color: var(--text-gray); margin-bottom: 30px;">Custo fixo. Sem
-                                compromisso de fidelização.</p>
+                            <p class="pricing-description">Custo fixo. Sem compromisso de fidelização.</p>
 
-                            <ul class="check-list"
-                                style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 40px; text-align: left;">
-                                <li style="display: flex; align-items: center; gap: 10px;"><i
-                                        class="ph-fill ph-check-circle"
-                                        style="color: var(--primary); font-size: 1.2rem;"></i> <span
-                                        style="font-weight: 600; color: var(--text-dark);">Itens Ilimitados</span></li>
-                                <li style="display: flex; align-items: center; gap: 10px;"><i
-                                        class="ph-fill ph-check-circle"
-                                        style="color: var(--primary); font-size: 1.2rem;"></i> <span
-                                        style="font-weight: 600; color: var(--text-dark);">Edição Instantânea</span>
-                                </li>
-                                <li style="display: flex; align-items: center; gap: 10px;"><i
-                                        class="ph-fill ph-check-circle"
-                                        style="color: var(--primary); font-size: 1.2rem;"></i> <span
-                                        style="font-weight: 600; color: var(--text-dark);">QR Code Exclusivo</span></li>
-                                <li style="display: flex; align-items: center; gap: 10px;"><i
-                                        class="ph-fill ph-check-circle"
-                                        style="color: var(--primary); font-size: 1.2rem;"></i> <span
-                                        style="font-weight: 600; color: var(--text-dark);">Modo PDF Incluído</span></li>
-                                <li style="display: flex; align-items: center; gap: 10px;"><i
-                                        class="ph-fill ph-check-circle"
-                                        style="color: var(--primary); font-size: 1.2rem;"></i> <span
-                                        style="font-weight: 600; color: var(--text-dark);">Visualizações
-                                        Ilimitadas</span></li>
+                            <ul class="check-list pricing-features">
+                                <li><i class="ph-fill ph-check-circle"></i> Itens
+                                    Ilimitados</li>
+                                <li><i class="ph-fill ph-check-circle"></i> Edição
+                                    Instantânea</li>
+                                <li><i class="ph-fill ph-check-circle"></i> QR Code
+                                    Exclusivo</li>
+                                <li><i class="ph-fill ph-check-circle"></i> Modo PDF
+                                    Incluído</li>
+                                <li><i class="ph-fill ph-check-circle"></i> Visualizações
+                                    Ilimitadas</li>
                             </ul>
 
-                            <a href="signup.html" class="btn-primary"
-                                style="width: 100%; box-sizing: border-box;">Experimentar 1 Mês Grátis</a>
-                            <p style="font-size: 0.8rem; color: var(--text-gray); margin-top: 15px;">Pode cancelar a
-                                qualquer momento.</p>
+                            <p>Pode cancelar a qualquer momento.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- CTA Section - Elevated & Minimal -->
-            <section id="contactos" class="cta-section" style="padding: 120px 0; background: white;">
+            <!-- CTA Section -->
+            <section id="contactos" class="cta-section">
                 <div class="container">
-                    <div class="cta-box reveal"
-                        style="background: var(--text-dark); border-radius: 24px; padding: 80px 40px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+                    <div class="cta-box reveal">
                         <!-- Decorative subtle grid or lines -->
-                        <div
-                            style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 30px 30px; opacity: 0.5;">
-                        </div>
+                        <div class="cta-grid-overlay"></div>
 
-                        <div class="cta-content"
-                            style="position: relative; z-index: 10; max-width: 600px; margin: 0 auto;">
-                            <h2
-                                style="font-family: var(--font-body); font-size: 2.5rem; font-weight: 800; color: white; text-transform: none; letter-spacing: -1px; margin-bottom: 20px;">
-                                Aumenta a satisfação hoje.
-                            </h2>
-                            <p style="font-size: 1.1rem; color: #cbd5e1; margin-bottom: 40px;">
-                                Cria a tua conta em 30 segundos, sem cartões de crédito. Junta-te à revolução da
-                                hospitalidade em Portugal.
+                        <div class="cta-content">
+                            <h2>Aumenta a satisfação hoje.</h2>
+                            <p>
+                                Cria a tua conta em 30 segundos. Junta-te à revolução da
+                                hospitalidade.
                             </p>
 
-                            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                                <a href="signup.html" class="btn-primary"
-                                    style="font-size: 1.1rem; padding: 1.2rem 3rem; border-radius: 12px; background: var(--primary); width: 100%; max-width: 300px;">
+                            <div>
+                                <a href="signup.html" class="btn-primary">
                                     Criar Conta Agora
                                 </a>
                             </div>
-                            <p style="font-size: 0.85rem; color: #64748b; margin-top: 20px;">Tratamento imediato. Painel
+                            <p>Tratamento imediato. Painel
                                 de
                                 controlo seguro.</p>
                         </div>
@@ -385,7 +285,7 @@
     <footer>
         <div class="container footer-content">
             <div class="footer-brand">
-                <img src="assets/images/logo.svg" alt="Logo Footer">
+                <img src="assets/images/logo.svg" alt="Logo Footer" width="120" height="40" loading="lazy">
                 <p>&copy; 2026 Menu no Ar.</p>
             </div>
             <div class="footer-links">
@@ -396,46 +296,26 @@
         </div>
     </footer>
 
-    <script src="js/script.js"></script>
+    <!-- Scripts - All deferred -->
+    <script src="js/script.js" defer></script>
     <script>
-        // Simple Mobile Menu Toggle
-        const toggle = document.querySelector('.mobile-toggle');
-        const menu = document.querySelector('.mobile-menu');
-
-        if (toggle) {
-            toggle.addEventListener('click', () => {
-                menu.classList.toggle('active');
-                const icon = toggle.querySelector('i');
-                if (menu.classList.contains('active')) {
-                    icon.classList.replace('ph-list', 'ph-x');
-                } else {
-                    icon.classList.replace('ph-x', 'ph-list');
-                }
-            });
-        }
-
-        // Scroll Reveal Animation Refactored
         document.addEventListener('DOMContentLoaded', () => {
-            const reveals = document.querySelectorAll('.reveal');
-
-            const revealOnScroll = () => {
-                const windowHeight = window.innerHeight;
-                const elementVisible = 150;
-
-                reveals.forEach((reveal) => {
-                    const elementTop = reveal.getBoundingClientRect().top;
-                    if (elementTop < windowHeight - elementVisible) {
-                        reveal.classList.add('active');
-                    }
-                });
+            // Mobile Toggle
+            const t = document.querySelector('.mobile-toggle');
+            const m = document.querySelector('.mobile-menu');
+            if (t) t.onclick = () => {
+                m.classList.toggle('active');
+                const i = t.querySelector('i');
+                i.className = m.classList.contains('active') ? 'ph ph-x' : 'ph ph-list';
             };
 
-            window.addEventListener('scroll', revealOnScroll);
-            // Trigger once on load
-            revealOnScroll();
+            // Reveal Animation
+            const reveals = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });
+            }, { threshold: 0.1 });
+            reveals.forEach(r => observer.observe(r));
         });
-    </script>
-
     </script>
 </body>
 

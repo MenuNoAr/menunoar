@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Painel de Gestão - Menu no Ar</title>
     <meta name="description"
         content="Gere o seu menu digital de forma simples e profissional com o Menu no Ar. Editor em tempo real, QR Code e muito mais.">
@@ -31,6 +31,7 @@
     <link rel="stylesheet" href="css/menu.css?v=1.1">
     <!-- Editor Styles (Overlays) -->
     <link rel="stylesheet" href="css/editor.css?v=3.2">
+    <link rel="stylesheet" href="css/mobile-fix.css?v=1.9">
 
     <!-- Defer non-critical scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
@@ -182,19 +183,19 @@
         </div>
 
         <div id="mobileDropbar" class="mobile-dropbar">
-            <button class="dropbar-item" onclick="openQrModal(); toggleNavDropdown()">
+            <button class="dropbar-item" onclick="openQrModal(); toggleNavDropdown(true)">
                 <i class="fa-solid fa-qrcode"></i> <span>QR Code</span>
             </button>
-            <button class="dropbar-item" id="liveLinkBtnMobile" onclick="toggleNavDropdown()">
+            <button class="dropbar-item" id="liveLinkBtnMobile" onclick="toggleNavDropdown(true)">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Ver Menu</span>
             </button>
-            <button class="dropbar-item" onclick="openSettingsModal(); toggleNavDropdown()">
+            <button class="dropbar-item" onclick="openSettingsModal(); toggleNavDropdown(true)">
                 <i class="fa-solid fa-gear"></i> <span>Configurar</span>
             </button>
-            <button class="dropbar-item" onclick="toggleDarkMode(); toggleNavDropdown()">
+            <button class="dropbar-item" onclick="toggleDarkMode(); toggleNavDropdown(true)">
                 <i class="fa-solid fa-moon" id="themeIconMobile"></i> <span>Mudar Tema</span>
             </button>
-            <button class="dropbar-item" onclick="openSettingsTab('billing'); toggleNavDropdown()">
+            <button class="dropbar-item" onclick="openSettingsTab('billing'); toggleNavDropdown(true)">
                 <i class="fa-solid fa-crown" style="color:var(--primary);"></i> <span>Premium</span>
             </button>
             <button class="dropbar-item btn-danger-soft" onclick="signOut()">
@@ -252,32 +253,26 @@
 
     <!-- SETTINGS MODAL (TABBED) -->
     <div id="settingsModal" class="edit-modal">
-        <div class="edit-modal-content settings-modal-modern"
-            style="max-width: 750px; padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="edit-modal-content settings-modal-modern">
 
-            <div class="settings-layout" style="display: flex; min-height: 500px; max-height: 85vh;">
+            <div class="settings-layout">
                 <!-- Sidebar Nav -->
-                <div class="settings-sidebar"
-                    style="width: 240px; background: var(--bg-page); border-right: 1px solid var(--border); padding: 30px 20px;">
-                    <h2 style="font-size: 1.3rem; margin-bottom: 25px; padding-left: 10px; color: var(--text);">
-                        Preferências</h2>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="settings-sidebar">
+                    <h2 class="settings-sidebar-title">Preferências</h2>
+                    <div class="settings-sidebar-tabs">
                         <button type="button" class="tab-btn-settings active" onclick="switchSettingsTab('general')"
-                            id="tab-btn-general"
-                            style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; width: 100%; text-align: left; background: transparent; border: none; border-radius: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; font-weight: 600;">
-                            <i class="fa-solid fa-store" style="width: 20px; text-align: center;"></i> O Meu Menu
+                            id="tab-btn-general">
+                            <i class="fa-solid fa-store"></i> <span>O Meu Menu</span>
                         </button>
                         <button type="button" class="tab-btn-settings" onclick="switchSettingsTab('billing')"
-                            id="tab-btn-billing"
-                            style="display: flex; align-items: center; gap: 12px; padding: 12px 15px; width: 100%; text-align: left; background: transparent; border: none; border-radius: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; font-weight: 600;">
-                            <i class="fa-solid fa-credit-card" style="width: 20px; text-align: center;"></i> Faturação &
-                            Plano
+                            id="tab-btn-billing">
+                            <i class="fa-solid fa-credit-card"></i> <span>Faturação & Plano</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Content Area -->
-                <div class="settings-content" style="flex: 1; padding: 35px; overflow-y: auto;">
+                <div class="settings-content">
 
                     <!-- TAB: GENERAL -->
                     <div id="tab-general" class="settings-tab-pane active" style="display: block;">

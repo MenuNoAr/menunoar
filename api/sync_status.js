@@ -44,8 +44,14 @@ export default async function handler(req, res) {
         let stripeSub = null;
         let customerId = rest.stripe_customer_id;
 
-        // Busca por email
-        if (email) {
+        // A. Se já temos customerId, procurar subscrições diretamente
+        if (customerId) {
+            const subs = await stripe.subscriptions.list({ customer: customerId, limit: 5 });
+            stripeSub = subs.data.find(s => s.status === 'active' || s.status === 'trialing');
+        }
+
+        // B. Se não temos customerId ou não encontramos subscrição, tentar por email
+        if (!stripeSub && email) {
             const customers = await stripe.customers.list({ email: email, limit: 1 });
             if (customers.data.length > 0) {
                 customerId = customers.data[0].id;
@@ -54,9 +60,9 @@ export default async function handler(req, res) {
             }
         }
 
-        // Busca por Session se falhou
+        // C. Fallback: Procurar em sessões recentes (apenas se ainda não encontramos)
         if (!stripeSub && userId) {
-            const sessions = await stripe.checkout.sessions.list({ limit: 20 });
+            const sessions = await stripe.checkout.sessions.list({ limit: 10 }); // Reduced limit
             const session = sessions.data.find(s => s.client_reference_id === userId && s.status === 'complete');
             if (session && session.customer) {
                 customerId = session.customer;

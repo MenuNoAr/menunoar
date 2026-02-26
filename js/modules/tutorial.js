@@ -55,17 +55,26 @@ const tutorialSteps = [
 
 let typeTimeout = null;
 
-export function openTutorial() {
+export function openTutorial(forceResume = false) {
     window.closeAllModals();
     isTutorialActive = true;
+    document.body.classList.add('tutorial-active');
 
     if (document.getElementById('mobileDropbar')?.classList.contains('open')) {
         window.toggleNavDropdown();
     }
 
-    currentTutStep = 0;
+    // Try to resume if it was already running before a reload
+    const savedStep = localStorage.getItem('tutorial_step');
+    if (forceResume && savedStep !== null) {
+        currentTutStep = parseInt(savedStep, 10);
+    } else {
+        currentTutStep = 0;
+        localStorage.setItem('tutorial_step', '0');
+    }
+
     clearOverlays();
-    renderStep(0);
+    renderStep(currentTutStep);
 }
 
 function clearOverlays() {
@@ -73,9 +82,15 @@ function clearOverlays() {
 }
 
 let autoAdvanceTimeout = null;
-/**
- * Validates if the user did the right action to advance
- */
+let currentTargetEl = null;
+let boostedParents = [];
+let originalZIndex = '';
+
+let isTransitioning = false;
+let isModalOverride = false; // Flag to pause spotlight/blocker when a modal is open
+
+const isMobileDevice = () => window.innerWidth <= 850;
+
 window.checkTutorialStep = (stepId) => {
     if (!isTutorialActive || isTransitioning) return;
     const currentStep = tutorialSteps[currentTutStep];
@@ -83,54 +98,55 @@ window.checkTutorialStep = (stepId) => {
     if (currentStep && (currentStep.id === stepId || stepId.startsWith(currentStep.id))) {
         // Special case for modal openings
         if (stepId.endsWith('_open')) {
+            isModalOverride = true; // PAUSE THE LOOP
             const textTarget = document.getElementById('tutText');
             const tooltip = document.querySelector('.tutorial-tooltip');
-            const isMobile = window.innerWidth <= 850;
+            const isMobile = isMobileDevice();
 
             if (textTarget && tooltip) {
+                // Combine success feedback with next instruction
+                const successIcon = '<span style="color:var(--success); font-weight:700; display:block; margin-bottom:8px; animation: popSuccess 0.4s cubic-bezier(0.17, 0.89, 0.32, 1.49);">🎉 Excelente!</span>';
+
                 if (currentStep.id === 'settings') {
-                    textTarget.innerHTML = "<b>Muito bem!</b><br>Aqui podes mudar a fonte, as cores ou ativar o modo PDF.";
+                    textTarget.innerHTML = successIcon + "Aqui podes mudar a fonte, as cores ou ativar o modo PDF.";
                 } else {
-                    textTarget.innerHTML = "<b>Muito bem!</b><br>Preenche os detalhes do prato e clica em guardar.";
+                    textTarget.innerHTML = successIcon + "Preenche os detalhes do prato e clica em guardar.";
                 }
 
-                // Move tooltip to corner to not block modal
+                // Move tooltip on mobile/desktop
                 if (isMobile) {
-                    Object.assign(tooltip.style, {
-                        left: '10px',
-                        right: '10px',
-                        top: 'auto',
-                        bottom: '10px',
-                        transform: 'none',
-                        width: 'calc(100vw - 20px)',
-                        padding: '15px',
-                        zIndex: '20005'
-                    });
+                    tooltip.classList.remove('is-bottom');
+                    tooltip.classList.add('is-top');
+                    tooltip.style.opacity = '1';
+                    tooltip.style.visibility = 'visible';
                 } else {
                     Object.assign(tooltip.style, {
-                        left: 'auto',
-                        right: '50px',
-                        top: '50%',
-                        bottom: 'auto',
-                        transform: 'translateY(-50%)',
-                        width: '400px',
-                        zIndex: '20005',
-                        padding: '24px'
+                        left: 'auto', right: '50px', top: '50%', bottom: 'auto',
+                        transform: 'translateY(-50%)', width: '400px', zIndex: '110000', padding: '24px', opacity: '1', visibility: 'visible'
                     });
                 }
 
-                // Hide spotlight/arrow while modal is open
-                document.querySelector('.tutorial-spotlight')?.style.setProperty('display', 'none');
-                document.querySelector('.tutorial-arrow')?.style.setProperty('opacity', '0');
+                // Hide spotlight/arrow/blocker explicitly and keep them hidden
+                const spotlight = document.querySelector('.tutorial-spotlight');
+                const arrow = document.querySelector('.tutorial-arrow');
+                const blocker = document.querySelector('.tutorial-blocker');
+
+                if (spotlight) spotlight.style.display = 'none';
+                if (arrow) arrow.style.opacity = '0';
+                if (blocker) blocker.style.display = 'none';
             }
             return;
         }
 
         if (autoAdvanceTimeout) clearTimeout(autoAdvanceTimeout);
         showSuccessFeedback();
+
+        // Speed up for settings step because it triggers a page reload
+        const delay = currentStep.id === 'settings' ? 0 : 500;
+
         autoAdvanceTimeout = setTimeout(() => {
             if (isTutorialActive) window.nextStep();
-        }, 1200);
+        }, delay);
     }
 };
 
@@ -143,6 +159,18 @@ function showSuccessFeedback() {
 
 function renderStep(index) {
     if (typeTimeout) clearTimeout(typeTimeout);
+    isModalOverride = false; // RESET MODAL STATE ON NEW STEP
+    localStorage.setItem('tutorial_step', index.toString()); // PERSIST STATE
+    localStorage.setItem('tutorial_running', 'true'); // FLAG FOR RELOAD RESUME
+
+    // Reset previous target z-index and boosted parents
+    if (currentTargetEl) {
+        currentTargetEl.style.zIndex = originalZIndex;
+        currentTargetEl.classList.remove('tutorial-active-target');
+        currentTargetEl = null;
+    }
+    boostedParents.forEach(p => p.classList.remove('tutorial-parent-boost'));
+    boostedParents = [];
 
     // Ensure UI is clean before showing next/prev step
     if (window.closeAllModals) window.closeAllModals();
@@ -152,17 +180,21 @@ function renderStep(index) {
     const step = tutorialSteps[index];
 
     let spotlight = document.querySelector('.tutorial-spotlight') || createEl('div', 'tutorial-spotlight');
-    let tooltip = document.querySelector('.tutorial-tooltip') || createEl('div', 'tutorial-tooltip', { opacity: '0', visibility: 'hidden', transition: 'none' });
+    let tooltip = document.querySelector('.tutorial-tooltip') || createEl('div', 'tutorial-tooltip', { opacity: '0', visibility: 'hidden' });
     let arrow = document.querySelector('.tutorial-arrow') || createEl('div', 'tutorial-arrow', {}, `<svg viewBox="0 0 24 24" width="40" height="40"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" fill="var(--primary)"/></svg>`);
 
-    // Reset spotlight/arrow display in case they were hidden by checkTutorialStep
+    // The blocker is actually what prevents clicking outside the target
+    let blocker = document.querySelector('.tutorial-blocker') || createEl('div', 'tutorial-blocker');
+
+    // Reset spotlight/arrow display
     spotlight.style.display = 'block';
     arrow.style.opacity = '1';
+    blocker.style.display = 'block';
 
     tooltip.innerHTML = `
         <div class="tutorial-header"><h3><i class="fa-solid ${step.icon}"></i> ${step.title}</h3></div>
         <p id="tutText" style="min-height: 3em;"></p>
-        <div class="tutorial-actions">
+        <div class="tutorial-actions" style="position:relative; z-index:20006;">
             <button class="tutorial-btn-skip" onclick="closeTutorial()">Sair</button>
             <div class="tutorial-step-dots">${tutorialSteps.map((_, i) => `<div class="tutorial-dot ${i === index ? 'active' : ''}"></div>`).join('')}</div>
             <div style="display:flex; gap:8px;">
@@ -178,12 +210,12 @@ function renderStep(index) {
         if (i < step.text.length) {
             textTarget.textContent += step.text.charAt(i);
             i++;
-            typeTimeout = setTimeout(type, 10);
+            typeTimeout = setTimeout(type, 8);
         }
     };
     type();
 
-    const isMobile = window.innerWidth <= 850;
+    const isMobile = isMobileDevice();
     let targetSelector = step.target;
 
     if (isMobile) {
@@ -195,6 +227,7 @@ function renderStep(index) {
     }
 
     const targetEl = targetSelector ? document.querySelector(targetSelector) : null;
+    currentTargetEl = targetEl;
 
     // Auto-scroll logic
     if (step.id === 'add_item' || step.id === 'create_cat') {
@@ -202,6 +235,22 @@ function renderStep(index) {
     }
 
     if (targetEl) {
+        // Bring target and its fixed/sticky ancestors to front
+        originalZIndex = targetEl.style.zIndex;
+        targetEl.style.zIndex = '20005';
+        targetEl.classList.add('tutorial-active-target');
+
+        let parent = targetEl.parentElement;
+        while (parent && parent !== document.body) {
+            const s = window.getComputedStyle(parent);
+            // Boost any positioned parent to ensure stacking context doesn't trap the target
+            if (s.position !== 'static' || (s.zIndex !== 'auto' && s.zIndex !== '0')) {
+                parent.classList.add('tutorial-parent-boost');
+                boostedParents.push(parent);
+            }
+            parent = parent.parentElement;
+        }
+
         // Ensure dropbar is open if target is inside it
         if (isMobile && (targetSelector.includes('mobile-dropbar') || targetSelector.includes('Mobile'))) {
             if (!document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
@@ -212,28 +261,48 @@ function renderStep(index) {
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         const placement = (targetEl.getBoundingClientRect().top > window.innerHeight / 2) ? 'above' : 'below';
 
-        let startTime = performance.now();
-        const sync = (now) => {
+        let syncFrameId = null;
+        const sync = () => {
+            if (!isTutorialActive || currentTargetEl !== targetEl || isModalOverride) {
+                if (syncFrameId) cancelAnimationFrame(syncFrameId);
+                return;
+            }
             const rect = targetEl.getBoundingClientRect(), padding = 10;
-            if (rect.width === 0) return; // Hidden
-            Object.assign(spotlight.style, { opacity: '1', left: `${rect.left - padding}px`, top: `${rect.top - padding}px`, width: `${rect.width + padding * 2}px`, height: `${rect.height + padding * 2}px`, display: 'block', boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.85)' });
-            positionTooltipAndArrow(rect, tooltip, arrow, placement);
-            if (now - startTime < 1000) requestAnimationFrame(sync);
+            if (rect.width > 0) {
+                Object.assign(spotlight.style, {
+                    opacity: '1', left: `${rect.left - padding}px`, top: `${rect.top - padding}px`,
+                    width: `${rect.width + padding * 2}px`, height: `${rect.height + padding * 2}px`,
+                    display: 'block', boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.8)'
+                });
+                positionTooltipAndArrow(rect, tooltip, arrow, placement);
+            }
+            syncFrameId = requestAnimationFrame(sync);
         };
-        sync(startTime);
+        syncFrameId = requestAnimationFrame(sync);
+
         tooltip.style.visibility = 'visible';
         tooltip.style.opacity = '1';
+
+        // Show spotlight even on mobile, but keep arrow hidden if preferred
+        if (isMobile) {
+            arrow.style.opacity = '0';
+        }
     } else {
         if (isMobile && document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
         Object.assign(spotlight.style, { opacity: '0', display: 'none' });
-        Object.assign(tooltip.style, {
-            left: '50%', right: 'auto',
-            top: '50%', bottom: 'auto',
-            transform: 'translate(-50%, -50%)',
-            opacity: '1', visibility: 'visible',
-            width: isMobile ? 'calc(100vw - 40px)' : '540px'
-        });
+
+        if (isMobile) {
+            tooltip.style.opacity = '1';
+            tooltip.style.visibility = 'visible';
+        } else {
+            Object.assign(tooltip.style, {
+                left: '50%', right: 'auto', top: '50%', bottom: 'auto',
+                transform: 'translate(-50%, -50%)', opacity: '1', visibility: 'visible',
+                width: '540px'
+            });
+        }
         arrow.style.opacity = '0';
+        blocker.style.display = 'block'; // Block even if no target for safety
     }
 }
 
@@ -247,8 +316,20 @@ function createEl(tag, className, styles = {}, html = '') {
 }
 
 function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
-    const isMobile = window.innerWidth <= 850;
-    const margin = 20, tooltipWidth = isMobile ? Math.min(window.innerWidth - 40, 340) : 540;
+    if (isMobileDevice()) {
+        arrow.style.opacity = '0';
+        tooltip.classList.remove('is-top', 'is-bottom');
+
+        // Dynamic positioning on mobile:
+        // If target is on top half, show tooltip at bottom. Otherwise top.
+        if (rect.top < window.innerHeight / 2) {
+            tooltip.classList.add('is-bottom');
+        } else {
+            tooltip.classList.add('is-top');
+        }
+        return; // Let CSS handle fixed positions
+    }
+    const margin = 20, tooltipWidth = 540;
     const tooltipHeight = tooltip.offsetHeight;
     let tx = rect.left + rect.width / 2 - tooltipWidth / 2;
     tx = Math.max(20, Math.min(tx, window.innerWidth - tooltipWidth - 20));
@@ -267,8 +348,6 @@ function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
     });
     Object.assign(arrow.style, { opacity: '1', left: `${ax}px`, top: `${ay}px`, transform: `rotate(${ar}deg)` });
 }
-
-let isTransitioning = false;
 window.nextStep = () => {
     if (isTransitioning) return;
     if (autoAdvanceTimeout) clearTimeout(autoAdvanceTimeout);
@@ -293,8 +372,21 @@ window.nextStep = () => {
 window.prevTutorialPage = () => currentTutStep > 0 && renderStep(--currentTutStep);
 window.closeTutorial = () => {
     isTutorialActive = false;
-    document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow').forEach(el => {
+    document.body.classList.remove('tutorial-active');
+    localStorage.removeItem('tutorial_step');
+    localStorage.removeItem('tutorial_running');
+
+    // Reset target z-index and parents
+    if (currentTargetEl) {
+        currentTargetEl.style.zIndex = originalZIndex;
+        currentTargetEl.classList.remove('tutorial-active-target');
+        currentTargetEl = null;
+    }
+    boostedParents.forEach(p => p.classList.remove('tutorial-parent-boost'));
+    boostedParents = [];
+
+    document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow, .tutorial-blocker').forEach(el => {
         el.style.opacity = '0';
-        setTimeout(() => el.remove(), 400);
+        setTimeout(() => el.remove(), 300);
     });
 };

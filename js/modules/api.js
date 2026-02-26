@@ -32,12 +32,16 @@ export async function loadData() {
     }
 
     // Step 3: sync status + fetch items in PARALLEL
+    // Optimization: Skip sync if already done this session
+    const syncCacheKey = `sync_done_${currentUser.id}`;
+    const shouldSync = !sessionStorage.getItem(syncCacheKey) && restRaw.subscription_status !== 'active';
+
     const [syncResult, itemsResult] = await Promise.allSettled([
-        fetch('/api/sync_status', {
+        shouldSync ? fetch('/api/sync_status', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: currentUser.email, userId: currentUser.id }),
-        }).then(r => (r.ok ? r.json() : null)).catch(() => null),
+        }).then(r => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null),
 
         supabase
             .from('menu_items')
@@ -46,6 +50,11 @@ export async function loadData() {
             .order('category')
             .order('name'),
     ]);
+
+    // Mark as synced if request was made
+    if (shouldSync && syncResult.status === 'fulfilled') {
+        sessionStorage.setItem(syncCacheKey, 'true');
+    }
 
     // Re-fetch restaurant only if sync changed something
     let rest = restRaw;

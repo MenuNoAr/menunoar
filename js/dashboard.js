@@ -57,6 +57,11 @@ async function init() {
                         openTutorial();
                     }
                 }, 1000);
+            } else if (localStorage.getItem('tutorial_running') === 'true') {
+                // Resume tutorial if it was running before a reload
+                setTimeout(() => {
+                    window.openTutorial(true);
+                }, 1000);
             }
         }, () => {
             window.location.href = 'login.html';
@@ -108,10 +113,16 @@ window.toggleDarkMode = () => {
     if (themeIconMobile) themeIconMobile.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
 };
 
-window.toggleNavDropdown = () => {
+window.toggleNavDropdown = (forceClose = false) => {
     const dropbar = document.getElementById('mobileDropbar');
     const icon = document.getElementById('navMobileIcon');
     if (!dropbar) return;
+
+    if (forceClose) {
+        dropbar.classList.remove('open');
+        if (icon) icon.className = 'fa-solid fa-bars-staggered';
+        return;
+    }
 
     const isOpen = dropbar.classList.toggle('open');
     if (icon) {
@@ -122,23 +133,30 @@ window.toggleNavDropdown = () => {
 // ─── Toast Notification System ────────────────────────────────────────────────
 window.showToast = (msg, type = 'success') => {
     let container = document.getElementById('toast-container');
+    const isMobile = window.innerWidth <= 850;
     if (!container) {
         container = document.createElement('div');
         container.id = 'toast-container';
         Object.assign(container.style, {
-            position: 'fixed', top: '20px', right: '20px', zIndex: '9999',
-            display: 'flex', flexDirection: 'column', gap: '10px'
+            position: 'fixed',
+            top: isMobile ? 'auto' : '20px',
+            bottom: isMobile ? '20px' : 'auto',
+            right: isMobile ? '0' : '20px',
+            left: isMobile ? '0' : 'auto',
+            zIndex: '200000',
+            display: 'flex', flexDirection: 'column', gap: '10px',
+            alignItems: 'center', width: isMobile ? '100%' : 'auto'
         });
         document.body.appendChild(container);
     }
     const toast = document.createElement('div');
     Object.assign(toast.style, {
         background: type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#3b82f6'),
-        color: '#fff', padding: '12px 20px', borderRadius: '8px',
-        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', display: 'flex',
-        alignItems: 'center', gap: '10px', fontWeight: '500', fontSize: '0.95rem',
-        opacity: '0', transform: 'translateX(100%)',
-        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)', pointerEvents: 'none'
+        color: '#fff', padding: '12px 20px', borderRadius: '12px',
+        boxShadow: '0 8px 20px rgba(0,0,0,0.2)', display: 'flex',
+        alignItems: 'center', gap: '10px', fontWeight: '600', fontSize: '0.9rem',
+        opacity: '0', transform: isMobile ? 'translateY(20px)' : 'translateX(100%)',
+        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)', pointerEvents: 'none'
     });
 
     toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-circle-exclamation'}"></i> <span>${msg}</span>`;
@@ -146,12 +164,12 @@ window.showToast = (msg, type = 'success') => {
 
     requestAnimationFrame(() => {
         toast.style.opacity = '1';
-        toast.style.transform = 'translateX(0)';
+        toast.style.transform = isMobile ? 'translateY(0)' : 'translateX(0)';
     });
 
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateX(100%)';
+        toast.style.transform = isMobile ? 'translateY(20px)' : 'translateX(100%)';
         setTimeout(() => toast.remove(), 300);
     }, 4000);
 };
