@@ -182,25 +182,43 @@
             </div>
         </div>
 
-        <div id="mobileDropbar" class="mobile-dropbar">
-            <button class="dropbar-item" onclick="openQrModal(); toggleNavDropdown(true)">
-                <i class="fa-solid fa-qrcode"></i> <span>QR Code</span>
-            </button>
-            <button class="dropbar-item" id="liveLinkBtnMobile" onclick="toggleNavDropdown(true)">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Ver Menu</span>
-            </button>
-            <button class="dropbar-item" onclick="openSettingsModal(); toggleNavDropdown(true)">
-                <i class="fa-solid fa-gear"></i> <span>Configurar</span>
-            </button>
-            <button class="dropbar-item" onclick="toggleDarkMode(); toggleNavDropdown(true)">
-                <i class="fa-solid fa-moon" id="themeIconMobile"></i> <span>Mudar Tema</span>
-            </button>
-            <button class="dropbar-item" onclick="openSettingsTab('billing'); toggleNavDropdown(true)">
-                <i class="fa-solid fa-crown" style="color:var(--primary);"></i> <span>Premium</span>
-            </button>
-            <button class="dropbar-item btn-danger-soft" onclick="signOut()">
-                <i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span>
-            </button>
+        <div id="mobileSidebarOverlay" class="mobile-sidebar-overlay" onclick="toggleNavDropdown(true)"></div>
+        <div id="mobileDropbar" class="mobile-sidebar">
+            <div class="sidebar-header">
+                <img src="assets/images/logo.svg" alt="Logo" class="sidebar-logo">
+                <button class="btn-close-sidebar" onclick="toggleNavDropdown(true)">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="user-info">
+                    <span id="sidebarUserName">Utilizador</span>
+                    <small>Gestor</small>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <button class="sidebar-item" onclick="openQrModal(); toggleNavDropdown(true)">
+                    <i class="fa-solid fa-qrcode"></i> <span>QR Code</span>
+                </button>
+                <button class="sidebar-item" id="liveLinkBtnMobile" onclick="toggleNavDropdown(true)">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Ver Menu</span>
+                </button>
+                <button class="sidebar-item" onclick="openSettingsModal(); toggleNavDropdown(true)">
+                    <i class="fa-solid fa-gear"></i> <span>Configurar</span>
+                </button>
+                <button class="sidebar-item" onclick="toggleDarkMode(); toggleNavDropdown(true)">
+                    <i class="fa-solid fa-moon" id="themeIconMobile"></i> <span>Mudar Tema</span>
+                </button>
+                <button class="sidebar-item premium" onclick="openSettingsTab('billing'); toggleNavDropdown(true)">
+                    <i class="fa-solid fa-crown"></i> <span>Premium</span>
+                </button>
+            </div>
+            <div class="sidebar-footer">
+                <button class="sidebar-item btn-danger-soft" onclick="signOut()">
+                    <i class="fa-solid fa-right-from-bracket"></i> <span>Sair da conta</span>
+                </button>
+            </div>
         </div>
 
         <!-- EDITOR CANVAS (Mimics menu.html structure but editable) -->

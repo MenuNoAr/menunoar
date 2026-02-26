@@ -39,6 +39,9 @@ async function init() {
             const greetEl = document.getElementById('setupGreetingName');
             if (greetEl) greetEl.textContent = firstName + '!';
 
+            const sidebarNameEl = document.getElementById('sidebarUserName');
+            if (sidebarNameEl) sidebarNameEl.textContent = firstName;
+
             await loadData();
 
             // Fire tutorial + confetti after first restaurant creation
@@ -93,6 +96,10 @@ document.getElementById('renameForm')?.addEventListener('submit', (e) => {
     if (el) el.textContent = newName;
     const greetEl = document.getElementById('setupGreetingName');
     if (greetEl) greetEl.textContent = newName + '!';
+
+    const sidebarNameEl = document.getElementById('sidebarUserName');
+    if (sidebarNameEl) sidebarNameEl.textContent = newName;
+
     window.closeModal('renameModal');
 });
 
@@ -115,16 +122,19 @@ window.toggleDarkMode = () => {
 
 window.toggleNavDropdown = (forceClose = false) => {
     const dropbar = document.getElementById('mobileDropbar');
+    const overlay = document.getElementById('mobileSidebarOverlay');
     const icon = document.getElementById('navMobileIcon');
     if (!dropbar) return;
 
     if (forceClose) {
         dropbar.classList.remove('open');
+        if (overlay) overlay.classList.remove('open');
         if (icon) icon.className = 'fa-solid fa-bars-staggered';
         return;
     }
 
     const isOpen = dropbar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('open');
     if (icon) {
         icon.className = isOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars-staggered';
     }

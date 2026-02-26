@@ -596,7 +596,7 @@ button:disabled {
 .category-tabs {
     /* Ensure sticking works in editor context */
     position: sticky;
-    top: 0;
+    top: var(--navbar-height);
     z-index: 100;
     background: var(--bg-mobile);
     padding-top: 10px;
