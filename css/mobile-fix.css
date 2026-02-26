@@ -167,6 +167,8 @@
         z-index: 99998;
         opacity: 0;
         visibility: hidden;
+        display: block !important;
+        /* Ensure it overrides desktop hide */
         transition: opacity 0.4s ease, visibility 0.4s ease;
     }
 

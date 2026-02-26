@@ -168,9 +168,11 @@ button:disabled {
     border-radius: 12px;
 }
 
-.mobile-dropbar {
-    display: none;
-    /* Hidden by default */
+.mobile-dropbar,
+.mobile-sidebar,
+.mobile-sidebar-overlay {
+    display: none !important;
+    /* Hidden by default on PC */
 }
 
 /* --- NAV ITEM BUTTON STYLING --- */
