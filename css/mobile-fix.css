@@ -6,7 +6,11 @@
 
 @media (max-width: 850px) {
 
-    /* 1. Global Scrolling & Clickability */
+    /* 1. Global Scrolling & Clickability & Variables */
+    :root {
+        --navbar-height: 60px;
+    }
+
     html,
     body {
         overflow-x: hidden !important;
