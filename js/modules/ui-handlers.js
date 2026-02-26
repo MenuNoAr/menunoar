@@ -491,6 +491,15 @@ window.togglePdfDetails = () => {
     const isPdf = document.getElementById('pdfToggle').checked;
     document.getElementById('pdfDetails').style.display = isPdf ? 'block' : 'none';
 
+    // Disable Guide/Tutorial and its button if PDF is active
+    if (isPdf) {
+        document.querySelectorAll('.mobile-help-trigger, .header-help').forEach(btn => btn.style.display = 'none');
+        if (typeof window.closeTutorial === 'function') window.closeTutorial();
+    } else {
+        document.querySelectorAll('.mobile-help-trigger').forEach(btn => btn.style.display = 'flex');
+        document.querySelectorAll('.header-help').forEach(btn => btn.style.display = 'inline-block');
+    }
+
     // Completely hide font selection in PDF mode
     const fontSelect = document.getElementById('modalFont');
     if (fontSelect) {
