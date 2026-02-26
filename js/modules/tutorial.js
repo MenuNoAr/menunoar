@@ -1,518 +1,392 @@
 /**
- * tutorial.js - Modern, Revolutionary Interactive Onboarding
- * Employs SVG masking, smooth interpolation, and glassmorphism.
+ * tutorial.js - Reactive Interactive Tutorial System
  */
 import { scrollToSlide } from './render.js';
 
-let currentStepIndex = 0;
-let isActive = false;
-let isTransitioning = false;
+let currentTutStep = 0;
+let isTutorialActive = false;
 
-// DOM Elements
-let tourBackdrop, tourPopover, tourCutout;
-
-const steps = [
+const tutorialSteps = [
     {
         id: 'welcome',
-        title: "Bem-vindo ao Topo 🚀",
-        text: "Desenhámos uma experiência de gestão incrivelmente fluida. Vamos fazer uma rápida visita guiada para te habituares?",
+        title: "Bem-vindo! 👋",
+        text: "Este é o teu painel. Vamos transformar o teu menu num sucesso digital!",
         target: null,
-        placement: 'center',
-        buttonLabel: 'Começar Tour'
+        icon: "fa-rocket"
     },
     {
         id: 'edit_name',
-        title: "Edição Invisível ✍️",
-        text: "Tudo o que vês no painel é editável num clique. Experimenta clicar no nome do teu restaurante agora mesmo.",
+        title: "Edição Direta ✍️",
+        text: "Experimenta clicar no nome do restaurante para o editares agora.",
         target: "#restNameEditor",
-        placement: 'bottom',
-        waitForAction: true
+        icon: "fa-pencil",
+        successText: "Excelente! Todo o texto no menu é editável assim."
     },
     {
         id: 'create_cat',
-        title: "Cria as Tuas Secções 📂",
-        text: "Bebidas, Pratos Principais, Sobremesas... Clica no botão '+' para criares uma nova categoria para o teu menu.",
+        title: "Nova Categoria 📂",
+        text: "Cria uma nova secção (ex: Bebidas ou Sobremesas) clicando no '+'.",
         target: ".btn-add-cat",
-        placement: 'bottom',
-        waitForAction: true
+        icon: "fa-folder-plus",
+        successText: "Boa! Podes criar quantas categorias quiseres."
     },
     {
         id: 'add_item',
-        title: "Adiciona Magia ✨",
-        text: "Aqui começas a compor o teu menu com pratos, preços e descrições radiantes. Ficará deslumbrante.",
+        title: "Novo Prato ✨",
+        text: "Adiciona o teu primeiro prato ou bebida nesta categoria.",
         target: ".add-item-btn",
-        placement: 'top'
+        icon: "fa-plus"
     },
     {
         id: 'settings',
-        title: "A Tua Identidade 🎨",
-        text: "Cores, tipografia e modo PDF. Todo o poder da personalização do teu menu está guardado aqui nesta engrenagem.",
-        target: () => window.innerWidth <= 850 ? ".mobile-nav-trigger" : "button[onclick='openSettingsModal()']",
-        placement: 'bottom'
+        title: "Configurações 🎨",
+        text: "Muda a fonte, cores ou ativa o modo PDF para o teu menu aqui.",
+        target: "button[onclick='openSettingsModal()']",
+        icon: "fa-gear"
     },
     {
         id: 'preview',
-        title: "Ao Vivo e a Cores 🌟",
-        text: "Sempre que quiseres ver como os teus clientes vêem o teu menu em direto, clica aqui. Aproveita a viagem!",
-        target: () => window.innerWidth <= 850 ? ".mobile-nav-trigger" : "#liveLinkBtn",
-        placement: 'bottom',
-        buttonLabel: 'Concluir!'
+        title: "Vê o Menu 🚀",
+        text: "Clica para veres o resultado final tal como os teus clientes o verão!",
+        target: "#liveLinkBtn",
+        icon: "fa-eye"
     }
 ];
 
-export function openTutorial(resume = false) {
-    if (isActive) return;
-    isActive = true;
+let typeTimeout = null;
 
-    // Close any open sidebars/modals
-    window.closeAllModals?.();
+export function openTutorial(forceResume = false) {
+    window.closeAllModals();
+    isTutorialActive = true;
+    document.body.classList.add('tutorial-active');
+
     if (document.getElementById('mobileDropbar')?.classList.contains('open')) {
-        window.toggleNavDropdown?.(true);
+        window.toggleNavDropdown();
     }
 
-    currentStepIndex = (resume && localStorage.getItem('tut_step')) ? parseInt(localStorage.getItem('tut_step')) : 0;
+    // Try to resume if it was already running before a reload
+    const savedStep = localStorage.getItem('tutorial_step');
+    if (forceResume && savedStep !== null) {
+        currentTutStep = parseInt(savedStep, 10);
+    } else {
+        currentTutStep = 0;
+        localStorage.setItem('tutorial_step', '0');
+    }
 
-    injectStyles();
-    injectElements();
-
-    // Slight delay to allow animations to flow in
-    setTimeout(() => renderStep(), 50);
+    clearOverlays();
+    renderStep(currentTutStep);
 }
 
-export function closeTutorial() {
-    isActive = false;
-    document.body.classList.remove('tut-active-freeze');
-    cleanupElements();
-    localStorage.removeItem('tut_step');
-    localStorage.removeItem('tutorial_running');
+function clearOverlays() {
+    document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow').forEach(el => el.remove());
 }
 
-window.openTutorial = openTutorial;
-window.closeTutorial = closeTutorial;
+let autoAdvanceTimeout = null;
+let currentTargetEl = null;
+let boostedParents = [];
+let originalZIndex = '';
 
-window.checkTutorialStep = (actionId) => {
-    if (!isActive) return;
+let isTransitioning = false;
+let isModalOverride = false; // Flag to pause spotlight/blocker when a modal is open
 
-    const step = steps[currentStepIndex];
-    if (!step) return;
+const isMobileDevice = () => window.innerWidth <= 850;
 
-    // Handle modal opens specifically so we don't skip the step instantly
-    if (actionId === step.id + '_open') {
-        const btn = tourPopover.querySelector('.tut-next-btn');
-        if (btn) {
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Boa, agora podes continuar.';
-            btn.classList.add('tut-success-pulse');
-            btn.classList.remove('waiting');
-            btn.style.pointerEvents = 'auto'; // allow manual continuation inside the modal
-            btn.style.opacity = '1';
+window.checkTutorialStep = (stepId) => {
+    if (!isTutorialActive || isTransitioning) return;
+    const currentStep = tutorialSteps[currentTutStep];
+
+    if (currentStep && (currentStep.id === stepId || stepId.startsWith(currentStep.id))) {
+        // Special case for modal openings
+        if (stepId.endsWith('_open')) {
+            isModalOverride = true; // PAUSE THE LOOP
+            const textTarget = document.getElementById('tutText');
+            const tooltip = document.querySelector('.tutorial-tooltip');
+            const isMobile = isMobileDevice();
+
+            if (textTarget && tooltip) {
+                // Combine success feedback with next instruction
+                const successIcon = '<span style="color:var(--success); font-weight:700; display:block; margin-bottom:8px; animation: popSuccess 0.4s cubic-bezier(0.17, 0.89, 0.32, 1.49);">🎉 Excelente!</span>';
+
+                if (currentStep.id === 'settings') {
+                    textTarget.innerHTML = successIcon + "Aqui podes mudar a fonte, as cores ou ativar o modo PDF.";
+                } else {
+                    textTarget.innerHTML = successIcon + "Preenche os detalhes do prato e clica em guardar.";
+                }
+
+                // Move tooltip on mobile/desktop
+                if (isMobile) {
+                    tooltip.classList.remove('is-bottom');
+                    tooltip.classList.add('is-top');
+                    tooltip.style.opacity = '1';
+                    tooltip.style.visibility = 'visible';
+                } else {
+                    Object.assign(tooltip.style, {
+                        left: 'auto', right: '50px', top: '50%', bottom: 'auto',
+                        transform: 'translateY(-50%)', width: '400px', zIndex: '110000', padding: '24px', opacity: '1', visibility: 'visible'
+                    });
+                }
+
+                // Hide spotlight/arrow/blocker explicitly and keep them hidden
+                const spotlight = document.querySelector('.tutorial-spotlight');
+                const arrow = document.querySelector('.tutorial-arrow');
+                const blocker = document.querySelector('.tutorial-blocker');
+
+                if (spotlight) spotlight.style.display = 'none';
+                if (arrow) arrow.style.opacity = '0';
+                if (blocker) blocker.style.display = 'none';
+            }
+            return;
         }
-        return;
-    }
 
-    if (step.id === actionId) {
-        // Success animation
-        const btn = tourPopover.querySelector('.tut-next-btn');
-        if (btn) {
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Perfeito!';
-            btn.classList.add('tut-success-pulse');
-            setTimeout(() => window.nextStep(), 800);
-        } else {
-            window.nextStep();
+        if (autoAdvanceTimeout) clearTimeout(autoAdvanceTimeout);
+        showSuccessFeedback();
+
+        // Speed up for settings step because it triggers a page reload
+        const delay = currentStep.id === 'settings' ? 0 : 500;
+
+        autoAdvanceTimeout = setTimeout(() => {
+            if (isTutorialActive) window.nextStep();
+        }, delay);
+    }
+};
+
+function showSuccessFeedback() {
+    const textTarget = document.getElementById('tutText');
+    if (textTarget) {
+        textTarget.innerHTML = '<span style="color:var(--success); font-weight:700; font-size:1.2rem; display:block; margin-top:10px; animation: popSuccess 0.4s cubic-bezier(0.17, 0.89, 0.32, 1.49);">🎉 Muito bem!</span>';
+    }
+}
+
+function renderStep(index) {
+    if (typeTimeout) clearTimeout(typeTimeout);
+    isModalOverride = false; // RESET MODAL STATE ON NEW STEP
+    localStorage.setItem('tutorial_step', index.toString()); // PERSIST STATE
+    localStorage.setItem('tutorial_running', 'true'); // FLAG FOR RELOAD RESUME
+
+    // Reset previous target z-index and boosted parents
+    if (currentTargetEl) {
+        currentTargetEl.style.zIndex = originalZIndex;
+        currentTargetEl.classList.remove('tutorial-active-target');
+        currentTargetEl = null;
+    }
+    boostedParents.forEach(p => p.classList.remove('tutorial-parent-boost'));
+    boostedParents = [];
+
+    // Ensure UI is clean before showing next/prev step
+    if (window.closeAllModals) window.closeAllModals();
+    if (window.closeModal) window.closeModal('mobileDropbar');
+
+    currentTutStep = index;
+    const step = tutorialSteps[index];
+
+    let spotlight = document.querySelector('.tutorial-spotlight') || createEl('div', 'tutorial-spotlight');
+    let tooltip = document.querySelector('.tutorial-tooltip') || createEl('div', 'tutorial-tooltip', { opacity: '0', visibility: 'hidden' });
+    let arrow = document.querySelector('.tutorial-arrow') || createEl('div', 'tutorial-arrow', {}, `<svg viewBox="0 0 24 24" width="40" height="40"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" fill="var(--primary)"/></svg>`);
+
+    // The blocker is actually what prevents clicking outside the target
+    let blocker = document.querySelector('.tutorial-blocker') || createEl('div', 'tutorial-blocker');
+
+    // Reset spotlight/arrow display
+    spotlight.style.display = 'block';
+    arrow.style.opacity = '1';
+    blocker.style.display = 'block';
+
+    tooltip.innerHTML = `
+        <div class="tutorial-header"><h3><i class="fa-solid ${step.icon}"></i> ${step.title}</h3></div>
+        <p id="tutText" style="min-height: 3em;"></p>
+        <div class="tutorial-actions" style="position:relative; z-index:20006;">
+            <button class="tutorial-btn-skip" onclick="closeTutorial()">Sair</button>
+            <div class="tutorial-step-dots">${tutorialSteps.map((_, i) => `<div class="tutorial-dot ${i === index ? 'active' : ''}"></div>`).join('')}</div>
+            <div style="display:flex; gap:8px;">
+                ${index > 0 ? `<button class="tutorial-btn-next" style="background:var(--bg-page); color:var(--text); border:1px solid var(--border); padding: 10px 15px;" onclick="prevTutorialPage()">Anterior</button>` : ''}
+                <button class="tutorial-btn-next" style="padding: 10px 15px;" onclick="nextStep()">${index === tutorialSteps.length - 1 ? 'Finalizar' : 'Seguinte'}</button>
+            </div>
+        </div>
+    `;
+
+    const textTarget = tooltip.querySelector('#tutText');
+    let i = 0;
+    const type = () => {
+        if (i < step.text.length) {
+            textTarget.textContent += step.text.charAt(i);
+            i++;
+            typeTimeout = setTimeout(type, 8);
+        }
+    };
+    type();
+
+    const isMobile = isMobileDevice();
+    let targetSelector = step.target;
+
+    if (isMobile) {
+        if (targetSelector === "button[onclick='openSettingsModal()']") {
+            targetSelector = ".mobile-dropbar button[onclick*='openSettingsModal']";
+        } else if (targetSelector === "#liveLinkBtn") {
+            targetSelector = "#liveLinkBtnMobile";
         }
     }
-};
 
-window.nextStep = () => {
-    if (currentStepIndex >= steps.length - 1) {
-        closeTutorial();
-        return;
-    }
-    currentStepIndex++;
-    localStorage.setItem('tut_step', currentStepIndex);
-    localStorage.setItem('tutorial_running', 'true');
-    renderStep();
-};
+    const targetEl = targetSelector ? document.querySelector(targetSelector) : null;
+    currentTargetEl = targetEl;
 
-window.prevStep = () => {
-    if (currentStepIndex <= 0) return;
-    currentStepIndex--;
-    localStorage.setItem('tut_step', currentStepIndex);
-    renderStep();
-};
-
-function renderStep() {
-    const step = steps[currentStepIndex];
-    document.body.classList.add('tut-active-freeze');
-
-    // Clear old active targets
-    document.querySelectorAll('.tut-active-el').forEach(e => {
-        e.classList.remove('tut-active-el');
-        e.style.zIndex = '';
-        e.style.position = '';
-        e.style.pointerEvents = '';
-    });
-
-    let targetEl = null;
-    if (step.target) {
-        let selector = typeof step.target === 'function' ? step.target() : step.target;
-        targetEl = document.querySelector(selector);
-    }
-
-    // Auto-scroll logic if specific step
+    // Auto-scroll logic
     if (step.id === 'add_item' || step.id === 'create_cat') {
         scrollToSlide(0, { instant: true });
     }
 
     if (targetEl) {
+        // Bring target and its fixed/sticky ancestors to front
+        originalZIndex = targetEl.style.zIndex;
+        targetEl.style.zIndex = '20005';
+        targetEl.classList.add('tutorial-active-target');
+
+        let parent = targetEl.parentElement;
+        while (parent && parent !== document.body) {
+            const s = window.getComputedStyle(parent);
+            // Boost any positioned parent to ensure stacking context doesn't trap the target
+            if (s.position !== 'static' || (s.zIndex !== 'auto' && s.zIndex !== '0')) {
+                parent.classList.add('tutorial-parent-boost');
+                boostedParents.push(parent);
+            }
+            parent = parent.parentElement;
+        }
+
+        // Ensure dropbar is open if target is inside it
+        if (isMobile && (targetSelector.includes('mobile-dropbar') || targetSelector.includes('Mobile'))) {
+            if (!document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
+        } else if (isMobile && document.getElementById('mobileDropbar').classList.contains('open')) {
+            window.toggleNavDropdown();
+        }
+
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const placement = (targetEl.getBoundingClientRect().top > window.innerHeight / 2) ? 'above' : 'below';
 
-        // Boost target
-        targetEl.classList.add('tut-active-el');
-        const computed = window.getComputedStyle(targetEl);
-        if (computed.position === 'static') {
-            targetEl.style.position = 'relative';
-        }
-        targetEl.style.zIndex = '100005';
-        targetEl.style.pointerEvents = 'auto';
-
-        // Boost positioned parents to bypass fixed headers trapping z-indexes
-        let p = targetEl.parentElement;
-        while (p && p !== document.body) {
-            const style = window.getComputedStyle(p);
-            if (style.position !== 'static' || style.zIndex !== 'auto' || style.transform !== 'none') {
-                p.classList.add('tut-active-el');
-                p.style.zIndex = '100004';
+        let syncFrameId = null;
+        const sync = () => {
+            if (!isTutorialActive || currentTargetEl !== targetEl || isModalOverride) {
+                if (syncFrameId) cancelAnimationFrame(syncFrameId);
+                return;
             }
-            p = p.parentElement;
-        }
-
-        // Keep position perfectly synced
-        updateHighlight(targetEl, step.placement);
-
-        // Constant sync for scrolling
-        if (window.tutSyncInterval) clearInterval(window.tutSyncInterval);
-        window.tutSyncInterval = setInterval(() => {
-            if (isActive && targetEl && document.contains(targetEl)) {
-                updateHighlight(targetEl, step.placement);
+            const rect = targetEl.getBoundingClientRect(), padding = 10;
+            if (rect.width > 0) {
+                Object.assign(spotlight.style, {
+                    opacity: '1', left: `${rect.left - padding}px`, top: `${rect.top - padding}px`,
+                    width: `${rect.width + padding * 2}px`, height: `${rect.height + padding * 2}px`,
+                    display: 'block', boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.8)'
+                });
+                positionTooltipAndArrow(rect, tooltip, arrow, placement);
             }
-        }, 16); // ~60fps sync
+            syncFrameId = requestAnimationFrame(sync);
+        };
+        syncFrameId = requestAnimationFrame(sync);
 
-        tourBackdrop.style.opacity = '1';
+        tooltip.style.visibility = 'visible';
+        tooltip.style.opacity = '1';
 
+        // Show spotlight even on mobile, but keep arrow hidden if preferred
+        if (isMobile) {
+            arrow.style.opacity = '0';
+        }
     } else {
-        if (window.tutSyncInterval) clearInterval(window.tutSyncInterval);
+        if (isMobile && document.getElementById('mobileDropbar').classList.contains('open')) window.toggleNavDropdown();
+        Object.assign(spotlight.style, { opacity: '0', display: 'none' });
 
-        // Hide cutout (drop it off screen)
-        tourCutout.style.top = '-9999px';
-        tourCutout.style.left = '-9999px';
-        tourCutout.style.width = '0px';
-        tourCutout.style.height = '0px';
-
-        tourPopover.style.top = '50%';
-        tourPopover.style.left = '50%';
-        tourPopover.style.transform = 'translate(-50%, -50%)';
-
-        tourBackdrop.style.opacity = '1';
-    }
-
-    // Render contents inside Popover
-    tourPopover.className = 'tut-popover open';
-    tourPopover.innerHTML = `
-        <div class="tut-progress">
-            ${steps.map((_, i) => `<div class="tut-dot ${i === currentStepIndex ? 'active' : ''}"></div>`).join('')}
-        </div>
-        <div class="tut-content">
-            <h3 class="tut-title">${step.title}</h3>
-            <p class="tut-text">${step.text}</p>
-        </div>
-        <div class="tut-footer">
-            <button class="tut-skip-btn" onclick="closeTutorial()">Pular</button>
-            <div class="tut-actions-right">
-                ${currentStepIndex > 0 ? `<button class="tut-prev-btn" onclick="window.prevStep()"><i class="fa-solid fa-arrow-left"></i></button>` : ''}
-                ${!step.waitForAction
-            ? `<button class="tut-next-btn" onclick="window.nextStep()">${step.buttonLabel || 'Continuar'}</button>`
-            : `<button class="tut-next-btn waiting"><i class="fa-solid fa-circle-notch fa-spin"></i> Aguardando ação...</button>`
+        if (isMobile) {
+            tooltip.style.opacity = '1';
+            tooltip.style.visibility = 'visible';
+        } else {
+            Object.assign(tooltip.style, {
+                left: '50%', right: 'auto', top: '50%', bottom: 'auto',
+                transform: 'translate(-50%, -50%)', opacity: '1', visibility: 'visible',
+                width: '540px'
+            });
         }
-            </div>
-        </div>
-    `;
-
-    // Small cascade text animation
-    const contentText = tourPopover.querySelector('.tut-content');
-    contentText.style.opacity = '0';
-    contentText.style.transform = 'translateY(10px)';
-    setTimeout(() => {
-        contentText.style.transition = 'all 0.4s ease';
-        contentText.style.opacity = '1';
-        contentText.style.transform = 'translateY(0)';
-    }, 50);
+        arrow.style.opacity = '0';
+        blocker.style.display = 'block'; // Block even if no target for safety
+    }
 }
 
-function updateHighlight(targetEl, placement) {
-    const rect = targetEl.getBoundingClientRect();
-    const padding = 12;
+function createEl(tag, className, styles = {}, html = '') {
+    const el = document.createElement(tag);
+    el.className = className;
+    Object.assign(el.style, styles);
+    el.innerHTML = html;
+    document.body.appendChild(el);
+    return el;
+}
 
-    // Update SVG cutout (the spotlight)
-    tourCutout.style.top = (rect.top - padding) + 'px';
-    tourCutout.style.left = (rect.left - padding) + 'px';
-    tourCutout.style.width = (rect.width + padding * 2) + 'px';
-    tourCutout.style.height = (rect.height + padding * 2) + 'px';
+function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
+    if (isMobileDevice()) {
+        arrow.style.opacity = '0';
+        tooltip.classList.remove('is-top', 'is-bottom');
 
-    // Position popover
-    const pWidth = 360; // Max width of popover
-    let pTop, pLeft, tX, tY;
-    const margin = 20;
-
-    // Default center placement based on target
-    pLeft = rect.left + (rect.width / 2);
-    tX = '-50%';
-
-    // Constrain X to screen bounds
-    if (pLeft < pWidth / 2 + margin) {
-        pLeft = margin + pWidth / 2;
-    } else if (pLeft > window.innerWidth - (pWidth / 2) - margin) {
-        pLeft = window.innerWidth - margin - (pWidth / 2);
+        // Dynamic positioning on mobile:
+        // If target is on top half, show tooltip at bottom. Otherwise top.
+        if (rect.top < window.innerHeight / 2) {
+            tooltip.classList.add('is-bottom');
+        } else {
+            tooltip.classList.add('is-top');
+        }
+        return; // Let CSS handle fixed positions
     }
+    const margin = 20, tooltipWidth = 540;
+    const tooltipHeight = tooltip.offsetHeight;
+    let tx = rect.left + rect.width / 2 - tooltipWidth / 2;
+    tx = Math.max(20, Math.min(tx, window.innerWidth - tooltipWidth - 20));
 
-    if (placement === 'top') {
-        pTop = rect.top - margin;
-        tY = 'calc(-100% - 10px)'; // pull up
+    let ty, ax = rect.left + rect.width / 2 - 12, ay, ar;
+    if (placement === 'above') {
+        ty = rect.top - tooltipHeight - margin - 10; ay = rect.top - margin - 5; ar = 180;
     } else {
-        // bottom or default
-        pTop = rect.bottom + margin;
-        tY = '10px';
+        ty = rect.bottom + margin + 10; ay = rect.bottom + margin - 15; ar = 0;
+    }
+    Object.assign(tooltip.style, {
+        left: `${tx}px`, right: 'auto',
+        top: `${ty}px`, bottom: 'auto',
+        transform: 'none',
+        width: tooltipWidth + 'px'
+    });
+    Object.assign(arrow.style, { opacity: '1', left: `${ax}px`, top: `${ay}px`, transform: `rotate(${ar}deg)` });
+}
+window.nextStep = () => {
+    if (isTransitioning) return;
+    if (autoAdvanceTimeout) clearTimeout(autoAdvanceTimeout);
+
+    // Force save if we are on an editable step by blurring the target
+    const step = tutorialSteps[currentTutStep];
+    if (step && step.target) {
+        const targetEl = document.querySelector(step.target);
+        if (targetEl && (targetEl.contentEditable === 'true' || targetEl.tagName === 'INPUT' || targetEl.tagName === 'TEXTAREA')) {
+            targetEl.blur();
+        }
     }
 
-    // Mobile specific safety (if modal falls off bottom)
-    if (pTop > window.innerHeight - 200) {
-        pTop = rect.top - margin;
-        tY = 'calc(-100% - 10px)';
-    }
-
-    if (window.innerWidth <= 600) {
-        // On very small screens just fix to bottom
-        pTop = window.innerHeight - margin;
-        pLeft = 50;
-        tX = '0%';
-        tY = 'calc(-100%)';
-        tourPopover.style.left = '20px';
-        tourPopover.style.right = '20px';
-        tourPopover.style.width = 'auto'; // fluid
-        tourPopover.style.transform = `translateY(${tY})`;
+    if (currentTutStep < tutorialSteps.length - 1) {
+        isTransitioning = true;
+        renderStep(++currentTutStep);
+        setTimeout(() => { isTransitioning = false; }, 400);
     } else {
-        tourPopover.style.width = pWidth + 'px';
-        tourPopover.style.left = pLeft + 'px';
-        tourPopover.style.transform = `translate(${tX}, ${tY})`;
+        window.closeTutorial();
     }
+};
+window.prevTutorialPage = () => currentTutStep > 0 && renderStep(--currentTutStep);
+window.closeTutorial = () => {
+    isTutorialActive = false;
+    document.body.classList.remove('tutorial-active');
+    localStorage.removeItem('tutorial_step');
+    localStorage.removeItem('tutorial_running');
 
-    tourPopover.style.top = window.innerWidth <= 600 ? 'auto' : pTop + 'px';
-}
+    // Reset target z-index and parents
+    if (currentTargetEl) {
+        currentTargetEl.style.zIndex = originalZIndex;
+        currentTargetEl.classList.remove('tutorial-active-target');
+        currentTargetEl = null;
+    }
+    boostedParents.forEach(p => p.classList.remove('tutorial-parent-boost'));
+    boostedParents = [];
 
-function injectElements() {
-    if (document.getElementById('tut-backdrop-svg')) return;
-
-    // We use a CSS box-shadow trick for a smooth cut-out spotlight rather than an SVG 
-    // because it handles border-radius and reflow transitions much smoother.
-    tourBackdrop = document.createElement('div');
-    tourBackdrop.id = 'tut-backdrop';
-    document.body.appendChild(tourBackdrop);
-
-    tourCutout = document.createElement('div');
-    tourCutout.id = 'tut-cutout';
-    document.body.appendChild(tourCutout);
-
-    tourPopover = document.createElement('div');
-    tourPopover.id = 'tut-popover';
-    document.body.appendChild(tourPopover);
-}
-
-function cleanupElements() {
-    if (window.tutSyncInterval) clearInterval(window.tutSyncInterval);
-    document.getElementById('tut-backdrop')?.remove();
-    document.getElementById('tut-cutout')?.remove();
-    document.getElementById('tut-popover')?.remove();
-    document.getElementById('tut-styles')?.remove();
-}
-
-function injectStyles() {
-    if (document.getElementById('tut-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'tut-styles';
-    style.innerHTML = `
-        /* Freeze background scroll when tutorial active */
-        body.tut-active-freeze {
-            overflow: hidden !important;
-        }
-
-        /* The dimming backdrop */
-        #tut-backdrop {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            z-index: 100000;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            pointer-events: auto; /* Block background clicks */
-        }
-
-        /* The transparent hole / pulsating ring */
-        #tut-cutout {
-            position: fixed;
-            z-index: 100001;
-            border-radius: 12px;
-            box-shadow: 0 0 0 4px var(--primary), 0 0 30px rgba(31, 168, 255, 0.6);
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            pointer-events: none; /* Let clicks pass through */
-        }
-
-        /* Pulse animation for the cutout */
-        @keyframes tutPulse {
-            0% { box-shadow: 0 0 0 0px rgba(31, 168, 255, 0.7), 0 0 0 4px var(--primary); }
-            70% { box-shadow: 0 0 0 15px rgba(31, 168, 255, 0), 0 0 0 4px var(--primary); }
-            100% { box-shadow: 0 0 0 0px rgba(31, 168, 255, 0), 0 0 0 4px var(--primary); }
-        }
-        #tut-cutout {
-            animation: tutPulse 2s infinite;
-            background: rgba(255, 255, 255, 0.05); /* Slight lightening */
-        }
-
-        /* Modern Popover Card */
-        #tut-popover {
-            position: fixed;
-            z-index: 100006;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            font-family: 'Inter', sans-serif;
-            pointer-events: auto;
-            max-width: 90vw;
-        }
-
-        #tut-popover.open {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Dark Mode Popover override */
-        body.dark-mode #tut-popover {
-            background: rgba(30,30,30,0.95);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
-            color: #fff;
-        }
-
-        .tut-progress {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 20px;
-            align-items: center;
-        }
-
-        .tut-dot {
-            height: 6px;
-            width: 16px;
-            border-radius: 10px;
-            background: rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        body.dark-mode .tut-dot { background: rgba(255,255,255,0.1); }
-        .tut-dot.active {
-            background: var(--primary);
-            width: 32px;
-        }
-
-        .tut-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            color: var(--text);
-            letter-spacing: -0.02em;
-        }
-        
-        .tut-text {
-            font-size: 0.95rem;
-            line-height: 1.5;
-            color: var(--text-muted);
-            margin-bottom: 24px;
-        }
-
-        .tut-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .tut-skip-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-        .tut-skip-btn:hover { background: rgba(0,0,0,0.05); }
-        body.dark-mode .tut-skip-btn:hover { background: rgba(255,255,255,0.05); }
-
-        .tut-actions-right {
-            display: flex;
-            gap: 8px;
-        }
-
-        .tut-prev-btn {
-            background: rgba(0,0,0,0.05);
-            color: var(--text);
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-        }
-        body.dark-mode .tut-prev-btn { background: rgba(255,255,255,0.1); color: #fff; }
-        .tut-prev-btn:hover { background: rgba(0,0,0,0.1); transform: scale(1.05); }
-
-        .tut-next-btn {
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            padding: 0 20px;
-            height: 42px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.49);
-            box-shadow: 0 4px 15px var(--primary-glow);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .tut-next-btn:not(.waiting):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--primary-glow);
-        }
-        
-        .tut-next-btn.waiting {
-            background: rgba(31, 168, 255, 0.1) !important;
-            color: var(--primary) !important;
-            box-shadow: none;
-        }
-        .tut-next-btn.tut-success-pulse {
-            background: var(--success);
-            box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.3);
-            transform: scale(1.05);
-        }
-    `;
-    document.head.appendChild(style);
-}
+    document.querySelectorAll('.tutorial-spotlight, .tutorial-tooltip, .tutorial-arrow, .tutorial-blocker').forEach(el => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+    });
+};
