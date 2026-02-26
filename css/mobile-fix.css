@@ -80,80 +80,6 @@
         background: var(--bg-mobile) !important;
     }
 
-    /* 4. Tutorial Banner - Modern Mobile Dialog */
-    .tutorial-tooltip {
-        position: fixed !important;
-        top: auto !important;
-        bottom: 20px !important;
-        left: 50% !important;
-        transform: translateX(-50%) translateY(0) scale(1) !important;
-        width: 90% !important;
-        max-width: 400px !important;
-        z-index: 99998 !important;
-        background: var(--bg-card) !important;
-        padding: 20px !important;
-        border-radius: 20px !important;
-        border-bottom: none !important;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
-        transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.49) !important;
-    }
-
-    .tutorial-tooltip.is-top {
-        bottom: auto !important;
-        top: 80px !important;
-    }
-
-    .tutorial-header h3 {
-        font-size: 1.1rem !important;
-        font-weight: 800 !important;
-        margin-bottom: 8px !important;
-        color: var(--text) !important;
-    }
-
-    .tutorial-tooltip p {
-        font-size: 0.95rem !important;
-        line-height: 1.5 !important;
-        color: var(--text-muted) !important;
-        margin-bottom: 15px !important;
-    }
-
-    .tutorial-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 15px;
-    }
-
-    .tutorial-btn-next {
-        background: var(--primary) !important;
-        color: white !important;
-        border-radius: 12px !important;
-        font-weight: 700 !important;
-        padding: 10px 20px !important;
-        border: none !important;
-        box-shadow: 0 4px 15px rgba(31, 168, 255, 0.3) !important;
-        transition: transform 0.2s, background 0.2s !important;
-    }
-
-    .tutorial-btn-next:active {
-        transform: scale(0.95) !important;
-        background: #0284c7 !important;
-    }
-
-    .tutorial-btn-skip {
-        color: var(--text-muted) !important;
-        background: rgba(0, 0, 0, 0.05) !important;
-        font-weight: 600 !important;
-        border-radius: 10px !important;
-        padding: 8px 15px !important;
-        border: none !important;
-        transition: background 0.2s !important;
-    }
-
-    .tutorial-btn-skip:active {
-        background: rgba(0, 0, 0, 0.1) !important;
-    }
-
     /* 5. Mobile Sidebar - Right to Left, Glassmorphism */
     .mobile-sidebar-overlay {
         position: fixed;
@@ -392,22 +318,6 @@
     }
 
     /* 6. Interaction Layers */
-    .tutorial-blocker {
-        z-index: 10000 !important;
-        background: rgba(0, 0, 0, 0.1) !important;
-        pointer-events: none !important;
-    }
-
-    .tutorial-spotlight {
-        z-index: 10001 !important;
-        pointer-events: none !important;
-    }
-
-    .tutorial-active-target {
-        z-index: 10002 !important;
-        position: relative !important;
-        pointer-events: auto !important;
-    }
 
     /* 7. Bottom Sheets (Modals) - ULTRA SMOOTH */
     .edit-modal {
@@ -522,15 +432,6 @@
         background: #111111 !important;
         border-bottom: 1px solid #222 !important;
     }
-
-    .dark-mode .tutorial-tooltip,
-    .dark-mode .mobile-sidebar,
-    .dark-mode .edit-modal-content {
-        background: #121212 !important;
-        color: #ffffff !important;
-    }
-
-    .dark-mode .tutorial-tooltip p,
     .dark-mode .sidebar-item {
         color: #eeeeee !important;
     }

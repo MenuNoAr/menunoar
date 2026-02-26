@@ -1,373 +1,518 @@
-/* tutorial.js - Revolutionary Insight Card + Orbit Tutorial */
+/**
+ * tutorial.js - Modern, Revolutionary Interactive Onboarding
+ * Employs SVG masking, smooth interpolation, and glassmorphism.
+ */
 import { scrollToSlide } from './render.js';
 
-let currentTutStep = 0;
-let isTutorialActive = false;
+let currentStepIndex = 0;
+let isActive = false;
+let isTransitioning = false;
 
-// Step Definitions
-const tutorialSteps = [
+// DOM Elements
+let tourBackdrop, tourPopover, tourCutout;
+
+const steps = [
     {
         id: 'welcome',
-        title: "Dá vida ao teu Menu",
-        text: "Bem-vindo ao teu novo painel profissional. Vamos aprender a transformar completamente o teu menu em poucos segundos.",
+        title: "Bem-vindo ao Topo 🚀",
+        text: "Desenhámos uma experiência de gestão incrivelmente fluida. Vamos fazer uma rápida visita guiada para te habituares?",
         target: null,
-        icon: "fa-rocket"
+        placement: 'center',
+        buttonLabel: 'Começar Tour'
     },
     {
         id: 'edit_name',
-        title: "Edição por Intuição",
-        text: "Clica literalmente onde queres ditar a lei. Podes começar agora mesmo no Nome do teu Restaurante.",
+        title: "Edição Invisível ✍️",
+        text: "Tudo o que vês no painel é editável num clique. Experimenta clicar no nome do teu restaurante agora mesmo.",
         target: "#restNameEditor",
-        icon: "fa-pen-nib",
-        successText: "Perfeito! Aquilo que tu vês, é exatamente o que o teu cliente recebe."
+        placement: 'bottom',
+        waitForAction: true
     },
     {
         id: 'create_cat',
-        title: "Categorias Fluidas",
-        text: "Clica no '+' mágico para criares uma nova aba: Sobremesas, Pizzas, Bebidas.",
+        title: "Cria as Tuas Secções 📂",
+        text: "Bebidas, Pratos Principais, Sobremesas... Clica no botão '+' para criares uma nova categoria para o teu menu.",
         target: ".btn-add-cat",
-        icon: "fa-layer-group",
-        successText: "Criado. Depois podes reordená-las à tua vontade apenas arrastando."
+        placement: 'bottom',
+        waitForAction: true
     },
     {
         id: 'add_item',
-        title: "O Primeiro Prato",
-        text: "Injeta a tua comida nesta categoria. Imagem, descrição saborosa e um preço apetecível.",
+        title: "Adiciona Magia ✨",
+        text: "Aqui começas a compor o teu menu com pratos, preços e descrições radiantes. Ficará deslumbrante.",
         target: ".add-item-btn",
-        icon: "fa-wand-magic-sparkles"
+        placement: 'top'
     },
     {
         id: 'settings',
-        title: "O Motor de Design",
-        text: "Clica aqui. Esta é a sala de máquinas. Define letras elegantes, liga as tuas cores, ou ativa o uso do PDF se preferires a via estática.",
-        target: "button[onclick='openSettingsModal()']",
-        icon: "fa-sliders"
+        title: "A Tua Identidade 🎨",
+        text: "Cores, tipografia e modo PDF. Todo o poder da personalização do teu menu está guardado aqui nesta engrenagem.",
+        target: () => window.innerWidth <= 850 ? ".mobile-nav-trigger" : "button[onclick='openSettingsModal()']",
+        placement: 'bottom'
     },
     {
         id: 'preview',
-        title: "100% Online e Ao Vivo",
-        text: "Acabaste? Espreita o botão Ver Menu para garantires que ficou deslumbrante na perspetiva do teu cliente final.",
-        target: "#liveLinkBtn",
-        icon: "fa-bolt"
+        title: "Ao Vivo e a Cores 🌟",
+        text: "Sempre que quiseres ver como os teus clientes vêem o teu menu em direto, clica aqui. Aproveita a viagem!",
+        target: () => window.innerWidth <= 850 ? ".mobile-nav-trigger" : "#liveLinkBtn",
+        placement: 'bottom',
+        buttonLabel: 'Concluir!'
     }
 ];
 
-let typeTimeout = null;
-let autoAdvanceTimeout = null;
-let currentTargetEl = null;
+export function openTutorial(resume = false) {
+    if (isActive) return;
+    isActive = true;
 
-let isTransitioning = false;
-let isModalOverride = false;
-let syncFrameId = null;
-
-const isMobileDevice = () => window.innerWidth <= 850;
-
-export function openTutorial(forceResume = false) {
-    if (window.closeAllModals) window.closeAllModals();
-    isTutorialActive = true;
-    document.body.classList.add('tut-running');
-
+    // Close any open sidebars/modals
+    window.closeAllModals?.();
     if (document.getElementById('mobileDropbar')?.classList.contains('open')) {
-        if (window.toggleNavDropdown) window.toggleNavDropdown();
+        window.toggleNavDropdown?.(true);
     }
 
-    const savedStep = localStorage.getItem('tutorial_step');
-    if (forceResume && savedStep !== null) {
-        currentTutStep = parseInt(savedStep, 10);
-    } else {
-        currentTutStep = 0;
-        localStorage.setItem('tutorial_step', '0');
-    }
+    currentStepIndex = (resume && localStorage.getItem('tut_step')) ? parseInt(localStorage.getItem('tut_step')) : 0;
 
-    buildUI();
-    renderStep(currentTutStep);
+    injectStyles();
+    injectElements();
+
+    // Slight delay to allow animations to flow in
+    setTimeout(() => renderStep(), 50);
 }
 
-// Builds the raw DOM elements if they don't exist
-function buildUI() {
-    if (!document.querySelector('.tut-overlay')) {
-        const overlay = document.createElement('div');
-        overlay.className = 'tut-overlay active';
-        document.body.appendChild(overlay);
-    } else {
-        document.querySelector('.tut-overlay').classList.add('active');
-    }
-
-    if (!document.querySelector('.tut-orb-wrapper')) {
-        const orb = document.createElement('div');
-        orb.className = 'tut-orb-wrapper';
-        document.body.appendChild(orb);
-    }
-
-    if (!document.querySelector('.tut-card')) {
-        const card = document.createElement('div');
-        card.className = 'tut-card';
-        document.body.appendChild(card);
-    }
+export function closeTutorial() {
+    isActive = false;
+    document.body.classList.remove('tut-active-freeze');
+    cleanupElements();
+    localStorage.removeItem('tut_step');
+    localStorage.removeItem('tutorial_running');
 }
 
-window.checkTutorialStep = (stepId) => {
-    if (!isTutorialActive || isTransitioning) return;
-    const currentStep = tutorialSteps[currentTutStep];
+window.openTutorial = openTutorial;
+window.closeTutorial = closeTutorial;
 
-    if (currentStep && (currentStep.id === stepId || stepId.startsWith(currentStep.id))) {
+window.checkTutorialStep = (actionId) => {
+    if (!isActive) return;
 
-        if (stepId.endsWith('_open')) {
-            isModalOverride = true;
-            showSuccessInline(currentStep);
-            const card = document.querySelector('.tut-card');
+    const step = steps[currentStepIndex];
+    if (!step) return;
 
-            // Re-anchor to screen center or clear area gracefully
-            card.style.transform = `translateY(0) scale(1)`;
-            if (isMobileDevice()) {
-                card.style.top = '16px';
-                card.style.bottom = 'auto';
-            } else {
-                card.style.top = '50%';
-                card.style.bottom = 'auto';
-                card.style.left = '50%';
-                card.style.right = 'auto';
-                card.style.transform = `translate(-50%, -50%) scale(1)`;
-            }
-
-            document.querySelector('.tut-orb-wrapper').style.opacity = '0';
-            return;
+    // Handle modal opens specifically so we don't skip the step instantly
+    if (actionId === step.id + '_open') {
+        const btn = tourPopover.querySelector('.tut-next-btn');
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Boa, agora podes continuar.';
+            btn.classList.add('tut-success-pulse');
+            btn.classList.remove('waiting');
+            btn.style.pointerEvents = 'auto'; // allow manual continuation inside the modal
+            btn.style.opacity = '1';
         }
+        return;
+    }
 
-        if (autoAdvanceTimeout) clearTimeout(autoAdvanceTimeout);
-        showSuccessInline(currentStep, true);
-
-        const delay = currentStep.id === 'settings' ? 0 : 800;
-        autoAdvanceTimeout = setTimeout(() => {
-            if (isTutorialActive) window.nextStep();
-        }, delay);
+    if (step.id === actionId) {
+        // Success animation
+        const btn = tourPopover.querySelector('.tut-next-btn');
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Perfeito!';
+            btn.classList.add('tut-success-pulse');
+            setTimeout(() => window.nextStep(), 800);
+        } else {
+            window.nextStep();
+        }
     }
 };
 
-function showSuccessInline(currentStep, animateIcon = false) {
-    const textTarget = document.querySelector('.tut-text');
-    if (!textTarget) return;
-    const msg = currentStep.successText || "Incrível! Vamos avançar para o próximo nível.";
-    textTarget.innerHTML = `<span style="color: #10b981; font-weight: 600; font-size: 0.95rem;">✨ ${msg}</span>`;
-}
-
-function renderStep(index) {
-    if (typeTimeout) clearTimeout(typeTimeout);
-    isModalOverride = false;
-    localStorage.setItem('tutorial_step', index.toString());
+window.nextStep = () => {
+    if (currentStepIndex >= steps.length - 1) {
+        closeTutorial();
+        return;
+    }
+    currentStepIndex++;
+    localStorage.setItem('tut_step', currentStepIndex);
     localStorage.setItem('tutorial_running', 'true');
+    renderStep();
+};
 
-    if (currentTargetEl) {
-        currentTargetEl.classList.remove('tut-active-target');
-        currentTargetEl = null;
-    }
-    document.querySelectorAll('.tut-parent-boost').forEach(el => el.classList.remove('tut-parent-boost'));
+window.prevStep = () => {
+    if (currentStepIndex <= 0) return;
+    currentStepIndex--;
+    localStorage.setItem('tut_step', currentStepIndex);
+    renderStep();
+};
 
-    if (window.closeAllModals) window.closeAllModals();
-    if (window.closeModal) window.closeModal('mobileDropbar');
+function renderStep() {
+    const step = steps[currentStepIndex];
+    document.body.classList.add('tut-active-freeze');
 
-    currentTutStep = index;
-    const step = tutorialSteps[index];
+    // Clear old active targets
+    document.querySelectorAll('.tut-active-el').forEach(e => {
+        e.classList.remove('tut-active-el');
+        e.style.zIndex = '';
+        e.style.position = '';
+        e.style.pointerEvents = '';
+    });
 
-    let orb = document.querySelector('.tut-orb-wrapper');
-    let card = document.querySelector('.tut-card');
-
-    // UI Assembly inside Card
-    const dotsHtml = tutorialSteps.map((_, i) => `<div class="tut-dot ${i === index ? 'active' : ''}"></div>`).join('');
-
-    card.innerHTML = `
-        <button class="tut-close" onclick="closeTutorial()"><i class="fa-solid fa-xmark"></i></button>
-        <div class="tut-header">
-            <div class="tut-icon-box"><i class="fa-solid ${step.icon}"></i></div>
-            <h3 class="tut-title">${step.title}</h3>
-        </div>
-        <p class="tut-text"></p>
-        <div class="tut-footer">
-            <div class="tut-progress">${dotsHtml}</div>
-            <button class="tut-btn" onclick="nextStep()">${index === tutorialSteps.length - 1 ? 'Concluir' : 'Continuar'}</button>
-        </div>
-    `;
-
-    // Typewriter effect
-    const textTarget = card.querySelector('.tut-text');
-    let i = 0;
-    const type = () => {
-        if (i < step.text.length) {
-            textTarget.textContent += step.text.charAt(i);
-            i++;
-            typeTimeout = setTimeout(type, 12);
-        }
-    };
-    type();
-
-    let targetSelector = step.target;
-    if (isMobileDevice()) {
-        if (targetSelector === "button[onclick='openSettingsModal()']") {
-            targetSelector = ".mobile-dropbar button[onclick*='openSettingsModal']";
-        } else if (targetSelector === "#liveLinkBtn") {
-            targetSelector = "#liveLinkBtnMobile";
-        }
+    let targetEl = null;
+    if (step.target) {
+        let selector = typeof step.target === 'function' ? step.target() : step.target;
+        targetEl = document.querySelector(selector);
     }
 
-    const targetEl = targetSelector ? document.querySelector(targetSelector) : null;
-    currentTargetEl = targetEl;
-
+    // Auto-scroll logic if specific step
     if (step.id === 'add_item' || step.id === 'create_cat') {
         scrollToSlide(0, { instant: true });
     }
 
     if (targetEl) {
-        targetEl.classList.add('tut-active-target');
-
-        let parent = targetEl.parentElement;
-        while (parent && parent !== document.body) {
-            const s = window.getComputedStyle(parent);
-            if (s.position !== 'static' || (s.zIndex !== 'auto' && s.zIndex !== '0')) {
-                parent.classList.add('tut-parent-boost');
-            }
-            parent = parent.parentElement;
-        }
-
-        if (isMobileDevice() && (targetSelector.includes('mobile-dropbar') || targetSelector.includes('Mobile'))) {
-            if (!document.getElementById('mobileDropbar').classList.contains('open') && window.toggleNavDropdown) {
-                window.toggleNavDropdown();
-            }
-        } else if (isMobileDevice() && document.getElementById('mobileDropbar').classList.contains('open') && window.toggleNavDropdown) {
-            window.toggleNavDropdown();
-        }
-
         targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-        card.classList.add('active');
-        orb.style.opacity = '1';
+        // Boost target
+        targetEl.classList.add('tut-active-el');
+        const computed = window.getComputedStyle(targetEl);
+        if (computed.position === 'static') {
+            targetEl.style.position = 'relative';
+        }
+        targetEl.style.zIndex = '100005';
+        targetEl.style.pointerEvents = 'auto';
 
-        const sync = () => {
-            if (!isTutorialActive || currentTargetEl !== targetEl || isModalOverride) {
-                if (syncFrameId) cancelAnimationFrame(syncFrameId);
-                return;
+        // Boost positioned parents to bypass fixed headers trapping z-indexes
+        let p = targetEl.parentElement;
+        while (p && p !== document.body) {
+            const style = window.getComputedStyle(p);
+            if (style.position !== 'static' || style.zIndex !== 'auto' || style.transform !== 'none') {
+                p.classList.add('tut-active-el');
+                p.style.zIndex = '100004';
             }
-            const rect = targetEl.getBoundingClientRect(), pad = 6;
-            if (rect.width > 0 && rect.height > 0) {
-                // Orb follows target precisely
-                Object.assign(orb.style, {
-                    left: `${rect.left - pad}px`,
-                    top: `${rect.top - pad}px`,
-                    width: `${rect.width + pad * 2}px`,
-                    height: `${rect.height + pad * 2}px`
-                });
+            p = p.parentElement;
+        }
 
-                // Card follows intelligently
-                positionCard(rect, card);
+        // Keep position perfectly synced
+        updateHighlight(targetEl, step.placement);
+
+        // Constant sync for scrolling
+        if (window.tutSyncInterval) clearInterval(window.tutSyncInterval);
+        window.tutSyncInterval = setInterval(() => {
+            if (isActive && targetEl && document.contains(targetEl)) {
+                updateHighlight(targetEl, step.placement);
             }
-            syncFrameId = requestAnimationFrame(sync);
-        };
-        syncFrameId = requestAnimationFrame(sync);
+        }, 16); // ~60fps sync
+
+        tourBackdrop.style.opacity = '1';
 
     } else {
-        orb.style.opacity = '0';
-        card.classList.add('active');
+        if (window.tutSyncInterval) clearInterval(window.tutSyncInterval);
 
-        if (isMobileDevice()) {
-            card.style.top = 'auto';
-            card.style.bottom = '24px';
-            card.style.left = '16px';
-            card.style.right = '16px';
-            card.style.transform = 'none';
-        } else {
-            Object.assign(card.style, {
-                top: '50%', left: '50%', transform: 'translate(-50%, -50%) scale(1)'
-            });
+        // Hide cutout (drop it off screen)
+        tourCutout.style.top = '-9999px';
+        tourCutout.style.left = '-9999px';
+        tourCutout.style.width = '0px';
+        tourCutout.style.height = '0px';
+
+        tourPopover.style.top = '50%';
+        tourPopover.style.left = '50%';
+        tourPopover.style.transform = 'translate(-50%, -50%)';
+
+        tourBackdrop.style.opacity = '1';
+    }
+
+    // Render contents inside Popover
+    tourPopover.className = 'tut-popover open';
+    tourPopover.innerHTML = `
+        <div class="tut-progress">
+            ${steps.map((_, i) => `<div class="tut-dot ${i === currentStepIndex ? 'active' : ''}"></div>`).join('')}
+        </div>
+        <div class="tut-content">
+            <h3 class="tut-title">${step.title}</h3>
+            <p class="tut-text">${step.text}</p>
+        </div>
+        <div class="tut-footer">
+            <button class="tut-skip-btn" onclick="closeTutorial()">Pular</button>
+            <div class="tut-actions-right">
+                ${currentStepIndex > 0 ? `<button class="tut-prev-btn" onclick="window.prevStep()"><i class="fa-solid fa-arrow-left"></i></button>` : ''}
+                ${!step.waitForAction
+            ? `<button class="tut-next-btn" onclick="window.nextStep()">${step.buttonLabel || 'Continuar'}</button>`
+            : `<button class="tut-next-btn waiting"><i class="fa-solid fa-circle-notch fa-spin"></i> Aguardando ação...</button>`
         }
-    }
-}
+            </div>
+        </div>
+    `;
 
-function positionCard(rect, card) {
-    if (isMobileDevice()) {
-        card.style.transform = `none`;
-        card.style.left = '16px';
-        card.style.right = '16px';
-        if (rect.top < window.innerHeight / 2) {
-            card.style.top = 'auto';
-            card.style.bottom = '24px';
-        } else {
-            card.style.bottom = 'auto';
-            card.style.top = '24px';
-        }
-        return;
-    }
-
-    const cardWidth = 320;
-    const cardHeight = card.offsetHeight || 180;
-    const margin = 24;
-
-    let tx = rect.left + rect.width / 2 - cardWidth / 2;
-    tx = Math.max(20, Math.min(tx, window.innerWidth - cardWidth - 20));
-
-    let ty;
-    if (rect.top > window.innerHeight / 2) {
-        // Place above
-        ty = rect.top - cardHeight - margin;
-    } else {
-        // Place below
-        ty = rect.bottom + margin;
-    }
-
-    Object.assign(card.style, {
-        top: `${ty}px`,
-        left: `${tx}px`,
-        bottom: 'auto',
-        right: 'auto',
-        transform: `translateY(0) scale(1)`
-    });
-}
-
-window.nextStep = () => {
-    if (isTransitioning) return;
-    if (autoAdvanceTimeout) clearTimeout(autoAdvanceTimeout);
-
-    const step = tutorialSteps[currentTutStep];
-    if (step && step.target) {
-        const tEl = document.querySelector(step.target);
-        if (tEl && (tEl.isContentEditable || tEl.tagName === 'INPUT')) {
-            tEl.blur();
-        }
-    }
-
-    if (currentTutStep < tutorialSteps.length - 1) {
-        isTransitioning = true;
-        renderStep(++currentTutStep);
-        setTimeout(() => { isTransitioning = false; }, 500);
-    } else {
-        window.closeTutorial();
-    }
-};
-
-window.closeTutorial = () => {
-    isTutorialActive = false;
-    document.body.classList.remove('tut-running');
-    localStorage.removeItem('tutorial_step');
-    localStorage.removeItem('tutorial_running');
-
-    if (currentTargetEl) {
-        currentTargetEl.classList.remove('tut-active-target');
-        currentTargetEl = null;
-    }
-    document.querySelectorAll('.tut-parent-boost').forEach(el => el.classList.remove('tut-parent-boost'));
-
-    const overlay = document.querySelector('.tut-overlay');
-    const card = document.querySelector('.tut-card');
-    const orb = document.querySelector('.tut-orb-wrapper');
-
-    if (overlay) overlay.classList.remove('active');
-    if (card) {
-        card.classList.remove('active');
-        card.style.transform = 'translateY(20px) scale(0.95)';
-    }
-    if (orb) orb.style.opacity = '0';
-
+    // Small cascade text animation
+    const contentText = tourPopover.querySelector('.tut-content');
+    contentText.style.opacity = '0';
+    contentText.style.transform = 'translateY(10px)';
     setTimeout(() => {
-        if (overlay) overlay.remove();
-        if (card) card.remove();
-        if (orb) orb.remove();
-    }, 600);
-};
+        contentText.style.transition = 'all 0.4s ease';
+        contentText.style.opacity = '1';
+        contentText.style.transform = 'translateY(0)';
+    }, 50);
+}
+
+function updateHighlight(targetEl, placement) {
+    const rect = targetEl.getBoundingClientRect();
+    const padding = 12;
+
+    // Update SVG cutout (the spotlight)
+    tourCutout.style.top = (rect.top - padding) + 'px';
+    tourCutout.style.left = (rect.left - padding) + 'px';
+    tourCutout.style.width = (rect.width + padding * 2) + 'px';
+    tourCutout.style.height = (rect.height + padding * 2) + 'px';
+
+    // Position popover
+    const pWidth = 360; // Max width of popover
+    let pTop, pLeft, tX, tY;
+    const margin = 20;
+
+    // Default center placement based on target
+    pLeft = rect.left + (rect.width / 2);
+    tX = '-50%';
+
+    // Constrain X to screen bounds
+    if (pLeft < pWidth / 2 + margin) {
+        pLeft = margin + pWidth / 2;
+    } else if (pLeft > window.innerWidth - (pWidth / 2) - margin) {
+        pLeft = window.innerWidth - margin - (pWidth / 2);
+    }
+
+    if (placement === 'top') {
+        pTop = rect.top - margin;
+        tY = 'calc(-100% - 10px)'; // pull up
+    } else {
+        // bottom or default
+        pTop = rect.bottom + margin;
+        tY = '10px';
+    }
+
+    // Mobile specific safety (if modal falls off bottom)
+    if (pTop > window.innerHeight - 200) {
+        pTop = rect.top - margin;
+        tY = 'calc(-100% - 10px)';
+    }
+
+    if (window.innerWidth <= 600) {
+        // On very small screens just fix to bottom
+        pTop = window.innerHeight - margin;
+        pLeft = 50;
+        tX = '0%';
+        tY = 'calc(-100%)';
+        tourPopover.style.left = '20px';
+        tourPopover.style.right = '20px';
+        tourPopover.style.width = 'auto'; // fluid
+        tourPopover.style.transform = `translateY(${tY})`;
+    } else {
+        tourPopover.style.width = pWidth + 'px';
+        tourPopover.style.left = pLeft + 'px';
+        tourPopover.style.transform = `translate(${tX}, ${tY})`;
+    }
+
+    tourPopover.style.top = window.innerWidth <= 600 ? 'auto' : pTop + 'px';
+}
+
+function injectElements() {
+    if (document.getElementById('tut-backdrop-svg')) return;
+
+    // We use a CSS box-shadow trick for a smooth cut-out spotlight rather than an SVG 
+    // because it handles border-radius and reflow transitions much smoother.
+    tourBackdrop = document.createElement('div');
+    tourBackdrop.id = 'tut-backdrop';
+    document.body.appendChild(tourBackdrop);
+
+    tourCutout = document.createElement('div');
+    tourCutout.id = 'tut-cutout';
+    document.body.appendChild(tourCutout);
+
+    tourPopover = document.createElement('div');
+    tourPopover.id = 'tut-popover';
+    document.body.appendChild(tourPopover);
+}
+
+function cleanupElements() {
+    if (window.tutSyncInterval) clearInterval(window.tutSyncInterval);
+    document.getElementById('tut-backdrop')?.remove();
+    document.getElementById('tut-cutout')?.remove();
+    document.getElementById('tut-popover')?.remove();
+    document.getElementById('tut-styles')?.remove();
+}
+
+function injectStyles() {
+    if (document.getElementById('tut-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'tut-styles';
+    style.innerHTML = `
+        /* Freeze background scroll when tutorial active */
+        body.tut-active-freeze {
+            overflow: hidden !important;
+        }
+
+        /* The dimming backdrop */
+        #tut-backdrop {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 100000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: auto; /* Block background clicks */
+        }
+
+        /* The transparent hole / pulsating ring */
+        #tut-cutout {
+            position: fixed;
+            z-index: 100001;
+            border-radius: 12px;
+            box-shadow: 0 0 0 4px var(--primary), 0 0 30px rgba(31, 168, 255, 0.6);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            pointer-events: none; /* Let clicks pass through */
+        }
+
+        /* Pulse animation for the cutout */
+        @keyframes tutPulse {
+            0% { box-shadow: 0 0 0 0px rgba(31, 168, 255, 0.7), 0 0 0 4px var(--primary); }
+            70% { box-shadow: 0 0 0 15px rgba(31, 168, 255, 0), 0 0 0 4px var(--primary); }
+            100% { box-shadow: 0 0 0 0px rgba(31, 168, 255, 0), 0 0 0 4px var(--primary); }
+        }
+        #tut-cutout {
+            animation: tutPulse 2s infinite;
+            background: rgba(255, 255, 255, 0.05); /* Slight lightening */
+        }
+
+        /* Modern Popover Card */
+        #tut-popover {
+            position: fixed;
+            z-index: 100006;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            font-family: 'Inter', sans-serif;
+            pointer-events: auto;
+            max-width: 90vw;
+        }
+
+        #tut-popover.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Dark Mode Popover override */
+        body.dark-mode #tut-popover {
+            background: rgba(30,30,30,0.95);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+            color: #fff;
+        }
+
+        .tut-progress {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .tut-dot {
+            height: 6px;
+            width: 16px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        body.dark-mode .tut-dot { background: rgba(255,255,255,0.1); }
+        .tut-dot.active {
+            background: var(--primary);
+            width: 32px;
+        }
+
+        .tut-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+        
+        .tut-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .tut-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tut-skip-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .tut-skip-btn:hover { background: rgba(0,0,0,0.05); }
+        body.dark-mode .tut-skip-btn:hover { background: rgba(255,255,255,0.05); }
+
+        .tut-actions-right {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tut-prev-btn {
+            background: rgba(0,0,0,0.05);
+            color: var(--text);
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        body.dark-mode .tut-prev-btn { background: rgba(255,255,255,0.1); color: #fff; }
+        .tut-prev-btn:hover { background: rgba(0,0,0,0.1); transform: scale(1.05); }
+
+        .tut-next-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 0 20px;
+            height: 42px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.49);
+            box-shadow: 0 4px 15px var(--primary-glow);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tut-next-btn:not(.waiting):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+        
+        .tut-next-btn.waiting {
+            background: rgba(31, 168, 255, 0.1) !important;
+            color: var(--primary) !important;
+            box-shadow: none;
+        }
+        .tut-next-btn.tut-success-pulse {
+            background: var(--success);
+            box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.3);
+            transform: scale(1.05);
+        }
+    `;
+    document.head.appendChild(style);
+}
