@@ -107,24 +107,26 @@ window.toggleDarkMode = () => {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('menu_theme', isDark ? 'dark' : 'light');
 
-    // Update Logos
-    ['dashboardLogo', 'sidebarLogo', 'setupLogo', 'qrLogoImg'].forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        // Only update QR logo if it's the default one
-        if (id === 'qrLogoImg' && !el.src.includes('assets/images/logo.svg') && !el.src.includes('assets/images/Ilogo.svg')) return;
-        el.src = isDark ? 'assets/images/Ilogo.svg' : 'assets/images/logo.svg';
+    // Use requestAnimationFrame to sync JS changes with the style/paint cycle
+    requestAnimationFrame(() => {
+        // Update Logos as fast as possible
+        const logoPath = isDark ? 'assets/images/Ilogo.svg' : 'assets/images/logo.svg';
+        ['dashboardLogo', 'sidebarLogo', 'setupLogo', 'qrLogoImg'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            // Only update QR logo if it's the default one
+            if (id === 'qrLogoImg' && !el.src.includes('assets/images/logo.svg') && !el.src.includes('assets/images/Ilogo.svg')) return;
+            el.src = logoPath;
+        });
+
+        // Update Icons
+        const iconClass = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        const desktopIcon = document.getElementById('themeIcon');
+        if (desktopIcon) desktopIcon.className = iconClass;
+
+        const mobileIcon = document.getElementById('themeIconMobile');
+        if (mobileIcon) mobileIcon.className = iconClass;
     });
-
-
-
-    // Update Desktop Icon
-    const themeIcon = document.getElementById('themeIcon');
-    if (themeIcon) themeIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-
-    // Update Mobile Icon
-    const themeIconMobile = document.getElementById('themeIconMobile');
-    if (themeIconMobile) themeIconMobile.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
 };
 
 window.toggleNavDropdown = (forceClose = false) => {
