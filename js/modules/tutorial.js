@@ -191,15 +191,22 @@ function renderStep(index) {
     arrow.style.opacity = '1';
     blocker.style.display = 'block';
 
+    const dotsHTML = tutorialSteps.map((_, i) => `<div class="tutorial-dot ${i === index ? 'active' : ''}"></div>`).join('');
+    const isMobile = isMobileDevice();
+
     tooltip.innerHTML = `
-        <div class="tutorial-header"><h3><i class="fa-solid ${step.icon}"></i> ${step.title}</h3></div>
+        <div class="tutorial-header">
+            <h3><i class="fa-solid ${step.icon}"></i> ${step.title}</h3>
+        </div>
         <p id="tutText" style="min-height: 3em;"></p>
-        <div class="tutorial-actions" style="position:relative; z-index:20006;">
-            <button class="tutorial-btn-skip" onclick="closeTutorial()">Sair</button>
-            <div class="tutorial-step-dots">${tutorialSteps.map((_, i) => `<div class="tutorial-dot ${i === index ? 'active' : ''}"></div>`).join('')}</div>
+        <div class="tutorial-actions">
+            <div class="tutorial-step-dots">${dotsHTML}</div>
             <div style="display:flex; gap:8px;">
-                ${index > 0 ? `<button class="tutorial-btn-next" style="background:var(--bg-page); color:var(--text); border:1px solid var(--border); padding: 10px 15px;" onclick="prevTutorialPage()">Anterior</button>` : ''}
-                <button class="tutorial-btn-next" style="padding: 10px 15px;" onclick="nextStep()">${index === tutorialSteps.length - 1 ? 'Finalizar' : 'Seguinte'}</button>
+                <button class="tutorial-btn-skip" onclick="closeTutorial()">Sair</button>
+                ${index > 0 && !isMobile ? `<button class="tutorial-btn-skip" onclick="prevTutorialPage()">Anterior</button>` : ''}
+                <button class="tutorial-btn-next" onclick="nextStep()" id="tutNextBtn">
+                    ${index === tutorialSteps.length - 1 ? 'Concluir' : 'Seguinte'}
+                </button>
             </div>
         </div>
     `;
@@ -215,12 +222,10 @@ function renderStep(index) {
     };
     type();
 
-    const isMobile = isMobileDevice();
     let targetSelector = step.target;
-
     if (isMobile) {
         if (targetSelector === "button[onclick='openSettingsModal()']") {
-            targetSelector = ".mobile-dropbar button[onclick*='openSettingsModal']";
+            targetSelector = ".sidebar-item[onclick*='openSettingsModal']";
         } else if (targetSelector === "#liveLinkBtn") {
             targetSelector = "#liveLinkBtnMobile";
         }
@@ -229,9 +234,17 @@ function renderStep(index) {
     const targetEl = targetSelector ? document.querySelector(targetSelector) : null;
     currentTargetEl = targetEl;
 
-    // Auto-scroll logic
+    // Auto-scroll logic / Side menu logic
     if (step.id === 'add_item' || step.id === 'create_cat') {
         scrollToSlide(0, { instant: true });
+    }
+
+    if (isMobile) {
+        if (targetSelector && targetSelector.includes('sidebar-item')) {
+            if (!document.getElementById('mobileDropbar').classList.contains('open')) {
+                window.toggleNavDropdown();
+            }
+        }
     }
 
     if (targetEl) {
@@ -292,6 +305,8 @@ function renderStep(index) {
         Object.assign(spotlight.style, { opacity: '0', display: 'none' });
 
         if (isMobile) {
+            tooltip.classList.remove('is-top', 'is-bottom');
+            tooltip.classList.add('is-bottom'); // Default for welcome
             tooltip.style.opacity = '1';
             tooltip.style.visibility = 'visible';
         } else {
@@ -321,13 +336,13 @@ function positionTooltipAndArrow(rect, tooltip, arrow, placement) {
         tooltip.classList.remove('is-top', 'is-bottom');
 
         // Dynamic positioning on mobile:
-        // If target is on top half, show tooltip at bottom. Otherwise top.
-        if (rect.top < window.innerHeight / 2) {
+        // Use a 10px threshold to see if target is in the header area
+        if (rect.top < 120) {
             tooltip.classList.add('is-bottom');
         } else {
             tooltip.classList.add('is-top');
         }
-        return; // Let CSS handle fixed positions
+        return;
     }
     const margin = 20, tooltipWidth = 540;
     const tooltipHeight = tooltip.offsetHeight;
