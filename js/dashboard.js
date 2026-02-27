@@ -107,9 +107,16 @@ window.toggleDarkMode = () => {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('menu_theme', isDark ? 'dark' : 'light');
 
-    // Update Logo
-    const logo = document.getElementById('dashboardLogo');
-    if (logo) logo.src = isDark ? 'assets/images/Ilogo.svg' : 'assets/images/logo.svg';
+    // Update Logos
+    ['dashboardLogo', 'sidebarLogo', 'setupLogo', 'qrLogoImg'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        // Only update QR logo if it's the default one
+        if (id === 'qrLogoImg' && !el.src.includes('assets/images/logo.svg') && !el.src.includes('assets/images/Ilogo.svg')) return;
+        el.src = isDark ? 'assets/images/Ilogo.svg' : 'assets/images/logo.svg';
+    });
+
+
 
     // Update Desktop Icon
     const themeIcon = document.getElementById('themeIcon');

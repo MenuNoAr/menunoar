@@ -17,8 +17,14 @@
         <p>A carregar ementa...</p>
     </div>
 
+    <!-- Theme Toggle Button -->
+    <button id="themeToggle" class="theme-toggle-btn" title="Mudar Tema">
+        <i class="fa-solid fa-moon"></i>
+    </button>
+
     <!-- Mobile Wrapper (Simulates Phone on Desktop) -->
     <div id="mobile-view">
+
 
         <!-- Header Section -->
         <header id="heroHeader">
@@ -58,6 +64,44 @@
 
     <script type="module">
         let currentCategoryIndex = 0;
+
+        // --- THEME LOGIC ---
+        window.toggleDarkMode = () => {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('menu_theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark);
+
+            // If we are in dark mode, we want the static dark mode variables from CSS to win.
+            // Inline styles set by the heuristic would override them, so we remove them.
+            if (isDark) {
+                document.documentElement.style.removeProperty('--bg-card');
+                document.documentElement.style.removeProperty('--bg-badge');
+                document.documentElement.style.removeProperty('--border');
+                document.documentElement.style.removeProperty('--text-muted');
+                document.documentElement.style.removeProperty('--bg-page');
+            } else {
+                // If switching back to light, we might need to re-apply the heuristic 
+                // but let's keep it simple: the page reload or initial load handles it.
+                // For a live toggle, it's better if we just let the default light vars win.
+            }
+        };
+
+
+        function updateThemeIcon(isDark) {
+            const icon = document.querySelector('#themeToggle i');
+            if (icon) {
+                icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            }
+        }
+
+        // Initial Theme Sync
+        if (localStorage.getItem('menu_theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            updateThemeIcon(true);
+        }
+
+        document.getElementById('themeToggle').onclick = window.toggleDarkMode;
+
 
         // --- PREVIEW LISTENER ---
         window.addEventListener('message', (event) => {
@@ -148,14 +192,19 @@
 
             // PDF MODE CHECK
             if (restaurant.menu_type === 'pdf' && restaurant.pdf_url) {
-                document.body.innerHTML = `
-                    <div id="pdf-reels-container" style="position:fixed; top:0; left:0; right:0; bottom:0; background: #1a1a1a; overflow-y:scroll; overflow-x:hidden; scroll-snap-type: y mandatory; display: flex; flex-direction: column; align-items: center; -webkit-overflow-scrolling: touch;">
-                        <div id="pdfLoading" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); display:flex; flex-direction:column; align-items:center; z-index:100;">
-                            <i class="fa-solid fa-spinner fa-spin" style="font-size:3rem; color:#fff; margin-bottom:15px;"></i>
-                            <p style="color:#fff; font-weight:500; font-family: 'Outfit', sans-serif;">A preparar menu...</p>
-                        </div>
+                const pdfContainer = document.createElement('div');
+                pdfContainer.id = 'pdf-reels-container';
+                pdfContainer.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background: #1a1a1a; overflow-y:scroll; overflow-x:hidden; scroll-snap-type: y mandatory; display: flex; flex-direction: column; align-items: center; -webkit-overflow-scrolling: touch; z-index: 50;';
+                pdfContainer.innerHTML = `
+                    <div id="pdfLoading" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); display:flex; flex-direction:column; align-items:center; z-index:100;">
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size:3rem; color:#fff; margin-bottom:15px;"></i>
+                        <p style="color:#fff; font-weight:500; font-family: 'Outfit', sans-serif;">A preparar menu...</p>
                     </div>
                 `;
+                document.body.appendChild(pdfContainer);
+                document.getElementById('mobile-view')?.remove();
+                document.getElementById('loading')?.remove();
+
 
                 // Load PDF.js dynamically
                 const script = document.createElement('script');
@@ -243,24 +292,34 @@
                 const bg = restaurant.color_background;
                 document.documentElement.style.setProperty('--bg-mobile', bg);
 
-                // Heuristic for Dark Mode
-                const isDark = bg.toLowerCase() === '#1a1a1a' || bg.toLowerCase() === '#121212' || bg.toLowerCase() === '#000000';
+                // Heuristic: If background is very dark, default to dark mode if no user preference set
+                const isNaturallyDark = bg.toLowerCase() === '#1a1a1a' || bg.toLowerCase() === '#121212' || bg.toLowerCase() === '#000000';
 
-                if (isDark) {
-                    document.documentElement.style.setProperty('--bg-card', '#252525');
-                    document.documentElement.style.setProperty('--bg-badge', '#333333');
-                    document.documentElement.style.setProperty('--border', '#333333');
-                    document.documentElement.style.setProperty('--text-muted', '#a0a0a0');
-                    document.documentElement.style.setProperty('--bg-page', '#121212');
-                } else {
-                    document.documentElement.style.setProperty('--bg-card', '#FFFFFF');
-                    document.documentElement.style.setProperty('--bg-badge', '#F5F7FA');
-                    document.documentElement.style.setProperty('--border', '#F0F0F0');
-                    document.documentElement.style.setProperty('--text-muted', '#666666');
-                    document.documentElement.style.setProperty('--bg-page', '#F0F2F5');
+                const userPref = localStorage.getItem('menu_theme');
+                if (!userPref && isNaturallyDark) {
+                    document.body.classList.add('dark-mode');
+                    updateThemeIcon(true);
+                }
+
+                // If NOT in manual dark mode, apply the dynamic secondary colors based on background
+                if (!document.body.classList.contains('dark-mode')) {
+                    if (isNaturallyDark) {
+                        document.documentElement.style.setProperty('--bg-card', '#252525');
+                        document.documentElement.style.setProperty('--bg-badge', '#333333');
+                        document.documentElement.style.setProperty('--border', '#333333');
+                        document.documentElement.style.setProperty('--text-muted', '#a0a0a0');
+                        document.documentElement.style.setProperty('--bg-page', '#121212');
+                    } else {
+                        document.documentElement.style.setProperty('--bg-card', '#FFFFFF');
+                        document.documentElement.style.setProperty('--bg-badge', '#F5F7FA');
+                        document.documentElement.style.setProperty('--border', '#F0F0F0');
+                        document.documentElement.style.setProperty('--text-muted', '#666666');
+                        document.documentElement.style.setProperty('--bg-page', '#F0F2F5');
+                    }
                 }
                 document.getElementById('mobile-view').style.background = restaurant.color_background;
             }
+
 
             // POPULATE HEADER
             document.title = restaurant.name;

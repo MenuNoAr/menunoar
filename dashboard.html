@@ -44,7 +44,7 @@
     <div id="setup-screen" class="setup-container" style="display:none;">
         <div class="setup-card" id="setup-choice-card">
             <div class="setup-header">
-                <img src="assets/images/logo.svg" alt="Logo" class="setup-logo">
+                <img id="setupLogo" src="assets/images/logo.svg" alt="Logo" class="setup-logo">
                 <h2>Bem-vindo, <span id="setupGreetingName">!</span></h2>
                 <p>Já tens um menu ou queres começar do zero?</p>
             </div>
@@ -185,7 +185,7 @@
         <div id="mobileSidebarOverlay" class="mobile-sidebar-overlay" onclick="toggleNavDropdown(true)"></div>
         <div id="mobileDropbar" class="mobile-sidebar">
             <div class="sidebar-header">
-                <img src="assets/images/logo.svg" alt="Logo" class="sidebar-logo">
+                <img id="sidebarLogo" src="assets/images/logo.svg" alt="Logo" class="sidebar-logo">
                 <button class="btn-close-sidebar" onclick="toggleNavDropdown(true)">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -614,8 +614,12 @@
         // Dark mode initial sync
         if (localStorage.getItem('menu_theme') === 'dark') {
             document.body.classList.add('dark-mode');
-            const logo = document.getElementById('dashboardLogo');
-            if (logo) logo.src = 'assets/images/Ilogo.svg';
+            ['dashboardLogo', 'sidebarLogo', 'setupLogo', 'qrLogoImg'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.src = 'assets/images/Ilogo.svg';
+            });
+
+
 
             const themeIcon = document.getElementById('themeIcon');
             if (themeIcon) themeIcon.className = 'fa-solid fa-sun';

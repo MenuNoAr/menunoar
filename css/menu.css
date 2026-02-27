@@ -377,3 +377,59 @@ h1#restName {
 .spinner {
     border-top-color: var(--primary);
 }
+
+/* === THEME TOGGLE === */
+.theme-toggle-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    color: var(--text);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.1) rotate(10deg);
+}
+
+.theme-toggle-btn:active {
+    transform: scale(0.95);
+}
+
+.theme-toggle-btn i {
+    font-size: 1.2rem;
+}
+
+.dark-mode .theme-toggle-btn {
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffd700;
+    /* Sun/Moon color in dark mode */
+}
+
+/* Specific adjustment for mobile view when it's centered */
+@media (min-width: 601px) {
+    .theme-toggle-btn {
+        right: calc(50% - 280px);
+        /* Position relative to the center container */
+    }
+}
+
+@media (max-width: 600px) {
+    .theme-toggle-btn {
+        top: 15px;
+        right: 15px;
+    }
+}
