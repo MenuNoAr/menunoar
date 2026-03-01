@@ -1235,10 +1235,18 @@ img {
 
     .nav-brand img {
         height: 45px;
+        margin-left: 18px;
     }
 
     .nav-brand .divider {
         display: none;
+    }
+
+    .nav-tools-desktop .desktop-badge-novo {
+        position: static !important;
+        margin-left: auto !important;
+        transform: none !important;
+        margin-right: 5px;
     }
 
     .user-name-btn {
