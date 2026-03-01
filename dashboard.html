@@ -135,10 +135,10 @@
                 <img id="dashboardLogo" src="assets/images/logo.svg" alt="MenuNoAr"
                     onclick="window.location.href='index.html'" style="cursor: pointer;">
                 <span class="divider">|</span>
-                <button id="userDisplay" class="user-name-btn" onclick="openRenameModal()"
-                    title="Clica para alterar o nome">
+                <button id="userDisplay" class="user-name-btn" onclick="openProfileModal()"
+                    title="Clica para ver ou alterar o perfil">
                     <span id="userDisplayName">...</span>
-                    <i class="fa-solid fa-pen-to-square user-edit-icon"></i>
+                    <i class="fa-solid fa-user-pen user-edit-icon"></i>
                 </button>
             </div>
 
@@ -573,23 +573,47 @@
 
 
 
-    <!-- RENAME MODAL -->
-    <div id="renameModal" class="edit-modal">
-        <div class="edit-modal-content" style="max-width:380px;">
-            <h2 style="margin-bottom:6px; color:var(--color-text);">Alterar Nome</h2>
-            <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Este nome é apenas para
-                referência pessoal no painel.</p>
-            <form id="renameForm">
+    <!-- PROFILE MODAL -->
+    <div id="profileModal" class="edit-modal">
+        <div class="edit-modal-content" style="max-width:480px;">
+            <h2 style="margin-bottom:6px; color:var(--text);">Perfil e Contacto</h2>
+            <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Estes dados são privados e
+                essenciais para podermos entrar em contacto consigo se necessário.</p>
+            <form id="profileForm">
                 <div class="form-group">
-                    <label>O teu nome</label>
+                    <label>Nome do Responsável</label>
                     <div class="input-with-icon">
                         <i class="fa-solid fa-user"></i>
-                        <input type="text" id="renameInput" placeholder="ex: João Silva" maxlength="40" required>
+                        <input type="text" id="profileName" placeholder="ex: João Silva" maxlength="40" required>
                     </div>
                 </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModal('renameModal')">Cancelar</button>
-                    <button type="submit" class="btn-confirm">Guardar</button>
+                <div class="form-group">
+                    <label>Nome do Estabelecimento</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-store"></i>
+                        <input type="text" id="profileEstablishment" placeholder="ex: O Tasco do Zé" maxlength="60"
+                            required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email de Contacto</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="profileEmail" placeholder="ex: contacto@restaurante.pt" maxlength="60"
+                            required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Telemóvel / Telefone</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="tel" id="profilePhone" placeholder="ex: 912 345 678" maxlength="20" required>
+                    </div>
+                </div>
+                <div class="modal-actions" style="margin-top: 25px;">
+                    <button type="button" class="btn-cancel" onclick="closeModal('profileModal')">Cancelar</button>
+                    <button type="submit" class="btn-confirm"><i class="fa-solid fa-floppy-disk"></i> Guardar
+                        Perfil</button>
                 </div>
             </form>
         </div>

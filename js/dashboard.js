@@ -79,28 +79,77 @@ async function init() {
 window.signOut = () => signOut();
 window.openTutorial = openTutorial;
 
-window.openRenameModal = () => {
+window.openProfileModal = () => {
+    // Current display name
     const currentName = document.getElementById('userDisplayName')?.textContent || '';
-    const input = document.getElementById('renameInput');
-    if (input) input.value = currentName;
-    document.getElementById('renameModal')?.classList.add('open');
-    setTimeout(() => input?.focus(), 100);
+    const nameInput = document.getElementById('profileName');
+    if (nameInput) nameInput.value = currentName;
+
+    // Load extra fields from local storage or from auth state
+    const profileEstablishment = document.getElementById('profileEstablishment');
+    if (profileEstablishment) profileEstablishment.value = localStorage.getItem('profile_establishment') || '';
+
+    const profileEmail = document.getElementById('profileEmail');
+    if (profileEmail) profileEmail.value = localStorage.getItem('profile_email') || state.currentUser?.email || '';
+
+    const profilePhone = document.getElementById('profilePhone');
+    if (profilePhone) profilePhone.value = localStorage.getItem('profile_phone') || '';
+
+    document.getElementById('profileModal')?.classList.add('open');
+    setTimeout(() => nameInput?.focus(), 100);
 };
 
-document.getElementById('renameForm')?.addEventListener('submit', (e) => {
+document.getElementById('profileForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const newName = document.getElementById('renameInput').value.trim();
-    if (!newName) return;
-    localStorage.setItem('user_display_name', newName);
-    const el = document.getElementById('userDisplayName');
-    if (el) el.textContent = newName;
-    const greetEl = document.getElementById('setupGreetingName');
-    if (greetEl) greetEl.textContent = newName + '!';
+    const btn = e.target.querySelector('button[type="submit"]');
+    const origText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    btn.disabled = true;
 
-    const sidebarNameEl = document.getElementById('sidebarUserName');
-    if (sidebarNameEl) sidebarNameEl.textContent = newName;
+    try {
+        const newName = document.getElementById('profileName').value.trim();
+        const est = document.getElementById('profileEstablishment').value.trim();
+        const email = document.getElementById('profileEmail').value.trim();
+        const phone = document.getElementById('profilePhone').value.trim();
 
-    window.closeModal('renameModal');
+        if (!newName) return;
+
+        // Save to LocalStorage
+        localStorage.setItem('user_display_name', newName);
+        localStorage.setItem('profile_establishment', est);
+        localStorage.setItem('profile_email', email);
+        localStorage.setItem('profile_phone', phone);
+
+        // Save to central metadata on Supabase if possible
+        if (state.supabase && state.currentUser) {
+            await state.supabase.auth.updateUser({
+                data: {
+                    full_name: newName,
+                    establishment: est,
+                    contact_email: email,
+                    contact_phone: phone
+                }
+            });
+        }
+
+        // Update UI
+        const el = document.getElementById('userDisplayName');
+        if (el) el.textContent = newName;
+        const greetEl = document.getElementById('setupGreetingName');
+        if (greetEl) greetEl.textContent = newName + '!';
+
+        const sidebarNameEl = document.getElementById('sidebarUserName');
+        if (sidebarNameEl) sidebarNameEl.textContent = newName;
+
+        window.closeModal('profileModal');
+        window.showToast("Perfil atualizado com sucesso!", "success");
+    } catch (err) {
+        console.error(err);
+        window.showToast("Erro ao guardar perfil.", "error");
+    } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+    }
 });
 
 window.toggleDarkMode = () => {
