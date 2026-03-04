@@ -25,31 +25,31 @@
 
 <body>
 
-    <nav class="nav-fixed">
-        <div class="container flex items-center justify-between" style="height: 100%;">
-            <a href="/"
-                style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: black; font-weight: 800; font-size: 1.25rem;">
+    <header class="nav-fixed">
+        <div class="container flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2"
+                style="text-decoration: none; color: var(--text-main); font-weight: 800; font-size: 1.1rem; letter-spacing: -0.02em;">
                 <img src="assets/images/logo.svg" alt="Logo" style="height: 32px;">
-                MENU NO AR
+                <span>MENU NO AR</span>
             </a>
 
             <div class="flex items-center gap-4" id="navActions">
                 <a href="login.html" class="btn btn-ghost">Entrar</a>
-                <a href="signup.html" class="btn btn-primary">Começar</a>
+                <a href="signup.html" class="btn btn-primary">Começar Grátis</a>
             </div>
         </div>
-    </nav>
+    </header>
 
     <main>
-        <!-- Industrial Minimalist Hero -->
-        <section class="hero">
-            <div class="container">
+        <!-- Modern Hero Section -->
+        <section class="hero animate-fade">
+            <div class="container" style="display: flex; flex-direction: column; align-items: center;">
                 <span class="section-label">Sistema de Gestão de Ementas</span>
-                <h1>Digitalize a sua<br>operação.</h1>
-                <p>Digitalize o seu restaurante com uma interface pensada para a performance. Menus QR Code elegantes,
-                    tateis e rápidos.</p>
+                <h1>Digitalize a sua operação.</h1>
+                <p>Crie uma experiência tátil moderna e rápida para o seu restaurante. Menus QR Code elegantes que
+                    aumentam as suas vendas.</p>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center justify-center gap-4">
                     <a href="signup.html" class="btn btn-primary">Criar Conta Grátis</a>
                     <a href="#funciona" class="btn btn-secondary">Explorar</a>
                 </div>
@@ -59,65 +59,73 @@
         <!-- Feature Grid -->
         <section id="funciona" class="container">
             <div class="grid-section">
-                <div class="grid-card">
-                    <i class="ph ph-lightning" style="font-size: 1.5rem; margin-bottom: 24px;"></i>
-                    <h3 style="margin-bottom: 16px;">Performance</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9375rem;">Carregamento instantâneo. Sem esperas,
-                        sem atritos na experiência do cliente.</p>
-                </div>
-                <div class="grid-card">
-                    <i class="ph ph-circles-three" style="font-size: 1.5rem; margin-bottom: 24px;"></i>
-                    <h3 style="margin-bottom: 16px;">Controlo Total</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9375rem;">Altere preços, adicione pratos ou oculte
-                        categorias num painel centralizado.</p>
-                </div>
-                <div class="grid-card">
-                    <i class="ph ph-qr-code" style="font-size: 1.5rem; margin-bottom: 24px;"></i>
-                    <h3 style="margin-bottom: 16px;">QR Dinâmico</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9375rem;">Gere códigos permanentes. Atualize o
-                        conteúdo sem nunca trocar o papel na mesa.</p>
-                </div>
+                <article class="grid-card">
+                    <i class="ph ph-lightning"></i>
+                    <h3>Performance</h3>
+                    <p>Carregamento instantâneo. Sem esperas, sem atritos na experiência do cliente em qualquer
+                        dispositivo.</p>
+                </article>
+                <article class="grid-card">
+                    <i class="ph ph-circles-three"></i>
+                    <h3>Controlo Total</h3>
+                    <p>Altere preços, adicione pratos ou oculte categorias num painel intuitivo e em tempo real.</p>
+                </article>
+                <article class="grid-card">
+                    <i class="ph ph-qr-code"></i>
+                    <h3>QR Dinâmico</h3>
+                    <p>Gere códigos permanentes. Atualize o seu menu sempre que quiser sem nunca trocar os QR Codes das
+                        mesas.</p>
+                </article>
             </div>
         </section>
 
-        <!-- Pricing / CTA -->
-        <section class="container">
-            <div class="grid-section" style="border-bottom: 1px solid var(--border-color);">
-                <div style="grid-column: span 8;">
+        <!-- Pricing Section -->
+        <section class="container" style="padding-bottom: 100px;">
+            <div class="grid-section" style="border: none; padding-top: 0; align-items: center;">
+                <div style="grid-column: span 7;">
                     <span class="section-label">Preços</span>
-                    <h2 style="font-size: 3rem; margin-bottom: 24px;">Subscrição fixa.<br>Transparente.</h2>
-                    <p style="color: var(--text-muted); max-width: 400px;">Acesso total a todas as funcionalidades por
-                        um valor fixo mensal. Sem taxas ocultas.</p>
+                    <h2 style="font-size: 3.5rem; margin-bottom: 24px;">Subscrição fixa.<br>Transparente.</h2>
+                    <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 450px;">Acesso total a todas as
+                        funcionalidades por um valor único mensal. Sem letras pequenas.</p>
                 </div>
-                <div style="grid-column: span 4; border: 1px solid #000; padding: 40px; background: #fff;">
-                    <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 16px;">PLANO ÚNICO</div>
-                    <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 24px;">15,00€ <span
-                            style="font-size: 1rem; font-weight: 400; color: #888;">/mês</span></div>
-                    <a href="signup.html" class="btn btn-primary" style="width: 100%;">Começar Agora</a>
+                <div class="pricing-card" style="grid-column: span 5; width: 100%;">
+                    <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 8px; color: var(--primary);">PLANO
+                        PROFISSIONAL</div>
+                    <div style="font-size: 3rem; font-weight: 800; margin-bottom: 32px; color: var(--text-main);">15,00€
+                        <span style="font-size: 1rem; font-weight: 400; color: var(--text-muted);">/mês</span></div>
+                    <a href="signup.html" class="btn btn-primary" style="width: 100%; padding: 16px;">Começar Agora</a>
+                    <ul
+                        style="margin-top: 32px; list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem; color: var(--text-muted);">
+                        <li class="flex items-center gap-2"><i class="ph ph-check-circle"
+                                style="color: var(--success);"></i> Itens Ilimitados</li>
+                        <li class="flex items-center gap-2"><i class="ph ph-check-circle"
+                                style="color: var(--success);"></i> QR Codes Personalizados</li>
+                        <li class="flex items-center gap-2"><i class="ph ph-check-circle"
+                                style="color: var(--success);"></i> Edição Instantânea</li>
+                    </ul>
                 </div>
             </div>
         </section>
 
-        <!-- Contact/End -->
-        <section style="padding: 120px 0; text-align: center;">
+        <!-- Contact CTA -->
+        <section
+            style="padding: 120px 0; background: var(--bg-surface); border-top: 1px solid var(--border-color); text-align: center;">
             <div class="container">
-                <h2 style="font-size: 2.5rem; margin-bottom: 24px;">Pronto para modernizar?</h2>
-                <p style="color: var(--text-muted); margin-bottom: 40px;">Junte-se a centenas de restaurantes que já
-                    usam o Menu no Ar.</p>
-                <a href="signup.html" class="btn btn-primary">Criar Conta</a>
+                <h2 style="font-size: 3rem; margin-bottom: 24px;">Pronto para modernizar?</h2>
+                <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem;">Eleve o seu restaurante a
+                    um novo nível de profissionalismo.</p>
+                <a href="signup.html" class="btn btn-primary" style="padding: 16px 48px;">Criar Conta Gratis</a>
             </div>
         </section>
     </main>
 
     <footer class="footer">
-        <div class="container">
-            <div class="flex justify-between items-center">
-                <div style="font-weight: 700; font-size: 0.875rem;">MENU NO AR &copy; 2026</div>
-                <div class="flex gap-4">
-                    <a href="#">Privacidade</a>
-                    <a href="#">Termos</a>
-                    <a href="mailto:geral@menunoar.pt">Contacto</a>
-                </div>
+        <div class="container flex justify-between items-center">
+            <div style="font-weight: 800; font-size: 0.9rem; letter-spacing: -0.02em;">MENU NO AR &copy; 2026</div>
+            <div class="footer-links flex gap-4">
+                <a href="#">Privacidade</a>
+                <a href="#">Termos</a>
+                <a href="mailto:geral@menunoar.pt">Contacto</a>
             </div>
         </div>
     </footer>

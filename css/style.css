@@ -1,14 +1,12 @@
 /* 
   Menu no Ar - Modern Clean Design System
-  Focus: Soft Rounding, Breathable Spacing, Subtle Depth, Premium Feel
+  Base Styles & Variables
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    /* Modern SaaS Palette - Soft & Professional */
     --primary: #4f46e5;
-    /* Modern Indigo */
     --primary-hover: #4338ca;
     --primary-soft: #eef2ff;
 
@@ -16,20 +14,16 @@
     --warning: #f59e0b;
     --danger: #ef4444;
 
-    /* Neutrals - Balanced & Clean */
     --bg-page: #f9fafb;
     --bg-surface: #ffffff;
     --text-main: #111827;
     --text-muted: #6b7280;
     --border-color: #e5e7eb;
 
-    /* Shadows - Layered & Modern */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
 
-    /* Rounding - Modern & Friendly (Not too sharp, not too round) */
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 14px;
@@ -58,6 +52,7 @@ body {
     color: var(--text-main);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
 }
 
 /* Typography */
@@ -70,7 +65,7 @@ h4 {
     letter-spacing: -0.02em;
 }
 
-/* Common Components */
+/* Components */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -83,18 +78,18 @@ h4 {
     cursor: pointer;
     transition: var(--transition);
     border: 1px solid transparent;
+    text-decoration: none;
+    white-space: nowrap;
 }
 
 .btn-primary {
     background-color: var(--primary);
-    color: white;
-    box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.3);
+    color: white !important;
 }
 
 .btn-primary:hover {
     background-color: var(--primary-hover);
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.4);
 }
 
 .btn-secondary {
@@ -105,8 +100,7 @@ h4 {
 
 .btn-secondary:hover {
     background-color: var(--bg-page);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
+    border-color: var(--text-main);
 }
 
 .btn-ghost {
@@ -115,15 +109,40 @@ h4 {
 }
 
 .btn-ghost:hover {
-    color: var(--text-main);
     background: var(--primary-soft);
+    color: var(--primary);
 }
 
-/* Common Layout */
+/* Layout */
 .container {
     max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     padding: 0 24px;
+}
+
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.gap-4 {
+    gap: 16px;
 }
 
 .card {
@@ -131,7 +150,22 @@ h4 {
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     padding: 24px;
-    box-shadow: var(--shadow-sm);
+}
+
+.animate-fade {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .badge {
@@ -142,38 +176,4 @@ h4 {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-}
-
-/* Animations */
-.animate-fade {
-    animation: fadeIn 0.5s ease-out forwards;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Utilities */
-.flex {
-    display: flex;
-}
-
-.items-center {
-    align-items: center;
-}
-
-.justify-between {
-    justify-content: space-between;
-}
-
-.gap-4 {
-    gap: 16px;
 }

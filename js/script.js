@@ -32,7 +32,7 @@ async function checkSessionAndNavigate() {
         const heroBtnGroup = document.querySelector('.hero .flex');
         if (heroBtnGroup) {
             heroBtnGroup.innerHTML = `
-                <a href="dashboard.html" class="btn btn-primary" style="padding: 16px 32px; font-size: 1.1rem;">
+                <a href="dashboard.html" class="btn btn-primary">
                     <i class="ph ph-layout"></i> Aceder ao meu Painel
                 </a>
             `;
