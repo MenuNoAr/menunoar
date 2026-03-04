@@ -110,16 +110,68 @@ document.addEventListener('DOMContentLoaded', () => {
             // Move the arrow icon
             const point = svgPath.getPointAtLength(progress * pathLength);
 
+            // To find the tangent (angle) we need a point slightly ahead or behind
+            const d = 0.5; // pixel distance to check angle
+            const isAtEnd = progress >= 0.999;
+            const p1 = svgPath.getPointAtLength(Math.max(0, progress * pathLength - d));
+            const p2 = svgPath.getPointAtLength(Math.min(pathLength, progress * pathLength + d));
+
+            // Calculate angle in degrees
+            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI);
+
             // point.x and point.y are relative to the viewBox "0 0 100 400"
             const xPercent = (point.x / 100) * 100;
             const yPercent = (point.y / 400) * 100;
 
             scrollArrow.style.left = xPercent + '%';
             scrollArrow.style.top = yPercent + '%';
+            // We use translate to keep it centered and rotate to face the path direction
+            scrollArrow.style.transform = `translate(-50%, -50%) rotate(${angle - 90}deg)`; // -90 deg because arrow icon normally points down
         };
 
         window.addEventListener('scroll', updateScrollProgress, { passive: true });
         window.addEventListener('resize', updateScrollProgress);
         updateScrollProgress(); // init
+    }
+
+    // 4. Force "Hard" Scroll Snapping on any wheel movement
+    const mainSections = document.querySelectorAll('main > section');
+    if (mainSections.length > 0) {
+        let isScrolling = false;
+
+        // Use the native wheel event, not scroll, to detect user intent
+        window.addEventListener('wheel', (e) => {
+            if (isScrolling) {
+                e.preventDefault();
+                return;
+            }
+
+            e.preventDefault(); // Prevent native slow scroll immediately
+            isScrolling = true;
+
+            const direction = e.deltaY > 0 ? 1 : -1;
+            const threshold = 5; // tiny threshold for "1mm" intention
+
+            if (Math.abs(e.deltaY) > threshold) {
+                // Find current section
+                const scrollY = window.scrollY;
+                const windowHeight = window.innerHeight;
+                let currentIdx = Math.round(scrollY / windowHeight);
+
+                // Calculate next target index
+                let targetIdx = currentIdx + direction;
+                targetIdx = Math.max(0, Math.min(targetIdx, mainSections.length - 1));
+
+                // Force scroll
+                mainSections[targetIdx].scrollIntoView({ behavior: 'smooth' });
+
+                // Allow wheel again after the smooth scroll finishes approx
+                setTimeout(() => {
+                    isScrolling = false;
+                }, 800); // 800ms lock to avoid scrolling multiple sections at once
+            } else {
+                isScrolling = false;
+            }
+        }, { passive: false });
     }
 });

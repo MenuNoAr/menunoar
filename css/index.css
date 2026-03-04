@@ -71,22 +71,20 @@ footer {
     position: absolute;
     top: 0;
     left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--primary);
-    color: #fff;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    transform: translate(-50%, -50%) rotate(0deg);
+    /* JS will control rotation */
+    color: var(--primary);
+    width: 24px;
+    height: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 12px rgba(31, 168, 255, 0.4);
-    will-change: left, top;
+    will-change: left, top, transform;
 }
 
 .scroll-arrow i {
-    font-size: 1.1rem;
-    font-weight: bold;
+    font-size: 1.5rem;
+    font-weight: 800;
 }
 
 :root {
