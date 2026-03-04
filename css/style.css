@@ -6,10 +6,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    /* Refined SaaS Colors */
-    --primary: #4f46e5;
-    --primary-hover: #4338ca;
-    --primary-soft: #f5f7ff;
+    /* Refined SaaS Colors - Matching Logo Blue */
+    --primary: #1fa8ff;
+    --primary-hover: #0091ea;
+    --primary-soft: #f0f9ff;
 
     --success: #10b981;
     --warning: #f59e0b;

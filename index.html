@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Menu no Ar | Transforme o seu Restaurante</title>
+    <title>Menu no Ar | Ultra Minimal Digital Menus</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
@@ -23,158 +23,141 @@
     <link rel="stylesheet" href="css/index.css">
 </head>
 
-<body>
+<body class="animate-fade">
 
+    <!-- NAVIGATION -->
     <header class="nav-fixed">
         <div class="container flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2"
-                style="text-decoration: none; color: var(--text-main); font-weight: 800; font-size: 1.25rem;">
-                <img src="assets/images/logo.svg" alt="Logo" style="height: 40px;">
-                <span>MENU NO AR</span>
+            <a href="/" class="flex items-center gap-3" style="text-decoration: none; color: #000;">
+                <img src="assets/images/logo.svg" alt="Logo" style="height: 42px;">
+                <div style="font-weight: 900; font-size: 1.4rem; letter-spacing: -0.06em; line-height: 1;">MENU<br>NO AR
+                </div>
             </a>
 
-            <nav class="flex items-center gap-2" id="navActions">
-                <a href="login.html" class="btn btn-ghost">Entrar</a>
-                <a href="signup.html" class="btn btn-primary">Começar Grátis</a>
+            <nav class="flex items-center gap-6">
+                <a href="login.html" class="btn btn-ghost" style="font-weight: 700;">Entrar</a>
+                <a href="signup.html" class="btn btn-primary"
+                    style="padding: 12px 28px; border-radius: 4px; font-weight: 700;">CRIAR MENU</a>
             </nav>
         </div>
     </header>
 
     <main>
-        <!-- Dynamic Hero -->
-        <section class="hero animate-fade">
+        <!-- HERO SEGMENT -->
+        <section class="hero">
             <div class="container">
-                <span class="section-label">O Futuro das Ementas</span>
-                <h1>Digitalize a sua<br>operação.</h1>
-                <p>Crie menus QR Code que respiram tecnologia. Instantâneos, elegantes e fáceis de gerir. Dê ao seu
-                    cliente a experiência que ele merece.</p>
+                <span class="section-label" style="background: #000; color: #fff; border-radius: 4px;">ESTADO DA
+                    ARTE</span>
+                <h1>Ementas digitais<br>sem concessões.</h1>
+                <p>Minimalismo industrial. Performance absoluta. O sistema de gestão de menus mais limpo do mercado para
+                    restaurantes que valorizam o design.</p>
 
                 <div class="flex items-center justify-center gap-4">
-                    <a href="signup.html" class="btn btn-primary" style="padding: 16px 40px; font-size: 1.1rem;">Criar
-                        Conta Grátis</a>
-                    <a href="#funciona" class="btn btn-secondary" style="padding: 16px 40px; font-size: 1.1rem;">Ver
-                        Demonstração</a>
+                    <a href="signup.html" class="btn btn-primary"
+                        style="padding: 20px 48px; font-size: 1.1rem; border-radius: 4px; font-weight: 800;">COMEÇAR
+                        AGORA</a>
                 </div>
             </div>
         </section>
 
-        <!-- Features -->
-        <section id="funciona" class="features-container">
-            <div class="container">
-                <div style="text-align: center; margin-bottom: 80px;">
-                    <span class="section-label">Funcionalidades</span>
-                    <h2 style="font-size: 3rem;">Tudo o que precisa num só lugar.</h2>
-                </div>
-
-                <div class="grid-section">
-                    <article class="grid-card">
-                        <i class="ph ph-lightning"></i>
-                        <h3>Performance Nativa</h3>
-                        <p>Menus focados na velocidade. Carregamento instantâneo para garantir que o cliente escolhe e
-                            pede sem esperas.</p>
-                    </article>
-                    <article class="grid-card">
-                        <i class="ph ph-pencil-line"></i>
-                        <h3>Edição em Directo</h3>
-                        <p>Acabou-se o stock de um prato? Oculte-o instantaneamente do menu digital através do seu
-                            telemóvel.</p>
-                    </article>
-                    <article class="grid-card">
-                        <i class="ph ph-shield-check"></i>
-                        <h3>Segurança de Dados</h3>
-                        <p>Infraestrutura robusta que garante que o seu menu está sempre online, 24 horas por dia, 7
-                            dias por semana.</p>
-                    </article>
-                </div>
+        <!-- PRODUCT MOCKUP -->
+        <section class="hero-mockup">
+            <div class="mockup-container">
+                <img src="assets/images/dashboard.png" alt="Painel de Edição"
+                    style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9;">
             </div>
         </section>
 
-        <!-- How it Works -->
-        <section class="how-it-works">
+        <!-- BENTO FEATURES -->
+        <section style="padding: 160px 0;">
             <div class="container">
-                <div style="text-align: center;">
-                    <span class="section-label">Workflow</span>
-                    <h2 style="font-size: 3rem;">Três passos simples.</h2>
+                <div style="max-width: 600px; margin-bottom: 80px;">
+                    <h2 style="font-size: 3.5rem; margin-bottom: 24px;">Engenharia visual para o seu negócio.</h2>
+                    <p style="font-size: 1.25rem; color: var(--text-muted);">Desenhamos cada detalhe para que a sua
+                        marca seja a única coisa que o cliente vê.</p>
                 </div>
 
-                <div class="steps-grid">
-                    <div class="step">
-                        <div class="step-number">01</div>
-                        <h4>Crie a sua Conta</h4>
-                        <p style="color: var(--text-muted);">Registe-se em segundos e defina o nome do seu
-                            estabelecimento para começar.</p>
+                <div class="bento-grid">
+                    <div class="bento-card item-1">
+                        <i class="ph ph-qr-code"></i>
+                        <h3>QR Code Dinâmico</h3>
+                        <p>Altere o seu menu em tempo real sem nunca precisar de trocar o código impresso nas mesas.</p>
                     </div>
-                    <div class="step">
-                        <div class="step-number">02</div>
-                        <h4>Construa o Menu</h4>
-                        <p style="color: var(--text-muted);">Adicione categorias, pratos e fotos. Personalize o design
-                            para combinar com a sua marca.</p>
+                    <div class="bento-card item-2">
+                        <i class="ph ph-layout"></i>
+                        <h3>Canvas de Edição</h3>
+                        <p>Interface 'What You See Is What You Get'. Simples como um documento, poderoso como uma
+                            aplicação.</p>
                     </div>
-                    <div class="step">
-                        <div class="step-number">03</div>
-                        <h4>Imprima o QR Code</h4>
-                        <p style="color: var(--text-muted);">Gere e descarregue o seu QR Code único. Coloque nas mesas e
-                            está pronto a faturar.</p>
+                    <div class="bento-card item-3">
+                        <i class="ph ph-file-pdf"></i>
+                        <h3>PDF Smart Mode</h3>
+                        <p>Já tem um menu em PDF? Transforme-o numa experiência mobile fluida em segundos.</p>
+                    </div>
+                    <div class="bento-card item-4">
+                        <i class="ph ph-paint-brush-broad"></i>
+                        <h3>Identidade Visual</h3>
+                        <p>Customização profunda de tipografia e cores para que o menu digital pareça uma extensão
+                            nativa do seu site.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Pricing Section -->
-        <section id="precos" class="pricing-section">
+        <!-- PRICING -->
+        <section class="pricing-minimal">
             <div class="container">
-                <div class="pricing-wrapper">
-                    <div>
-                        <span class="section-label">Subscrição</span>
-                        <h2 style="font-size: 3.5rem; margin-bottom: 32px;">Um preço.<br>Tudo incluído.</h2>
-                        <ul class="pricing-benefit-list">
-                            <li><i class="ph ph-check-circle"></i> Categorias e Itens Ilimitados</li>
-                            <li><i class="ph ph-check-circle"></i> QR Code Personalizável</li>
-                            <li><i class="ph ph-check-circle"></i> Edição em Tempo Real</li>
-                            <li><i class="ph ph-check-circle"></i> Suporte Prioritário</li>
-                        </ul>
-                    </div>
-
-                    <div class="pricing-card">
-                        <div style="font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 8px;">PLANO
-                            PRO</div>
-                        <div style="font-size: 4rem; font-weight: 800; color: var(--text-main); margin-bottom: 8px;">15€
-                        </div>
-                        <div style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 40px;">cobrado
-                            mensalmente</div>
-                        <a href="signup.html" class="btn btn-primary" style="width: 100%; padding: 18px;">Começar
-                            Agora</a>
-                    </div>
+                <h2>Transparência Radical.</h2>
+                <div class="pricing-box">
+                    <span style="color: var(--primary); font-weight: 800; letter-spacing: 0.2em;">PLANO ÚNICO</span>
+                    <div class="price-value">15€<span>/mês</span></div>
+                    <p style="margin-bottom: 40px; opacity: 0.6;">Sem contratos. Sem taxas escondidas. Sem limites de
+                        itens.</p>
+                    <a href="signup.html" class="btn btn-primary"
+                        style="width: 100%; padding: 20px; border-radius: 4px; font-weight: 800; background: #fff; color: #000 !important;">SUBSCREVER
+                        PRO</a>
                 </div>
             </div>
         </section>
 
-        <!-- Final CTA -->
-        <section style="padding: 140px 0; background: var(--primary-soft); text-align: center;">
+        <!-- FINAL CTA -->
+        <section style="padding: 160px 0; text-align: center;">
             <div class="container">
-                <h2 style="font-size: 3.5rem; margin-bottom: 32px;">Pronto para elevar o nível?</h2>
-                <p
-                    style="color: var(--text-muted); font-size: 1.25rem; margin-bottom: 56px; max-width: 600px; margin-left: auto; margin-right: auto;">
-                    Junte-se aos centenas de restaurantes que já modernizaram a sua operação com o Menu no Ar.</p>
-                <a href="signup.html" class="btn btn-primary" style="padding: 20px 60px; font-size: 1.2rem;">Criar a
-                    Minha Ementa</a>
+                <h2 style="font-size: 4rem; margin-bottom: 32px; letter-spacing: -0.04em;">O seu menu merece este ar.
+                </h2>
+                <a href="signup.html" class="btn btn-primary"
+                    style="padding: 24px 64px; font-size: 1.2rem; border-radius: 4px; font-weight: 800;">CRIAR CONTA
+                    GRATUITA</a>
             </div>
         </section>
     </main>
 
     <footer class="footer">
         <div class="container">
-            <div class="footer-nav">
-                <div style="font-weight: 900; font-size: 1.5rem; letter-spacing: -0.05em;">MENU NO AR</div>
-                <div class="footer-links">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="footer-logo">MENU NO AR</div>
+                    <p style="color: var(--text-muted); max-width: 300px;">A plataforma de ementas digitais para quem
+                        não abre mão da excelência visual.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Produto</h4>
+                    <a href="#">Funcionalidades</a>
+                    <a href="#">Demonstração</a>
+                    <a href="#">Preços</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
                     <a href="#">Privacidade</a>
-                    <a href="#">Termos de Uso</a>
+                    <a href="#">Termos</a>
                     <a href="mailto:geral@menunoar.pt">Contacto</a>
                 </div>
             </div>
-            <div style="display: flex; justify-content: space-between; color: #64748b; font-size: 0.9rem;">
-                <div>&copy; 2026 Menu no Ar. Todos os direitos reservados.</div>
-                <div class="flex gap-4">
+
+            <div
+                style="margin-top: 80px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 32px; color: var(--text-muted); font-size: 0.85rem;">
+                <div>&copy; 2026 Menu no Ar. Designed in Portugal.</div>
+                <div class="flex gap-4" style="font-size: 1.2rem;">
                     <i class="ph ph-instagram-logo"></i>
                     <i class="ph ph-facebook-logo"></i>
                 </div>
@@ -183,7 +166,6 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="js/script.js"></script>
 </body>
 
