@@ -223,23 +223,93 @@ footer {
     color: #000;
 }
 
-/* MOCKUP */
-.hero-mockup {
-    /* Removed padding to center vertically */
+/* CREATION OPTIONS GRID */
+.creation-options {
     position: relative;
-    z-index: 10;
 }
 
-.mockup-container {
-    max-width: 1100px;
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    max-width: 1000px;
     margin: 0 auto;
+}
+
+.option-card {
     background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.08);
-    aspect-ratio: 16/10;
     border: 1px solid var(--border-color);
-    position: relative;
+    padding: 60px 40px;
+    border-radius: 12px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.option-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+}
+
+.option-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(31, 168, 255, 0.1);
+    color: var(--primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+    margin: 0 auto 32px;
+}
+
+.option-card h3 {
+    font-size: 1.85rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+}
+
+.option-card p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    min-height: 80px;
+}
+
+.option-btn {
+    padding: 14px 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    border-radius: 6px;
+    background: var(--primary);
+    color: #fff;
+}
+
+.option-btn i {
+    font-size: 1.1rem;
+}
+
+.option-btn-secondary {
+    background: #fff;
+    color: #000;
+    border: 1px solid var(--border-color);
+}
+
+.option-btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+@media (max-width: 768px) {
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* BENTO FEATURE GRID */
