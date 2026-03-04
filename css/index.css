@@ -146,7 +146,10 @@ footer {
     text-align: center;
     font-size: 0.85rem;
     font-weight: 500;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 1100;
     display: flex;
     justify-content: center;
@@ -164,22 +167,25 @@ footer {
 
 .nav-header {
     position: absolute;
-    top: 36px;
+    top: 40px;
+    /* Offset by the height of the top banner */
     left: 0;
     right: 0;
     height: 70px;
     background: transparent;
     z-index: 1000;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    /* Subtle white border for the dark hero */
 }
 
-/* HERO SECTION - Tighter & More Impactful */
+/* HERO SECTION - Photographic Banner */
 .hero {
-    /* Removed padding, using min-height 100vh from main > section */
     text-align: center;
     position: relative;
-    background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
-    background-size: 32px 32px;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=2000');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
 }
 
 .hero h1 {
@@ -187,13 +193,13 @@ footer {
     line-height: 1;
     letter-spacing: -0.04em;
     margin-bottom: 24px;
-    color: #000;
+    color: #fff;
     font-weight: 800;
 }
 
 .hero p {
     font-size: 1.25rem;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.85);
     max-width: 600px;
     margin: 0 auto 40px;
     line-height: 1.5;
