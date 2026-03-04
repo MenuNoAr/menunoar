@@ -1,223 +1,206 @@
 /* 
   Index - Minimalist Industrial SaaS
-  High-end aesthetic, bold typography, ample white space.
 */
+
+:root {
+    --grid-color: rgba(0, 0, 0, 0.03);
+}
 
 .nav-fixed {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 90px;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-color);
+    height: 100px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(30px);
     z-index: 1000;
-    display: flex;
-    align-items: center;
+    border-bottom: 1px solid var(--border-color);
 }
 
-/* HERO */
+/* HERO SECTION */
 .hero {
-    padding: 220px 0 140px;
+    padding: 240px 0 160px;
     text-align: center;
+    position: relative;
+    background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 0%, #fff 70%);
+    pointer-events: none;
+}
+
+.hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.section-label {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    background: #000;
+    color: #fff;
+    border-radius: 2px;
+    margin-bottom: 40px;
+    text-transform: uppercase;
 }
 
 .hero h1 {
-    font-size: 5.5rem;
-    line-height: 0.95;
-    letter-spacing: -0.05em;
+    font-size: 6.5rem;
+    line-height: 0.9;
+    letter-spacing: -0.06em;
     margin-bottom: 32px;
-    color: var(--text-main);
+    color: #000;
+    font-weight: 850;
 }
 
 .hero p {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     color: var(--text-muted);
-    max-width: 700px;
-    margin: 0 auto 56px;
-    line-height: 1.5;
+    max-width: 750px;
+    margin: 0 auto 64px;
+    line-height: 1.4;
 }
 
-/* HERO IMAGE MOCKUP */
+/* BUTTONS */
+.btn-hero {
+    padding: 24px 48px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+}
+
+.btn-hero-secondary {
+    padding: 24px 48px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border-radius: 4px;
+    background: #fff;
+    border: 1px solid #000;
+    color: #000;
+}
+
+.btn-hero-secondary:hover {
+    background: #000;
+    color: #fff;
+}
+
+/* MOCKUP */
 .hero-mockup {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 40px;
-    perspective: 2000px;
+    margin-top: -100px;
+    padding: 0 40px 140px;
+    position: relative;
+    z-index: 10;
 }
 
 .mockup-container {
+    max-width: 1200px;
+    margin: 0 auto;
     background: #000;
     border-radius: 4px;
-    /* Industrial sharp */
     overflow: hidden;
-    box-shadow: 0 60px 120px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 100px 150px -50px rgba(0, 0, 0, 0.3);
     aspect-ratio: 16/9;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    animation: floatMockup 6s ease-in-out infinite;
 }
 
-@keyframes floatMockup {
-
-    0%,
-    100% {
-        transform: translateY(0) rotateX(2deg);
-    }
-
-    50% {
-        transform: translateY(-20px) rotateX(0deg);
-    }
-}
-
-/* BENTO FEATURES */
+/* BENTO GRID */
 .bento-grid {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    gap: 24px;
-    margin-top: 100px;
+    gap: 32px;
 }
 
 .bento-card {
     background: #fff;
     border: 1px solid var(--border-color);
+    padding: 56px;
     border-radius: 4px;
-    padding: 48px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    min-height: 420px;
+    justify-content: space-between;
+    min-height: 440px;
     transition: var(--transition);
 }
 
 .bento-card:hover {
+    transform: translateY(-12px);
     border-color: var(--primary);
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.06);
 }
 
 .bento-card i {
     font-size: 3.5rem;
     color: #000;
-    /* Minimalist icons */
-    margin-bottom: auto;
+    margin-bottom: 60px;
 }
 
 .bento-card h3 {
-    font-size: 1.75rem;
+    font-size: 2rem;
     margin-bottom: 16px;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
 }
 
-.bento-card p {
-    color: var(--text-muted);
-    font-size: 1.1rem;
-    line-height: 1.6;
-}
-
-.item-1 {
-    grid-column: span 7;
-}
-
-.item-2 {
-    grid-column: span 5;
-}
-
-.item-3 {
-    grid-column: span 5;
-}
-
+.item-1,
 .item-4 {
     grid-column: span 7;
 }
 
+.item-2,
+.item-3 {
+    grid-column: span 5;
+}
+
 /* PRICING */
 .pricing-minimal {
-    padding: 160px 0;
+    padding: 200px 0;
     background: #000;
     color: #fff;
     text-align: center;
 }
 
 .pricing-minimal h2 {
-    font-size: 5rem;
-    margin-bottom: 64px;
+    font-size: 5.5rem;
     letter-spacing: -0.05em;
+    margin-bottom: 80px;
 }
 
 .pricing-box {
-    background: #0a0a0a;
-    border: 1px solid #222;
-    padding: 80px 60px;
-    border-radius: 4px;
-    max-width: 550px;
+    max-width: 600px;
     margin: 0 auto;
-    transition: var(--transition);
-}
-
-.pricing-box:hover {
-    border-color: var(--primary);
+    background: #080808;
+    border: 1px solid #1a1a1a;
+    padding: 80px;
+    border-radius: 4px;
 }
 
 .price-value {
-    font-size: 7rem;
+    font-size: 8rem;
     font-weight: 900;
-    margin: 24px 0;
+    margin: 32px 0;
     letter-spacing: -0.05em;
+    line-height: 1;
 }
 
-.price-value span {
-    font-size: 1.5rem;
-    font-weight: 400;
-    opacity: 0.4;
-}
-
-/* FOOTER */
-.footer {
-    padding: 120px 0 60px;
-    background: #fff;
-}
-
-.footer-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 40px;
-}
-
-.footer-logo {
-    font-weight: 900;
-    font-size: 1.5rem;
-    margin-bottom: 24px;
-    letter-spacing: -0.05em;
-}
-
-.footer-col h4 {
-    margin-bottom: 24px;
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
-.footer-col a {
-    display: block;
-    color: var(--text-main);
-    text-decoration: none;
-    margin-bottom: 12px;
-    font-weight: 500;
-    transition: 0.2s;
-}
-
-.footer-col a:hover {
-    color: var(--primary);
-}
-
+/* RESPONSIVE */
 @media (max-width: 1024px) {
     .hero h1 {
-        font-size: 4rem;
+        font-size: 4.5rem;
     }
 
-    .hero p {
-        font-size: 1.1rem;
+    .hero {
+        padding: 180px 0 120px;
     }
 
     .bento-grid {
@@ -229,14 +212,5 @@
     .item-3,
     .item-4 {
         grid-column: span 1 !important;
-    }
-
-    .pricing-minimal h2 {
-        font-size: 3rem;
-    }
-
-    .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 40px;
     }
 }
