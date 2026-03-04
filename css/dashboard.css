@@ -1,119 +1,181 @@
 /* 
-  Dashboard Specific Layout & Editor Workspace
+  Dashboard - Modern Clean Workspace
 */
 
 .dashboard-layout {
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 260px 1fr;
     min-height: 100vh;
+    background-color: var(--bg-page);
 }
 
 .sidebar {
     background-color: var(--bg-surface);
     border-right: 1px solid var(--border-color);
-    padding: 32px 20px;
+    padding: 32px 16px;
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+.sidebar-header {
+    padding: 0 16px 32px;
 }
 
 .sidebar-logo {
-    height: 32px;
+    height: 38px;
 }
 
 .nav-menu {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex: 1;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 16px;
+    padding: 12px 16px;
     border-radius: var(--radius-md);
     text-decoration: none;
     color: var(--text-muted);
     font-weight: 500;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     transition: var(--transition);
 }
 
 .nav-item i {
-    font-size: 1rem;
+    font-size: 1.25rem;
 }
 
-.nav-item:hover,
-.nav-item.active {
-    background-color: var(--primary-soft);
+.nav-item:hover {
+    background-color: var(--bg-page);
     color: var(--text-main);
 }
 
+.nav-item.active {
+    background-color: var(--primary-soft);
+    color: var(--primary);
+}
+
 .main-content {
-    background-color: var(--bg-page);
     display: flex;
     flex-direction: column;
 }
 
 .top-bar {
-    height: 64px;
+    height: 72px;
     background-color: var(--bg-surface);
     border-bottom: 1px solid var(--border-color);
-    padding: 0 32px;
+    padding: 0 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.view-title {
+    font-size: 1.125rem;
+    font-weight: 600;
 }
 
 .editor-workspace {
     flex: 1;
-    padding: 48px;
+    padding: 60px 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow-y: auto;
+    background: radial-gradient(circle at center, #fff, var(--bg-page));
 }
 
-.card {
+/* Modals Modernized - Clean & Elevated */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+}
+
+.modal-backdrop.open {
+    display: flex;
+}
+
+.modal-content {
     background-color: var(--bg-surface);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 500px;
     padding: 32px;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-color);
+    animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Setup Screen */
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* Setup Screen Modern */
 .setup-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-page);
-    padding: 24px;
+    background: linear-gradient(135deg, #f3f4f6 0%, #fff 100%);
 }
 
-/* Trial Badge States */
 .trial-timer-badge {
-    padding: 4px 12px;
-    font-size: 0.75rem;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.8125rem;
     font-weight: 700;
-    border-radius: var(--radius-sm);
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 6px;
 }
 
 .state-pro {
-    background: #000;
+    background: #111827;
     color: #fff;
 }
 
 .state-trial {
     background: var(--primary-soft);
-    color: var(--text-main);
+    color: var(--primary);
 }
 
 .state-expired {
-    background: var(--danger);
-    color: #fff;
+    background: #fee2e2;
+    color: var(--danger);
 }

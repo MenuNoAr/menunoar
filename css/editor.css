@@ -1,110 +1,125 @@
 /* 
-  Menu no Ar - Minimalist Editor Styles
-  Focus: Serious workspace, low rounding, professional utilities.
+  Editor - Modern Workspace
 */
-
-.editor-workspace {
-    background-color: #f8fafc;
-}
 
 .editor-canvas {
     width: 375px;
-    min-height: 667px;
+    min-height: 700px;
     background-color: #fff;
-    border: 12px solid #0f172a;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xl);
+    border-radius: 40px;
+    box-shadow: 0 0 0 10px #111827, var(--shadow-xl);
     overflow: hidden;
     position: relative;
+    border: 4px solid #111827;
 }
 
 .dark-mode .editor-canvas {
-    border-color: #1e293b;
-    background-color: #000;
+    box-shadow: 0 0 0 10px #1f2937, var(--shadow-xl);
+    border-color: #1f2937;
 }
 
-/* Modal System - Industrial Minimalist */
-.modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+.canvas-content {
+    background: #fff;
+    height: 100%;
 }
 
-.modal-backdrop.open {
+/* Category Nav Tabs Modern */
+.category-tabs {
     display: flex;
-}
-
-.modal-content {
-    background-color: var(--bg-surface);
-    border-radius: var(--radius-sm);
-    width: 100%;
-    max-width: 480px;
-    padding: 32px;
-    border: 1px solid var(--border-color);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
+    gap: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    background: #fff;
     border-bottom: 1px solid var(--border-color);
-    padding-bottom: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
 }
 
-/* Forms - Minimal */
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 8px;
-    color: var(--text-muted);
-}
-
-.form-input {
-    width: 100%;
-    padding: 12px;
+.tab-btn {
+    padding: 8px 16px;
+    border-radius: 50px;
     background: var(--bg-page);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-size: 0.9375rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
     transition: var(--transition);
 }
 
-.form-input:focus {
-    outline: none;
-    border-color: var(--primary);
+.tab-btn.active {
+    background: var(--primary);
+    color: #fff;
 }
 
-/* Item Cards in Editor */
+/* Item Cards In Editor */
 .menu-item {
-    padding: 24px;
-    border-bottom: 1px solid var(--border-color);
     display: grid;
-    grid-template-columns: 1fr 80px;
+    grid-template-columns: 1fr 90px;
     gap: 16px;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: #fff;
+    transition: var(--transition);
 }
 
 .menu-item:hover {
+    background-color: #fcfcfd;
+}
+
+.item-text h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.item-desc {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.item-price {
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: 8px;
+    font-size: 0.9375rem;
+}
+
+.item-img {
+    width: 90px;
+    height: 90px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-page);
+    border: 1px solid var(--border-color);
+}
+
+.item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Input Fields in Editor */
+.inline-editable {
+    border: 1px solid transparent;
+    padding: 2px 4px;
+    border-radius: 4px;
+    cursor: text;
+}
+
+.inline-editable:hover {
     background-color: var(--primary-soft);
 }
 
-/* Tooltips/Toast - Neutral */
-#toast-container div {
-    border-radius: var(--radius-sm) !important;
-}
-
-/* Tab Management in Modals */
-.settings-tab-pane {
-    animation: fadeIn 0.2s ease-out;
+.inline-editable:focus {
+    outline: none;
+    background-color: #fff;
+    border-color: var(--primary);
 }

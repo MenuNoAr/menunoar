@@ -1,49 +1,49 @@
 /* 
-  Menu no Ar - Minimalist Industry Standard Design System (Global)
-  Focus: Clean, Serious, Professional, Low-Rounding, Neutral Palette
+  Menu no Ar - Modern Clean Design System
+  Focus: Soft Rounding, Breathable Spacing, Subtle Depth, Premium Feel
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    /* Brand Colors - Standard Professional Blue */
-    --primary: #0f172a;
-    /* Deep Slate almost Black */
-    --primary-hover: #1e293b;
-    --primary-soft: #f1f5f9;
+    /* Modern SaaS Palette - Soft & Professional */
+    --primary: #4f46e5;
+    /* Modern Indigo */
+    --primary-hover: #4338ca;
+    --primary-soft: #eef2ff;
 
-    --success: #15803d;
-    --warning: #b45309;
-    --danger: #b91c1c;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
 
-    /* Neutrals - High Contrast / Professional */
-    --bg-page: #ffffff;
+    /* Neutrals - Balanced & Clean */
+    --bg-page: #f9fafb;
     --bg-surface: #ffffff;
-    --text-main: #0f172a;
-    --text-muted: #475569;
-    --border-color: #e2e8f0;
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --border-color: #e5e7eb;
 
-    /* Shadows - Very subtle */
+    /* Shadows - Layered & Modern */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
-    /* Misc - Minimal Rounding */
-    --radius-sm: 2px;
-    --radius-md: 4px;
-    --radius-lg: 6px;
-    --radius-xl: 8px;
-    --transition: all 0.15s ease-in-out;
+    /* Rounding - Modern & Friendly (Not too sharp, not too round) */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dark-mode {
-    --bg-page: #000000;
-    --bg-surface: #0a0a0a;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --border-color: #262626;
-    --primary-soft: rgba(255, 255, 255, 0.05);
+    --bg-page: #030712;
+    --bg-surface: #111827;
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --border-color: #1f2937;
+    --primary-soft: rgba(79, 70, 229, 0.1);
 }
 
 * {
@@ -53,43 +53,30 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: var(--bg-page);
     color: var(--text-main);
-    line-height: 1.6;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-}
-
-button,
-input,
-select,
-textarea {
-    font-family: inherit;
 }
 
 /* Typography */
 h1,
 h2,
 h3,
-h4,
-h5 {
-    font-weight: 600;
-    line-height: 1.1;
+h4 {
+    font-weight: 700;
+    line-height: 1.2;
     letter-spacing: -0.02em;
 }
 
-/* Clear vibrant gradients */
-.gradient-text {
-    color: var(--text-main);
-}
-
-/* Buttons */
+/* Common Components */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px 24px;
+    padding: 10px 20px;
     border-radius: var(--radius-md);
     font-weight: 500;
     font-size: 0.9375rem;
@@ -101,22 +88,25 @@ h5 {
 .btn-primary {
     background-color: var(--primary);
     color: white;
+    box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.3);
 }
 
 .btn-primary:hover {
     background-color: var(--primary-hover);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px 0 rgba(79, 70, 229, 0.4);
 }
 
 .btn-secondary {
-    background-color: transparent;
+    background-color: var(--bg-surface);
     color: var(--text-main);
     border-color: var(--border-color);
 }
 
 .btn-secondary:hover {
-    background-color: var(--primary-soft);
-    border-color: var(--text-main);
+    background-color: var(--bg-page);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-ghost {
@@ -129,13 +119,49 @@ h5 {
     background: var(--primary-soft);
 }
 
-/* Layout Utilities */
+/* Common Layout */
 .container {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 40px;
+    padding: 0 24px;
 }
 
+.card {
+    background-color: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.badge {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Animations */
+.animate-fade {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Utilities */
 .flex {
     display: flex;
 }
@@ -148,43 +174,6 @@ h5 {
     justify-content: space-between;
 }
 
-.gap-2 {
-    gap: 8px;
-}
-
 .gap-4 {
     gap: 16px;
-}
-
-/* Common Components */
-.card {
-    background-color: var(--bg-surface);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    padding: 32px;
-}
-
-.badge {
-    padding: 2px 8px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border-radius: var(--radius-sm);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.animate-fade {
-    animation: fadeIn 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
