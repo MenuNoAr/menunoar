@@ -63,12 +63,10 @@
 .nav-header {
     position: absolute;
     top: 36px;
-    /* Below top-banner */
     left: 0;
     right: 0;
     height: 70px;
     background: transparent;
-    /* No longer needs blur backdrop as it's at the top */
     z-index: 1000;
     border-bottom: 1px solid var(--border-color);
 }
@@ -136,7 +134,7 @@
     position: relative;
 }
 
-/* BENTO FEATURE GRID - WorkOS Information Density */
+/* BENTO FEATURE GRID */
 .bento-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -171,35 +169,88 @@
     color: var(--text-muted);
 }
 
-/* PRICING - Compact & Strong */
+/* PRICING REFINED */
 .pricing-minimal {
-    padding: 120px 0;
+    padding: 60px 0;
     background: #fafafa;
     border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
 }
 
-.pricing-box {
-    max-width: 480px;
+.pricing-card-refined {
+    max-width: 900px;
     margin: 0 auto;
     background: #fff;
     border: 1px solid var(--border-color);
-    padding: 60px;
     border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+}
+
+.pricing-info {
+    padding: 48px;
+    flex: 1;
+    border-right: 1px solid var(--border-color);
+}
+
+.plan-label {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
 }
 
 .price-value {
     font-size: 4rem;
     font-weight: 800;
-    margin: 20px 0;
+    margin: 16px 0;
     letter-spacing: -0.04em;
+    color: #000;
+}
+
+.price-value span {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.pricing-features {
+    padding: 48px;
+    flex: 1.2;
+    background: #fdfdfd;
+    display: flex;
+    align-items: center;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.feature-list li i {
+    color: var(--primary);
+    font-size: 1.25rem;
 }
 
 /* FOOTER - Tighter */
 .footer {
     padding: 80px 0 40px;
-    border-top: 1px solid var(--border-color);
 }
 
 .footer-grid {
@@ -209,15 +260,25 @@
 }
 
 @media (max-width: 1024px) {
+    .pricing-card-refined {
+        flex-direction: column;
+    }
+
+    .pricing-info {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 40px;
+    }
+
+    .pricing-features {
+        padding: 40px;
+    }
+
     .hero h1 {
         font-size: 3.5rem;
     }
 
     .bento-grid {
         grid-template-columns: 1fr;
-    }
-
-    .footer-grid {
-        grid-template-columns: 1fr 1fr;
     }
 }
