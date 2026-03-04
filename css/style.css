@@ -175,24 +175,88 @@ h4 {
     letter-spacing: 0.05em;
 }
 
-/* ENTRANCE ANIMATIONS (WorkOS Inspired) */
-@keyframes fadeInUp {
-    from {
+/* ENTRANCE ANIMATIONS (WorkOS Inspired - Scroll Triggered) */
+.reveal,
+.reveal-blur,
+.reveal-shadow {
+    opacity: 0;
+    visibility: hidden;
+    will-change: transform, opacity, filter, box-shadow;
+}
+
+.reveal.is-visible,
+.reveal-blur.is-visible,
+.reveal-shadow.is-visible {
+    visibility: visible;
+}
+
+/* 1. Base Fade Up with Blur */
+@keyframes workosFadeUp {
+    0% {
         opacity: 0;
-        transform: translateY(24px);
+        transform: translateY(32px);
+        filter: blur(8px);
     }
 
-    to {
+    100% {
         opacity: 1;
         transform: translateY(0);
+        filter: blur(0);
     }
 }
 
-.reveal {
-    opacity: 0;
-    animation: fadeInUp 0.7s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+.reveal.is-visible {
+    animation: workosFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* 2. Scale & Blur Reveal (For large Typography & Images) */
+@keyframes workosScaleBlur {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+        filter: blur(12px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+.reveal-blur.is-visible {
+    animation: workosScaleBlur 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+/* 3. Multi-layer Drop Shadow (Sombra Duplicada/Multiplicada) for Cards & Mockups */
+@keyframes workosShadowReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+        box-shadow:
+            0 0 0 rgba(0, 0, 0, 0),
+            0 0 0 rgba(0, 0, 0, 0),
+            0 0 0 rgba(0, 0, 0, 0);
+        filter: blur(8px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.05),
+            0 12px 24px -4px rgba(0, 0, 0, 0.08),
+            0 32px 64px -16px rgba(0, 0, 0, 0.12),
+            0 0 0 1px rgba(0, 0, 0, 0.02);
+        filter: blur(0);
+    }
+}
+
+.reveal-shadow.is-visible {
+    animation: workosShadowReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Stagger Delays */
 .delay-1 {
     animation-delay: 0.1s;
 }
@@ -214,7 +278,7 @@ h4 {
 }
 
 .animate-fade {
-    animation: fadeInUp 0.5s ease-out forwards;
+    animation: workosFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .badge {

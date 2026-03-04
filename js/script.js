@@ -43,8 +43,9 @@ async function checkSessionAndNavigate() {
 // Start
 initSupabase();
 
-// Scroll to section helper
+// Scroll and Reveal
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Smooth Scroll
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -55,4 +56,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // 2. Complex Intersection Animations (WorkOS pattern)
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.15
+    };
+
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Add the class that triggers the CSS animation
+                entry.target.classList.add('is-visible');
+                // Optional: Stop observing once revealed to retain the state
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    const revealElements = document.querySelectorAll('.reveal, .reveal-blur, .reveal-shadow');
+    revealElements.forEach(el => revealObserver.observe(el));
 });
