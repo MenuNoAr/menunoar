@@ -111,13 +111,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const point = svgPath.getPointAtLength(progress * pathLength);
 
             // To find the tangent (angle) we need a point slightly ahead or behind
-            const d = 0.5; // pixel distance to check angle
+            const d = 0.5; // distance scale inside viewBox
             const isAtEnd = progress >= 0.999;
             const p1 = svgPath.getPointAtLength(Math.max(0, progress * pathLength - d));
             const p2 = svgPath.getPointAtLength(Math.min(pathLength, progress * pathLength + d));
 
-            // Calculate angle in degrees
-            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI);
+            // Reconcile view box coordinates to actual screen ratios for perfect visual angling
+            const ratioX = window.innerWidth / 100;
+            const containerHeight = Math.max(document.querySelector('.curved-scroll-container').offsetHeight, 1);
+            const ratioY = containerHeight / 400;
+
+            const dxScreen = (p2.x - p1.x) * ratioX;
+            const dyScreen = (p2.y - p1.y) * ratioY;
+
+            let angle = Math.atan2(dyScreen, dxScreen) * (180 / Math.PI);
+
+            // Arrow direction inversion on scroll up
+            if (window.lastScrollY === undefined) window.lastScrollY = window.scrollY;
+            const isScrollingUp = window.scrollY < window.lastScrollY;
+            window.lastScrollY = window.scrollY;
+
+            if (isScrollingUp) {
+                angle -= 180;
+            }
 
             // point.x and point.y are relative to the viewBox "0 0 100 400"
             const xPercent = (point.x / 100) * 100;
@@ -126,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             scrollArrow.style.left = xPercent + '%';
             scrollArrow.style.top = yPercent + '%';
             // We use translate to keep it centered and rotate to face the path direction
-            scrollArrow.style.transform = `translate(-50%, -50%) rotate(${angle - 90}deg)`; // -90 deg because arrow icon normally points down
+            scrollArrow.style.transform = `translate(-50%, -50%) rotate(${angle - 90}deg)`; // -90 deg because arrow icon defaults down
         };
 
         window.addEventListener('scroll', updateScrollProgress, { passive: true });
@@ -134,44 +150,63 @@ document.addEventListener('DOMContentLoaded', () => {
         updateScrollProgress(); // init
     }
 
-    // 4. Force "Hard" Scroll Snapping on any wheel movement
+    // 4. Force "Hard" Scroll Snapping on any wheel movement (Spammable)
     const mainSections = document.querySelectorAll('main > section');
     if (mainSections.length > 0) {
-        let isScrolling = false;
+        let isAnimating = false;
+        let targetIdx = 0;
+        let currentAnimation = null;
+        let wheelTimeout = null;
 
-        // Use the native wheel event, not scroll, to detect user intent
+        const easeInOutCubic = t => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+
+        const scrollToSection = (idx) => {
+            if (currentAnimation) cancelAnimationFrame(currentAnimation);
+            isAnimating = true;
+
+            const targetY = mainSections[idx].offsetTop;
+            const startY = window.scrollY;
+            const distance = targetY - startY;
+            const duration = 700; // Faster, 0.7s, allows for snappy but smooth feel
+            let start = null;
+
+            const step = (timestamp) => {
+                if (!start) start = timestamp;
+                const progress = timestamp - start;
+                const percent = Math.min(progress / duration, 1);
+
+                window.scrollTo(0, startY + (distance * easeInOutCubic(percent)));
+
+                if (progress < duration) {
+                    currentAnimation = window.requestAnimationFrame(step);
+                } else {
+                    isAnimating = false;
+                    currentAnimation = null;
+                }
+            };
+
+            currentAnimation = window.requestAnimationFrame(step);
+        };
+
         window.addEventListener('wheel', (e) => {
-            if (isScrolling) {
-                e.preventDefault();
-                return;
-            }
+            e.preventDefault();
 
-            e.preventDefault(); // Prevent native slow scroll immediately
-            isScrolling = true;
+            if (Math.abs(e.deltaY) > 5) {
+                // Throttle inputs a bit so we jump exactly one section per logical mouse wheel click
+                if (!wheelTimeout) {
+                    const direction = e.deltaY > 0 ? 1 : -1;
 
-            const direction = e.deltaY > 0 ? 1 : -1;
-            const threshold = 5; // tiny threshold for "1mm" intention
+                    // Base the jump on what is currently the active destination (or the current page)
+                    let baseIdx = isAnimating ? targetIdx : Math.round(window.scrollY / window.innerHeight);
 
-            if (Math.abs(e.deltaY) > threshold) {
-                // Find current section
-                const scrollY = window.scrollY;
-                const windowHeight = window.innerHeight;
-                let currentIdx = Math.round(scrollY / windowHeight);
+                    targetIdx = Math.max(0, Math.min(baseIdx + direction, mainSections.length - 1));
+                    scrollToSection(targetIdx);
 
-                // Calculate next target index
-                let targetIdx = currentIdx + direction;
-                targetIdx = Math.max(0, Math.min(targetIdx, mainSections.length - 1));
-
-                // Force scroll
-                mainSections[targetIdx].scrollIntoView({ behavior: 'smooth' });
-
-                // Allow wheel again after the smooth scroll finishes approx
-                setTimeout(() => {
-                    isScrolling = false;
-                }, 800); // 800ms lock to avoid scrolling multiple sections at once
-            } else {
-                isScrolling = false;
+                    // Only lock inputs for a fraction of the animation (200ms) to allow 'spamming' updates
+                    wheelTimeout = setTimeout(() => { wheelTimeout = null; }, 200);
+                }
             }
         }, { passive: false });
     }
 });
+
