@@ -13,7 +13,7 @@ const escapeHTML = (str) => str ? String(str).replace(/[&<>"']/g, m => ESC[m]) :
 // ─── Live Link ────────────────────────────────────────────────────────────────
 // ─── Live Link ────────────────────────────────────────────────────────────────
 export function updateLiveLink(slug) {
-    const url = `https://menunoar.pt/menu.html?id=${slug}`;
+    const url = `${window.location.origin}/menu.html?id=${slug}`;
 
     // Update both desktop and mobile buttons
     ['liveLinkBtn', 'liveLinkBtnMobile'].forEach(id => {

@@ -6,19 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menu no Ar - A tua ementa digital</title>
 
-    <!-- Auto-Redirect logged in users (Ultra-Fast Path) -->
-    <script>
-        (function () {
-            try {
-                const k = Object.keys(localStorage).find(x => x.includes('-auth-token'));
-                if (k) {
-                    const s = JSON.parse(localStorage.getItem(k));
-                    if (s && s.access_token) window.location.replace('dashboard.html');
-                }
-            } catch (e) { }
-        })();
-    </script>
-
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
 

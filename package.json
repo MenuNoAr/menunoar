@@ -4,7 +4,8 @@
   "type": "module",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.3",
-    "stripe": "^14.14.0",
-    "micro": "^10.0.1"
+    "micro": "^10.0.1",
+    "pg": "^8.19.0",
+    "stripe": "^14.14.0"
   }
 }

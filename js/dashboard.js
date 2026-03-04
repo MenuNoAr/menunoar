@@ -373,11 +373,7 @@ document.getElementById('setupForm').onsubmit = async (e) => {
         .single();
 
     if (error) {
-        alert('Erro ao criar: ' + (
-            error.code === '23505'
-                ? 'Este link já existe. Escolha outro.'
-                : error.message
-        ));
+        window.showToast(error.code === '23505' ? 'Este link já existe. Escolha outro.' : error.message, 'error');
         btn.innerHTML = orig;
         btn.disabled = false;
         return;

@@ -8,9 +8,39 @@ async function initSupabase() {
         supabaseClient = await getSupabase();
         if (supabaseClient) {
             console.log('Supabase initialized on Landing Page');
+            checkSessionAndNavigate();
         }
     } catch (error) {
         console.error('Erro a inicializar:', error);
+    }
+}
+
+async function checkSessionAndNavigate() {
+    if (!supabaseClient) return;
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+        const navActions = document.getElementById('navActions');
+        if (navActions) {
+            navActions.innerHTML = `
+                <a href="dashboard.html" class="btn-primary small">
+                    <i class="ph ph-layout"></i> Ir para Dashboard
+                </a>
+            `;
+        }
+
+        // Update hero buttons too
+        const heroBtns = document.querySelector('.hero-btns');
+        if (heroBtns) {
+            heroBtns.innerHTML = `
+                <a href="dashboard.html" class="btn-primary">
+                    <i class="ph ph-layout"></i> Aceder ao Painel
+                </a>
+                <a href="#demo" class="btn-secondary">
+                    Como Funciona <i class="ph ph-arrow-right"></i>
+                </a>
+            `;
+        }
     }
 }
 
