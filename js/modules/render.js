@@ -206,5 +206,14 @@ export function createItemCard(item) {
     `;
 }
 
-// Dummy stubs for event handlers that might be called globally
-window.scrollToSlide = () => { }; // Backward compatibility if any
+// Backward compatibility for existing event handlers
+export function scrollToSlide(index) {
+    // In the new vertical layout, we scroll to the category section instead of a slide
+    const nav = document.getElementById('categoryNav');
+    if (!nav) return;
+    const tabs = nav.querySelectorAll('.draggable-tab');
+    if (tabs[index]) {
+        tabs[index].click();
+    }
+}
+window.scrollToSlide = scrollToSlide;
