@@ -78,21 +78,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const revealElements = document.querySelectorAll('.reveal, .reveal-blur, .reveal-shadow');
     revealElements.forEach(el => revealObserver.observe(el));
 
-    // 3. Scroll Progress Line Logic
-    const scrollProgress = document.getElementById('scrollProgress');
-    if (scrollProgress) {
-        window.addEventListener('scroll', () => {
-            const htmlElement = document.documentElement;
-            // Native smooth snap containers scroll on the HTML element.
-            const scrollTop = window.scrollY || htmlElement.scrollTop;
-            const scrollHeight = htmlElement.scrollHeight;
-            const clientHeight = htmlElement.clientHeight;
+    // 3. Curved Scroll Progress Line Logic
+    const svgPath = document.getElementById('pathLineFg');
+    const scrollArrow = document.getElementById('scrollArrow');
 
-            const scrolled = (scrollTop / (scrollHeight - clientHeight)) * 100;
-            // Prevent going below 0 or above 100
-            const percentage = Math.min(Math.max(scrolled, 0), 100);
+    if (svgPath && scrollArrow) {
+        // Prepare the SVG path for drawing
+        const pathLength = svgPath.getTotalLength();
+        svgPath.style.strokeDasharray = pathLength;
+        svgPath.style.strokeDashoffset = pathLength;
 
-            scrollProgress.style.height = percentage + '%';
-        });
+        const updateScrollProgress = () => {
+            const container = document.querySelector('.curved-scroll-container');
+            if (!container) return;
+
+            const rect = container.getBoundingClientRect();
+            const clientHeight = window.innerHeight;
+
+            // We measure progress as how much of the container has passed 
+            // the middle of the screen (clientHeight / 2).
+            const centerOfScreen = clientHeight / 2;
+            const containerStart = rect.top;
+
+            // Calculate progress 0.0 to 1.0
+            let progress = (centerOfScreen - containerStart) / rect.height;
+            progress = Math.min(Math.max(progress, 0), 1);
+
+            // Draw the line
+            svgPath.style.strokeDashoffset = pathLength - (progress * pathLength);
+
+            // Move the arrow icon
+            const point = svgPath.getPointAtLength(progress * pathLength);
+
+            // point.x and point.y are relative to the viewBox "0 0 100 400"
+            const xPercent = (point.x / 100) * 100;
+            const yPercent = (point.y / 400) * 100;
+
+            scrollArrow.style.left = xPercent + '%';
+            scrollArrow.style.top = yPercent + '%';
+        };
+
+        window.addEventListener('scroll', updateScrollProgress, { passive: true });
+        window.addEventListener('resize', updateScrollProgress);
+        updateScrollProgress(); // init
     }
 });

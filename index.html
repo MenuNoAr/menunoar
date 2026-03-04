@@ -48,9 +48,25 @@
     </header>
 
     <main style="position: relative;">
-        <!-- VERTICAL SCROLL LINE -->
-        <div class="scroll-line-container">
-            <div class="scroll-line-progress" id="scrollProgress"></div>
+        <!-- CURVED SCROLL PROGRESS -->
+        <div class="curved-scroll-container">
+            <!-- 
+               ViewBox 0 0 100 400 maps directly to our 400vh space.
+               The path curves beautifully between left and right as it descends.
+               Points map to vertical percentage: 
+               - Y=0: Hero center
+               - Y=100: Mockup center
+               - Y=200: Features center
+               - Y=300: Pricing center
+               - Y=400: CTA center
+            -->
+            <svg id="scrollSvg" preserveAspectRatio="none" viewBox="0 0 100 400">
+                <path class="path-bg"
+                    d="M 50,0 C 90,40 90,60 90,100 C 90,140 10,160 10,200 C 10,240 90,260 90,300 C 90,340 50,360 50,400" />
+                <path id="pathLineFg" class="path-line"
+                    d="M 50,0 C 90,40 90,60 90,100 C 90,140 10,160 10,200 C 10,240 90,260 90,300 C 90,340 50,360 50,400" />
+            </svg>
+            <div id="scrollArrow" class="scroll-arrow"><i class="ph ph-arrow-down"></i></div>
         </div>
 
         <!-- HERO -->

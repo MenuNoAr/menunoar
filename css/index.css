@@ -6,7 +6,7 @@
 html {
     scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 body {
@@ -16,50 +16,77 @@ body {
 main>section {
     scroll-snap-align: start;
     scroll-snap-stop: always;
-    min-height: 100vh;
+    height: 100vh;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     position: relative;
+    overflow: hidden;
 }
 
 footer {
     scroll-snap-align: end;
 }
 
-/* SCROLL PROGRESS LINE */
-.scroll-line-container {
-    position: fixed;
-    top: 0;
-    left: 40px;
-    bottom: 0;
-    width: 2px;
-    background: rgba(0, 0, 0, 0.05);
-    z-index: 50;
-    pointer-events: none;
-}
-
-.scroll-line-progress {
+/* CURVED SCROLL PROGRESS TRACK */
+.curved-scroll-container {
     position: absolute;
-    top: 0;
+    top: 50vh;
     left: 0;
-    width: 100%;
-    height: 0%;
-    background: var(--primary);
-    transition: height 0.1s ease-out;
+    right: 0;
+    height: 400vh;
+    /* Exactly from center of Section 1 to center of Section 5 */
+    pointer-events: none;
+    z-index: 1;
+    /* behind content to not block clicks */
 }
 
-.scroll-line-progress::after {
-    content: '';
+.curved-scroll-container svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+}
+
+.path-bg {
+    stroke: rgba(0, 0, 0, 0.06);
+    stroke-width: 3px;
+    stroke-dasharray: 8 8;
+    /* A dotted/dashed track looks super modern */
+    fill: none;
+    vector-effect: non-scaling-stroke;
+}
+
+.path-line {
+    stroke: var(--primary);
+    stroke-width: 4px;
+    stroke-linecap: round;
+    fill: none;
+    vector-effect: non-scaling-stroke;
+    /* dasharray handled by JS */
+}
+
+.scroll-arrow {
     position: absolute;
-    bottom: -4px;
+    top: 0;
     left: 50%;
-    transform: translateX(-50%);
-    width: 10px;
-    height: 10px;
-    border-right: 2px solid var(--primary);
-    border-bottom: 2px solid var(--primary);
-    transform: translateX(-50%) rotate(45deg);
+    transform: translate(-50%, -50%);
+    background: var(--primary);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(31, 168, 255, 0.4);
+    will-change: left, top;
+}
+
+.scroll-arrow i {
+    font-size: 1.1rem;
+    font-weight: bold;
 }
 
 :root {
