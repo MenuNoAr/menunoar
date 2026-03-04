@@ -60,14 +60,15 @@
     font-weight: 700;
 }
 
-.nav-fixed {
-    position: fixed;
+.nav-header {
+    position: absolute;
     top: 36px;
+    /* Below top-banner */
     left: 0;
     right: 0;
     height: 70px;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
+    background: transparent;
+    /* No longer needs blur backdrop as it's at the top */
     z-index: 1000;
     border-bottom: 1px solid var(--border-color);
 }
