@@ -1,0 +1,119 @@
+/* 
+  Dashboard Specific Layout & Editor Workspace
+*/
+
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+}
+
+.sidebar {
+    background-color: var(--bg-surface);
+    border-right: 1px solid var(--border-color);
+    padding: 32px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.sidebar-logo {
+    height: 32px;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+
+.nav-item i {
+    font-size: 1rem;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background-color: var(--primary-soft);
+    color: var(--text-main);
+}
+
+.main-content {
+    background-color: var(--bg-page);
+    display: flex;
+    flex-direction: column;
+}
+
+.top-bar {
+    height: 64px;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.editor-workspace {
+    flex: 1;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.card {
+    background-color: var(--bg-surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    padding: 32px;
+}
+
+/* Setup Screen */
+.setup-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-page);
+    padding: 24px;
+}
+
+/* Trial Badge States */
+.trial-timer-badge {
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.state-pro {
+    background: #000;
+    color: #fff;
+}
+
+.state-trial {
+    background: var(--primary-soft);
+    color: var(--text-main);
+}
+
+.state-expired {
+    background: var(--danger);
+    color: #fff;
+}

@@ -1,81 +1,37 @@
 /* 
-  Menu no Ar - Editor Styles Refactored
-  Focused on a professional, workspace-first interface.
+  Menu no Ar - Minimalist Editor Styles
+  Focus: Serious workspace, low rounding, professional utilities.
 */
+
+.editor-workspace {
+    background-color: #f8fafc;
+}
 
 .editor-canvas {
     width: 375px;
-    /* Mobile View as center piece */
     min-height: 667px;
     background-color: #fff;
-    border-radius: 40px;
-    box-shadow: 0 0 0 12px #222, var(--shadow-xl);
+    border: 12px solid #0f172a;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
     overflow: hidden;
     position: relative;
-    transform-origin: top center;
 }
 
 .dark-mode .editor-canvas {
-    box-shadow: 0 0 0 12px #333, var(--shadow-xl);
+    border-color: #1e293b;
+    background-color: #000;
 }
 
-/* Editor Overlays */
-.edit-hint {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    opacity: 0;
-    transition: var(--transition);
-    pointer-events: none;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.editable-area:hover .edit-hint {
-    opacity: 1;
-}
-
-.item-card-editor {
-    position: relative;
-    border: 1px solid transparent;
-    transition: var(--transition);
-}
-
-.item-card-editor:hover {
-    border-color: var(--primary);
-    background-color: var(--primary-soft);
-}
-
-.item-actions-panel {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    display: flex;
-    gap: 4px;
-    opacity: 0;
-    transition: var(--transition);
-}
-
-.item-card-editor:hover .item-actions-panel {
-    opacity: 1;
-}
-
-/* Modals Modernized */
+/* Modal System - Industrial Minimalist */
 .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(2, 6, 23, 0.8);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.7);
     display: none;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    padding: 24px;
 }
 
 .modal-backdrop.open {
@@ -84,13 +40,11 @@
 
 .modal-content {
     background-color: var(--bg-surface);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-sm);
     width: 100%;
-    max-width: 500px;
+    max-width: 480px;
     padding: 32px;
-    box-shadow: var(--shadow-xl);
     border: 1px solid var(--border-color);
-    animation: fadeIn 0.3s ease-out;
 }
 
 .modal-header {
@@ -98,73 +52,59 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
 }
 
-.modal-header h2 {
-    font-size: 1.5rem;
-}
-
-/* Form Styling */
+/* Forms - Minimal */
 .form-group {
     margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     margin-bottom: 8px;
     color: var(--text-muted);
 }
 
 .form-input {
     width: 100%;
-    padding: 12px 16px;
-    border-radius: var(--radius-md);
+    padding: 12px;
+    background: var(--bg-page);
     border: 1px solid var(--border-color);
-    background-color: var(--bg-page);
-    color: var(--text-main);
+    border-radius: var(--radius-sm);
+    font-size: 0.9375rem;
     transition: var(--transition);
 }
 
 .form-input:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
-/* Toast System Refined */
-#toast-container {
-    position: fixed;
-    bottom: 32px;
-    right: 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    z-index: 2000;
+/* Item Cards in Editor */
+.menu-item {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: grid;
+    grid-template-columns: 1fr 80px;
+    gap: 16px;
 }
 
-.toast {
-    padding: 16px 24px;
-    border-radius: var(--radius-md);
-    background-color: var(--text-main);
-    color: var(--bg-page);
-    font-weight: 600;
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    animation: slideIn 0.3s ease-out;
+.menu-item:hover {
+    background-color: var(--primary-soft);
 }
 
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
+/* Tooltips/Toast - Neutral */
+#toast-container div {
+    border-radius: var(--radius-sm) !important;
+}
 
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+/* Tab Management in Modals */
+.settings-tab-pane {
+    animation: fadeIn 0.2s ease-out;
 }
