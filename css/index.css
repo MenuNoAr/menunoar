@@ -3,6 +3,65 @@
   Minimalist, high density, sophisticated animations.
 */
 
+html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    overflow-y: scroll;
+}
+
+body {
+    counter-reset: section;
+}
+
+main>section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+footer {
+    scroll-snap-align: end;
+}
+
+/* SCROLL PROGRESS LINE */
+.scroll-line-container {
+    position: fixed;
+    top: 0;
+    left: 40px;
+    bottom: 0;
+    width: 2px;
+    background: rgba(0, 0, 0, 0.05);
+    z-index: 50;
+    pointer-events: none;
+}
+
+.scroll-line-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    background: var(--primary);
+    transition: height 0.1s ease-out;
+}
+
+.scroll-line-progress::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid var(--primary);
+    border-bottom: 2px solid var(--primary);
+    transform: translateX(-50%) rotate(45deg);
+}
+
 :root {
     --grid-color: rgba(0, 0, 0, 0.04);
 }
@@ -73,7 +132,7 @@
 
 /* HERO SECTION - Tighter & More Impactful */
 .hero {
-    padding: 160px 0 80px;
+    /* Removed padding, using min-height 100vh from main > section */
     text-align: center;
     position: relative;
     background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
@@ -115,9 +174,9 @@
     color: #000;
 }
 
-/* MOCKUP - Tighter Spacing */
+/* MOCKUP */
 .hero-mockup {
-    padding: 0 40px 100px;
+    /* Removed padding to center vertically */
     position: relative;
     z-index: 10;
 }
@@ -171,7 +230,6 @@
 
 /* PRICING REFINED */
 .pricing-minimal {
-    padding: 60px 0;
     background: #fafafa;
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);

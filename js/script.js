@@ -77,4 +77,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const revealElements = document.querySelectorAll('.reveal, .reveal-blur, .reveal-shadow');
     revealElements.forEach(el => revealObserver.observe(el));
+
+    // 3. Scroll Progress Line Logic
+    const scrollProgress = document.getElementById('scrollProgress');
+    if (scrollProgress) {
+        window.addEventListener('scroll', () => {
+            const htmlElement = document.documentElement;
+            // Native smooth snap containers scroll on the HTML element.
+            const scrollTop = window.scrollY || htmlElement.scrollTop;
+            const scrollHeight = htmlElement.scrollHeight;
+            const clientHeight = htmlElement.clientHeight;
+
+            const scrolled = (scrollTop / (scrollHeight - clientHeight)) * 100;
+            // Prevent going below 0 or above 100
+            const percentage = Math.min(Math.max(scrolled, 0), 100);
+
+            scrollProgress.style.height = percentage + '%';
+        });
+    }
 });
