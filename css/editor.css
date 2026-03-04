@@ -1,15 +1,16 @@
 /* 
   Editor - Refined Full Canvas Styles
+  WorkOS Inspired density and spacing.
 */
 
 .category-nav-wrapper {
     position: sticky;
-    top: 80px;
-    /* Below top-bar */
+    top: 52px;
+    /* Matches new top-bar height */
     background: #fff;
     z-index: 50;
     border-bottom: 1px solid var(--border-color);
-    padding: 12px 40px;
+    padding: 8px 32px;
     display: flex;
     overflow-x: auto;
     gap: 12px;
@@ -21,52 +22,55 @@
 }
 
 .tab-btn {
-    padding: 8px 20px;
-    border-radius: 50px;
+    padding: 6px 16px;
+    border-radius: 4px;
+    /* WorkOS sharp style */
     background: var(--bg-page);
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     white-space: nowrap;
     cursor: pointer;
     transition: var(--transition);
-    border: 1px solid transparent;
+    border: 1px solid var(--border-color);
 }
 
 .tab-btn.active {
     background: var(--primary);
     color: #fff;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    border-color: var(--primary);
 }
 
 .menu-section {
-    padding: 60px 40px;
+    padding: 40px 32px;
 }
 
 .category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 32px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .category-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 /* Item Grid */
 .items-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
 }
 
 .menu-item-card {
     background: #fff;
-    border-radius: var(--radius-lg);
+    border-radius: 4px;
+    /* Sharp industrial */
     border: 1px solid var(--border-color);
     overflow: hidden;
     transition: var(--transition);
@@ -76,12 +80,12 @@
 
 .menu-item-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
     border-color: var(--primary);
 }
 
 .item-visual {
-    height: 180px;
+    height: 160px;
     background: var(--bg-page);
     position: relative;
 }
@@ -93,7 +97,7 @@
 }
 
 .item-details {
-    padding: 24px;
+    padding: 20px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -108,20 +112,17 @@
 
 .item-name {
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .item-price {
-    font-weight: 800;
+    font-weight: 700;
     color: var(--primary);
-    background: var(--primary-soft);
-    padding: 4px 10px;
-    border-radius: 6px;
     font-size: 0.9rem;
 }
 
 .item-description {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     color: var(--text-muted);
     line-height: 1.5;
     margin-bottom: 20px;
@@ -131,7 +132,7 @@
 .item-actions {
     display: flex;
     gap: 8px;
-    opacity: 0.4;
+    opacity: 0.2;
     transition: var(--transition);
 }
 
@@ -157,14 +158,27 @@
     background: #fff;
     border: 1px solid var(--primary);
 }
+
+.add-item-trigger {
+    border: 2px dashed var(--border-color);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    min-height: 150px;
+    opacity: 0.6;
+    transition: var(--transition);
+}
+
 .add-item-trigger:hover {
-    opacity: 1 !important;
-    border-color: var(--primary) !important;
-    background: var(--primary-soft) !important;
+    opacity: 1;
+    border-color: var(--primary);
+    background: var(--primary-soft);
     transform: translateY(-4px);
 }
 
-.add-item-trigger:hover i, 
+.add-item-trigger:hover i,
 .add-item-trigger:hover div {
     color: var(--primary) !important;
 }

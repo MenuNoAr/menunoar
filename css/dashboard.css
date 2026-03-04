@@ -4,7 +4,7 @@
 
 .dashboard-layout {
     display: grid;
-    grid-template-columns: 80px 1fr;
+    grid-template-columns: 70px 1fr;
     min-height: 100vh;
     background: var(--bg-page);
 }
@@ -27,7 +27,7 @@
 }
 
 .sidebar-logo {
-    height: 32px;
+    height: 28px;
 }
 
 .nav-menu {
@@ -74,11 +74,11 @@
 }
 
 .top-bar {
-    height: 60px;
+    height: 52px;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-color);
-    padding: 0 40px;
+    padding: 0 32px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -156,8 +156,8 @@
     background: #fff;
     border-radius: var(--radius-lg);
     width: 100%;
-    max-width: 550px;
-    padding: 40px;
+    max-width: 500px;
+    padding: 32px;
     box-shadow: var(--shadow-lg);
     animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -207,7 +207,7 @@
 
 /* Inline Add Category Area */
 .add-category-inline {
-    padding: 60px 40px;
+    padding: 40px 32px;
     text-align: center;
 }
 

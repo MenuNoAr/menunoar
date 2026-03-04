@@ -1,11 +1,54 @@
+/* 
+  Index - WorkOS Inspired Aesthetic
+  Minimalist, high density, sophisticated animations.
+*/
+
+:root {
+    --grid-color: rgba(0, 0, 0, 0.04);
+}
+
+/* BASE ENTRANCE ANIMATIONS */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.reveal {
+    opacity: 0;
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-1 {
+    animation-delay: 0.1s;
+}
+
+.delay-2 {
+    animation-delay: 0.2s;
+}
+
+.delay-3 {
+    animation-delay: 0.3s;
+}
+
+.delay-4 {
+    animation-delay: 0.4s;
+}
+
 /* TOP BANNER */
 .top-banner {
     background: #000;
     color: #fff;
-    padding: 10px 0;
+    padding: 8px 0;
     text-align: center;
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 500;
     position: relative;
     z-index: 1100;
 }
@@ -13,237 +56,167 @@
 .top-banner a {
     color: var(--primary);
     text-decoration: none;
-    margin-left: 10px;
-}
-
-.top-banner a:hover {
-    text-decoration: underline;
+    margin-left: 8px;
+    font-weight: 700;
 }
 
 .nav-fixed {
     position: fixed;
-    top: 40px;
-    /* Space for banner */
+    top: 36px;
     left: 0;
     right: 0;
-    height: 80px;
+    height: 70px;
     background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(30px);
+    backdrop-filter: blur(20px);
     z-index: 1000;
     border-bottom: 1px solid var(--border-color);
 }
 
-/* HERO SECTION */
+/* HERO SECTION - Tighter & More Impactful */
 .hero {
-    padding: 240px 0 160px;
+    padding: 160px 0 80px;
     text-align: center;
     position: relative;
-    background-image:
-        linear-gradient(var(--grid-color) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-    background-size: 40px 40px;
-}
-
-.hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, transparent 0%, #fff 70%);
-    pointer-events: none;
-}
-
-.hero .container {
-    position: relative;
-    z-index: 2;
-}
-
-.section-label {
-    display: inline-block;
-    padding: 8px 16px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    background: #000;
-    color: #fff;
-    border-radius: 2px;
-    margin-bottom: 40px;
-    text-transform: uppercase;
+    background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+    background-size: 32px 32px;
 }
 
 .hero h1 {
-    font-size: 6.5rem;
-    line-height: 0.9;
-    letter-spacing: -0.06em;
-    margin-bottom: 32px;
+    font-size: 5rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 24px;
     color: #000;
-    font-weight: 850;
+    font-weight: 800;
 }
 
 .hero p {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: var(--text-muted);
-    max-width: 750px;
-    margin: 0 auto 64px;
-    line-height: 1.4;
+    max-width: 600px;
+    margin: 0 auto 40px;
+    line-height: 1.5;
 }
 
-/* BUTTONS - Reduced & Refined */
+/* BUTTONS - WorkOS Style (Sharp & Elegant) */
 .btn-hero {
-    padding: 18px 36px;
-    font-size: 1rem;
-    font-weight: 700;
-    border-radius: 4px;
+    padding: 14px 28px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 6px;
 }
 
 .btn-hero-secondary {
-    padding: 18px 36px;
-    font-size: 1rem;
-    font-weight: 700;
-    border-radius: 4px;
-    background: transparent;
+    padding: 14px 28px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 6px;
+    background: #fff;
     border: 1px solid var(--border-color);
-    color: var(--text-main);
+    color: #000;
 }
 
-.btn-hero-secondary:hover {
-    background: #000;
-    color: #fff;
-}
-
-/* MOCKUP */
+/* MOCKUP - Tighter Spacing */
 .hero-mockup {
-    margin-top: -100px;
-    padding: 0 40px 140px;
+    padding: 0 40px 100px;
     position: relative;
     z-index: 10;
 }
 
 .mockup-container {
-    max-width: 1200px;
+    max-width: 1100px;
     margin: 0 auto;
-    background: #f8fafc;
-    border-radius: 4px;
+    background: #fff;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);
-    aspect-ratio: 16/9;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.08);
+    aspect-ratio: 16/10;
     border: 1px solid var(--border-color);
     position: relative;
 }
 
-.mockup-overlay {
-    position: absolute;
-    bottom: 40px;
-    left: 40px;
-    z-index: 5;
-}
-
-.mockup-badge {
-    background: #000;
-    color: #fff;
-    padding: 8px 16px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    border-radius: 2px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-/* BENTO GRID */
+/* BENTO FEATURE GRID - WorkOS Information Density */
 .bento-grid {
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 32px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
 }
 
 .bento-card {
     background: #fff;
     border: 1px solid var(--border-color);
-    padding: 56px;
-    border-radius: 4px;
+    padding: 32px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    min-height: 440px;
-    transition: var(--transition);
-}
-
-.bento-card:hover {
-    transform: translateY(-12px);
-    border-color: var(--primary);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.06);
+    height: 100%;
 }
 
 .bento-card i {
-    font-size: 3.5rem;
-    color: #000;
-    margin-bottom: 60px;
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 32px;
 }
 
 .bento-card h3 {
-    font-size: 2rem;
-    margin-bottom: 16px;
-    letter-spacing: -0.04em;
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
 }
 
-.item-1,
-.item-4 {
-    grid-column: span 7;
+.bento-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-muted);
 }
 
-.item-2,
-.item-3 {
-    grid-column: span 5;
-}
-
-/* PRICING */
+/* PRICING - Compact & Strong */
 .pricing-minimal {
-    padding: 200px 0;
-    background: #000;
-    color: #fff;
-    text-align: center;
-}
-
-.pricing-minimal h2 {
-    font-size: 5.5rem;
-    letter-spacing: -0.05em;
-    margin-bottom: 80px;
+    padding: 120px 0;
+    background: #fafafa;
+    border-top: 1px solid var(--border-color);
 }
 
 .pricing-box {
-    max-width: 600px;
+    max-width: 480px;
     margin: 0 auto;
-    background: #080808;
-    border: 1px solid #1a1a1a;
-    padding: 80px;
-    border-radius: 4px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    padding: 60px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
 }
 
 .price-value {
-    font-size: 8rem;
-    font-weight: 900;
-    margin: 32px 0;
-    letter-spacing: -0.05em;
-    line-height: 1;
+    font-size: 4rem;
+    font-weight: 800;
+    margin: 20px 0;
+    letter-spacing: -0.04em;
 }
 
-/* RESPONSIVE */
+/* FOOTER - Tighter */
+.footer {
+    padding: 80px 0 40px;
+    border-top: 1px solid var(--border-color);
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+}
+
 @media (max-width: 1024px) {
     .hero h1 {
-        font-size: 4.5rem;
-    }
-
-    .hero {
-        padding: 180px 0 120px;
+        font-size: 3.5rem;
     }
 
     .bento-grid {
         grid-template-columns: 1fr;
     }
 
-    .item-1,
-    .item-2,
-    .item-3,
-    .item-4 {
-        grid-column: span 1 !important;
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
     }
 }

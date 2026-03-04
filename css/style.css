@@ -175,20 +175,46 @@ h4 {
     letter-spacing: 0.05em;
 }
 
-.animate-fade {
-    animation: fadeIn 0.5s ease-out forwards;
-}
-
-@keyframes fadeIn {
+/* ENTRANCE ANIMATIONS (WorkOS Inspired) */
+@keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(15px);
+        transform: translateY(24px);
     }
 
     to {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.reveal {
+    opacity: 0;
+    animation: fadeInUp 0.7s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+.delay-1 {
+    animation-delay: 0.1s;
+}
+
+.delay-2 {
+    animation-delay: 0.2s;
+}
+
+.delay-3 {
+    animation-delay: 0.3s;
+}
+
+.delay-4 {
+    animation-delay: 0.4s;
+}
+
+.delay-5 {
+    animation-delay: 0.5s;
+}
+
+.animate-fade {
+    animation: fadeInUp 0.5s ease-out forwards;
 }
 
 .badge {
