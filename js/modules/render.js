@@ -219,7 +219,7 @@ export function renderPdfViewer(data) {
 
 // ─── Menu ─────────────────────────────────────────────────────────────────────
 export function renderMenu(items) {
-    const container = document.getElementById('menuContainer');
+    const container = document.getElementById('menuSections');
     const nav = document.getElementById('categoryNav');
     if (!container || !nav) return;
 

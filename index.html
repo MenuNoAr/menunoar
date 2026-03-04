@@ -4,306 +4,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Menu no Ar - A tua ementa digital</title>
+    <title>Menu no Ar - A tua ementa digital profissional</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
 
-    <!-- Fonts - Optimized -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-    <!-- CSS -->
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
 
-    <!-- Critical Scripts - Deferred for better FCP -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <style>
+        /* Hero specific styles for Index */
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+            background: radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%);
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            padding: 80px 0;
+        }
+
+        .feature-item {
+            padding: 32px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            transition: var(--transition);
+        }
+
+        .feature-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+        }
+
+        .nav-sticky {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 48px);
+            max-width: 1200px;
+            height: 72px;
+            padding: 0 24px;
+            border-radius: 40px;
+            z-index: 1000;
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- Floating Navbar -->
-    <nav class="main-nav">
-        <div class="nav-content">
-            <a href="#" class="logo-link">
-                <img src="assets/images/logo.svg" alt="Menu no Ar" class="nav-logo" width="150" height="60">
-            </a>
+    <!-- Professional Floating Navbar -->
+    <nav class="nav-sticky glass flex items-center justify-between">
+        <a href="#" class="flex items-center">
+            <img src="assets/images/logo.svg" alt="Menu no Ar" style="height: 48px;">
+        </a>
 
-            <div class="nav-links">
-                <a href="#funciona">Como Funciona</a>
-                <a href="#demo">Exemplos</a>
-                <a href="#planos">Preços</a>
-                <a href="#contactos">Começar</a>
-            </div>
-
-            <div class="nav-actions" id="navActions">
-                <a href="login.html" class="btn-text">Entrar</a>
-                <a href="signup.html" class="btn-primary small">Criar Conta</a>
-            </div>
-
-            <button class="mobile-toggle" aria-label="Menu">
-                <i class="ph ph-list"></i>
-            </button>
+        <div class="flex items-center gap-4" id="navActions">
+            <a href="login.html" class="btn btn-ghost">Entrar</a>
+            <a href="signup.html" class="btn btn-primary">Começar Grátis</a>
         </div>
     </nav>
 
-    <!-- Mobile Menu Overlay -->
-    <div class="mobile-menu">
-        <a href="#funciona">Como Funciona</a>
-        <a href="#demo">Exemplos</a>
-        <a href="#planos">Preços</a>
-        <a href="login.html">Entrar</a>
-        <a href="signup.html" class="btn-primary-text">Criar Conta</a>
-    </div>
-
     <main>
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="container hero-grid">
-                <div class="hero-text">
-                    <div class="pill-badge">
-                        <i class="ph ph-star"></i> A escolha dos melhores restaurantes
-                    </div>
-                    <h1>O Fim dos Menus de Papel. O Início da <span class="text-primary">Eficiência</span>.
-                    </h1>
-                    <p>Digitalize o seu restaurante em minutos. Um menu inteligente em PDF ou formato tátil, sem
-                        necessidade de apps externas.</p>
-                    <div class="hero-btns">
-                        <a href="signup.html" class="btn-primary">
-                            <i class="ph ph-rocket-launch"></i> Começar Gratuitamente
-                        </a>
-                        <a href="#demo" class="btn-secondary">
-                            Como Funciona <i class="ph ph-arrow-right"></i>
-                        </a>
-                    </div>
+        <!-- Modern Hero Section -->
+        <section class="hero">
+            <div class="container animate-fade">
+                <span
+                    style="background: var(--primary-soft); color: var(--primary); padding: 8px 16px; border-radius: 50px; font-weight: 700; font-size: 0.875rem; margin-bottom: 24px; display: inline-block;">
+                    ✨ A revolução dos menus digitais
+                </span>
+                <h1 class="gradient-text">Aumenta a tua faturação<br>com um menu inteligente.</h1>
+                <p>Digitaliza o teu restaurante em minutos. Partilha o teu menu via QR Code e deixa os teus clientes
+                    encantados com uma experiência tátil moderna.</p>
 
-                    <div class="hero-rating">
-                        <div class="rating-stars-container">
-                            <div class="rating-stars">
-                                <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i
-                                    class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i
-                                    class="ph-fill ph-star"></i>
-                            </div>
-                            <span class="rating-text">+500
-                                restaurantes satisfeitos</span>
-                        </div>
-                    </div>
+                <div class="flex items-center justify-center gap-4">
+                    <a href="signup.html" class="btn btn-primary" style="padding: 16px 32px; font-size: 1.1rem;">
+                        Criar Menu Grátis <i class="ph ph-arrow-right"></i>
+                    </a>
+                    <a href="#funciona" class="btn btn-secondary" style="padding: 16px 32px; font-size: 1.1rem;">
+                        Ver Demo
+                    </a>
                 </div>
-                <div class="hero-visual">
-                    <img src="assets/images/dashboard.png" alt="Software Interface" width="600" height="400"
-                        loading="lazy">
-                    <!-- Ambient glows replacing old blobs -->
-                    <div class="hero-glow-1"></div>
-                    <div class="hero-glow-2"></div>
+
+                <!-- Dashboard Mockup/Preview -->
+                <div style="margin-top: 80px; position: relative;">
+                    <div
+                        style="position: absolute; inset: 0; background: var(--primary); filter: blur(120px); opacity: 0.1; z-index: -1;">
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=1200&q=80"
+                        alt="App Preview"
+                        style="width: 100%; max-width: 1000px; border-radius: 24px; border: 8px solid var(--bg-surface); box-shadow: var(--shadow-xl);">
                 </div>
             </div>
         </section>
 
-        <!-- Features Grid -->
-        <section id="funciona" class="features-section">
-            <div class="container">
-                <div class="section-header text-center reveal">
-                    <h2>Desenvolvido a pensar no dono do restaurante</h2>
-                    <p>Uma plataforma completa que remove atritos e otimiza a experiência de consumo.</p>
+        <!-- Features Section -->
+        <section id="funciona" class="container">
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="ph ph-qr-code"></i></div>
+                    <h3>QR Code Próprio</h3>
+                    <p>Gera um código único para o teu restaurante que nunca muda, mesmo que alteres o teu menu.</p>
                 </div>
-
-                <div class="features-grid reveal">
-                    <!-- Feature 1 -->
-                    <div class="feature-card">
-                        <div class="icon-box icon-box-primary">
-                            <i class="ph ph-qr-code"></i>
-                        </div>
-                        <h3>Acesso Imediato</h3>
-                        <p>Os clientes acedem ao menu instantaneamente via QR Code. Sem formulários ou downloads.</p>
-                    </div>
-                    <!-- Feature 2 -->
-                    <div class="feature-card">
-                        <div class="icon-box icon-box-accent">
-                            <i class="ph ph-device-mobile"></i>
-                        </div>
-                        <h3>Gestão em Tempo Real</h3>
-                        <p>O Prato do Dia acabou? Atualize no telemóvel e o cliente vê imediatamente a alteração.</p>
-                    </div>
-                    <!-- Feature 3 -->
-                    <div class="feature-card">
-                        <div class="icon-box icon-box-purple">
-                            <i class="ph ph-translate"></i>
-                        </div>
-                        <h3>Interface Universal</h3>
-                        <p>O menu formata-se de modo estético em qualquer smartphone ou tablet.</p>
-                    </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="ph ph-pencil-line"></i></div>
+                    <h3>Edição em Tempo Real</h3>
+                    <p>Acabou o stock de um prato? Esconde-o em 2 segundos através do teu telemóvel.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="ph ph-palette"></i></div>
+                    <h3>Design Premium</h3>
+                    <p>O teu menu vai parecer uma aplicação nativa. Cores, fontes e imagens à tua medida.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Product Details / Showcase -->
-        <section id="demo" class="showcase-section">
-            <div class="container">
-                <div class="showcase-grid reveal">
-                    <div class="showcase-image">
-                        <img src="https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=600&q=80"
-                            alt="Experiência Mobile" loading="lazy" width="600" height="700">
-                        <div class="showcase-badge">
-                            <div class="badge-icon-container">
-                                <i class="ph ph-lightning"></i>
-                            </div>
-                            <div>
-                                <div class="badge-title">Carregamento Flash</div>
-                                <div class="badge-subtitle">Menos de 1 segundo</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="showcase-info">
-                        <h2>Design à medida da tua marca</h2>
-                        <p>O Menu no Ar adapta-se não só com cores, mas com fontes sofisticadas, seja em formato
-                            interativo ou PDF.</p>
-                        <ul class="check-list">
-                            <li><i class="ph-fill ph-check-circle"></i> Painel de
-                                Controlo Total</li>
-                            <li><i class="ph-fill ph-check-circle"></i> Modo Clássico em
-                                PDF</li>
-                        </ul>
-                    </div>
+        <!-- Pricing Section -->
+        <section style="padding: 100px 0; background: var(--bg-surface); border-top: 1px solid var(--border-color);">
+            <div class="container text-center">
+                <h2 style="font-size: 2.5rem; margin-bottom: 48px;">O melhor preço do mercado.</h2>
+
+                <div class="card animate-fade"
+                    style="max-width: 400px; margin: 0 auto; border: 2px solid var(--primary);">
+                    <span
+                        style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; position: absolute; top: -14px; left: 50%; transform: translateX(-50%);">MAIS
+                        POPULAR</span>
+                    <h3 style="margin-bottom: 8px;">Profissional</h3>
+                    <div style="font-size: 3rem; font-weight: 800; margin-bottom: 16px;">15€<span
+                            style="font-size: 1rem; color: var(--text-muted); font-weight: 400;">/mês</span></div>
+                    <ul
+                        style="list-style: none; text-align: left; margin-bottom: 32px; display: flex; flex-direction: column; gap: 12px;">
+                        <li><i class="ph ph-check-circle" style="color: var(--success);"></i> Pratos e Categorias
+                            Ilimitadas</li>
+                        <li><i class="ph ph-check-circle" style="color: var(--success);"></i> Edição Instantânea</li>
+                        <li><i class="ph ph-check-circle" style="color: var(--success);"></i> QR Code de Alta Qualidade
+                        </li>
+                        <li><i class="ph ph-check-circle" style="color: var(--success);"></i> Suporte Prioritário</li>
+                    </ul>
+                    <a href="signup.html" class="btn btn-primary" style="width: 100%; justify-content: center;">Começar
+                        Agora</a>
                 </div>
             </div>
-            <!-- Advantages Extra Section -->
-            <section class="advantages-section">
-                <div class="container">
-                    <div class="reveal advantages-card">
-                        <h3 class="advantages-title">Porquê escolher um menu digital?</h3>
-                        <div class="advantages-grid">
-                            <div class="advantage-item">
-                                <div class="advantage-icon icon-primary"><i class="ph ph-chart-line-up"></i>
-                                </div>
-                                <div class="advantage-content">
-                                    <h4>Aumenta Faturação</h4>
-                                    <p>Menus atrativos com fotografias reais induzem o cliente a pedir mais.</p>
-                                </div>
-                            </div>
-                            <div class="advantage-item">
-                                <div class="advantage-icon icon-accent"><i class="ph ph-clock"></i></div>
-                                <div class="advantage-content">
-                                    <h4>Poupa Tempo</h4>
-                                    <p>Atualize preços e dispoinibilidades num clique, sem contactar gráficas.</p>
-                                </div>
-                            </div>
-                            <div class="advantage-item">
-                                <div class="advantage-icon icon-orange"><i class="ph ph-leaf"></i></div>
-                                <div class="advantage-content">
-                                    <h4>Sustentável</h4>
-                                    <p>Menos papel impresso = mais ecológico e melhor para as suas margens.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Pricing Section -->
-            <section id="planos" class="pricing-section">
-                <div class="container">
-                    <div class="section-header text-center reveal">
-                        <h2>Sem surpresas. Preço único.</h2>
-                        <p>Subscrição acessível com acesso total, sem comissões ocultas.</p>
-                    </div>
-
-                    <div class="reveal">
-                        <div class="pricing-card">
-                            <div class="pricing-badge">1 MÊS GRÁTIS</div>
-
-                            <h3>Plano Profissional</h3>
-                            <div class="pricing-price">
-                                <span class="amount">15€</span>
-                                <span class="price-period">/ mês</span>
-                            </div>
-                            <p class="pricing-description">Custo fixo. Sem compromisso de fidelização.</p>
-
-                            <ul class="check-list pricing-features">
-                                <li><i class="ph-fill ph-check-circle"></i> Itens
-                                    Ilimitados</li>
-                                <li><i class="ph-fill ph-check-circle"></i> Edição
-                                    Instantânea</li>
-                                <li><i class="ph-fill ph-check-circle"></i> QR Code
-                                    Exclusivo</li>
-                                <li><i class="ph-fill ph-check-circle"></i> Modo PDF
-                                    Incluído</li>
-                                <li><i class="ph-fill ph-check-circle"></i> Visualizações
-                                    Ilimitadas</li>
-                            </ul>
-
-                            <p>Pode cancelar a qualquer momento.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- CTA Section -->
-            <section id="contactos" class="cta-section">
-                <div class="container">
-                    <div class="cta-box reveal">
-                        <!-- Decorative subtle grid or lines -->
-                        <div class="cta-grid-overlay"></div>
-
-                        <div class="cta-content">
-                            <h2>Aumenta a satisfação hoje.</h2>
-                            <p>
-                                Cria a tua conta em 30 segundos. Junta-te à revolução da
-                                hospitalidade.
-                            </p>
-
-                            <div>
-                                <a href="signup.html" class="btn-primary">
-                                    Criar Conta Agora
-                                </a>
-                            </div>
-                            <p>Tratamento imediato. Painel
-                                de
-                                controlo seguro.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        </section>
     </main>
 
-    <footer>
-        <div class="container footer-content">
-            <div class="footer-brand">
-                <img src="assets/images/logo.svg" alt="Logo Footer" width="120" height="40" loading="lazy">
-                <p>&copy; 2026 Menu no Ar.</p>
-            </div>
-            <div class="footer-links">
-                <a href="#">Privacidade</a>
-                <a href="#">Termos</a>
-                <a href="login.html">Login</a>
-            </div>
+    <footer style="padding: 60px 0; background: var(--bg-page); border-top: 1px solid var(--border-color);">
+        <div class="container flex justify-between items-center">
+            <img src="assets/images/logo.svg" alt="Menu no Ar" style="height: 40px; opacity: 0.5;">
+            <p style="color: var(--text-muted);">&copy; 2026 Menu no Ar. Todos os direitos reservados.</p>
         </div>
     </footer>
 
-    <!-- Scripts - All deferred -->
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="js/script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Mobile Toggle
-            const t = document.querySelector('.mobile-toggle');
-            const m = document.querySelector('.mobile-menu');
-            if (t) t.onclick = () => {
-                m.classList.toggle('active');
-                const i = t.querySelector('i');
-                i.className = m.classList.contains('active') ? 'ph ph-x' : 'ph ph-list';
-            };
-
-            // Reveal Animation
-            const reveals = document.querySelectorAll('.reveal');
-            const observer = new IntersectionObserver(entries => {
-                entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });
-            }, { threshold: 0.1 });
-            reveals.forEach(r => observer.observe(r));
-        });
-    </script>
 </body>
 
 </html>

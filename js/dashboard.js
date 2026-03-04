@@ -387,11 +387,11 @@ document.getElementById('setupForm').onsubmit = async (e) => {
 window.closeModal = (id) => document.getElementById(id)?.classList.remove('open');
 
 window.closeAllModals = () =>
-    document.querySelectorAll('.edit-modal').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
 
 // Close modals or dropbar on backdrop click
 document.addEventListener('mousedown', (e) => {
-    if (e.target.classList.contains('edit-modal')) window.closeAllModals();
+    if (e.target.classList.contains('modal-backdrop')) window.closeAllModals();
 
     // Close mobile dropbar if clicking outside
     const dropbar = document.getElementById('mobileDropbar');

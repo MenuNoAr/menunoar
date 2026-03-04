@@ -5,653 +5,359 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Painel de Gestão - Menu no Ar</title>
-    <meta name="description"
-        content="Gere o seu menu digital de forma simples e profissional com o Menu no Ar. Editor em tempo real, QR Code e muito mais.">
-    <meta name="keywords" content="menu digital, qr code restaurante, e-menu, gestão restaurante, portugal">
+
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
 
-    <!-- Open Graph / Social -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Menu no Ar - Gestão de Menu Digital">
-    <meta property="og:description" content="O editor de menus mais rápido e intuitivo para o seu restaurante.">
-    <meta property="og:image" content="assets/images/logo.svg">
-
-    <!-- Preconnect to Font Provider -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <!-- Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=Inter:wght@400;600&family=Playfair+Display:wght@400;600&family=Oswald:wght@400;600&family=Montserrat:wght@400;600&family=Lato:wght@400;700&family=Raleway:wght@400;600&family=Dancing+Script:wght@400;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        media="print" onload="this.media='all'">
 
-    <!-- Menu Styles (Visuals for preview) -->
-    <link rel="stylesheet" href="css/menu.css?v=1.1">
-    <!-- Editor Styles (Overlays) -->
-    <link rel="stylesheet" href="css/editor.css?v=3.2">
-    <link rel="stylesheet" href="css/mobile-fix.css?v=1.9">
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Defer non-critical scripts -->
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/menu.css"> <!-- For the preview canvas -->
+
+    <!-- Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js" defer></script>
 </head>
 
-<body>
+<body class="dashboard-body">
 
     <!-- SETUP SCREEN (Visible only if no restaurant) -->
     <div id="setup-screen" class="setup-container" style="display:none;">
-        <div class="setup-card" id="setup-choice-card">
-            <div class="setup-header">
-                <img id="setupLogo" src="assets/images/logo.svg" alt="Logo" class="setup-logo">
-                <h2>Bem-vindo, <span id="setupGreetingName">!</span></h2>
-                <p>Já tens um menu ou queres começar do zero?</p>
-            </div>
-            <div class="setup-actions" style="display:flex; flex-direction:column; gap:15px; margin-top: 20px;">
-                <button type="button" class="btn-confirm btn-full" onclick="showSetupForm('import')"
-                    style="flex: none;">
-                    <i class="fa-solid fa-file-import"></i> Já tenho um menu (Importar)
+        <div class="card animate-fade" id="setup-choice-card" style="max-width: 500px; text-align: center;">
+            <img src="assets/images/logo.svg" alt="Logo" style="height: 48px; margin-bottom: 24px;">
+            <h2>Bem-vindo, <span id="setupGreetingName">!</span></h2>
+            <p style="margin-bottom: 32px; color: var(--text-muted);">Como queres começar o teu menu digital?</p>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <button class="btn btn-primary" onclick="showSetupForm('scratch')"
+                    style="width: 100%; justify-content: center;">
+                    <i class="ph ph-plus-circle"></i> Criar Menu do Zero
                 </button>
-                <button type="button" class="btn-secondary btn-full" onclick="showSetupForm('scratch')"
-                    style="flex: none;">
-                    <i class="fa-solid fa-plus"></i> Criar do Zero
+                <button class="btn btn-secondary" onclick="showSetupForm('import')"
+                    style="width: 100%; justify-content: center;">
+                    <i class="ph ph-file-pdf"></i> Importar Menu PDF
                 </button>
             </div>
         </div>
 
-        <div class="setup-card" id="setup-form-card" style="display:none;">
-            <button type="button" class="btn-cancel" onclick="goBackToSetupChoice()"
-                style="margin-bottom: 20px; width: 100%;">
-                <i class="fa-solid fa-arrow-left"></i> Voltar
-            </button>
-            <div class="setup-header">
-                <h2>Criar Menu do Zero</h2>
-                <p>Vamos dar vida ao teu menu digital.</p>
+        <!-- Setup Form Scratch -->
+        <div class="card animate-fade" id="setup-form-card" style="display:none; max-width: 500px;">
+            <div style="margin-bottom: 24px;">
+                <button class="btn btn-ghost" onclick="goBackToSetupChoice()">
+                    <i class="ph ph-arrow-left"></i> Voltar
+                </button>
             </div>
-            <form id="setupForm" class="setup-form">
-                <div class="form-group">
-                    <label for="setupName">Nome do Restaurante</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-store"></i>
-                        <input type="text" id="setupName" placeholder="ex: O Tasco do Zé" required>
-                    </div>
-                </div>
+            <h2>Novo Menu Digital</h2>
+            <p style="margin-bottom: 24px; color: var(--text-muted);">Diz-nos o nome do teu estabelecimento.</p>
 
+            <form id="setupForm">
                 <div class="form-group">
-                    <label for="setupDesc">Descrição Curta</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-align-left"></i>
-                        <textarea id="setupDesc" rows="2" placeholder="Descreve o teu espaço..."></textarea>
-                    </div>
+                    <label>Nome do Restaurante</label>
+                    <input type="text" id="setupName" class="form-input" placeholder="Ex: Cantinho do Sabor" required>
                 </div>
-
-                <button type="submit" class="btn-confirm btn-full">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Criar Menu
+                <div class="form-group">
+                    <label>Descrição Opcional</label>
+                    <textarea id="setupDesc" class="form-input" rows="2"
+                        placeholder="O melhor da cozinha regional..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; justify-content: center; margin-top: 16px;">
+                    Criar Agora <i class="ph ph-magic-wand"></i>
                 </button>
             </form>
         </div>
 
-        <div class="setup-card" id="setup-import-card" style="display:none;">
-            <button type="button" class="btn-cancel" onclick="goBackToSetupChoice()"
-                style="margin-bottom: 20px; width: 100%;">
-                <i class="fa-solid fa-arrow-left"></i> Voltar
-            </button>
-            <div class="setup-header">
-                <h2>Configura o teu menu</h2>
+        <!-- Setup Form Import -->
+        <div class="card animate-fade" id="setup-import-card" style="display:none; max-width: 500px;">
+            <div style="margin-bottom: 24px;">
+                <button class="btn btn-ghost" onclick="goBackToSetupChoice()">
+                    <i class="ph ph-arrow-left"></i> Voltar
+                </button>
             </div>
-            <form id="importForm" class="setup-form">
+            <h2>Importar PDF</h2>
+            <p style="margin-bottom: 24px; color: var(--text-muted);">Tens um PDF? Nós tratamos de o pôr online.</p>
+
+            <form id="importForm">
                 <div class="form-group">
-                    <label for="importRestName">Nome do Restaurante</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-store"></i>
-                        <input type="text" id="importRestName" required placeholder="ex: O Tasco do Zé">
-                    </div>
+                    <label>Nome do Restaurante</label>
+                    <input type="text" id="importRestName" class="form-input" required>
                 </div>
                 <div class="form-group">
-                    <label>Ficheiro do Menu (Formato PDF)</label>
-                    <div class="file-upload-wrapper" onclick="document.getElementById('importFile').click()"
-                        style="margin-top: 5px;">
-                        <div class="upload-icon"><i class="fa-solid fa-file-pdf"></i></div>
-                        <div class="upload-text">
-                            <span id="importFileNameDisplay">Clique para selecionar o PDF do Menu</span>
-                        </div>
+                    <label>Ficheiro PDF</label>
+                    <div style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 32px; text-align: center; cursor: pointer;"
+                        onclick="document.getElementById('importFile').click()">
+                        <i class="ph ph-cloud-arrow-up"
+                            style="font-size: 2rem; color: var(--primary); margin-bottom: 12px;"></i>
+                        <div id="pdfFileNameDisplay">Clica para selecionar o PDF</div>
+                        <input type="file" id="importFile" hidden accept="application/pdf"
+                            onchange="window.handlePdfSelect(this)">
                     </div>
-                    <input type="file" id="importFile" accept=".pdf" required style="display:none;"
-                        onchange="document.getElementById('importFileNameDisplay').textContent = this.files[0] ? this.files[0].name : 'Clique para selecionar o PDF do Menu'">
                 </div>
-                <button type="submit" class="btn-confirm btn-full">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Criar Menu Rapidamente
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; justify-content: center; margin-top: 16px;">
+                    Carregar e Criar <i class="ph ph-rocket"></i>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD (Hidden by default until loaded) -->
-    <div id="main-dashboard" style="display:none;">
+    <!-- MAIN DASHBOARD LAYOUT -->
+    <div id="main-dashboard" class="dashboard-layout" style="display:none;">
 
-        <div class="dashboard-navbar">
-            <div class="nav-brand">
-                <img id="dashboardLogo" src="assets/images/logo.svg" alt="MenuNoAr"
-                    onclick="window.location.href='index.html'" style="cursor: pointer;">
-                <span class="divider">|</span>
-                <button id="userDisplay" class="user-name-btn" onclick="openProfileModal()"
-                    title="Clica para ver ou alterar o perfil">
-                    <span id="userDisplayName">...</span>
-                    <i class="fa-solid fa-user-pen user-edit-icon"></i>
-                </button>
-            </div>
-
-            <div class="nav-tools">
-                <div class="nav-tools-desktop">
-                    <button class="btn-nav" onclick="openQrModal()" title="QR Code">
-                        <i class="fa-solid fa-qrcode"></i> <span class="desktop-only">QR Code</span>
-                    </button>
-                    <button class="btn-nav" id="liveLinkBtn" title="Ver ao Vivo">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="desktop-only">Ver
-                            Menu</span>
-                    </button>
-                    <button class="btn-nav" onclick="openSettingsModal()" title="Configurações">
-                        <i class="fa-solid fa-gear"></i> <span class="desktop-only">Configurar</span>
-                    </button>
-                    <button class="btn-nav" onclick="toggleDarkMode()" title="Tema">
-                        <i class="fa-solid fa-moon" id="themeIcon"></i> <span class="desktop-only">Mudar Tema</span>
-                    </button>
-                    <button class="btn-nav" onclick="openSettingsTab('billing')" title="Planos">
-                        <i class="fa-solid fa-crown" style="color:var(--primary);"></i> <span
-                            class="desktop-only">Premium</span>
-                    </button>
-                    <button class="btn-nav" onclick="openTutorial()" title="Tutorial">
-                        <i class="fa-solid fa-graduation-cap"></i> <span class="desktop-only">Ajuda</span>
-                        <span class="badge-pulse desktop-badge-novo">NOVO</span>
-                    </button>
-                    <button class="btn-nav btn-danger-soft" onclick="signOut()" title="Sair">
-                        <i class="fa-solid fa-right-from-bracket"></i> <span class="desktop-only">Sair da conta</span>
-                    </button>
-                </div>
-
-                <button class="btn-nav mobile-help-trigger" onclick="openTutorial()" title="Ajuda"
-                    style="position:relative;">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                    <span class="badge-pulse" style="right: -2px; top: -2px;">NOVO</span>
-                </button>
-
-                <button class="btn-nav mobile-nav-trigger" onclick="toggleNavDropdown()" title="Menu">
-                    <i class="fa-solid fa-bars-staggered" id="navMobileIcon"></i>
-                </button>
-            </div>
-        </div>
-
-        <div id="mobileSidebarOverlay" class="mobile-sidebar-overlay" onclick="toggleNavDropdown(true)"></div>
-        <div id="mobileDropbar" class="mobile-sidebar">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
             <div class="sidebar-header">
-                <img id="sidebarLogo" src="assets/images/logo.svg" alt="Logo" class="sidebar-logo">
-                <button class="btn-close-sidebar" onclick="toggleNavDropdown(true)">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <img src="assets/images/logo.svg" alt="Menu no Ar" class="sidebar-logo">
             </div>
-            <div class="sidebar-user">
-                <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
-                <div class="user-info">
-                    <span id="sidebarUserName">Utilizador</span>
-                    <small>Gestor</small>
+
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" onclick="switchView('editor')">
+                    <i class="ph ph-layout"></i>
+                    <span>Editor de Menu</span>
+                </a>
+                <a href="#" class="nav-item" onclick="openSettingsTab('design')">
+                    <i class="ph ph-palette"></i>
+                    <span>Personalização</span>
+                </a>
+                <a href="#" class="nav-item" onclick="openQrModal()">
+                    <i class="ph ph-qr-code"></i>
+                    <span>QR Code</span>
+                </a>
+                <a href="#" class="nav-item" onclick="openSettingsTab('billing')">
+                    <i class="ph ph-credit-card"></i>
+                    <span>Subscrição</span>
+                </a>
+                <a href="#" class="nav-item" onclick="openSettingsModal()">
+                    <i class="ph ph-gear"></i>
+                    <span>Definições</span>
+                </a>
+            </nav>
+
+            <div style="margin-top: auto;">
+                <div class="nav-item" style="cursor: default;">
+                    <i class="ph ph-user-circle"></i>
+                    <span id="sidebarUserName" style="font-weight: 600;">Utilizador</span>
                 </div>
+                <a href="#" class="nav-item" onclick="signOut()" style="color: var(--danger);">
+                    <i class="ph ph-sign-out"></i>
+                    <span>Sair</span>
+                </a>
             </div>
-            <div class="sidebar-menu">
-                <button class="sidebar-item" onclick="openQrModal(); toggleNavDropdown(true)">
-                    <i class="fa-solid fa-qrcode"></i> <span>QR Code</span>
-                </button>
-                <button class="sidebar-item" id="liveLinkBtnMobile" onclick="toggleNavDropdown(true)">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Ver Menu</span>
-                </button>
-                <button class="sidebar-item" onclick="openSettingsModal(); toggleNavDropdown(true)">
-                    <i class="fa-solid fa-gear"></i> <span>Configurar</span>
-                </button>
-                <button class="sidebar-item" onclick="toggleDarkMode()">
-                    <i class="fa-solid fa-moon" id="themeIconMobile"></i> <span>Mudar Tema</span>
-                </button>
-                <button class="sidebar-item premium" onclick="openSettingsTab('billing'); toggleNavDropdown(true)">
-                    <i class="fa-solid fa-crown"></i> <span>Premium</span>
-                </button>
-            </div>
-            <div class="sidebar-footer">
-                <button class="sidebar-item btn-danger-soft" onclick="signOut()">
-                    <i class="fa-solid fa-right-from-bracket"></i> <span>Sair da conta</span>
-                </button>
-            </div>
-        </div>
+        </aside>
 
-        <!-- EDITOR CANVAS (Mimics menu.html structure but editable) -->
-        <main class="editor-canvas">
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
 
-            <header id="heroHeader" class="menu-header">
-                <div id="coverEditor" class="cover-image editable-trigger" onclick="triggerCoverUpload()">
-                    <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
-                    <input type="file" id="coverUpload" accept="image/*" style="display:none;">
+            <!-- TOP BAR -->
+            <header class="top-bar">
+                <div class="flex items-center gap-4">
+                    <h2 id="view-title">Editor de Menu</h2>
+                    <div id="trialTimer" class="trial-timer-badge"></div>
                 </div>
 
-                <div class="header-content container">
-                    <!-- Inline Editable Fields -->
-                    <h1 id="restNameEditor" class="inline-editable">Restaurante</h1>
-                    <p id="restDescEditor" class="inline-editable">Descrição...</p>
-
-                    <div class="info-badges">
-                        <span id="badgeWifi" class="badge">
-                            <i class="fa-solid fa-wifi"></i> <span id="textWifi" class="inline-editable">Wifi</span>
-                        </span>
-                        <span id="badgePhone" class="badge">
-                            <i class="fa-solid fa-phone"></i> <span id="textPhone" class="inline-editable">Tel</span>
-                        </span>
-                        <span id="badgeAddress" class="badge">
-                            <i class="fa-solid fa-location-dot"></i> <span id="textAddress"
-                                class="inline-editable">Morada</span>
-                        </span>
-                    </div>
+                <div class="flex items-center gap-4">
+                    <button class="btn btn-secondary" id="liveLinkBtn">
+                        <i class="ph ph-eye"></i> Ver Menu Online
+                    </button>
+                    <button class="btn btn-primary" onclick="window.addNewCategoryOptimized()">
+                        <i class="ph ph-plus"></i> Nova Categoria
+                    </button>
+                    <button class="btn btn-ghost" onclick="toggleDarkMode()" title="Mudar Tema">
+                        <i id="themeIcon" class="ph ph-moon"></i>
+                    </button>
                 </div>
             </header>
 
-            <!-- CATEGORY NAV -->
-            <div id="categoryNav" class="category-scroll-nav sticky-nav">
-                <!-- Tabs Injected via JS -->
-            </div>
+            <!-- WORKSPACE -->
+            <div class="editor-workspace">
+                <div id="categoryNav"></div> <!-- Added for navigation tabs -->
 
-            <!-- MENU GRID -->
-            <div class="container menu-grid-layout">
-                <div id="menuContainer" class="menu-sections">
-                    <!-- Items Injected via JS -->
+                <!-- THE DEVICE PREVIEW (CANVAS) -->
+                <div class="editor-canvas animate-fade" id="menuContainer"> <!-- Added menuContainer ID -->
+                    <!-- This is where render.js will inject the menu content -->
+                    <div class="canvas-content">
+                        <!-- Header Editor -->
+                        <div id="coverEditor" class="editable-area"
+                            style="height: 200px; background: #eee; position: relative;" onclick="triggerCoverUpload()">
+                            <div class="edit-hint">Alterar Capa</div>
+                        </div>
+
+                        <div style="padding: 24px; text-align: center;">
+                            <h1 id="restNameEditor" class="inline-editable" placeholder="Nome do Restaurante"></h1>
+                            <p id="restDescEditor" class="inline-editable" placeholder="Descrição curta..."></p>
+
+                            <div class="info-badges"
+                                style="display: flex; gap: 8px; justify-content: center; margin-top: 16px;">
+                                <div id="badgeWifi" class="badge"><i class="ph ph-wifi"></i> <span id="textWifi"></span>
+                                </div>
+                                <div id="badgePhone" class="badge"><i class="ph ph-phone"></i> <span
+                                        id="textPhone"></span></div>
+                                <div id="badgeAddress" class="badge"><i class="ph ph-map-pin"></i> <span
+                                        id="textAddress"></span></div>
+                            </div>
+                        </div>
+
+                        <!-- Menu Sections Container -->
+                        <div id="menuSections">
+                            <div id="editorTrack" class="slider-track"></div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
-
-            <footer class="app-footer">
-                <p>Menu no Ar &copy; 2026</p>
-            </footer>
-
         </main>
     </div>
 
-    <!-- SETTINGS MODAL (TABBED) -->
-    <div id="settingsModal" class="edit-modal">
-        <div class="edit-modal-content settings-modal-modern">
+    <!-- MODALS (REFACTORED) -->
 
-            <div class="settings-layout">
-                <!-- Sidebar Nav -->
-                <div class="settings-sidebar">
-                    <h2 class="settings-sidebar-title">Preferências</h2>
-                    <div class="settings-sidebar-tabs">
-                        <button type="button" class="tab-btn-settings active" onclick="switchSettingsTab('general')"
-                            id="tab-btn-general">
-                            <i class="fa-solid fa-store"></i> <span>O Meu Menu</span>
-                        </button>
-                        <button type="button" class="tab-btn-settings" onclick="switchSettingsTab('billing')"
-                            id="tab-btn-billing">
-                            <i class="fa-solid fa-credit-card"></i> <span>Faturação & Plano</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Content Area -->
-                <div class="settings-content">
-
-                    <!-- TAB: GENERAL -->
-                    <div id="tab-general" class="settings-tab-pane active" style="display: block;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                            <h3 style="color: var(--text); font-size: 1.4rem;">Geral</h3>
-                            <button type="button" class="btn-secondary small" onclick="closeModal('settingsModal')"><i
-                                    class="fa-solid fa-xmark"></i> Fechar</button>
-                        </div>
-
-                        <form id="settingsForm">
-                            <div class="form-group">
-                                <label>Link do Menu (Slug)</label>
-                                <div class="input-with-icon">
-                                    <i class="fa-solid fa-link"></i>
-                                    <input type="text" id="modalSlug" readonly
-                                        style="background: var(--bg-page); color: var(--text-muted); cursor: not-allowed;"
-                                        title="O link do teu menu.">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Estilo do Menu (Letra)</label>
-                                <select id="modalFont"
-                                    onchange="this.style.fontFamily = this.options[this.selectedIndex].style.fontFamily;">
-                                    <option value="Inter" style="font-family: 'Inter', sans-serif;">Inter (Limpa /
-                                        Padrão)</option>
-                                    <option value="Outfit" style="font-family: 'Outfit', sans-serif;">Outfit (Moderna)
-                                    </option>
-                                    <option value="Montserrat" style="font-family: 'Montserrat', sans-serif;">Montserrat
-                                        (Geométrica)</option>
-                                    <option value="Lato" style="font-family: 'Lato', sans-serif;">Lato (Suave)</option>
-                                    <option value="Raleway" style="font-family: 'Raleway', sans-serif;">Raleway
-                                        (Sofisticada)</option>
-                                    <option value="Playfair Display" style="font-family: 'Playfair Display', serif;">
-                                        Playfair Display (Elegante)</option>
-                                    <option value="Oswald" style="font-family: 'Oswald', sans-serif;">Oswald (Forte /
-                                        Expressiva)</option>
-                                    <option value="Dancing Script"
-                                        style="font-family: 'Dancing Script', cursive; font-size: 1.1rem;">Dancing
-                                        Script (Manuscrita)</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group"
-                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:var(--bg-page); padding:15px; border-radius:12px; border: 1px solid var(--border);">
-                                <label style="margin:0; display:flex; align-items:center; gap:8px; font-weight:600;">
-                                    <i class="fa-solid fa-file-pdf" style="color: var(--danger);"></i> Ativar Menu por
-                                    PDF
-                                </label>
-                                <label class="switch">
-                                    <input type="checkbox" id="pdfToggle" onchange="togglePdfDetails()">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-
-                            <div class="form-group" id="pdfDetails"
-                                style="display:none; animation: fadeIn 0.3s; padding: 20px; border: 2px dashed var(--border); border-radius: 12px;">
-                                <label style="margin-bottom: 10px; display: block;">Ficheiro PDF do Menu</label>
-                                <div id="pdfUploadState">
-                                    <div class="file-upload-wrapper"
-                                        onclick="document.getElementById('pdfUploadInput').click()">
-                                        <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                                        <div class="upload-text">
-                                            <span id="pdfFileNameDisplay">Clica para fazer upload do PDF</span>
-                                            <small>Tamanho máx: 10MB</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="pdfActionsState"
-                                    style="display:none; background: var(--bg-page); padding: 15px; border-radius: 12px; margin-top: 10px;">
-                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                                        <i class="fa-solid fa-file-pdf" style="font-size: 2rem; color: #ef4444;"></i>
-                                        <div style="flex: 1; overflow: hidden;">
-                                            <div style="font-weight: 700; font-size: 0.95rem; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
-                                                id="pdfCurrentFileName">Menu.pdf</div>
-                                            <div style="font-size: 0.8rem; color: var(--text-muted);"><a href="#"
-                                                    id="pdfViewLink" target="_blank"
-                                                    style="color: var(--primary); text-decoration: none;">Abrir
-                                                    Documento atual</a></div>
-                                        </div>
-                                    </div>
-                                    <div style="display: flex; gap: 10px;">
-                                        <button type="button" class="btn-secondary small" style="flex: 1;"
-                                            onclick="document.getElementById('pdfUploadInput').click()"><i
-                                                class="fa-solid fa-pen"></i> Alterar</button>
-                                        <button type="button" class="btn-secondary small"
-                                            style="flex: 1; color: #ef4444; border-color: #fee2e2;"
-                                            onclick="window.deletePdfFile()"><i class="fa-solid fa-trash"></i>
-                                            Apagar</button>
-                                    </div>
-                                </div>
-                                <input type="file" id="pdfUploadInput" style="display:none;" accept="application/pdf"
-                                    onchange="handlePdfSelect(this)">
-                                <p
-                                    style="font-size:0.8rem; color:var(--text-muted); margin-top:10px; display:flex; gap:6px;">
-                                    <i class="fa-solid fa-circle-info" style="margin-top:2px;"></i> Ligar isto desativa
-                                    o menu tátil (digital) original.
-                                </p>
-                            </div>
-
-                            <button type="submit" class="btn-confirm btn-full" style="margin-top: 25px;"><i
-                                    class="fa-solid fa-check"></i> Guardar Atualizações</button>
-                        </form>
-                    </div>
-
-                    <!-- TAB: BILLING -->
-                    <div id="tab-billing" class="settings-tab-pane" style="display: none;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                            <h3 style="color: var(--text); font-size: 1.4rem;">Faturação</h3>
-                            <button type="button" class="btn-secondary small" onclick="closeModal('settingsModal')"><i
-                                    class="fa-solid fa-xmark"></i> Fechar</button>
-                        </div>
-
-                        <div
-                            style="background: var(--bg-card); padding: 30px; border-radius: 16px; border: 2px solid var(--primary); margin-bottom: 30px; position:relative; box-shadow: 0 10px 30px rgba(31,168,255,0.08);">
-                            <div
-                                style="position: absolute; top: -14px; right: 25px; background: var(--primary); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(31,168,255,0.3);">
-                                MENU NO AR PRO
-                            </div>
-
-                            <div
-                                style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px;">
-                                <div>
-                                    <h4
-                                        style="font-size: 1.6rem; color: var(--text); margin-bottom:5px; font-weight: 800;">
-                                        Plano Profissional</h4>
-                                    <div id="billingStatusText"
-                                        style="font-weight: 600; color: var(--text-muted); font-size: 1rem;"><i
-                                            class="fa-solid fa-circle-notch fa-spin"></i> A analisar a tua licença...
-                                    </div>
-                                </div>
-                            </div>
-
-                            <ul class="check-list"
-                                style="margin-bottom: 30px; font-size:0.95rem; display:flex; flex-direction:column; gap:12px; color: var(--text-muted); list-style: none;">
-                                <li style="display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-rocket"
-                                        style="color:var(--primary); font-size:1.1rem; width: 20px;"></i> Menus digitais
-                                    e PDFs Ilimitados</li>
-                                <li style="display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-qrcode"
-                                        style="color:var(--primary); font-size:1.1rem; width: 20px;"></i> Códigos QR e
-                                    Visitas Ilimitadas</li>
-                                <li style="display:flex; align-items:center; gap:10px;"><i
-                                        class="fa-solid fa-shield-halved"
-                                        style="color:var(--primary); font-size:1.1rem; width: 20px;"></i> Remoção de
-                                    menções do MenuNoAr</li>
-                            </ul>
-
-                            <div style="display:flex; flex-direction:column; gap:10px;">
-                                <button id="btnActionBilling" type="button" class="btn-primary"
-                                    style="width: 100%; height: 50px; font-size: 1.05rem;"
-                                    onclick="window.handleBillingAction()">
-                                    <i class="fa-solid fa-spinner fa-spin"></i> A carregar...
-                                </button>
-                                <p
-                                    style="font-size: 0.8rem; text-align: center; color: var(--text-muted); margin-top: 5px;">
-                                    Cancela facilmente a qualquer momento.</p>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 30px; text-align: center;">
-                            <button type="button"
-                                style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer; text-decoration:underline; opacity: 0.7; transition: opacity 0.2s;"
-                                onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'"
-                                onclick="promptDeleteRestaurant()">
-                                Apagar restaurante permanentemente
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    <!-- Item Modal -->
+    <div id="itemModal" class="modal-backdrop" onclick="if(event.target===this) closeModal('itemModal')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Adicionar Prato</h2>
+                <button class="btn btn-ghost" onclick="closeModal('itemModal')"><i class="ph ph-x"></i></button>
             </div>
-        </div>
-    </div>
-
-    <!-- ITEM EDIT MODAL -->
-    <div id="itemModal" class="edit-modal">
-        <div class="edit-modal-content">
-            <h2 id="modalTitle" style="margin-bottom:20px; color:var(--color-text);">Editar Produto</h2>
             <form id="itemEditForm">
                 <input type="hidden" id="editItemId">
+                <input type="hidden" id="editItemCat">
                 <div class="form-group">
                     <label>Nome do Prato</label>
-                    <input type="text" id="editItemName" required>
+                    <input type="text" id="editItemName" class="form-input" required>
                 </div>
                 <div class="form-group">
                     <label>Preço (€)</label>
-                    <input type="number" step="0.01" id="editItemPrice" required>
+                    <input type="number" step="0.01" id="editItemPrice" class="form-input" required>
                 </div>
                 <div class="form-group">
                     <label>Descrição</label>
-                    <textarea id="editItemDesc" rows="3"></textarea>
+                    <textarea id="editItemDesc" class="form-input" rows="3"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Categoria</label>
-                    <input list="catSuggestions" id="editItemCat" required>
-                    <datalist id="catSuggestions">
-                        <option value="Entradas">
-                        <option value="Pratos Principais">
-                        <option value="Sobremesas">
-                        <option value="Bebidas">
-                    </datalist>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModal('itemModal')">Cancelar</button>
-                    <button type="submit" class="btn-confirm">Guardar Prato</button>
-                </div>
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; justify-content: center;">Guardar</button>
             </form>
         </div>
     </div>
 
-    <!-- SETUP WIZARD MODAL REMOVED (DUPLICATE OF SETUP SCREEN) -->
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-backdrop" onclick="if(event.target===this) closeModal('settingsModal')">
+        <div class="modal-content"
+            style="max-width: 700px; height: 600px; display: flex; flex-direction: column; padding: 0;">
+            <div style="display: flex; height: 100%;">
 
-    <!-- IMAGE PREVIEW MODAL -->
-    <div id="imageModal" class="edit-modal">
-        <div class="edit-modal-content" style="text-align:center; max-width:400px;">
-            <h2 style="margin-bottom:15px; color:var(--text);">Imagem do Prato</h2>
+                <!-- Modal Sidebar -->
+                <div
+                    style="width: 200px; border-right: 1px solid var(--border-color); padding: 24px; background: var(--bg-page);">
+                    <h3 style="margin-bottom: 24px;">Definições</h3>
+                    <div style="display: flex; flex-direction: column; gap: 8px;" id="settings-tabs">
+                        <button class="nav-item btn-ghost" onclick="switchSettingsTab('general')"
+                            id="tab-btn-general">Geral</button>
+                        <button class="nav-item btn-ghost" onclick="switchSettingsTab('design')"
+                            id="tab-btn-design">Design</button>
+                        <button class="nav-item btn-ghost" onclick="switchSettingsTab('billing')"
+                            id="tab-btn-billing">Subscrição</button>
+                    </div>
+                </div>
 
-            <div id="imgPreviewContainer"
-                style="width:100%; height:250px; background:#f5f5f5; border-radius:12px; overflow:hidden; margin-bottom:20px; display:flex; align-items:center; justify-content:center;">
-                <img id="imgPreviewDisplay" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
-                <i id="imgPreviewPlaceholder" class="fa-solid fa-image" style="font-size:3rem; color:#ccc;"></i>
+                <!-- Modal Body -->
+                <div style="flex: 1; padding: 32px; display: flex; flex-direction: column;">
+                    <form id="settingsForm" style="height: 100%; display: flex; flex-direction: column;">
+
+                        <!-- Page: General -->
+                        <div id="tab-general" class="settings-tab-pane">
+                            <div class="form-group">
+                                <label>Link do Menu (URL)</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <span style="align-self: center; color: var(--text-muted);">/menu.html?id=</span>
+                                    <input type="text" id="modalSlug" class="form-input">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Modo de Menu</label>
+                                <div
+                                    style="display: flex; align-items: center; gap: 12px; background: var(--bg-page); padding: 12px; border-radius: var(--radius-md);">
+                                    <input type="checkbox" id="pdfToggle" onchange="togglePdfDetails()">
+                                    <span>Ativar Modo PDF (Substitui o menu tátil por um PDF)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Page: Design -->
+                        <div id="tab-design" class="settings-tab-pane" style="display:none;">
+                            <div class="form-group">
+                                <label>Tipo de Letra</label>
+                                <select id="modalFont" class="form-input">
+                                    <option value="Outfit">Outfit (Moderno)</option>
+                                    <option value="Inter">Inter (Clean)</option>
+                                    <option value="Playfair Display">Playfair (Clássico)</option>
+                                    <option value="Dancing Script">Dancing (Escrita)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Page: Billing -->
+                        <div id="tab-billing" class="settings-tab-pane" style="display:none;">
+                            <div id="billingStatusBlock" class="card"
+                                style="background: var(--bg-page); margin-bottom: 24px;">
+                                <h4 id="billingStatusText">Carregando...</h4>
+                            </div>
+                            <button type="button" id="btnActionBilling" class="btn btn-primary"></button>
+                        </div>
+
+                        <div style="margin-top: auto; display: flex; gap: 12px;">
+                            <button type="button" class="btn btn-secondary"
+                                onclick="closeModal('settingsModal')">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Alterações</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <div class="modal-actions" style="justify-content:center; flex-wrap:wrap; gap:10px;">
-                <button class="btn-secondary small" onclick="closeModal('imageModal')">Fechar</button>
-                <button class="btn-secondary small" id="btnRemoveImage" style="color:#ef4444; border-color:#fee2e2;">
-                    <i class="fa-solid fa-trash"></i> Remover
-                </button>
-                <button class="btn-confirm small" id="btnChangeImage">
-                    <i class="fa-solid fa-camera"></i> Alterar
-                </button>
-            </div>
-
-            <input type="file" id="modalImageUpload" accept="image/*" style="display:none;">
         </div>
     </div>
 
-    <!-- GENERIC TEXT EDIT MODAL REMOVED -->
-
-    <!-- QR CODE MODAL -->
-    <div id="qrModal" class="edit-modal">
-        <div class="edit-modal-content" style="text-align:center; max-width:480px;">
-            <h2 style="margin-bottom:20px; color:var(--text);">O Teu QR Code</h2>
-
-            <!-- QR Preview -->
-            <div id="qr-code-container" style="margin: 0 auto 20px auto; display:flex; justify-content:center;"></div>
-
-            <!-- Logo Customizer -->
-            <div class="qr-logo-section">
-
-                <div class="qr-logo-row">
-                    <div id="qrLogoPreview" class="qr-logo-preview">
-                        <img id="qrLogoImg" src="assets/images/logo.svg" alt="Logo QR">
-                    </div>
-                    <div class="qr-logo-actions">
-                        <button class="btn-secondary small" onclick="document.getElementById('qrLogoUpload').click()">
-                            <i class="fa-solid fa-upload"></i> Trocar Logo
-                        </button>
-                        <button class="btn-secondary small" id="btnResetQrLogo" onclick="resetQrLogo()"
-                            style="display:none;">
-                            <i class="fa-solid fa-rotate-left"></i> Repor Padrão
-                        </button>
-                    </div>
-                </div>
-                <input type="file" id="qrLogoUpload" accept="image/*" style="display:none;"
-                    onchange="handleQrLogoChange(this)">
+    <!-- QR Modal -->
+    <div id="qrModal" class="modal-backdrop" onclick="if(event.target===this) closeModal('qrModal')">
+        <div class="modal-content" style="text-align: center;">
+            <div class="modal-header">
+                <h2>O teu QR Code</h2>
+                <button class="btn btn-ghost" onclick="closeModal('qrModal')"><i class="ph ph-x"></i></button>
             </div>
-
-            <p style="margin:16px 0 20px; color:var(--text-muted); font-size:0.875rem;">Imprime este código e coloca-o
-                nas mesas.</p>
-
-            <div class="modal-actions" style="justify-content:center;">
-                <button class="btn-cancel" onclick="closeModal('qrModal')">Fechar</button>
-                <button class="btn-confirm" onclick="downloadQr()">
-                    <i class="fa-solid fa-download" style="margin-right:8px;"></i>Baixar PNG
-                </button>
+            <div id="qr-code-container" style="margin: 24px auto;"></div>
+            <p id="qrRestaurantName" style="font-weight: 700; font-size: 1.25rem;"></p>
+            <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
+                <button class="btn btn-secondary" onclick="downloadQr()"><i class="ph ph-download"></i> Descarregar
+                    PNG</button>
             </div>
         </div>
     </div>
 
-
-
-    <!-- PROFILE MODAL -->
-    <div id="profileModal" class="edit-modal">
-        <div class="edit-modal-content" style="max-width:480px;">
-            <h2 style="margin-bottom:6px; color:var(--text);">Perfil e Contacto</h2>
-            <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Estes dados são privados e
-                essenciais para podermos entrar em contacto consigo se necessário.</p>
-            <form id="profileForm">
-                <div class="form-group">
-                    <label>Nome do Responsável</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-user"></i>
-                        <input type="text" id="profileName" placeholder="ex: João Silva" maxlength="40" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Nome do Estabelecimento</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-store"></i>
-                        <input type="text" id="profileEstablishment" placeholder="ex: O Tasco do Zé" maxlength="60"
-                            required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Email de Contacto</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="profileEmail" placeholder="ex: contacto@restaurante.pt" maxlength="60"
-                            required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Telemóvel / Telefone</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-phone"></i>
-                        <input type="tel" id="profilePhone" placeholder="ex: 912 345 678" maxlength="20" required>
-                    </div>
-                </div>
-                <div class="modal-actions" style="margin-top: 25px;">
-                    <button type="button" class="btn-cancel" onclick="closeModal('profileModal')">Cancelar</button>
-                    <button type="submit" class="btn-confirm"><i class="fa-solid fa-floppy-disk"></i> Guardar
-                        Perfil</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- SORTABLE, CONFETTI, ETC -->
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
 
-    <!-- Scripts -->
-    <script type="module" src="js/dashboard.js?v=3.1"></script>
-    <script type="module">
-        // Inline helpers moved to module scope for cleanliness
-        window.handlePdfSelect = (input) => {
-            const fileName = input.files[0] ? input.files[0].name : "Clique para selecionar o PDF";
-            const display = document.getElementById('pdfFileNameDisplay');
-            if (display) display.textContent = fileName;
-            const wrapper = document.querySelector('.file-upload-wrapper');
-            if (wrapper) wrapper.classList.add('selected');
-        };
-
-        // Dark mode initial sync
-        if (localStorage.getItem('menu_theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-            ['dashboardLogo', 'sidebarLogo', 'setupLogo', 'qrLogoImg'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.src = 'assets/images/Ilogo.svg';
-            });
-
-
-
-            const themeIcon = document.getElementById('themeIcon');
-            if (themeIcon) themeIcon.className = 'fa-solid fa-sun';
-
-            const themeIconMobile = document.getElementById('themeIconMobile');
-            if (themeIconMobile) themeIconMobile.className = 'fa-solid fa-sun';
+    <script type="module" src="js/dashboard.js"></script>
+    <script>
+        // Simple View Controller
+        window.switchView = (view) => {
+            // Placeholder for multi-view logic if needed
+            console.log('Switching to', view);
         }
+
+        window.handlePdfSelect = (input) => {
+            const fileName = input.files[0] ? input.files[0].name : "Clica para selecionar o PDF";
+            document.getElementById('pdfFileNameDisplay').textContent = fileName;
+        };
     </script>
+
 </body>
 
 </html>
