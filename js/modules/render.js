@@ -119,27 +119,6 @@ export function renderMenu(items) {
         return acc;
     }, {});
 
-    // Render Navigation Tags
-    nav.innerHTML = '';
-    cats.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = 'tab-btn draggable-tab';
-        btn.dataset.category = cat;
-        btn.innerHTML = `<span>${escapeHTML(cat)}</span>`;
-        btn.onclick = () => {
-            document.getElementById(`cat-sec-${cat.replace(/\s+/g, '-')}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
-        nav.appendChild(btn);
-    });
-
-    const addBtn = document.createElement('button');
-    addBtn.className = 'tab-btn';
-    addBtn.style.background = 'var(--primary-soft)';
-    addBtn.style.color = 'var(--primary)';
-    addBtn.innerHTML = '<i class="ph ph-plus"></i> Nova';
-    addBtn.onclick = () => window.addNewCategoryOptimized();
-    nav.appendChild(addBtn);
-
     // Render Menu Sections
     container.innerHTML = '';
     cats.forEach(cat => {
@@ -157,26 +136,44 @@ export function renderMenu(items) {
                     onblur="handleCategoryRename('${cat}', this.innerText)"
                     onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${escapeHTML(cat)}</h2>
                 <div class="flex gap-2">
-                    <button class="btn btn-ghost" onclick="openAddItemModal('${cat}')" title="Adicionar Prato"><i class="ph ph-plus-circle"></i></button>
                     <button class="btn btn-ghost" onclick="deleteCategory('${cat}')" style="color:var(--danger)" title="Eliminar Categoria"><i class="ph ph-trash"></i></button>
                 </div>
             </div>
             <div class="items-grid">
                 ${itemsHTML}
+                <div class="menu-item-card add-item-trigger" onclick="openAddItemModal('${cat}')" style="border: 2px dashed var(--border-color); background: transparent; cursor: pointer; align-items: center; justify-content: center; min-height: 200px; opacity: 0.6; transition: var(--transition);">
+                    <div style="text-align: center;">
+                        <i class="ph ph-plus-circle" style="font-size: 2.5rem; margin-bottom: 12px; color: var(--text-muted);"></i>
+                        <div style="font-weight: 600; color: var(--text-muted);">Adicionar Prato</div>
+                    </div>
+                </div>
             </div>
         `;
         container.appendChild(section);
     });
 
-    // Initialize Draggable Nav
+    // Add Category Button at the bottom
+    const addCatBox = document.createElement('div');
+    addCatBox.className = 'add-category-inline';
+    addCatBox.innerHTML = `
+        <button class="btn btn-secondary" onclick="window.addNewCategoryOptimized()" style="width:100%; border: 2px dashed var(--border-color); background: transparent; padding: 24px;">
+            <i class="ph ph-plus-circle"></i> Adicionar Nova Categoria
+        </button>
+    `;
+    container.appendChild(addCatBox);
+
+    // Enable Vertical Drag for Categories
     if (window.Sortable) {
-        new Sortable(nav, {
+        new Sortable(container, {
             animation: 150,
-            draggable: '.draggable-tab',
+            handle: '.category-title', // Drag by the title
+            draggable: '.menu-section',
             onEnd: async () => {
-                const newOrder = Array.from(nav.querySelectorAll('.draggable-tab')).map(t => t.dataset.category);
+                const newOrder = Array.from(container.querySelectorAll('.menu-section')).map(s => {
+                    // Extract cat name from ID: cat-sec-Name -> Name
+                    return s.querySelector('.category-title').innerText.trim();
+                });
                 await saveCategoryOrder(newOrder);
-                renderMenu(state.menuItems); // Re-render to sync sections
             }
         });
     }

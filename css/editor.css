@@ -157,3 +157,14 @@
     background: #fff;
     border: 1px solid var(--primary);
 }
+.add-item-trigger:hover {
+    opacity: 1 !important;
+    border-color: var(--primary) !important;
+    background: var(--primary-soft) !important;
+    transform: translateY(-4px);
+}
+
+.add-item-trigger:hover i, 
+.add-item-trigger:hover div {
+    color: var(--primary) !important;
+}
