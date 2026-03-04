@@ -26,10 +26,33 @@ async function getSupabase() {
     if (supabaseInstance) return supabaseInstance;
 
     const config = await getConfig();
-    if (!config) return null;
+    if (!config || config.error) {
+        console.error("Supabase Config Error:", config?.error || "Unknown error");
+        return null;
+    }
 
-    if (window.supabase) {
-        supabaseInstance = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+    // Helper to wait for global supabase to be ready (as it is loaded via script tag)
+    const waitForSupabase = (timeout = 5000) => {
+        return new Promise((resolve) => {
+            if (window.supabase) return resolve(window.supabase);
+
+            const start = Date.now();
+            const interval = setInterval(() => {
+                if (window.supabase) {
+                    clearInterval(interval);
+                    resolve(window.supabase);
+                } else if (Date.now() - start > timeout) {
+                    clearInterval(interval);
+                    resolve(null);
+                }
+            }, 100);
+        });
+    };
+
+    const supabaseLib = await waitForSupabase();
+
+    if (supabaseLib) {
+        supabaseInstance = supabaseLib.createClient(config.supabaseUrl, config.supabaseAnonKey, {
             auth: {
                 persistSession: true,
                 autoRefreshToken: true,
@@ -40,7 +63,7 @@ async function getSupabase() {
         configLoaded = true;
         return supabaseInstance;
     } else {
-        console.error("Supabase JS not loaded");
+        console.error("Supabase JS library failed to load in time.");
         return null;
     }
 }

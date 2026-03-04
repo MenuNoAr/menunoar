@@ -72,6 +72,17 @@ async function init() {
 
     } catch (err) {
         console.error('Init Error:', err);
+        const setupScreen = document.getElementById('setup-screen');
+        if (setupScreen) {
+            setupScreen.style.display = 'flex';
+            setupScreen.innerHTML = `
+                <div class="setup-card">
+                    <h2 style="color:#ef4444">Erro de Configuração</h2>
+                    <p>Não foi possível ligar ao Supabase. Verifique se as variáveis de ambiente (SUPABASE_URL e ANON_KEY) estão configuradas no Vercel.</p>
+                    <button onclick="window.location.reload()" class="btn-confirm" style="margin-top:20px">Tentar Novamente</button>
+                </div>
+            `;
+        }
     }
 }
 
