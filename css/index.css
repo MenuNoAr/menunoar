@@ -433,14 +433,12 @@ footer {
 
     main>section {
         height: auto !important;
-        /* Using dvh (dynamic viewport height) on mobile respects the native browser URL/menu bars expanding and collapsing, keeping elements perfectly vertically centered */
+        /* Using dvh on mobile respects native browser expanding bars */
         min-height: 100dvh;
-        padding: 120px 20px 100px !important;
-        /* Ample padding to prevent collisions with top header and bottom screen curves */
+        padding: 120px 0 100px !important;
         justify-content: center !important;
-        align-items: center;
-        /* Guarantee child contents stay centered across axes */
-        overflow: visible;
+        /* Removed align-items center to allow .container to fluidly fill width 100% without horizontal shrink bug */
+        overflow-x: hidden;
         display: flex;
         flex-direction: column;
     }
@@ -511,9 +509,23 @@ footer {
         font-size: 2rem !important;
     }
 
+    /* 6.5 Center internal card layouts that were left-aligned on desktop */
+    .bento-card {
+        text-align: center;
+        align-items: center;
+    }
+
+    .bento-card i {
+        margin: 0 auto 24px;
+    }
+
     /* 7. Pricing adjustments */
     .pricing-info {
         padding: 30px 20px !important;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     .price-value {
@@ -522,6 +534,12 @@ footer {
 
     .pricing-features {
         padding: 30px 20px !important;
+        align-items: center;
+    }
+
+    .feature-list {
+        margin: 0 auto;
+        display: inline-flex;
     }
 
     /* 8. Footer Reformat */
