@@ -83,42 +83,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollArrow = document.getElementById('scrollArrow');
 
     if (svgPath && scrollArrow) {
-        // Prepare the SVG path for drawing
         const pathLength = svgPath.getTotalLength();
         svgPath.style.strokeDasharray = pathLength;
         svgPath.style.strokeDashoffset = pathLength;
 
-        const updateScrollProgress = () => {
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+
+        let containerHeight = 0;
+        let containerTopOffset = 0;
+
+        const measureContainer = () => {
             const container = document.querySelector('.curved-scroll-container');
-            if (!container) return;
+            if (container) {
+                containerHeight = container.offsetHeight;
+                // Get initial distance from top of page
+                const rect = container.getBoundingClientRect();
+                containerTopOffset = rect.top + window.scrollY;
+            }
+        };
 
-            const rect = container.getBoundingClientRect();
+        const updateScrollProgress = () => {
+            const currentScrollY = window.scrollY;
             const clientHeight = window.innerHeight;
+            const centerOfScreen = currentScrollY + (clientHeight / 2);
 
-            // We measure progress as how much of the container has passed 
-            // the middle of the screen (clientHeight / 2).
-            const centerOfScreen = clientHeight / 2;
-            const containerStart = rect.top;
-
-            // Calculate progress 0.0 to 1.0
-            let progress = (centerOfScreen - containerStart) / rect.height;
+            // Calculate progress 0.0 to 1.0 based on centerOfScreen relative to container
+            let progress = (centerOfScreen - containerTopOffset) / containerHeight;
             progress = Math.min(Math.max(progress, 0), 1);
 
-            // Draw the line
             svgPath.style.strokeDashoffset = pathLength - (progress * pathLength);
 
-            // Move the arrow icon
             const point = svgPath.getPointAtLength(progress * pathLength);
-
-            // To find the tangent (angle) we need a point slightly ahead or behind
-            const d = 0.5; // distance scale inside viewBox
-            const isAtEnd = progress >= 0.999;
+            const d = 0.5;
             const p1 = svgPath.getPointAtLength(Math.max(0, progress * pathLength - d));
             const p2 = svgPath.getPointAtLength(Math.min(pathLength, progress * pathLength + d));
 
-            // Reconcile view box coordinates to actual screen ratios for perfect visual angling
             const ratioX = window.innerWidth / 100;
-            const containerHeight = Math.max(document.querySelector('.curved-scroll-container').offsetHeight, 1);
             const ratioY = containerHeight / 400;
 
             const dxScreen = (p2.x - p1.x) * ratioX;
@@ -126,87 +127,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let angle = Math.atan2(dyScreen, dxScreen) * (180 / Math.PI);
 
-            // Arrow direction inversion on scroll up
-            if (window.lastScrollY === undefined) window.lastScrollY = window.scrollY;
-            const isScrollingUp = window.scrollY < window.lastScrollY;
-            window.lastScrollY = window.scrollY;
+            const isScrollingUp = currentScrollY < lastScrollY;
+            lastScrollY = currentScrollY;
 
             if (isScrollingUp) {
                 angle -= 180;
             }
 
-            // point.x and point.y are relative to the viewBox "0 0 100 400"
             const xPercent = (point.x / 100) * 100;
             const yPercent = (point.y / 400) * 100;
 
-            scrollArrow.style.left = xPercent + '%';
-            scrollArrow.style.top = yPercent + '%';
-            // We use translate to keep it centered and rotate to face the path direction
-            scrollArrow.style.transform = `translate(-50%, -50%) rotate(${angle - 90}deg)`; // -90 deg because arrow icon defaults down
+            scrollArrow.style.setProperty('--arrow-left', xPercent + '%');
+            scrollArrow.style.setProperty('--arrow-top', yPercent + '%');
+            scrollArrow.style.setProperty('--arrow-angle', `${angle - 90}deg`);
+
+            ticking = false;
         };
 
-        window.addEventListener('scroll', updateScrollProgress, { passive: true });
-        window.addEventListener('resize', updateScrollProgress);
-        updateScrollProgress(); // init
-    }
-
-    // 4. Force "Hard" Scroll Snapping on any wheel movement (Spammable)
-    const mainSections = document.querySelectorAll('main > section');
-    if (mainSections.length > 0) {
-        let isAnimating = false;
-        let targetIdx = 0;
-        let currentAnimation = null;
-        let wheelTimeout = null;
-
-        const easeInOutCubic = t => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
-
-        const scrollToSection = (idx) => {
-            if (currentAnimation) cancelAnimationFrame(currentAnimation);
-            isAnimating = true;
-
-            const targetY = mainSections[idx].offsetTop;
-            const startY = window.scrollY;
-            const distance = targetY - startY;
-            const duration = 700; // Faster, 0.7s, allows for snappy but smooth feel
-            let start = null;
-
-            const step = (timestamp) => {
-                if (!start) start = timestamp;
-                const progress = timestamp - start;
-                const percent = Math.min(progress / duration, 1);
-
-                window.scrollTo(0, startY + (distance * easeInOutCubic(percent)));
-
-                if (progress < duration) {
-                    currentAnimation = window.requestAnimationFrame(step);
-                } else {
-                    isAnimating = false;
-                    currentAnimation = null;
-                }
-            };
-
-            currentAnimation = window.requestAnimationFrame(step);
-        };
-
-        window.addEventListener('wheel', (e) => {
-            e.preventDefault();
-
-            if (Math.abs(e.deltaY) > 5) {
-                // Throttle inputs a bit so we jump exactly one section per logical mouse wheel click
-                if (!wheelTimeout) {
-                    const direction = e.deltaY > 0 ? 1 : -1;
-
-                    // Base the jump on what is currently the active destination (or the current page)
-                    let baseIdx = isAnimating ? targetIdx : Math.round(window.scrollY / window.innerHeight);
-
-                    targetIdx = Math.max(0, Math.min(baseIdx + direction, mainSections.length - 1));
-                    scrollToSection(targetIdx);
-
-                    // Only lock inputs for a fraction of the animation (200ms) to allow 'spamming' updates
-                    wheelTimeout = setTimeout(() => { wheelTimeout = null; }, 200);
-                }
+        const onScroll = () => {
+            if (!ticking) {
+                window.requestAnimationFrame(updateScrollProgress);
+                ticking = true;
             }
-        }, { passive: false });
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', () => {
+            measureContainer();
+            onScroll();
+        });
+
+        measureContainer();
+        onScroll();
     }
+
+    // 4. Smooth Navigation instead of custom Wheel Logic
+    // We removed the wheel event listener that was blocking performance.
+    // Native scrolling with CSS scroll-snap is much smoother.
+
 });
 

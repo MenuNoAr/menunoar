@@ -4,10 +4,17 @@
 */
 
 html {
-    scroll-behavior: auto;
-    /* Disabled native smooth scroll to allow JS custom easing */
-    overflow-y: hidden;
-    /* Hide scrollbar for a cleaner presentation */
+    scroll-behavior: smooth;
+    overflow-y: auto;
+}
+
+body {
+    scroll-snap-type: y mandatory;
+}
+
+main>section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
 }
 
 body {
@@ -68,9 +75,9 @@ footer {
 
 .scroll-arrow {
     position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(0deg);
+    left: var(--arrow-left, 50%);
+    top: var(--arrow-top, 0);
+    transform: translate(-50%, -50%) rotate(var(--arrow-angle, 0deg));
     /* JS will control rotation */
     color: var(--primary);
     width: 24px;
