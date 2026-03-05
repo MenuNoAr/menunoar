@@ -124,51 +124,10 @@ footer {
     animation-delay: 0.4s;
 }
 
-/* TOP BANNER */
-@keyframes slideDown {
-    0% {
-        transform: translateY(-100%);
-    }
-
-    100% {
-        transform: translateY(0);
-    }
-}
-
-.animate-slide-down {
-    animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.top-banner {
-    background: #000;
-    color: #fff;
-    padding: 10px 0;
-    text-align: center;
-    font-size: 0.85rem;
-    font-weight: 500;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1100;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    letter-spacing: -0.01em;
-}
-
-.top-banner a {
-    color: var(--primary);
-    text-decoration: none;
-    margin-left: 8px;
-    font-weight: 700;
-}
-
+/* NAVIGATION */
 .nav-header {
     position: absolute;
-    top: 40px;
-    /* Offset by the height of the top banner */
+    top: 0;
     left: 0;
     right: 0;
     height: 70px;
@@ -474,11 +433,16 @@ footer {
 
     main>section {
         height: auto !important;
-        min-height: 100vh;
-        padding: 120px 20px 80px !important;
-        /* Provide ample breathing room for stacked content */
+        /* Using dvh (dynamic viewport height) on mobile respects the native browser URL/menu bars expanding and collapsing, keeping elements perfectly vertically centered */
+        min-height: 100dvh;
+        padding: 120px 20px 100px !important;
+        /* Ample padding to prevent collisions with top header and bottom screen curves */
         justify-content: center !important;
+        align-items: center;
+        /* Guarantee child contents stay centered across axes */
         overflow: visible;
+        display: flex;
+        flex-direction: column;
     }
 
     /* 2. Hide SVG background tracker on mobile */
@@ -486,25 +450,9 @@ footer {
         display: none !important;
     }
 
-    /* 3. Top Banner & Header Adjustments */
-    .top-banner {
-        flex-direction: column;
-        padding: 12px 20px;
-        font-size: 0.8rem;
-        gap: 6px;
-    }
-
-    .top-banner a {
-        background: rgba(255, 255, 255, 0.15);
-        padding: 6px 16px;
-        border-radius: 4px;
-        margin-top: 4px;
-        margin-left: 0;
-    }
-
+    /* 3. Header Adjustments */
     .nav-header {
-        top: 76px;
-        /* Offset for the taller mobile banner */
+        top: 0;
         height: auto;
         padding: 12px 0;
     }
