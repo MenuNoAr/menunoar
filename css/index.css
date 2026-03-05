@@ -459,3 +459,140 @@ footer {
         grid-template-columns: 1fr;
     }
 }
+
+/* ----------------------------------- */
+/* MOBILE OVERHAUL: FLUID & BEAUTIFUL  */
+/* ----------------------------------- */
+
+@media (max-width: 768px) {
+
+    /* 1. Unlock Scroll & Height constraints */
+    html {
+        overflow-y: auto !important;
+        /* Critical to allow touch swiping! */
+    }
+
+    main>section {
+        height: auto !important;
+        min-height: 100vh;
+        padding: 120px 20px 80px !important;
+        /* Provide ample breathing room for stacked content */
+        justify-content: center !important;
+        overflow: visible;
+    }
+
+    /* 2. Hide SVG background tracker on mobile */
+    .curved-scroll-container {
+        display: none !important;
+    }
+
+    /* 3. Top Banner & Header Adjustments */
+    .top-banner {
+        flex-direction: column;
+        padding: 12px 20px;
+        font-size: 0.8rem;
+        gap: 6px;
+    }
+
+    .top-banner a {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 6px 16px;
+        border-radius: 4px;
+        margin-top: 4px;
+        margin-left: 0;
+    }
+
+    .nav-header {
+        top: 76px;
+        /* Offset for the taller mobile banner */
+        height: auto;
+        padding: 12px 0;
+    }
+
+    /* 4. Hero Visuals */
+    .hero {
+        background-position: left center;
+    }
+
+    .hero h1 {
+        font-size: 2.75rem !important;
+        margin-bottom: 16px;
+    }
+
+    .hero p {
+        font-size: 1.05rem;
+        padding: 0 10px;
+        margin-bottom: 32px;
+    }
+
+    .hero .flex.items-center.justify-center {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .btn-hero,
+    .btn-hero-secondary {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* 5. Creation Options Grid */
+    .options-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px;
+    }
+
+    .option-card {
+        padding: 40px 20px;
+    }
+
+    .option-card h3 {
+        font-size: 1.5rem;
+    }
+
+    .option-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 1.5rem;
+        margin-bottom: 24px;
+    }
+
+    /* 6. Typography Downscaling for specific sections */
+    h2[style*="font-size: 3rem"],
+    h2[style*="font-size: 3.5rem"] {
+        font-size: 2rem !important;
+    }
+
+    /* 7. Pricing adjustments */
+    .pricing-info {
+        padding: 30px 20px !important;
+    }
+
+    .price-value {
+        font-size: 3.5rem;
+    }
+
+    .pricing-features {
+        padding: 30px 20px !important;
+    }
+
+    /* 8. Footer Reformat */
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        text-align: center;
+    }
+
+    .footer {
+        position: relative !important;
+        /* Release from 'absolute' bottom to stack natively */
+        padding-top: 60px;
+        margin-top: auto;
+    }
+
+    /* 9. Final CTA Layout */
+    section[style*="padding-top: 35vh"] {
+        padding-top: 90px !important;
+        padding-bottom: 20px !important;
+    }
+}
