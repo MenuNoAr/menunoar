@@ -4,10 +4,9 @@
 */
 
 html {
-    scroll-behavior: auto;
-    /* Disabled native smooth scroll to allow JS custom easing */
-    overflow-y: hidden;
-    /* Hide scrollbar for a cleaner presentation */
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 body {
@@ -15,13 +14,13 @@ body {
 }
 
 main>section {
-    height: 100vh;
+    min-height: 100vh;
     width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     position: relative;
-    overflow: hidden;
+    /* Removed overflow: hidden to prevent content from disappearing */
 }
 
 footer {
@@ -105,6 +104,8 @@ footer {
 
 .reveal {
     opacity: 0;
+    visibility: visible;
+    /* Override style.css hidden */
     animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
