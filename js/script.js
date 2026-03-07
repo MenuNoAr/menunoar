@@ -83,10 +83,16 @@ function updateScrollPath() {
     arrow.style.left = `${x}px`;
     arrow.style.top = `${y}px`;
 
-    // Angle/Rotation
+    // Angle/Rotation calculation
     const nextPoint = path.getPointAtLength(Math.min(length, length * scrollPercentage + 1));
-    const angle = Math.atan2(nextPoint.y - point.y, (nextPoint.x - point.x) * (svgHeight / svgWidth) * (500 / 100));
-    arrow.style.transform = `translate(-50%, -50%) rotate(${angle * 180 / Math.PI}deg)`;
+
+    // Convert SVG delta to pixel delta for accurate rotation
+    const dx = (nextPoint.x - point.x) * (svgWidth / 100);
+    const dy = (nextPoint.y - point.y) * (svgHeight / 500);
+
+    const angle = Math.atan2(dy, dx);
+    // Subtract 90 degrees because ph-arrow-down points downwards by default
+    arrow.style.transform = `translate(-50%, -50%) rotate(${angle * 180 / Math.PI - 90}deg)`;
 }
 
 // Initial call
