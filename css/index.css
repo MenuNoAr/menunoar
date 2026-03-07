@@ -7,6 +7,7 @@ html {
     scroll-behavior: smooth;
     overflow-x: hidden;
     overflow-y: auto;
+    scroll-snap-type: y mandatory;
 }
 
 body {
@@ -14,13 +15,14 @@ body {
 }
 
 main>section {
-    min-height: 100vh;
+    height: 100vh;
     width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     position: relative;
-    /* Removed overflow: hidden to prevent content from disappearing */
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
 }
 
 footer {
@@ -33,11 +35,10 @@ footer {
     top: 50vh;
     left: 0;
     right: 0;
-    height: 400vh;
-    /* Exactly from center of Section 1 to center of Section 5 */
+    height: 500vh;
+    /* Updated for 6 sections (Hero to CTA) */
     pointer-events: none;
     z-index: 1;
-    /* behind content to not block clicks */
 }
 
 .curved-scroll-container svg {
@@ -104,9 +105,14 @@ footer {
 
 .reveal {
     opacity: 0;
-    visibility: visible;
-    /* Override style.css hidden */
-    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform: translateY(40px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+    visibility: visible !important;
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .delay-1 {
