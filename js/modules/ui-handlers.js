@@ -305,7 +305,7 @@ window.openQrModal = () => {
 };
 
 function _renderQr() {
-    const url = `${window.location.origin}/menu.html?id=${state.currentData.slug}`;
+    const url = `https://menunoar.pt/menu.html?id=${state.currentData.slug}`;
     const opts = {
         width: 280, height: 280, type: 'svg', data: url,
         image: _qrLogoUrl,
