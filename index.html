@@ -21,9 +21,6 @@
     <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/index.css">
-
-    <!-- Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -84,34 +81,21 @@
         <section class="creation-options" style="z-index: 10;">
             <div class="container drop-shadow-lg">
                 <div class="options-grid">
-                    <div class="option-card image-card">
-                        <div class="card-image"
-                            style="background-image: url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&q=80&w=800');">
-                        </div>
-                        <div class="card-content">
-                            <div class="option-icon"><i class="ph ph-magic-wand"></i></div>
-                            <h3>Comece do Zero</h3>
-                            <p>Utilize os nossos modelos desenhados à medida e o editor Pure Canvas para construir um
-                                menu
-                                perfeito à sua imagem.</p>
-                            <a href="signup.html" class="btn option-btn">Criar Menu <i
-                                    class="ph ph-arrow-right"></i></a>
-                        </div>
+                    <div class="option-card">
+                        <div class="option-icon"><i class="ph ph-magic-wand"></i></div>
+                        <h3>Comece do Zero</h3>
+                        <p>Utilize os nossos modelos desenhados à medida e o editor Pure Canvas para construir um menu
+                            perfeito à sua imagem.</p>
+                        <a href="signup.html" class="btn option-btn">Criar Menu <i class="ph ph-arrow-right"></i></a>
                     </div>
-                    <div class="option-card image-card">
-                        <div class="card-image"
-                            style="background-image: url('https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&q=80&w=800');">
-                        </div>
-                        <div class="card-content">
-                            <div class="option-icon" style="background: rgba(0,0,0,0.05); color: #000;"><i
-                                    class="ph ph-file-pdf"></i></div>
-                            <h3>Importe o seu PDF</h3>
-                            <p>Já tem o design feito? Importe o ficheiro PDF de alta resolução da sua ementa atual em
-                                apenas
-                                2 cliques.</p>
-                            <a href="signup.html" class="btn option-btn option-btn-secondary">Importar <i
-                                    class="ph ph-arrow-right"></i></a>
-                        </div>
+                    <div class="option-card">
+                        <div class="option-icon" style="background: rgba(0,0,0,0.05); color: #000;"><i
+                                class="ph ph-file-pdf"></i></div>
+                        <h3>Importe o seu PDF</h3>
+                        <p>Já tem o design feito? Importe o ficheiro PDF de alta resolução da sua ementa atual em apenas
+                            2 cliques.</p>
+                        <a href="signup.html" class="btn option-btn option-btn-secondary">Importar <i
+                                class="ph ph-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -128,38 +112,22 @@
                 </div>
 
                 <div class="bento-grid">
-                    <div class="bento-card bento-image-card reveal delay-1" style="grid-column: span 2;">
-                        <div class="bento-bg"
-                            style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&q=80&w=1000');">
-                        </div>
-                        <div class="bento-content">
-                            <i class="ph ph-qr-code"></i>
-                            <h3>QR Code Dinâmico</h3>
-                            <p>Altere o seu menu em tempo real sem nunca trocar o código impresso. Atualizações
-                                instantâneas.</p>
-                        </div>
+                    <div class="bento-card reveal delay-1">
+                        <i class="ph ph-qr-code"></i>
+                        <h3>QR Code Dinâmico</h3>
+                        <p>Altere o seu menu em tempo real sem nunca trocar o código impresso. Atualizações
+                            instantâneas.</p>
                     </div>
-                    <div class="bento-card bento-standard reveal delay-2">
+                    <div class="bento-card reveal delay-2">
                         <i class="ph ph-layout"></i>
                         <h3>Editor Pure Canvas</h3>
                         <p>Interface direta. Sem abas escondidas. O que vê no editor é exatamente o que o cliente
                             recebe.</p>
                     </div>
-                    <div class="bento-card bento-standard reveal delay-3">
+                    <div class="bento-card reveal delay-3">
                         <i class="ph ph-sparkle"></i>
                         <h3>Design Minimal</h3>
                         <p>Focado na leitura e conversão. Menus que não apenas informam, mas elevam a marca.</p>
-                    </div>
-                    <div class="bento-card bento-image-card reveal delay-4"
-                        style="grid-column: span 3; min-height: 350px;">
-                        <div class="bento-bg"
-                            style="background-image: linear-gradient(to right, rgba(0,0,0,0.9) 20%, transparent), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200');">
-                        </div>
-                        <div class="bento-content" style="max-width: 500px;">
-                            <h3 style="font-size: 2.25rem;">Performance Global</h3>
-                            <p>O seu menu carrega instantaneamente, não importa onde o cliente esteja, garantindo que
-                                nada se interpõe entre a fome e o pedido.</p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -192,8 +160,7 @@
         </section>
 
         <!-- FINAL CTA SECTION -->
-        <section class="final-cta"
-            style="position: relative; justify-content: flex-start; padding-top: 35vh; background: linear-gradient(rgba(245, 245, 247, 0.8), rgba(245, 245, 247, 1) 70%), url('https://images.unsplash.com/photo-1498837167922-41c54b4231b6?auto=format&fit=crop&q=80&w=2000') center/cover; background-attachment: fixed;">
+        <section style="position: relative; justify-content: flex-start; padding-top: 35vh;">
             <div class="container reveal" style="text-align: center; position: relative; z-index: 20;">
                 <h2 style="font-size: 3.5rem; margin-bottom: 24px; letter-spacing: -0.03em;">Pronto para elevar o seu
                     restaurante?</h2>
