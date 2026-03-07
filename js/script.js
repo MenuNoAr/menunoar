@@ -1,27 +1,14 @@
-// Initialize Supabase
-// IMPORTANTE: Para sites puramente estáticos (HTML/JS) no Vercel, as variáveis de ambiente normais (process.env) NÃO estão disponíveis no browser.
-// Tens duas opções:
-// 1. Colar as chaves diretamente aqui (A chave 'anon' é pública, por isso é seguro para este tipo de site).
-// 2. Se quiseres mesmo usar Env Vars do Vercel, terias de usar uma Vercel Serverless Function para injetar estas chaves, o que é mais complexo.
-// RECOMENDAÇÃO: Cola as chaves aqui. É seguro para a chave ANON.
+import { getSupabase } from './auth-service.js';
 
 let supabaseClient;
 
-// Função para iniciar o Supabase buscando as keys ao servidor (Vercel)
+// Função para iniciar o Supabase
 async function initSupabase() {
     try {
-        const response = await fetch('/api/config');
-        if (!response.ok) throw new Error('Falha ao carregar configuração');
-
-        const config = await response.json();
-
-        if (!config.supabaseUrl || !config.supabaseAnonKey) {
-            console.warn('Supabase keys em falta nas Environment Variables do Vercel.');
-            return;
+        supabaseClient = await getSupabase();
+        if (supabaseClient) {
+            console.log('Supabase initialized successfully via auth-service');
         }
-
-        supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
-        console.log('Supabase initialized via Vercel Env Vars');
     } catch (error) {
         console.error('Erro a inicializar:', error);
     }
