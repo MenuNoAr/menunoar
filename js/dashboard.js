@@ -72,17 +72,6 @@ async function init() {
 
     } catch (err) {
         console.error('Init Error:', err);
-        const setupScreen = document.getElementById('setup-screen');
-        if (setupScreen) {
-            setupScreen.style.display = 'flex';
-            setupScreen.innerHTML = `
-                <div class="setup-card">
-                    <h2 style="color:#ef4444">Erro de Configuração</h2>
-                    <p>Não foi possível ligar ao Supabase. Verifique se as variáveis de ambiente (SUPABASE_URL e ANON_KEY) estão configuradas no Vercel.</p>
-                    <button onclick="window.location.reload()" class="btn-confirm" style="margin-top:20px">Tentar Novamente</button>
-                </div>
-            `;
-        }
     }
 }
 
@@ -373,7 +362,11 @@ document.getElementById('setupForm').onsubmit = async (e) => {
         .single();
 
     if (error) {
-        window.showToast(error.code === '23505' ? 'Este link já existe. Escolha outro.' : error.message, 'error');
+        alert('Erro ao criar: ' + (
+            error.code === '23505'
+                ? 'Este link já existe. Escolha outro.'
+                : error.message
+        ));
         btn.innerHTML = orig;
         btn.disabled = false;
         return;
@@ -387,11 +380,11 @@ document.getElementById('setupForm').onsubmit = async (e) => {
 window.closeModal = (id) => document.getElementById(id)?.classList.remove('open');
 
 window.closeAllModals = () =>
-    document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.edit-modal').forEach(m => m.classList.remove('open'));
 
 // Close modals or dropbar on backdrop click
 document.addEventListener('mousedown', (e) => {
-    if (e.target.classList.contains('modal-backdrop')) window.closeAllModals();
+    if (e.target.classList.contains('edit-modal')) window.closeAllModals();
 
     // Close mobile dropbar if clicking outside
     const dropbar = document.getElementById('mobileDropbar');

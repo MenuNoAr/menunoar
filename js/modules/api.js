@@ -86,7 +86,7 @@ export async function loadData() {
     }
 
     document.getElementById('setup-screen').style.display = 'none';
-    document.getElementById('main-dashboard').style.display = 'grid';
+    document.getElementById('main-dashboard').style.display = 'block';
 
     updateLiveLink(rest.slug);
     _checkSubscription(rest);
