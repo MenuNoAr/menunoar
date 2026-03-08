@@ -598,24 +598,26 @@ footer {
     background-position: center;
     background-attachment: fixed;
     position: relative;
-    padding: 0 0 40px;
+    padding: 0;
 }
 
 .final-cta .container {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    /* CTA at center, Footer at bottom */
-    min-height: 90vh;
+    justify-content: center;
+    /* PERFECT CENTER */
+    min-height: 100vh;
     width: 100%;
+    position: relative;
 }
 
 .cta-content {
-    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding-bottom: 80px;
+    /* Slight visual nudge to sit perfectly under the arrow tip */
 }
 
 .cta-heading {
@@ -635,11 +637,12 @@ footer {
 
 /* INTEGRATED FOOTER */
 .footer-minimal {
-    margin-top: 100px;
+    position: absolute;
+    bottom: 40px;
     width: 100%;
     text-align: left;
     border-top: 1px solid rgba(0, 0, 0, 0.06);
-    padding-top: 60px;
+    padding-top: 30px;
 }
 
 .footer-grid {
@@ -1137,10 +1140,12 @@ footer {
 
     /* 8. Footer Reformat - Integrated */
     .footer-minimal {
-        margin-top: 48px;
-        padding-top: 32px;
+        margin-top: 60px !important;
+        padding-top: 40px !important;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
         text-align: center;
+        position: static !important;
+        /* Flow naturally on mobile */
     }
 
     .footer-grid {
@@ -1163,26 +1168,37 @@ footer {
 
     /* 9. Final CTA Layout */
     .final-cta {
-        padding: 60px 24px !important;
+        padding: 0 24px !important;
         background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('../assets/images/cta_bg.png') !important;
         background-size: cover !important;
         background-position: center !important;
         color: #fff !important;
         min-height: 100dvh !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        /* Start from top on mobile to fit footer */
-        align-items: center;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        /* Center content vertically */
+        align-items: center !important;
     }
 
     .final-cta .container {
-        justify-content: flex-start !important;
-        min-height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        /* Button at center */
+        min-height: 100dvh !important;
+        padding-top: 70px !important;
+        /* NAVBAR CLEARANCE */
+        position: relative !important;
     }
 
     .cta-content {
-        padding: 40px 0 !important;
+        padding: 0 !important;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
 
     .final-cta h2,
