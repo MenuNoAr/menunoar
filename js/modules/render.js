@@ -54,7 +54,7 @@ export function renderHeader(data) {
     if (coverDiv) {
         if (data.cover_url) {
             coverDiv.style.backgroundImage = `url('${data.cover_url}')`;
-            coverDiv.style.height = '350px';
+            coverDiv.style.height = '250px';
             coverDiv.innerHTML = `
                 <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
                 <div class="header-actions-abs">
