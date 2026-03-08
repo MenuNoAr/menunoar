@@ -1,411 +1,600 @@
 /* 
-  Dashboard Hub - "The Command Center"
-  Brutalist Premium Style: Sharp borders, high contrast, split-pane.
+  Menu Studio - Premium Lifestyle Dashboard CSS
+  Inherits tokens from style.css
 */
 
 :root {
-    --hub-bg: #0a0a0b;
-    --hub-surface: #ffffff;
-    --hub-border: #e4e4e7;
-    --hub-text: #09090b;
-    --hub-muted: #71717a;
-    --hub-primary: #000000;
-    --hub-accent: #0070f3;
-    --hub-danger: #ef4444;
-    --hub-topbar-h: 68px;
-    --hub-blueprint-w: 480px;
+    --studio-sidebar-w: 80px;
+    --studio-topbar-h: 72px;
+    --studio-blueprint-w: 420px;
+    --studio-accent: #1fa8ff;
+    --studio-glass: rgba(255, 255, 255, 0.7);
+    --studio-border: rgba(226, 232, 240, 0.5);
 }
 
-body.hub-body {
-    background-color: var(--hub-bg);
-    color: var(--hub-text);
+.dark-mode {
+    --studio-glass: rgba(15, 23, 42, 0.8);
+    --studio-border: rgba(30, 41, 59, 1);
+}
+
+body.studio-body {
+    background-color: var(--bg-page);
+    color: var(--text-main);
     overflow: hidden;
     height: 100vh;
+    font-family: 'Inter', sans-serif;
 }
 
-/* ─── Topbar ─── */
-.hub-topbar {
-    height: var(--hub-topbar-h);
-    background: #fff;
-    border-bottom: 2px solid #000;
+/* ─── Studio Dashboard Architecture ─── */
+.studio-app {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Sidebar (Left Rail) */
+.studio-sidebar {
+    width: var(--studio-sidebar-w);
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 0;
+    z-index: 100;
+}
+
+.studio-logo img {
+    width: 34px;
+    height: auto;
+    margin-bottom: 40px;
+}
+
+.sidebar-menu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.side-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: var(--transition);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    z-index: 1000;
+    justify-content: center;
     position: relative;
 }
 
-.top-left,
-.top-right {
+.side-btn span {
+    position: absolute;
+    left: 60px;
+    background: var(--text-main);
+    color: var(--bg-surface);
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    opacity: 0;
+    transform: translateX(-10px);
+    pointer-events: none;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.side-btn:hover span {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.side-btn:hover,
+.side-btn.active {
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.side-btn.logout:hover {
+    background: #fef2f2;
+    color: var(--danger);
+}
+
+/* Viewport (Main Area) */
+.studio-viewport {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Topbar */
+.studio-topbar {
+    height: var(--studio-topbar-h);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.bar-left .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.01em;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(31, 168, 255, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(31, 168, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(31, 168, 255, 0);
+    }
+}
+
+.bar-right {
     display: flex;
     align-items: center;
     gap: 16px;
 }
 
-.hub-logo {
-    height: 28px;
-}
-
-.hub-divider {
-    width: 1px;
-    height: 24px;
-    background: var(--hub-border);
-}
-
-.location-path {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-}
-
-.muted {
-    color: var(--hub-muted);
-}
-
-.hub-nav {
-    display: flex;
-    background: #f4f4f5;
-    padding: 4px;
-    border-radius: 8px;
-}
-
-.nav-tab {
-    padding: 6px 16px;
-    border-radius: 6px;
-    border: none;
-    background: transparent;
-    font-weight: 600;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.nav-tab.active {
-    background: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.status-pill {
+.premium-badge {
+    background: var(--text-main);
+    color: var(--bg-surface);
     padding: 4px 12px;
     border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
+    font-size: 0.7rem;
+    font-weight: 800;
 }
 
-.status-pill.trial {
-    background: #fef9c3;
-    color: #854d0e;
+.glass {
+    backdrop-filter: blur(10px);
+    background: var(--primary-soft);
+    border-color: transparent;
 }
 
-/* ─── Workspace Layout ─── */
-.hub-container {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+.theme-switch {
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    cursor: pointer;
 }
 
-.hub-workspace {
+.user-pill {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    border-radius: 50%;
+    border: none;
+    color: #fff;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* Workspace Panels */
+.studio-workspace {
     flex: 1;
     display: flex;
     overflow: hidden;
-    background: #fbfbfb;
+    background: var(--bg-page);
 }
 
-/* ─── Left Section: Blueprint ─── */
-.hub-blueprint {
-    width: var(--hub-blueprint-w);
-    border-right: 2px solid #000;
-    background: #fff;
+.workspace-panel {
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
     padding: 32px;
 }
 
-.blueprint-header {
+.blueprint-panel {
+    width: var(--studio-blueprint-w);
+    border-right: 1px solid var(--border-color);
+    background: var(--bg-surface);
+}
+
+.panel-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 32px;
 }
 
-.blueprint-header h2 {
+.section-title {
     font-family: 'Outfit', sans-serif;
-    font-size: 2rem;
-    font-weight: 900;
-    letter-spacing: -0.04em;
-}
-
-.blueprint-content {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-/* Item Blueprint Cards */
-.cat-blueprint-box {
-    border: 2px solid #000;
-    background: #fff;
-    padding: 20px;
-    position: relative;
-    transition: transform 0.2s;
-}
-
-.cat-blueprint-box:hover {
-    transform: translate(-4px, -4px);
-    box-shadow: 6px 6px 0 #000;
-}
-
-.cat-head-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.cat-name-input {
-    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
     font-weight: 800;
-    font-size: 1.1rem;
-    border: none;
-    outline: none;
-    background: transparent;
 }
 
-.item-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-top: 1px solid #f0f0f0;
-    cursor: pointer;
-}
-
-.item-row:hover {
-    color: var(--hub-accent);
-}
-
-.item-row.unavailable {
-    opacity: 0.4;
-    text-decoration: line-through;
-}
-
-.item-name-box {
-    flex: 1;
-    font-weight: 600;
-    font-size: 0.95rem;
-}
-
-.item-price-box {
-    font-weight: 700;
-    margin: 0 16px;
-}
-
-/* ─── Right Section: Studio ─── */
-.hub-studio {
-    flex: 1;
-    background: var(--hub-bg);
-    padding: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-}
-
-.studio-tools {
-    position: absolute;
-    top: 24px;
-    right: 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    padding: 8px 16px;
-    border-radius: 50px;
-}
-
-.studio-canvas {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    perspective: 1000px;
-}
-
-.studio-preview-card {
-    width: 380px;
-    height: 760px;
-    background: #fff;
-    border-radius: 40px;
-    border: 12px solid #1a1a1a;
-    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+.scroll-y {
     overflow-y: auto;
     scrollbar-width: none;
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.studio-preview-card::-webkit-scrollbar {
+.scroll-y::-webkit-scrollbar {
     display: none;
 }
 
-.hub-container.tablet-mode .studio-preview-card {
-    width: 800px;
-    height: 600px;
-}
-
-/* ─── General Components ─── */
-.hub-btn {
-    padding: 10px 20px;
-    border-radius: 6px;
-    border: 2px solid #000;
-    font-weight: 700;
-    font-size: 0.9rem;
-    cursor: pointer;
-    background: #fff;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    text-transform: uppercase;
-}
-
-.hub-btn.primary {
-    background: #000;
-    color: #fff;
-}
-
-.hub-btn:hover {
-    background: var(--hub-accent);
-    color: #fff;
-    border-color: var(--hub-accent);
-}
-
-.hub-btn.block {
-    width: 100%;
-    justify-content: center;
-}
-
-.hub-btn.sm {
-    padding: 6px 12px;
-    font-size: 0.75rem;
-}
-
-.icon-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: none;
-    background: #f4f4f5;
-    cursor: pointer;
+/* Bento Cards in Blueprint */
+.categories-grid {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 100px;
 }
 
-.profile-trigger {
-    width: 36px;
-    height: 36px;
-    background: #000;
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    font-weight: 800;
-    cursor: pointer;
+.bento-card {
+    background: var(--bg-page);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    padding: 24px;
+    transition: var(--transition);
 }
 
-/* ─── Overlays & Modals ─── */
-.hub-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--hub-bg);
+.bento-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    z-index: 5000;
+    margin-bottom: 20px;
 }
 
-.setup-window {
-    background: #fff;
-    padding: 64px;
-    border-radius: 40px;
-    max-width: 600px;
-    width: 100%;
-    text-align: center;
-}
-
-.setup-head h1 {
+.cat-edit-input {
     font-family: 'Outfit', sans-serif;
-    font-size: 2.5rem;
     font-weight: 700;
-    margin: 24px 0 8px;
+    font-size: 1.1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    width: 70%;
 }
 
-.setup-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-top: 40px;
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.setup-card-btn {
-    background: #fbfbfb;
-    border: 2px solid #f0f0f0;
-    padding: 32px;
-    border-radius: 24px;
+.item-strip {
+    background: var(--bg-surface);
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     cursor: pointer;
-    text-align: left;
-    transition: all 0.2s;
+    transition: var(--transition);
 }
 
-.setup-card-btn:hover {
-    border-color: #000;
-    transform: translateY(-4px);
+.item-strip:hover {
+    transform: translateX(8px);
+    border-color: var(--primary);
 }
 
-.setup-card-btn i {
-    font-size: 2.5rem;
-    color: var(--hub-accent);
-    margin-bottom: 16px;
+.item-info strong {
+    font-size: 0.9rem;
     display: block;
 }
 
-/* ─── Dark Mode Adjust ─── */
-.dark-mode .hub-topbar {
+.item-info span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.item-price {
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 0.9rem;
+}
+
+/* Preview Studio (Right) */
+.preview-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 60px;
+}
+
+.preview-controls {
+    position: absolute;
+    top: 24px;
+    display: flex;
+    background: var(--bg-surface);
+    padding: 4px;
+    border-radius: 50px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.view-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.view-btn.active {
+    background: var(--primary);
+    color: #fff;
+}
+
+.device-frame {
+    width: 380px;
+    height: 780px;
     background: #000;
-    color: #fff;
-    border-bottom: 2px solid #333;
+    border-radius: 48px;
+    border: 12px solid #1a1a1a;
+    box-shadow: 0 100px 100px -20px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    position: relative;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.dark-mode .nav-tab {
-    color: #fff;
+.device-content {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    overflow-y: auto;
+    scrollbar-width: none;
 }
 
-.dark-mode .nav-tab.active {
-    background: #222;
+.device-content::-webkit-scrollbar {
+    display: none;
 }
 
-.dark-mode .hub-blueprint {
-    background: #000;
-    color: #fff;
-    border-right: 2px solid #333;
+.studio-app.tablet-mode .device-frame {
+    width: 800px;
+    height: 600px;
+    border-radius: 32px;
 }
 
-.dark-mode .cat-blueprint-box {
-    background: #111;
-    border-color: #333;
-    color: #fff;
+/* ─── Setup Screen Overhaul ─── */
+.studio-setup-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-page);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
-.dark-mode .cat-name-input {
-    color: #fff;
+.setup-container {
+    max-width: 800px;
+    width: 100%;
+    background: var(--bg-surface);
+    border-radius: var(--radius-xl);
+    padding: 64px;
+    text-align: center;
 }
 
-.dark-mode .hub-logo {
-    filter: invert(1);
+.setup-brand {
+    height: 40px;
+    margin-bottom: 24px;
+}
+
+.setup-header h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.setup-header p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+.setup-cards-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 48px 0;
+}
+
+.setup-card {
+    background: var(--bg-page);
+    border: 1px solid var(--border-color);
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.setup-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary);
+}
+
+.setup-card i {
+    font-size: 3rem;
+    color: var(--primary);
+    margin-bottom: 24px;
+    display: block;
+}
+
+.setup-card strong {
+    display: block;
+    font-size: 1.25rem;
+    font-family: 'Outfit', sans-serif;
+}
+
+.setup-card span {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* Form styles for setup */
+.setup-input-group {
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.fancy-input-wrapper {
+    position: relative;
+}
+
+.studio-input,
+.setup-input-group input {
+    width: 100%;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-main);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.studio-input:focus,
+.setup-input-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(31, 168, 255, 0.1);
+}
+
+/* Modals */
+.modal-root {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+}
+
+.modal-root.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-glass {
+    background: var(--studio-glass);
+    border: 1px solid var(--studio-border);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 500px;
+    padding: 40px;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(20px);
+    transition: var(--transition);
+}
+
+.modal-root.open .modal-glass {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-header h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+}
+
+.close-x {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.column label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.btn-full {
+    width: 100%;
+    padding: 16px;
+    margin-top: 12px;
+}
+
+/* Studio Image Modal Specifics */
+.image-studio-preview {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    background: var(--bg-page);
+    font-size: 3rem;
+    color: var(--text-muted);
+}
+
+.image-studio-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+}
+
+.studio-actions {
+    display: flex;
+    gap: 12px;
 }

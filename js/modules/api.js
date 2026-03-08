@@ -1,5 +1,5 @@
 /**
- * api.js - Hub Version
+ * api.js - Studio Edition
  */
 import { state, updateState } from './state.js';
 import { renderAll, updateLiveLink } from './render.js';
@@ -8,21 +8,23 @@ export async function loadData() {
     const { supabase, currentUser } = state;
     if (!supabase || !currentUser) return;
 
-    // Fetch Restaurant
+    // Fetch Restaurant (Nike performance focus: parallelism where possible)
     const { data: rest, error } = await supabase
         .from('restaurants')
         .select('*')
         .eq('owner_id', currentUser.id)
         .maybeSingle();
 
-    if (error) return console.error('Error:', error);
+    if (error) return console.error('Supabase Error:', error);
 
     const setupEl = document.getElementById('setup-screen');
     const mainEl = document.getElementById('main-dashboard');
 
+    // Case: New User / No Restaurant
     if (!rest) {
         if (setupEl) setupEl.style.display = 'flex';
         if (mainEl) mainEl.style.display = 'none';
+        _triggerSetupReveal();
         return;
     }
 
@@ -34,53 +36,57 @@ export async function loadData() {
         .order('category')
         .order('name');
 
-    // Update Global State
+    // Sync State
     updateState({
         restaurantId: rest.id,
         currentData: rest,
         menuItems: items || []
     });
 
-    // Visibility
+    // Layout Transition
     if (setupEl) setupEl.style.display = 'none';
     if (mainEl) mainEl.style.display = 'flex';
 
-    // UI Topbar updates
-    const nameLabel = document.getElementById('sidebarUserName');
-    if (nameLabel) nameLabel.textContent = rest.name || 'Restaurante';
+    // UI Updates (Header & Branding)
+    const sidebarName = document.getElementById('sidebarUserName');
+    if (sidebarName) sidebarName.textContent = rest.name || 'Menu Studio';
 
-    const userLabel = document.getElementById('userDisplayName');
-    if (userLabel) userLabel.textContent = (rest.name || 'U').charAt(0).toUpperCase();
+    const userInitials = document.getElementById('userDisplayName');
+    if (userInitials) userInitials.textContent = (rest.name || currentUser.email || 'U').charAt(0).toUpperCase();
 
-    // Trigger Complete Render
+    // Cinematic Rendering
     renderAll();
 
     updateLiveLink(rest.slug);
-    _updateStatusPill(rest);
+    _updateTrialStatus(rest);
 }
 
-function _updateStatusPill(rest) {
-    const pill = document.getElementById('trialTimer');
-    if (!pill) return;
+function _updateTrialStatus(rest) {
+    const badge = document.getElementById('trialTimer');
+    if (!badge) return;
 
     const isActive = rest.subscription_status === 'active';
     const trialEnds = new Date(rest.trial_ends_at);
-    const days = Math.ceil((trialEnds - new Date()) / (1000 * 60 * 60 * 24));
+    const now = new Date();
+    const daysLeft = Math.ceil((trialEnds - now) / (1000 * 60 * 60 * 24));
 
     if (isActive) {
-        pill.textContent = 'Membro Pro';
-        pill.className = 'status-pill pro';
-        pill.style.background = '#000';
-        pill.style.color = '#fff';
-    } else if (days > 0) {
-        pill.textContent = `${days} dias trial`;
-        pill.className = 'status-pill trial';
+        badge.innerHTML = '<i class="ph-fill ph-check-circle"></i> PREMIUM';
+        badge.className = 'premium-badge pro';
+    } else if (daysLeft > 0) {
+        badge.innerHTML = `<i class="ph ph-lightning"></i> ${daysLeft}d Trial`;
+        badge.className = 'premium-badge trial';
     } else {
-        pill.textContent = 'Trial Expirado';
-        pill.className = 'status-pill expired';
-        pill.style.background = '#ef4444';
-        pill.style.color = '#fff';
+        badge.innerHTML = '<i class="ph ph-warning"></i> Expirado';
+        badge.className = 'premium-badge expired';
     }
+}
+
+function _triggerSetupReveal() {
+    setTimeout(() => {
+        const c = document.querySelector('.setup-container');
+        if (c) c.classList.add('is-visible');
+    }, 100);
 }
 
 export async function saveCategoryOrder(order) {

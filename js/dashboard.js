@@ -1,9 +1,10 @@
 /**
- * dashboard.js - The Command Center Hub Entry
+ * dashboard.js - Studio Edition Entry Point
+ * Aligned with the premium lifestyle identity.
  */
 import { state, updateState } from './modules/state.js';
 import { loadData } from './modules/api.js';
-import { initAuthListener, signOut, getSupabase } from './auth-service.js';
+import { initAuthListener, getSupabase } from './auth-service.js';
 import { initUploadService } from './upload-service.js';
 
 async function init() {
@@ -13,7 +14,21 @@ async function init() {
     initUploadService(supabase);
     updateState({ supabase });
 
+    // Enforce saved theme accurately
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        const icon = document.getElementById('themeIcon');
+        if (icon) icon.className = 'ph ph-sun';
+        const logo = document.getElementById('studioLogo');
+        if (logo) logo.style.filter = 'invert(1)';
+    }
+
     initAuthListener(async (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
         updateState({ currentUser: user });
         await loadData();
     }, () => {
@@ -21,50 +36,36 @@ async function init() {
     });
 }
 
-// ─── UTILS ───
-window.signOut = signOut;
-window.closeModal = (id) => document.getElementById(id)?.classList.remove('open');
-window.closeAllModals = () => document.querySelectorAll('.hub-modal-overlay').forEach(m => m.classList.remove('open'));
-
+// ─── SETUP FLOW HELPERS ───
 window.showSetupForm = (type) => {
-    document.querySelector('.setup-grid').style.display = 'none';
-    document.getElementById('setupForm').style.display = 'block';
+    document.querySelector('.setup-cards-row').style.display = 'none';
+    document.getElementById('setupForm').style.display = 'flex';
+    document.getElementById('setupForm').classList.add('animate-fade');
 };
 
 window.goBackToSetupChoice = () => {
-    document.querySelector('.setup-grid').style.display = 'grid';
+    document.querySelector('.setup-cards-row').style.display = 'grid';
     document.getElementById('setupForm').style.display = 'none';
 };
 
 window.generateSlugString = (name) => {
-    return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+    return name
+        .toLowerCase()
+        .normalize('NFD') // handle accents
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
 };
 
 window.generateSlug = (name) => {
-    const el = document.getElementById('setupSlug');
-    if (el) el.value = window.generateSlugString(name);
+    const slug = window.generateSlugString(name);
+    const viewer = document.getElementById('setupSlugPreview');
+    const hiddenInput = document.getElementById('setupSlug');
+    if (viewer) viewer.textContent = slug || '...';
+    if (hiddenInput) hiddenInput.value = slug;
 };
 
-document.getElementById('setupForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('setupName').value;
-    const slug = document.getElementById('setupSlug').value;
-
-    const { error } = await state.supabase.from('restaurants').insert([{
-        owner_id: state.currentUser.id,
-        name, slug,
-        menu_type: 'digital',
-        subscription_status: 'trialing',
-        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-    }]);
-
-    if (error) alert("Erro ao criar restaurante.");
-    else window.location.reload();
-});
-
-window.openProfileModal = () => {
-    document.getElementById('profileEmail').textContent = state.currentUser.email;
-    document.getElementById('profileModal').classList.add('open');
-};
-
+// ─── START ───
 init();

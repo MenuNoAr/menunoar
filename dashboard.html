@@ -3,309 +3,252 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Hub | Menu no Ar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Menu Studio | Painel Premium</title>
 
-    <!-- Design tokens -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800;900&display=swap"
-        rel="stylesheet">
-
-    <!-- Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
-    <!-- Styles -->
+    <!-- Global Styles & Inter font (Imported in style.css) -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
 
-    <!-- Libs -->
+    <!-- Branding Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Premium Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Runtime Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body class="hub-body">
+<body class="studio-body">
 
-    <!-- OVERLAYS: Setup Screen -->
-    <div id="setup-screen" class="hub-overlay" style="display:none;">
-        <div class="setup-window animate-fade">
-            <header class="setup-head">
-                <img src="assets/images/logo.svg" alt="Logo" class="hub-logo">
-                <h1>Vamos criar o seu Menu</h1>
-                <p>Escolha a base para o seu novo espaço digital.</p>
+    <!-- SETUP FLOW (REVEAL ANIMATION) -->
+    <div id="setup-screen" class="studio-setup-overlay" style="display:none;">
+        <div class="setup-container reveal-shadow">
+            <header class="setup-header">
+                <img src="assets/images/logo.svg" alt="Menu no Ar" class="setup-brand">
+                <h1>Eleve o seu Negócio</h1>
+                <p>O futuro da restauração começa agora.</p>
             </header>
 
-            <div class="setup-grid">
-                <button class="setup-card-btn" onclick="showSetupForm('scratch')">
-                    <i class="ph-fill ph-plus-circle"></i>
-                    <div class="card-info">
+            <div class="setup-cards-row">
+                <button class="setup-card" onclick="showSetupForm('scratch')">
+                    <div class="card-glow"></div>
+                    <i class="ph-fill ph-sparkle"></i>
+                    <div class="card-content">
                         <strong>Menu Digital</strong>
-                        <span>Editor Visual Dinâmico</span>
+                        <span>Editor Visual Pro</span>
                     </div>
                 </button>
-                <button class="setup-card-btn" onclick="showSetupForm('import')">
+                <button class="setup-card" onclick="showSetupForm('import')">
+                    <div class="card-glow"></div>
                     <i class="ph-fill ph-file-pdf"></i>
-                    <div class="card-info">
-                        <strong>Menu em PDF</strong>
-                        <span>Upload e Conversão Quick</span>
+                    <div class="card-content">
+                        <strong>Ementa em PDF</strong>
+                        <span>Upload Instantâneo</span>
                     </div>
                 </button>
             </div>
 
-            <!-- Hidden Forms -->
-            <form id="setupForm" class="setup-inner-form" style="display:none;">
-                <input type="text" id="setupName" placeholder="Nome do Restaurante" required
-                    oninput="generateSlug(this.value)">
-                <div class="slug-preview">menunoar.pt/<input type="text" id="setupSlug" readonly></div>
-                <button type="submit" class="hub-btn block primary">Criar Dashboard <i
+            <!-- Contextual Form (Revealed based on choice) -->
+            <form id="setupForm" class="setup-input-group" style="display:none;">
+                <div class="fancy-input-wrapper">
+                    <input type="text" id="setupName" placeholder="Nome do Restaurante" required
+                        oninput="generateSlug(this.value)">
+                    <div class="input-focus-border"></div>
+                </div>
+                <div class="slug-badge">
+                    menunoar.pt/<span id="setupSlugPreview">...</span>
+                    <input type="hidden" id="setupSlug">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Começar Experiência <i
                         class="ph ph-arrow-right"></i></button>
-                <button type="button" class="hub-btn block ghost" onclick="goBackToSetupChoice()">Cancelar</button>
+                <button type="button" class="btn btn-ghost btn-full" onclick="goBackToSetupChoice()">Voltar</button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN APP: The Command Hub -->
-    <div id="main-dashboard" class="hub-container" style="display:none;">
+    <!-- STUDIO CORE SHELL -->
+    <div id="main-dashboard" class="studio-app" style="display:none;">
 
-        <!-- HEADER -->
-        <header class="hub-topbar">
-            <div class="top-left">
-                <a href="/" class="brand-link">
-                    <img src="assets/images/logo.svg" alt="Menu no Ar" id="hubLogo">
+        <!-- SIDE NAVIGATION (Nike Style Column) -->
+        <nav class="studio-sidebar">
+            <div class="sidebar-top">
+                <a href="/" class="studio-logo">
+                    <img src="assets/images/logo.svg" alt="Logo" id="studioLogo">
                 </a>
-                <div class="hub-divider"></div>
-                <div class="location-path">
-                    <span class="muted">Painel</span>
-                    <i class="ph ph-caret-right"></i>
-                    <strong id="sidebarUserName">Restaurante</strong>
-                </div>
             </div>
 
-            <div class="top-center">
-                <nav class="hub-nav">
-                    <button class="nav-tab active" onclick="switchView('editor')">Menu</button>
-                    <button class="nav-tab" onclick="openSettingsModal()">Design</button>
-                    <button class="nav-tab" onclick="openQrModal()">QR Code</button>
-                </nav>
-            </div>
-
-            <div class="top-right">
-                <div id="trialTimer" class="status-pill trial">30 dias restantes</div>
-                <button class="icon-btn" onclick="toggleDarkMode()">
-                    <i id="themeIcon" class="ph ph-moon"></i>
+            <div class="sidebar-menu">
+                <button class="side-btn active" onclick="switchView('editor')" title="Menu Editor">
+                    <i class="ph ph-layout"></i>
+                    <span>Menu</span>
                 </button>
-                <button class="profile-trigger" onclick="openProfileModal()">
-                    <span id="userDisplayName">U</span>
+                <button class="side-btn" onclick="openSettingsModal('design')" title="Design Language">
+                    <i class="ph ph-palette"></i>
+                    <span>Design</span>
+                </button>
+                <button class="side-btn" onclick="openQrModal()" title="QR Studio">
+                    <i class="ph ph-qr-code"></i>
+                    <span>QR</span>
+                </button>
+                <button class="side-btn" id="billingLink" onclick="openSettingsModal('billing')" title="Subscription">
+                    <i class="ph ph-credit-card"></i>
+                    <span>Conta</span>
                 </button>
             </div>
-        </header>
 
-        <!-- SPLIT CANVAS -->
-        <main class="hub-workspace">
+            <div class="sidebar-bottom">
+                <button class="side-btn logout" onclick="signOut()" title="Logout">
+                    <i class="ph ph-sign-out"></i>
+                </button>
+            </div>
+        </nav>
 
-            <!-- LEFT: THE BLUEPRINT -->
-            <section class="hub-blueprint" id="menu-blueprint">
-                <div class="blueprint-header">
-                    <h2>Ementa</h2>
-                    <div class="blueprint-actions">
-                        <button class="hub-btn primary sm" onclick="addNewCategoryOptimized()">
-                            <i class="ph ph-plus"></i> Categoria
-                        </button>
+        <!-- MAIN CANVAS AREA -->
+        <main class="studio-viewport">
+
+            <!-- TOP BAR (Contextual Navigation) -->
+            <header class="studio-topbar">
+                <div class="bar-left">
+                    <div class="status-indicator">
+                        <div class="pulse-dot"></div>
+                        <span id="sidebarUserName">Studio</span>
                     </div>
                 </div>
 
-                <div id="categories-list" class="blueprint-content">
-                    <!-- JS Injects Categories using Bento Cards -->
-                    <div class="hub-loading">
-                        <i class="ph ph-spinner fa-spin"></i>
-                    </div>
-                </div>
-            </section>
+                <div class="bar-right">
+                    <div id="trialTimer" class="premium-badge">PRO</div>
 
-            <!-- RIGHT: THE STUDIO (LIVE PREVIEW) -->
-            <section class="hub-studio">
-                <div class="studio-tools">
-                    <button class="tool-btn" onclick="togglePreviewMode('mobile')"><i
-                            class="ph ph-smartphone"></i></button>
-                    <button class="tool-btn" onclick="togglePreviewMode('tablet')"><i class="ph ph-tablet"></i></button>
-                    <div class="hub-divider"></div>
-                    <button class="hub-btn pro-action" id="liveLinkBtn">
-                        <i class="ph ph-arrow-square-out"></i> Abrir Link Público
+                    <button class="btn btn-secondary glass" id="liveLinkBtn">
+                        <i class="ph ph-eye"></i>
+                        <span>Live Preview</span>
+                    </button>
+
+                    <div class="divider"></div>
+
+                    <button class="theme-switch" onclick="toggleDarkMode()">
+                        <i id="themeIcon" class="ph ph-moon"></i>
+                    </button>
+
+                    <button class="user-pill" onclick="openProfileModal()">
+                        <span id="userDisplayName">U</span>
                     </button>
                 </div>
+            </header>
 
-                <div class="studio-canvas" id="canvas-wrapper">
-                    <div id="menuContainer" class="studio-preview-card">
-                        <!-- THE ACTUAL LIVE PREVIEW INJECTED HERE -->
+            <!-- EDITING WORKSPACE -->
+            <section class="studio-workspace">
+
+                <!-- CONTENT PANEL (Management) -->
+                <div class="workspace-panel blueprint-panel">
+                    <header class="panel-head">
+                        <h2 class="section-title">Blueprint</h2>
+                        <button class="btn btn-primary sm" onclick="addNewCategoryOptimized()">
+                            <i class="ph ph-plus"></i>
+                        </button>
+                    </header>
+                    <div id="categories-blueprint" class="categories-grid scroll-y">
+                        <!-- Bento Cards injected here -->
                     </div>
                 </div>
+
+                <!-- PREVIEW PANEL (Visual Result) -->
+                <div class="workspace-panel preview-panel">
+                    <div class="preview-controls">
+                        <button class="view-btn active" onclick="setPreviewSize('mobile')"><i
+                                class="ph ph-smartphone"></i></button>
+                        <button class="view-btn" onclick="setPreviewSize('tablet')"><i
+                                class="ph ph-tablet"></i></button>
+                    </div>
+
+                    <div id="viewport-frame" class="device-frame">
+                        <div class="device-content" id="menuContainer">
+                            <!-- Live Menu Render -->
+                        </div>
+                    </div>
+                </div>
+
             </section>
 
         </main>
     </div>
 
-    <!-- MODALS -->
+    <!-- PREMIUM MODALS (Glassmorphism) -->
 
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="hub-modal-overlay" onclick="if(event.target===this) closeModal('settingsModal')">
-        <div class="hub-modal-window wide">
-            <div class="modal-sidebar">
-                <button class="m-nav-btn active" id="tab-btn-design"
-                    onclick="switchSettingsTab('design')">Design</button>
-                <button class="m-nav-btn" id="tab-btn-general" onclick="switchSettingsTab('general')">Geral</button>
-                <button class="m-nav-btn" id="tab-btn-billing" onclick="switchSettingsTab('billing')">Conta</button>
-            </div>
-            <div class="modal-main">
-                <div class="modal-header">
-                    <h3 id="settingsTitle">Identidade Visual</h3>
-                    <button class="close-modal" onclick="closeModal('settingsModal')"><i class="ph ph-x"></i></button>
-                </div>
-                <form id="settingsForm" class="modal-form">
-                    <div id="tab-design" class="m-pane">
-                        <div class="f-group">
-                            <label>Tipo de Letra Principal</label>
-                            <select id="modalFont" class="hub-input">
-                                <option value="Inter">Inter (Clean)</option>
-                                <option value="Outfit">Outfit (Moderna)</option>
-                                <option value="Playfair Display">Sério / Elegante</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="tab-general" class="m-pane" style="display:none;">
-                        <div class="f-group">
-                            <label>Link (Slug)</label>
-                            <input type="text" id="modalSlug" class="hub-input">
-                        </div>
-                        <div class="pdf-card">
-                            <div class="info">
-                                <strong>Utilizar PDF</strong>
-                                <span>Ignorar editor digital</span>
-                            </div>
-                            <label class="hub-switch">
-                                <input type="checkbox" id="pdfToggle" onchange="togglePdfDetails()">
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-                        <div id="pdfDetails" style="display:none; margin-top:20px;">
-                            <input type="file" id="pdfUploadInput" accept="application/pdf" class="hub-input">
-                        </div>
-                    </div>
-                    <div id="tab-billing" class="m-pane" style="display:none;">
-                        <div class="status-box">
-                            <p>Plano Selecionado:</p>
-                            <strong id="billingStatusText">Profissional</strong>
-                        </div>
-                        <button type="button" class="hub-btn primary" id="btnActionBilling">Gerir Assinatura</button>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="hub-btn primary">Guardar Alterações</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Profile/Account Modal -->
-    <div id="profileModal" class="hub-modal-overlay" onclick="if(event.target===this) closeModal('profileModal')">
-        <div class="hub-modal-window small">
+    <!-- Item/Product Modal -->
+    <div id="itemModal" class="modal-root" onclick="if(event.target===this) closeModal('itemModal')">
+        <div class="modal-glass">
             <div class="modal-header">
-                <h3>Minha Conta</h3>
-                <button class="close-modal" onclick="closeModal('profileModal')"><i class="ph ph-x"></i></button>
+                <h3 id="modalTitle">Detalhes do Prato</h3>
+                <button class="close-x" onclick="closeModal('itemModal')"><i class="ph ph-x"></i></button>
             </div>
-            <div class="modal-body">
-                <div class="profile-top">
-                    <div class="avatar-large" id="avatarLarge">U</div>
-                    <h4 id="profileEmail">email@user.com</h4>
-                </div>
-                <button class="hub-btn danger block" onclick="signOut()">Sair da Conta <i
-                        class="ph ph-sign-out"></i></button>
-                <button class="hub-btn ghost block" onclick="promptDeleteRestaurant()">Apagar Restaurante</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- QR Modal -->
-    <div id="qrModal" class="hub-modal-overlay" onclick="if(event.target===this) closeModal('qrModal')">
-        <div class="hub-modal-window small">
-            <div class="modal-header">
-                <h3>QR Code do Menu</h3>
-                <button class="close-modal" onclick="closeModal('qrModal')"><i class="ph ph-x"></i></button>
-            </div>
-            <div class="modal-body align-center">
-                <div id="qr-code-container" class="qr-box"></div>
-                <p id="qrRestaurantName" class="bold">Nome</p>
-                <button class="hub-btn block primary" onclick="downloadQr()"><i class="ph ph-download"></i> Baixar
-                    PNG</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Item Editor Modal (The Blueprint focused one) -->
-    <div id="itemModal" class="hub-modal-overlay" onclick="if(event.target===this) closeModal('itemModal')">
-        <div class="hub-modal-window">
-            <div class="modal-header">
-                <h3 id="modalTitle">Prato</h3>
-                <button class="close-modal" onclick="closeModal('itemModal')"><i class="ph ph-x"></i></button>
-            </div>
-            <form id="itemEditForm" class="modal-form">
+            <form id="itemEditForm" class="modal-body">
                 <input type="hidden" id="editItemId">
                 <input type="hidden" id="editItemCat">
 
-                <div class="f-group">
-                    <label>Título do Prato</label>
-                    <input type="text" id="editItemName" class="hub-input" placeholder="Ex: Risoto de Trufa" required>
-                </div>
-                <div class="f-row">
-                    <div class="f-group">
-                        <label>Preço (€)</label>
-                        <input type="number" step="0.01" id="editItemPrice" class="hub-input" required>
+                <div class="form-row">
+                    <div class="column">
+                        <label>Nome</label>
+                        <input type="text" id="editItemName" class="studio-input" placeholder="Ex: Risoto Mare"
+                            required>
                     </div>
-                    <div class="f-group">
-                        <label>Esgotado?</label>
-                        <select id="editItemVisibility" class="hub-input">
+                    <div class="column narrow">
+                        <label>Preço (€)</label>
+                        <input type="number" step="0.01" id="editItemPrice" class="studio-input" required>
+                    </div>
+                </div>
+
+                <label>Descrição</label>
+                <textarea id="editItemDesc" class="studio-input" rows="3"
+                    placeholder="Ingredientes e detalhes..."></textarea>
+
+                <div class="form-row">
+                    <div class="column">
+                        <label>Disponibilidade</label>
+                        <select id="editItemVisibility" class="studio-input">
                             <option value="true">Disponível</option>
                             <option value="false">Esgotado</option>
                         </select>
                     </div>
                 </div>
-                <div class="f-group">
-                    <label>Descrição</label>
-                    <textarea id="editItemDesc" class="hub-input" rows="3"></textarea>
-                </div>
 
                 <div class="modal-footer">
-                    <button type="submit" class="hub-btn primary block">Guardar Informação</button>
+                    <button type="submit" class="btn btn-primary btn-full">Guardar Alterações</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Image Modal -->
-    <div id="imageModal" class="hub-modal-overlay" onclick="if(event.target===this) closeModal('imageModal')">
-        <div class="hub-modal-window">
+    <!-- Image Studio Modal -->
+    <div id="imageModal" class="modal-root" onclick="if(event.target===this) closeModal('imageModal')">
+        <div class="modal-glass small">
             <div class="modal-header">
-                <h3>Imagem do Item</h3>
-                <button class="close-modal" onclick="closeModal('imageModal')"><i class="ph ph-x"></i></button>
+                <h3>Visual Studio</h3>
+                <button class="close-x" onclick="closeModal('imageModal')"><i class="ph ph-x"></i></button>
             </div>
-            <div class="modal-body align-center">
-                <div class="img-preview" id="imgPreviewZone">
+            <div class="modal-body studio-light">
+                <div class="image-studio-preview" id="imgPreviewZone">
                     <img id="imgPreviewDisplay" style="display:none;">
-                    <i class="ph ph-image-square"></i>
+                    <i class="ph ph-cloud-arrow-up"></i>
                 </div>
                 <input type="file" id="modalImageUpload" hidden accept="image/*">
-                <div class="img-actions">
-                    <button class="hub-btn primary" id="btnChangeImage"><i class="ph ph-camera"></i> Carregar</button>
-                    <button class="hub-btn ghost text-danger" id="btnRemoveImage">Remover</button>
+                <div class="studio-actions">
+                    <button class="btn btn-primary" id="btnChangeImage">Upload <i class="ph ph-camera"></i></button>
+                    <button class="btn btn-ghost text-danger" id="btnRemoveImage">Remover</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Core Runtime Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
     <script type="module" src="js/dashboard.js"></script>
-
 </body>
 
 </html>
