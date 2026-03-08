@@ -270,12 +270,7 @@ export function renderMenu(items) {
         tab.dataset.category = cat;
         tab.dataset.index = index;
         tab.onclick = () => scrollToSlide(index);
-        tab.innerHTML = `
-            <span>${escapeHTML(cat)}</span>
-            <div class="handle" title="Arrastar">
-                <i class="fa-solid fa-grip-lines-vertical"></i>
-            </div>
-        `;
+        tab.innerHTML = `<span>${escapeHTML(cat)}</span>`;
         navFrag.appendChild(tab);
 
         // ── Slide section ──
@@ -369,7 +364,6 @@ export function renderMenu(items) {
             updateState({
                 sortableInstance: new Sortable(nav, {
                     animation: 150,
-                    handle: '.handle',
                     draggable: '.draggable-tab',
                     ghostClass: 'sortable-ghost',
                     onEnd: async () => {
