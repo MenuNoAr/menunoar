@@ -126,7 +126,7 @@ h1#restName {
     padding: 0 10px;
 }
 
-/* --- SIMPLE INFO BADGES (Clean Look) --- */
+/* --- INFO BADGES --- */
 .info-badges {
     display: flex;
     justify-content: center;
@@ -135,61 +135,32 @@ h1#restName {
     margin: 20px 0;
 }
 
-.info-badges span {
-    background: transparent;
-    font-size: 0.9rem;
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     padding: 2px 8px;
+    background: transparent;
     border-radius: 4px;
     color: var(--text);
     font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 0.9rem;
     transition: all 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
 }
 
-.info-badges span:hover {
+.badge:hover {
     background: var(--bg-badge);
     transform: translateY(-1px);
 }
 
-.info-badges i {
+.badge i {
     color: var(--primary);
     font-size: 1rem;
 }
 
-/* --- ADD ITEM BUTTON (Editor Only) --- */
-.add-item-btn {
-    width: 100%;
-    padding: 16px;
-    background: var(--bg-surface);
-    border: 2px dashed var(--border);
-    border-radius: var(--radius-lg);
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin: 24px 0 40px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-}
 
-.add-item-btn i {
-    color: var(--primary);
-    font-size: 1.1rem;
-}
-
-.add-item-btn:hover {
-    background: var(--bg-page);
-    border-color: var(--primary);
-    color: var(--primary);
-    transform: scale(1.01);
-    box-shadow: var(--shadow-sm);
-}
 
 
 /* === TABS & SLIDER === */

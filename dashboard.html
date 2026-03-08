@@ -204,47 +204,49 @@
         <!-- EDITOR CANVAS (Mimics menu.html structure but editable) -->
         <main class="editor-canvas">
 
-            <header id="heroHeader" class="menu-header">
-                <div id="coverEditor" class="cover-image editable-trigger" onclick="triggerCoverUpload()">
-                    <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
-                    <input type="file" id="coverUpload" accept="image/*" style="display:none;">
+            <div id="mobile-view">
+                <header id="heroHeader">
+                    <div id="coverEditor" class="cover-image editable-trigger" onclick="triggerCoverUpload()">
+                        <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
+                        <input type="file" id="coverUpload" accept="image/*" style="display:none;">
+                    </div>
+
+                    <div class="header-content">
+                        <!-- Inline Editable Fields -->
+                        <h1 id="restNameEditor" class="inline-editable" placeholder="Nome do Restaurante"></h1>
+                        <p id="restDescEditor" class="inline-editable description"
+                            placeholder="Descrição curta (clica para editar)"></p>
+
+                        <div class="info-badges">
+                            <span id="badgeWifi" class="badge clickable-badge" onclick="openBadgeModal('wifi')">
+                                <i class="fa-solid fa-wifi"></i> <span id="textWifi">Wifi</span>
+                            </span>
+                            <span id="badgePhone" class="badge clickable-badge" onclick="openBadgeModal('phone')">
+                                <i class="fa-solid fa-phone"></i> <span id="textPhone">Telefone</span>
+                            </span>
+                            <span id="badgeAddress" class="badge clickable-badge" onclick="openBadgeModal('address')">
+                                <i class="fa-solid fa-location-dot"></i> <span id="textAddress">Morada</span>
+                            </span>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- CATEGORY NAVIGATION (Tabs) -->
+                <div id="categoryNav" class="category-tabs sticky-nav">
+                    <!-- Injected via render.js -->
                 </div>
 
-                <div class="header-content container">
-                    <!-- Inline Editable Fields -->
-                    <h1 id="restNameEditor" class="inline-editable" placeholder="Nome do Restaurante"></h1>
-                    <p id="restDescEditor" class="inline-editable" placeholder="Descrição curta (clica para editar)">
-                    </p>
-
-                    <div class="info-badges">
-                        <span id="badgeWifi" class="badge clickable-badge" onclick="openBadgeModal('wifi')">
-                            <i class="fa-solid fa-wifi"></i> <span id="textWifi">Wifi</span>
-                        </span>
-                        <span id="badgePhone" class="badge clickable-badge" onclick="openBadgeModal('phone')">
-                            <i class="fa-solid fa-phone"></i> <span id="textPhone">Telefone</span>
-                        </span>
-                        <span id="badgeAddress" class="badge clickable-badge" onclick="openBadgeModal('address')">
-                            <i class="fa-solid fa-location-dot"></i> <span id="textAddress">Morada</span>
-                        </span>
+                <!-- MENU CAROUSEL (Slider) -->
+                <div id="menuSliderWindow" class="slider-window">
+                    <div id="menuSliderTrack" class="slider-track menu-sections">
+                        <!-- Items Injected via render.js -->
                     </div>
                 </div>
-            </header>
 
-            <!-- CATEGORY NAV -->
-            <div id="categoryNav" class="category-scroll-nav sticky-nav">
-                <!-- Tabs Injected via JS -->
+                <footer class="menu-footer">
+                    <p>Menu no Ar &copy; 2026</p>
+                </footer>
             </div>
-
-            <!-- MENU GRID -->
-            <div class="container menu-grid-layout">
-                <div id="menuContainer" class="menu-sections">
-                    <!-- Items Injected via JS -->
-                </div>
-            </div>
-
-            <footer class="app-footer">
-                <p>Menu no Ar &copy; 2026</p>
-            </footer>
 
         </main>
     </div>
