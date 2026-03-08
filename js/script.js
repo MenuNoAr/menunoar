@@ -260,7 +260,7 @@ function performSmoothSnap(index, duration = 650) {
 
 // Global Wheel Listener
 window.addEventListener('wheel', (e) => {
-    e.preventDefault();
+    if (e.cancelable) e.preventDefault();
     if (scrollCooldown || isAnimating && Math.abs(e.deltaY) < 50) return;
     if (Math.abs(e.deltaY) < 30) return;
 
@@ -282,8 +282,8 @@ window.addEventListener('touchstart', (e) => {
 }, { passive: true });
 
 window.addEventListener('touchmove', (e) => {
-    // Only prevent if we're in the middle of a snap OR if we want total control
-    if (isAnimating) e.preventDefault();
+    // Only prevent if we're in the middle of a snap AND the event can be cancelled
+    if (isAnimating && e.cancelable) e.preventDefault();
 }, { passive: false });
 
 window.addEventListener('touchend', (e) => {
