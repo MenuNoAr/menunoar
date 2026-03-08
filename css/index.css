@@ -759,15 +759,25 @@ footer {
     }
 
     /* Fixed sections overlap prevention */
+    /* Fixed sections overlap prevention */
     .hero,
     .creation-options,
     .experience-section,
     #funciona,
-    .pricing-minimal {
+    .pricing-minimal,
+    .final-cta {
         position: relative !important;
         top: auto !important;
         left: auto !important;
         margin: 0 !important;
+        height: 100dvh !important;
+        /* Force dynamic viewport height */
+        min-height: 100dvh !important;
+        overflow: hidden !important;
+        /* Prevent double scrollbars within snap points */
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
     }
 
     /* 2. Hide SVG background tracker on mobile */
@@ -1102,5 +1112,77 @@ footer {
         width: 100%;
         display: block;
         text-align: center;
+    }
+
+    /* 10. Intelligent Scaling for Short Screens (Phones with bars/link overlays) */
+    @media (max-height: 720px) {
+        h2 {
+            font-size: 1.4rem !important;
+            margin-bottom: 8px !important;
+        }
+
+        .hero h1 {
+            font-size: 1.8rem !important;
+        }
+
+        .hero p,
+        .experience-content p,
+        .bento-text p {
+            font-size: 0.85rem !important;
+            margin-bottom: 12px !important;
+        }
+
+        .option-card {
+            padding: 16px !important;
+        }
+
+        .option-card h3 {
+            font-size: 1.2rem !important;
+        }
+
+        .option-card p {
+            font-size: 0.8rem !important;
+        }
+
+        .experience-section .check-list li {
+            padding: 6px 12px !important;
+            font-size: 0.75rem !important;
+        }
+
+        .premium-img {
+            max-height: 140px !important;
+        }
+
+        .bento-card {
+            min-height: 55dvh !important;
+        }
+
+        .bento-img-container {
+            height: 120px !important;
+        }
+
+        .bento-text {
+            padding: 16px !important;
+        }
+
+        .price-value {
+            font-size: 2.5rem !important;
+        }
+
+        .pricing-features {
+            padding: 16px !important;
+        }
+
+        .final-cta h2 {
+            font-size: 1.8rem !important;
+        }
+
+        .nav-header {
+            height: 60px !important;
+        }
+
+        .curved-scroll-container {
+            display: none !important;
+        }
     }
 }
