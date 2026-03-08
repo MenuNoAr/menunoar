@@ -598,6 +598,10 @@ footer {
     align-items: center;
     text-align: center;
     padding: 100px 0;
+    background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url('../assets/images/cta_bg.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
 .cta-heading {
@@ -925,6 +929,8 @@ footer {
     .bento-grid {
         display: flex !important;
         overflow-x: auto !important;
+        overflow-y: hidden !important;
+        /* Remove vertical scroll */
         scroll-snap-type: x mandatory;
         padding: 0 0 20px !important;
         gap: 20px !important;
@@ -1039,7 +1045,9 @@ footer {
     /* 9. Final CTA Layout */
     .final-cta {
         padding: 120px 24px !important;
-        background: #000 !important;
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../assets/images/cta_bg.png') !important;
+        background-size: cover !important;
+        background-position: center !important;
         color: #fff !important;
         min-height: 100dvh !important;
         display: flex;
