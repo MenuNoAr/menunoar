@@ -481,8 +481,24 @@ button:disabled {
 /* Hover: Subtle text hint */
 .inline-editable:hover {
     background: rgba(0, 0, 0, 0.03);
-    /* Extremely subtle */
-    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Placeholder Logic - Disappears on focus for better UX */
+.inline-editable:empty::before {
+    content: attr(placeholder);
+    color: var(--text-muted);
+    opacity: 0.5;
+    pointer-events: none;
+    display: inline-block;
+}
+
+.inline-editable:focus::before {
+    display: none !important;
+}
+
+/* Ensure parents like badges are fully visible when child is focused */
+.badge:focus-within {
+    opacity: 1 !important;
 }
 
 /* Focus: Clean, premium interaction */
@@ -510,13 +526,7 @@ button:disabled {
     border-bottom-color: var(--primary);
 }
 
-[contenteditable]:empty:before {
-    content: attr(placeholder);
-    color: #9ca3af;
-    pointer-events: none;
-    display: block;
-    /* For Firefox */
-}
+/* Removed redundant placeholder rule */
 
 /* --- LOCKED OVERLAY --- */
 .locked-overlay {
