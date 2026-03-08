@@ -43,15 +43,82 @@ window.addEventListener('scroll', () => {
         // Se voltarmos ao topo, volta ao normal
         document.body.classList.remove('scrolled');
     }
+
+    // Curved Scroll Path Tracking
+    updateScrollPath();
 });
 
+function updateScrollPath() {
+    const path = document.getElementById('pathLineFg');
+    const arrow = document.getElementById('scrollArrow');
+    if (!path || !arrow) return;
+
+    const length = path.getTotalLength();
+    path.style.strokeDasharray = length;
+
+    // Calculate progress: Hero center (0) to last section center
+    // The container is 500vh, top starts at 50vh.
+    const scrollStart = window.innerHeight * 0.5;
+    const scrollEnd = window.innerHeight * 5.5; // Final section center at 5.5vh? 
+    // Wait, hero=0, mockup=1, exp=2, bento=3, pricing=4, cta=5. 
+    // Container starts at 50vh (hero center) and ends at 550vh (cta center).
+    // Total height = 500vh.
+
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercentage = Math.max(0, Math.min(1, window.scrollY / maxScroll));
+
+    path.style.strokeDashoffset = length * (1 - scrollPercentage);
+
+    // Position arrow
+    const point = path.getPointAtLength(length * scrollPercentage);
+
+    // Scale points (0-100 x 0-500) to actual container pixels
+    const svgRect = path.parentElement.getBoundingClientRect();
+    const svgWidth = svgRect.width;
+    const svgHeight = svgRect.height;
+
+    const x = (point.x / 100) * svgWidth;
+    const y = (point.y / 500) * svgHeight;
+
+    arrow.style.left = `${x}px`;
+    arrow.style.top = `${y}px`;
+
+    // Angle/Rotation calculation
+    const nextPoint = path.getPointAtLength(Math.min(length, length * scrollPercentage + 1));
+
+    // Convert SVG delta to pixel delta for accurate rotation
+    const dx = (nextPoint.x - point.x) * (svgWidth / 100);
+    const dy = (nextPoint.y - point.y) * (svgHeight / 500);
+
+    const angle = Math.atan2(dy, dx);
+    // Subtract 90 degrees because ph-arrow-down points downwards by default
+    arrow.style.transform = `translate(-50%, -50%) rotate(${angle * 180 / Math.PI - 90}deg)`;
+}
+
+// Initial call
+window.addEventListener('DOMContentLoaded', () => {
+    updateScrollPath();
+    initRevealObserver();
+});
+window.addEventListener('resize', updateScrollPath);
+
+function initRevealObserver() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
 
 // Scroll Handling for Links
 function scrollToSection(id) {
     const element = document.getElementById(id);
     if (element) {
-        // "block: 'center'" faz com que o elemento fique no meio do ecrã
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.scrollIntoView({ behavior: 'smooth' });
     }
 }
 
