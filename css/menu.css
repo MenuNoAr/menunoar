@@ -127,26 +127,35 @@ h1#restName {
     padding: 0 10px;
 }
 
+/* --- PREMIUM INFO BADGES --- */
 .info-badges {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     gap: 12px;
-    margin-top: 15px;
+    margin: 25px 0 10px;
 }
 
 .info-badges span {
-    background: transparent;
-    font-size: 0.9rem;
-    padding: 0;
-    border-radius: 0;
+    background: var(--bg-badge);
+    font-size: 0.85rem;
+    padding: 8px 18px;
+    border-radius: 100px;
+    /* Modern Pill */
     color: var(--text);
-    font-weight: 500;
+    font-weight: 700;
     display: flex;
     align-items: center;
     gap: 8px;
-    border: none;
-    box-shadow: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid var(--border);
+}
+
+.info-badges span:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+    background: var(--bg-card);
 }
 
 .info-badges i {
@@ -154,27 +163,54 @@ h1#restName {
     font-size: 1rem;
 }
 
+/* --- ADD ITEM BUTTON (Editor Only) --- */
+.add-item-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--bg-surface);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 24px 0 40px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.add-item-btn i {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.add-item-btn:hover {
+    background: var(--bg-page);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: scale(1.01);
+    box-shadow: var(--shadow-sm);
+}
+
 
 /* === TABS & SLIDER === */
 .category-tabs {
     display: flex;
-    overflow-x: hidden;
-    flex-wrap: wrap;
-    /* Prevent scroll, wrap instead */
+    overflow-x: auto;
+    flex-wrap: nowrap;
     width: 100%;
-    gap: 0px;
-    padding: 0 5px 5px 5px;
-    /* Added bottom padding */
-    margin-bottom: 5px;
-    /* Reduced margin slightly to compensate */
+    gap: 15px;
+    padding: 10px 20px;
+    margin-bottom: 10px;
     scrollbar-width: none;
     border-bottom: 1px solid var(--border);
-    min-height: 50px;
-    /* Force minimum height */
+    min-height: 55px;
     align-items: center;
-    /* Center items vertically */
     max-width: 800px;
-    /* Centered Width */
     margin-left: auto;
     margin-right: auto;
 }
