@@ -87,7 +87,7 @@ function _updateBadge(badgeId, textId, value) {
     if (!el || !span) return;
 
     span.textContent = value || '';
-    el.style.opacity = value ? '1' : '0.5';
+    el.classList.toggle('is-empty', !value);
 
     // Force icon and text color to be consistent across all badges
     const icon = el.querySelector('i');

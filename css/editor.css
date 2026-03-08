@@ -483,22 +483,32 @@ button:disabled {
     background: rgba(0, 0, 0, 0.03);
 }
 
-/* Placeholder Logic - Disappears on focus for better UX */
+/* Intelligent Placeholder - Stays visible on focus, disappears when typing content */
 .inline-editable:empty::before {
     content: attr(placeholder);
     color: var(--text-muted);
-    opacity: 0.5;
+    opacity: 0.6;
     pointer-events: none;
     display: inline-block;
 }
 
-.inline-editable:focus::before {
-    display: none !important;
+/* Base Badge States */
+.badge {
+    transition: all 0.2s ease !important;
+    border: 1px solid transparent;
 }
 
-/* Ensure parents like badges are fully visible when child is focused */
+.badge.is-empty {
+    opacity: 0.5;
+}
+
+/* Force visibility and style when interacting */
+.badge:hover,
 .badge:focus-within {
     opacity: 1 !important;
+    background: var(--bg-card);
+    border-color: var(--primary-glow);
+    box-shadow: var(--shadow-sm);
 }
 
 /* Focus: Clean, premium interaction */
