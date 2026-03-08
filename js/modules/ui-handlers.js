@@ -14,8 +14,7 @@ window.switchCategory = (idx) => {
     if (slider) {
         slider.style.transform = `translateX(-${idx * 100}%)`;
     }
-    // Update active state
-    document.querySelectorAll('.cat-btn').forEach((btn, i) => {
+    document.querySelectorAll('.cat-item-link').forEach((btn, i) => {
         btn.classList.toggle('active', i === idx);
     });
 };
@@ -112,7 +111,20 @@ window.deleteItem = async (id) => {
     loadData();
 };
 
-window.triggerCoverUpload = () => { /* reuse previous implementation if needed or update */ };
+window.triggerCategoryImageUpload = (catName) => {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const { data, error } = await uploadFile(file, `cat-${catName}-${Date.now()}`);
+        if (!error && data) {
+            await state.supabase.from('menu_items').update({ category_image: data.publicUrl }).eq('category', catName).eq('restaurant_id', state.restaurantId);
+            loadData();
+        }
+    };
+    input.click();
+};
 
 window.triggerItemImageUpload = (itemId) => {
     const input = document.createElement('input');

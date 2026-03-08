@@ -22,49 +22,55 @@
 
 <body class="zen-body">
 
-    <!-- GLOBAL HUD (Minimal fixed top bar) -->
+    <!-- TOP HUD -->
     <header class="zen-hud">
         <div class="hud-left">
-            <a href="/" class="hud-logo"><img src="assets/images/logo.svg" alt="logo"></a>
-            <div class="hud-sep"></div>
-            <div class="hud-status">
-                <div class="dot green"></div> <span id="sidebarUserName">...</span>
-            </div>
+            <img src="assets/logo.png" alt="Menu no Ar" class="hud-logo-img">
         </div>
-
         <div class="hud-actions">
-            <button class="hud-btn" id="liveLinkBtn" title="Ver Link Público"><i
-                    class="ph ph-arrow-square-out"></i></button>
-            <button class="hud-btn" onclick="openSettingsModal()" title="Definições"><i
-                    class="ph ph-sliders"></i></button>
-            <button class="hud-btn" onclick="openQrModal()" title="Código QR"><i class="ph ph-qr-code"></i></button>
+            <button class="hud-btn" title="Dashboard"><i class="ph ph-squares-four"></i></button>
+            <button class="hud-btn" id="liveLinkBtn" title="Ver Menu"><i class="ph ph-arrow-square-out"></i></button>
+            <button class="hud-btn" onclick="openSettingsModal()" title="Definições"><i class="ph ph-gear"></i></button>
             <button class="hud-btn" onclick="toggleDarkMode()" title="Tema"><i id="themeIcon"
                     class="ph ph-moon"></i></button>
-            <button class="hud-user" onclick="openProfileModal()" id="userDisplayName">U</button>
+            <button class="hud-btn premium" title="Premium"><i class="ph ph-crown"></i></button>
+            <div class="hud-btn-badge">
+                <button class="hud-btn" title="Tutorial"><i class="ph ph-graduation-cap"></i></button>
+                <span class="badge-tag">NOVO</span>
+            </div>
+            <button class="hud-btn exit" onclick="signOut()" title="Sair"><i class="ph ph-sign-out"></i></button>
         </div>
     </header>
 
-    <!-- THE STAGE (Centered Editor) -->
+    <!-- THE STAGE -->
     <main class="zen-stage">
-        <!-- Sticky Category Nav -->
-        <nav id="categoryNav" class="zen-tabs-nav"></nav>
-
         <div id="editor-container" class="zen-canvas">
-            <!-- Restaurant Info (Non-sliding) -->
-            <div class="rest-info" style="padding: 20px 16px; margin-top:20px;">
-                <h1 id="restName" contenteditable="true"
-                    style="font-size: 2.2rem; font-weight: 900; margin: 0; letter-spacing:-0.03em;">...</h1>
-                <p id="restDesc" contenteditable="true"
-                    style="color: var(--menu-muted); font-size: 1rem; margin-top: 8px;">...</p>
+            <!-- Master Cover Upload -->
+            <div class="cover-container" onclick="window.triggerCoverUpload()">
+                <img src="https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=2070" id="coverDisplay">
+                <div class="cover-fade"></div>
             </div>
 
-            <!-- Sticky Category Nav -->
-            <nav id="categoryNav" class="category-nav-bar"></nav>
+            <!-- Restaurant Identity -->
+            <div class="rest-identity">
+                <h1 id="restName" contenteditable="true">Taberna do Mercado</h1>
+                <p id="restDesc" contenteditable="true">Sabores autênticos da cozinha portuguesa...</p>
 
-            <!-- This is the direct Menu Editor Slider -->
-            <div id="menuContainer" class="zen-menu-root">
-                <!-- Slider renders here -->
+                <div class="rest-meta">
+                    <div class="meta-item"><i class="ph-fill ph-wifi-high"></i> <span contenteditable="true"
+                            id="metaWifi">taberna_gratis</span></div>
+                    <div class="meta-item"><i class="ph-fill ph-phone"></i> <span contenteditable="true"
+                            id="metaPhone">+351 210 999 888</span></div>
+                    <div class="meta-item"><i class="ph-fill ph-map-pin"></i> <span contenteditable="true"
+                            id="metaAddr">Rua Augusta, 150, Lisboa</span></div>
+                </div>
             </div>
+
+            <!-- Category Navigation -->
+            <nav id="categoryNav" class="category-grid-nav"></nav>
+
+            <!-- Sliding Menu Content -->
+            <div id="menuContainer" class="menu-slider-viewport"></div>
         </div>
     </main>
 
