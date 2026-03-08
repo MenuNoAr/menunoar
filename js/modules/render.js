@@ -95,11 +95,6 @@ function _updateBadge(badgeId, textId, value) {
 
     span.textContent = value || '';
     el.classList.toggle('is-empty', !value);
-
-    // Force icon and text color to be consistent across all badges
-    const icon = el.querySelector('i');
-    if (icon) icon.style.color = 'var(--primary)';
-    span.style.color = 'var(--text)';
 }
 
 // ─── PDF Viewer ───────────────────────────────────────────────────────────────

@@ -6,7 +6,9 @@
 import { state, updateState } from './state.js';
 import { loadData } from './api.js';
 import { uploadFile } from '../upload-service.js';
-import { scrollToSlide, renderMenu } from './render.js';
+import { scrollToSlide, renderMenu, renderHeader } from './render.js';
+
+let _autocomplete = null;
 
 // ─── Inline Editing ───────────────────────────────────────────────────────────
 export function setupInlineEdit(elementId, fieldName) {
@@ -646,14 +648,45 @@ window.openBadgeModal = (type) => {
     } else if (type === 'address') {
         title.textContent = 'Localização e Morada';
         desc.textContent = 'Insira a morada e o link do Google Maps.';
-        document.getElementById('badgeInputAddress').value = data.address || '';
+        const addrInput = document.getElementById('badgeInputAddress');
+        addrInput.value = data.address || '';
         document.getElementById('badgeInputMaps').value = data.google_maps_url || '';
         document.getElementById('group-address').style.display = 'block';
+
+        // Initialize Google Autocomplete if available
+        initGoogleAutocomplete(addrInput);
     }
 
     window.closeAllModals();
     modal.classList.add('open');
 };
+
+// ─── Google Autocomplete ───────────────────────────────────────────────────
+function initGoogleAutocomplete(input) {
+    if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
+        console.warn('Google Maps API not loaded.');
+        return;
+    }
+
+    if (_autocomplete) {
+        google.maps.event.clearInstanceListeners(_autocomplete);
+    }
+
+    _autocomplete = new google.maps.places.Autocomplete(input, {
+        types: ['establishment', 'geocode'],
+        componentRestrictions: { country: 'pt' }
+    });
+
+    _autocomplete.addListener('place_changed', () => {
+        const place = _autocomplete.getPlace();
+        if (!place.geometry) return;
+
+        document.getElementById('badgeInputAddress').value = place.name || place.formatted_address;
+        if (place.url) {
+            document.getElementById('badgeInputMaps').value = place.url;
+        }
+    });
+}
 
 document.getElementById('badgeForm').onsubmit = async (e) => {
     e.preventDefault();
@@ -680,9 +713,7 @@ document.getElementById('badgeForm').onsubmit = async (e) => {
 
     if (!error) {
         Object.assign(state.currentData, updates);
-        renderMenu(state.menuItems); // Re-renders the whole menu structure which includes header
-        // Since renderMenu might not re-render the header depending on implementation, let's call renderHeader
-        import('./render.js').then(m => m.renderHeader(state.currentData));
+        renderHeader(state.currentData);
         window.closeModal('badgeModal');
         if (window.showToast) window.showToast('Informações atualizadas!', 'success');
     } else {
