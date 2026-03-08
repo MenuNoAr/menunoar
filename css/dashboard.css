@@ -1,8 +1,3 @@
-/* 
-  Direct Edition Framework - Normal, Clean, Functional 
-  Focus: No luxury, no informal. Just the menu.
-*/
-
 :root {
     --menu-bg: #ffffff;
     --menu-text: #1a1a1a;
@@ -11,7 +6,7 @@
     --menu-accent: #1fa8ff;
     --menu-width: 500px;
     --hud-h: 56px;
-    --font-normal: Arial, Inter, Helvetica, sans-serif;
+    --font-normal: 'Inter', Arial, sans-serif;
 }
 
 .dark-mode {
@@ -283,6 +278,23 @@ body.zen-body {
 .mini-ico:hover {
     background: var(--menu-accent);
     color: #fff;
+}
+
+.nav-chip.active {
+    background: var(--menu-accent);
+    color: #fff;
+}
+
+.nav-chip.add-cat-btn {
+    background: transparent;
+    border: 1px dashed var(--menu-border);
+    color: var(--menu-muted);
+}
+
+.nav-chip.add-cat-btn:hover {
+    border-style: solid;
+    color: var(--menu-accent);
+    background: var(--menu-border);
 }
 
 .mini-ico.red:hover {

@@ -23,10 +23,19 @@ export function renderDirectEditor(data, items) {
     if (!canvas) return;
 
     const cats = _getOrderedCategories(items);
-    const groups = cats.reduce((acc, cat) => {
-        acc[cat] = items.filter(i => i.category === cat);
-        return acc;
-    }, {});
+
+    // Assuming a nav element exists or needs to be created/targeted for the category chips
+    // For this change, we'll assume there's a 'categoryNav' element to update.
+    // If not, this part needs further clarification on where the nav should be rendered.
+    // For now, let's assume it's a separate element that gets updated.
+    const categoryNav = document.getElementById('categoryNav');
+    if (categoryNav) {
+        categoryNav.innerHTML = cats.map(cat => `
+            <button class="nav-chip" onclick="document.getElementById('cat-${cat.replace(/\s+/g, '-')}').scrollIntoView({behavior:'smooth', block: 'center'})">${escapeHTML(cat)}</button>
+        `).join('') + `
+            <button class="nav-chip add-cat-btn" onclick="window.addNewCategoryOptimized()" title="Adicionar Categoria"><i class="ph ph-plus"></i></button>
+        `;
+    }
 
     canvas.innerHTML = `
         <!-- Main Image -->
@@ -44,7 +53,7 @@ export function renderDirectEditor(data, items) {
             ${cats.map(cat => {
         const catItems = groups[cat] || [];
         return `
-                    <div class="cat-section">
+                    <div class="cat-section" id="cat-${cat.replace(/\s+/g, '-')}">
                         <div class="cat-title">
                             <span contenteditable="true" onblur="window.handleCategoryRename('${cat}', this.innerText)">${escapeHTML(cat)}</span>
                             <div class="cat-ghost">
@@ -87,11 +96,6 @@ export function renderDirectEditor(data, items) {
                     </div>
                 `;
     }).join('')}
-
-            <!-- Category Slot Placeholder -->
-            <div class="placeholder-slot cat-placeholder" onclick="window.addNewCategoryOptimized()">
-                <i class="ph ph-plus"></i> Nova Categoria
-            </div>
         </div>
     `;
 }
