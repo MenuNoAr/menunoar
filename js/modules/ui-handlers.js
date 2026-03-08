@@ -45,8 +45,8 @@ export function setupInlineEdit(elementId, fieldName) {
 }
 
 export function initHeaderEditing() {
-    ['restNameEditor', 'restDescEditor', 'textWifi', 'textPhone', 'textAddress'].forEach((id, i) => {
-        const fields = ['name', 'description', 'wifi_password', 'phone', 'address'];
+    ['restNameEditor', 'restDescEditor'].forEach((id, i) => {
+        const fields = ['name', 'description'];
         setupInlineEdit(id, fields[i]);
     });
 }
@@ -617,6 +617,80 @@ window.promptDeleteRestaurant = async () => {
         if (window.showToast) window.showToast('Erro ao apagar o menu. Tenta novamente.', 'error');
         else alert('Erro ao apagar o menu.');
     }
+};
+
+// ─── Info Badge Modal Logic ──────────────────────────────────────────────────
+let _currentBadgeType = null;
+
+window.openBadgeModal = (type) => {
+    _currentBadgeType = type;
+    const data = state.currentData;
+    const modal = document.getElementById('badgeModal');
+    const title = document.getElementById('badgeModalTitle');
+    const desc = document.getElementById('badgeModalDesc');
+
+    // Reset visibility
+    document.querySelectorAll('.badge-form-group').forEach(el => el.style.display = 'none');
+
+    if (type === 'wifi') {
+        title.textContent = 'Configurar Wi-Fi';
+        desc.textContent = 'Insira os dados da rede para os seus clientes.';
+        document.getElementById('badgeInputWifiName').value = data.wifi_ssid || '';
+        document.getElementById('badgeInputWifiPass').value = data.wifi_password || '';
+        document.getElementById('group-wifi').style.display = 'block';
+    } else if (type === 'phone') {
+        title.textContent = 'Contacto Telefónico';
+        desc.textContent = 'O número será clicável no menu dos clientes.';
+        document.getElementById('badgeInputPhone').value = data.phone || '';
+        document.getElementById('group-phone').style.display = 'block';
+    } else if (type === 'address') {
+        title.textContent = 'Localização e Morada';
+        desc.textContent = 'Insira a morada e o link do Google Maps.';
+        document.getElementById('badgeInputAddress').value = data.address || '';
+        document.getElementById('badgeInputMaps').value = data.google_maps_url || '';
+        document.getElementById('group-address').style.display = 'block';
+    }
+
+    window.closeAllModals();
+    modal.classList.add('open');
+};
+
+document.getElementById('badgeForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('.btn-confirm');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A guardar...';
+    btn.disabled = true;
+
+    const updates = {};
+    if (_currentBadgeType === 'wifi') {
+        updates.wifi_ssid = document.getElementById('badgeInputWifiName').value.trim();
+        updates.wifi_password = document.getElementById('badgeInputWifiPass').value.trim();
+    } else if (_currentBadgeType === 'phone') {
+        updates.phone = document.getElementById('badgeInputPhone').value.trim();
+    } else if (_currentBadgeType === 'address') {
+        updates.address = document.getElementById('badgeInputAddress').value.trim();
+        updates.google_maps_url = document.getElementById('badgeInputMaps').value.trim();
+    }
+
+    const { error } = await state.supabase
+        .from('restaurants')
+        .update(updates)
+        .eq('id', state.restaurantId);
+
+    if (!error) {
+        Object.assign(state.currentData, updates);
+        renderMenu(state.menuItems); // Re-renders the whole menu structure which includes header
+        // Since renderMenu might not re-render the header depending on implementation, let's call renderHeader
+        import('./render.js').then(m => m.renderHeader(state.currentData));
+        window.closeModal('badgeModal');
+        if (window.showToast) window.showToast('Informações atualizadas!', 'success');
+    } else {
+        alert('Erro ao guardar: ' + error.message);
+    }
+
+    btn.innerHTML = orig;
+    btn.disabled = false;
 };
 
 // ─── Item Modal ───────────────────────────────────────────────────────────────

@@ -493,23 +493,41 @@ button:disabled {
     display: inline-block;
 }
 
+/* Disappear immediately on focus (selection) */
+.inline-editable:focus::before {
+    display: none !important;
+}
+
 /* Base Badge States */
 .badge {
     transition: all 0.2s ease !important;
     border: 1px solid transparent;
+    cursor: default;
 }
 
 .badge.is-empty {
     opacity: 0.5;
 }
 
+.badge.clickable-badge {
+    cursor: pointer !important;
+    padding: 6px 14px;
+    background: var(--bg-badge);
+    border: 1px solid var(--border);
+    user-select: none;
+}
+
 /* Force visibility and style when interacting */
-.badge:hover,
-.badge:focus-within {
+.badge.clickable-badge:hover {
     opacity: 1 !important;
     background: var(--bg-card);
-    border-color: var(--primary-glow);
-    box-shadow: var(--shadow-sm);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.badge.clickable-badge:active {
+    transform: translateY(0);
 }
 
 /* Focus: Clean, premium interaction */

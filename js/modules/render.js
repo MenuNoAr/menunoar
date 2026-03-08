@@ -82,7 +82,8 @@ export function renderHeader(data) {
         }
     }
 
-    _updateBadge('badgeWifi', 'textWifi', data.wifi_password);
+    // Info Badges
+    _updateBadge('badgeWifi', 'textWifi', data.wifi_ssid || data.wifi_password);
     _updateBadge('badgePhone', 'textPhone', data.phone);
     _updateBadge('badgeAddress', 'textAddress', data.address);
 }

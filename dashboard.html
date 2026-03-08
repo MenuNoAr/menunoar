@@ -217,17 +217,14 @@
                     </p>
 
                     <div class="info-badges">
-                        <span id="badgeWifi" class="badge">
-                            <i class="fa-solid fa-wifi"></i> <span id="textWifi" class="inline-editable"
-                                placeholder="Wifi"></span>
+                        <span id="badgeWifi" class="badge clickable-badge" onclick="openBadgeModal('wifi')">
+                            <i class="fa-solid fa-wifi"></i> <span id="textWifi">Wifi</span>
                         </span>
-                        <span id="badgePhone" class="badge">
-                            <i class="fa-solid fa-phone"></i> <span id="textPhone" class="inline-editable"
-                                placeholder="Telefone"></span>
+                        <span id="badgePhone" class="badge clickable-badge" onclick="openBadgeModal('phone')">
+                            <i class="fa-solid fa-phone"></i> <span id="textPhone">Telefone</span>
                         </span>
-                        <span id="badgeAddress" class="badge">
-                            <i class="fa-solid fa-location-dot"></i> <span id="textAddress" class="inline-editable"
-                                placeholder="Morada"></span>
+                        <span id="badgeAddress" class="badge clickable-badge" onclick="openBadgeModal('address')">
+                            <i class="fa-solid fa-location-dot"></i> <span id="textAddress">Morada</span>
                         </span>
                     </div>
                 </div>
@@ -572,6 +569,69 @@
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeModal('renameModal')">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- INFO BADGE MODAL -->
+    <div id="badgeModal" class="edit-modal">
+        <div class="edit-modal-content" style="max-width:420px;">
+            <h2 id="badgeModalTitle" style="margin-bottom:10px; color:var(--text);">Título</h2>
+            <p id="badgeModalDesc" style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Descrição
+            </p>
+
+            <form id="badgeForm">
+                <!-- Phone Fields -->
+                <div id="group-phone" class="badge-form-group" style="display:none;">
+                    <div class="form-group">
+                        <label>Número de Telemóvel</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="text" id="badgeInputPhone" placeholder="ex: +351 912 345 678">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Fields -->
+                <div id="group-address" class="badge-form-group" style="display:none;">
+                    <div class="form-group">
+                        <label>Texto da Morada</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <input type="text" id="badgeInputAddress" placeholder="ex: Rua de Santa Catarina, Porto">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Link Google Maps (URL)</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-link"></i>
+                            <input type="url" id="badgeInputMaps" placeholder="https://goo.gl/maps/...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wifi Fields -->
+                <div id="group-wifi" class="badge-form-group" style="display:none;">
+                    <div class="form-group">
+                        <label>Nome da Rede (SSID)</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-wifi"></i>
+                            <input type="text" id="badgeInputWifiName" placeholder="ex: Wifi-Restaurante">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="text" id="badgeInputWifiPass" placeholder="ex: senha123">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('badgeModal')">Cancelar</button>
                     <button type="submit" class="btn-confirm">Guardar</button>
                 </div>
             </form>

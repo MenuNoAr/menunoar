@@ -71,9 +71,9 @@
 
                 // Wifi
                 const badgeWifi = document.getElementById('badgeWifi');
-                if (data.wifi_password) {
+                if (data.wifi_ssid || data.wifi_password) {
                     badgeWifi.style.display = 'inline-flex';
-                    document.getElementById('textWifi').textContent = data.wifi_password;
+                    document.getElementById('textWifi').textContent = data.wifi_ssid || data.wifi_password;
                 } else {
                     badgeWifi.style.display = 'none';
                 }
@@ -278,17 +278,45 @@
             }
 
             // Badges
-            if (restaurant.wifi_password) {
-                document.getElementById('badgeWifi').style.display = 'inline-flex';
-                document.getElementById('textWifi').textContent = restaurant.wifi_password;
+            // 1. Wifi
+            if (restaurant.wifi_password || restaurant.wifi_ssid) {
+                const badge = document.getElementById('badgeWifi');
+                const text = document.getElementById('textWifi');
+                badge.style.display = 'inline-flex';
+                text.textContent = restaurant.wifi_ssid || 'Wi-Fi';
+
+                // On mobile, we can offer to copy password or just show it
+                badge.onclick = () => {
+                    if (restaurant.wifi_password) {
+                        alert(`Rede: ${restaurant.wifi_ssid || 'N/A'}\nPassword: ${restaurant.wifi_password}`);
+                    }
+                };
+                badge.style.cursor = 'pointer';
             }
+
+            // 2. Phone
             if (restaurant.phone) {
-                document.getElementById('badgePhone').style.display = 'inline-flex';
-                document.getElementById('textPhone').textContent = restaurant.phone;
+                const badge = document.getElementById('badgePhone');
+                const text = document.getElementById('textPhone');
+                badge.style.display = 'inline-flex';
+                // Create a clickable link
+                badge.innerHTML = `<a href="tel:${restaurant.phone.replace(/\s+/g, '')}" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-phone"></i> <span id="textPhone">${restaurant.phone}</span>
+                </a>`;
             }
+
+            // 3. Address
             if (restaurant.address) {
-                document.getElementById('badgeAddress').style.display = 'inline-flex';
-                document.getElementById('textAddress').textContent = restaurant.address;
+                const badge = document.getElementById('badgeAddress');
+                const text = document.getElementById('textAddress');
+                badge.style.display = 'inline-flex';
+                if (restaurant.google_maps_url) {
+                    badge.innerHTML = `<a href="${restaurant.google_maps_url}" target="_blank" style="color:inherit; text-decoration:none; display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-location-dot"></i> <span id="textAddress">${restaurant.address}</span>
+                    </a>`;
+                } else {
+                    text.textContent = restaurant.address;
+                }
             }
 
             // LOAD ITEMS
