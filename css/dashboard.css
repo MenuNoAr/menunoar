@@ -94,7 +94,7 @@ body.zen-body {
 
 /* ─── The Editor Canvas ─── */
 .zen-stage {
-    padding-top: calc(var(--hud-h) + 40px);
+    padding-top: calc(var(--hud-h) + 20px);
     padding-bottom: 120px;
     display: flex;
     flex-direction: column;
@@ -287,14 +287,17 @@ body.zen-body {
 
 .nav-chip.add-cat-btn {
     background: transparent;
-    border: 1px dashed var(--menu-border);
-    color: var(--menu-muted);
+    border: 1px dashed var(--menu-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
 }
 
 .nav-chip.add-cat-btn:hover {
-    border-style: solid;
-    color: var(--menu-accent);
     background: var(--menu-border);
+    color: var(--menu-accent);
+    border-style: solid;
 }
 
 .mini-ico.red:hover {

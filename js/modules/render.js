@@ -31,8 +31,8 @@ export function renderDirectEditor(data, items) {
     // Update the category navigation bar
     const categoryNav = document.getElementById('categoryNav');
     if (categoryNav) {
-        categoryNav.innerHTML = cats.map(cat => `
-            <button class="nav-chip" onclick="document.getElementById('cat-${cat.replace(/\s+/g, '-')}').scrollIntoView({behavior:'smooth', block: 'center'})">${escapeHTML(cat)}</button>
+        categoryNav.innerHTML = cats.map((cat, idx) => `
+            <button class="nav-chip ${idx === 0 ? 'active' : ''}" onclick="document.getElementById('cat-${cat.replace(/\s+/g, '-')}').scrollIntoView({behavior:'smooth', block: 'center'})">${escapeHTML(cat)}</button>
         `).join('') + `
             <button class="nav-chip add-cat-btn" onclick="window.addNewCategoryOptimized()" title="Adicionar Categoria"><i class="ph ph-plus"></i></button>
         `;
