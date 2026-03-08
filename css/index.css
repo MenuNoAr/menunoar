@@ -59,8 +59,8 @@ footer {
     top: 50vh;
     left: 0;
     right: 0;
-    height: 600vh;
-    /* Updated for 7 sections (Hero to Footer) */
+    height: 500vh;
+    /* Updated for 6 sections (Hero to Combined CTA/Footer) */
     pointer-events: none;
     z-index: 1;
 }
@@ -577,11 +577,7 @@ footer {
 }
 
 /* FOOTER - Tighter */
-.footer {
-    padding: 80px 0 40px;
-    background: #fff;
-    border-top: 1px solid var(--border-color);
-}
+/* Replaced by integrated .footer-minimal */
 
 .footer-grid {
     display: grid;
@@ -597,25 +593,102 @@ footer {
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 100px 0;
-    background: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url('../assets/images/cta_bg.png');
+    background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('../assets/images/cta_bg.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+    position: relative;
+    padding: 0 0 40px;
+}
+
+.final-cta .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* CTA at center, Footer at bottom */
+    min-height: 90vh;
+    width: 100%;
+}
+
+.cta-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .cta-heading {
     font-size: 3.5rem;
-    margin-bottom: 24px;
-    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+    letter-spacing: -0.04em;
     color: #000;
+    font-weight: 800;
 }
 
 .btn-cta {
-    padding: 18px 48px;
-    border-radius: 6px;
-    font-size: 1.1rem;
+    padding: 20px 56px;
+    border-radius: 8px;
+    font-size: 1.15rem;
     font-weight: 700;
+}
+
+/* INTEGRATED FOOTER */
+.footer-minimal {
+    margin-top: 100px;
+    width: 100%;
+    text-align: left;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    padding-top: 60px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1.5fr repeat(3, 1fr);
+    gap: 40px;
+    margin-bottom: 60px;
+}
+
+.footer-logo {
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+    color: #000;
+}
+
+.footer-tagline {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.footer-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #000;
+}
+
+.footer-minimal a {
+    display: block;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.footer-minimal a:hover {
+    color: var(--primary);
+}
+
+.footer-bottom {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    opacity: 0.8;
 }
 
 .section-header {
@@ -1062,56 +1135,69 @@ footer {
         color: #000 !important;
     }
 
-    /* 8. Footer Reformat */
-    .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
+    /* 8. Footer Reformat - Integrated */
+    .footer-minimal {
+        margin-top: 48px;
+        padding-top: 32px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
         text-align: center;
     }
 
-    .footer {
-        height: auto !important;
-        min-height: auto !important;
-        padding: 80px 24px !important;
-        background: #000 !important;
-        color: #fff !important;
-        scroll-snap-align: start;
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        text-align: center;
     }
 
-    .footer a,
+    .footer-minimal a,
     .footer-tagline,
     .footer-bottom {
         color: rgba(255, 255, 255, 0.6) !important;
+        font-size: 0.9rem;
     }
 
     .footer-title {
         color: #fff !important;
+        margin-bottom: 16px;
     }
 
     /* 9. Final CTA Layout */
     .final-cta {
-        padding: 120px 24px !important;
-        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../assets/images/cta_bg.png') !important;
+        padding: 60px 24px !important;
+        background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('../assets/images/cta_bg.png') !important;
         background-size: cover !important;
         background-position: center !important;
         color: #fff !important;
         min-height: 100dvh !important;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
+        /* Start from top on mobile to fit footer */
+        align-items: center;
+    }
+
+    .final-cta .container {
+        justify-content: flex-start !important;
+        min-height: auto !important;
+    }
+
+    .cta-content {
+        padding: 40px 0 !important;
     }
 
     .final-cta h2,
     .final-cta .cta-heading {
-        font-size: 2.5rem !important;
+        font-size: 2rem !important;
         color: #fff !important;
-        margin-bottom: 32px !important;
+        margin-bottom: 24px !important;
+        line-height: 1.1;
     }
 
     .btn-cta {
         width: 100%;
         display: block;
         text-align: center;
+        padding: 16px !important;
     }
 
     /* 10. Intelligent Scaling for Short Screens (Phones with bars/link overlays) */
