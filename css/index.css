@@ -4,10 +4,10 @@
 */
 
 html {
-    scroll-behavior: auto;
-    /* Disabled native smooth scroll to allow JS custom easing */
-    overflow-y: hidden;
-    /* Hide scrollbar for a cleaner presentation */
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
 }
 
 body {
@@ -21,7 +21,8 @@ main>section {
     flex-direction: column;
     justify-content: center;
     position: relative;
-    overflow: hidden;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
 }
 
 footer {
@@ -34,11 +35,10 @@ footer {
     top: 50vh;
     left: 0;
     right: 0;
-    height: 400vh;
-    /* Exactly from center of Section 1 to center of Section 5 */
+    height: 500vh;
+    /* Updated for 6 sections (Hero to CTA) */
     pointer-events: none;
     z-index: 1;
-    /* behind content to not block clicks */
 }
 
 .curved-scroll-container svg {
@@ -105,7 +105,14 @@ footer {
 
 .reveal {
     opacity: 0;
-    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform: translateY(40px);
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+    visibility: visible !important;
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .delay-1 {
@@ -141,10 +148,13 @@ footer {
 .hero {
     text-align: center;
     position: relative;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=2000');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('../assets/images/hero.png');
     background-size: cover;
     background-position: center;
     color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .hero h1 {
@@ -201,13 +211,59 @@ footer {
     padding: 60px 40px;
     border-radius: 12px;
     text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.option-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    z-index: -1;
+    filter: brightness(0.4);
+}
+
+.option-card:nth-child(1)::before {
+    background-image: url('../assets/images/chef.png');
+}
+
+.option-card:nth-child(2)::before {
+    background-image: url('../assets/images/qr_scan.png');
 }
 
 .option-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+    transform: translateY(-10px);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+    color: #fff;
+}
+
+.option-card:hover::before {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.option-card:hover .option-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.option-card:hover p {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.option-card:hover .option-btn-secondary {
+    background: #fff;
+    color: #000;
 }
 
 .option-icon {
@@ -271,6 +327,90 @@ footer {
     }
 }
 
+/* EXPERIENCE SECTION */
+.experience-section {
+    background: #000;
+    color: #fff;
+    padding: 100px 0;
+}
+
+.experience-section .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+}
+
+.label {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: var(--primary);
+    margin-bottom: 24px;
+}
+
+.experience-content h2 {
+    font-size: 4rem;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    margin-bottom: 32px;
+}
+
+.experience-content p {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.check-list {
+    list-style: none;
+    padding: 0;
+}
+
+.check-list li {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.check-list li i {
+    color: var(--primary);
+    font-size: 1.5rem;
+}
+
+.premium-img {
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-img:hover {
+    transform: scale(1.02);
+}
+
+@media (max-width: 768px) {
+    .experience-section .grid-2 {
+        grid-template-columns: 1fr;
+        gap: 60px;
+        text-align: center;
+    }
+
+    .experience-content h2 {
+        font-size: 2.5rem;
+    }
+
+    .check-list li {
+        justify-content: center;
+    }
+}
+
 /* BENTO FEATURE GRID */
 .bento-grid {
     display: grid;
@@ -281,23 +421,51 @@ footer {
 .bento-card {
     background: #fff;
     border: 1px solid var(--border-color);
-    padding: 32px;
-    border-radius: 8px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     height: 100%;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.bento-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+.bento-img-container {
+    height: 200px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.bento-img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.bento-card:hover .bento-img-container img {
+    transform: scale(1.1);
+}
+
+.bento-text {
+    padding: 32px;
 }
 
 .bento-card i {
     font-size: 2rem;
     color: var(--primary);
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
 
 .bento-card h3 {
     font-size: 1.25rem;
     margin-bottom: 12px;
     letter-spacing: -0.02em;
+    font-weight: 700;
 }
 
 .bento-card p {
