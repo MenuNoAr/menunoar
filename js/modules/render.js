@@ -19,6 +19,68 @@ export function updateLiveLink(slug) {
     });
 }
 
+// ─── PDF Viewer ───────────────────────────────────────────────────────────────
+export function renderPdfViewer(data) {
+    const canvas = document.querySelector('.editor-canvas');
+    if (!canvas) return;
+
+    canvas.innerHTML = `
+        <div id="pdf-view-shell" style="height:100%; display:flex; flex-direction:column; background:var(--bg-page);">
+            <div id="pdf-reels-container" style="flex:1; overflow-y:auto; scroll-snap-type: y mandatory; display:flex; flex-direction:column; gap:20px; padding:20px; align-items:center;">
+                <!-- Pages Injected here -->
+            </div>
+            <div id="pdfLoading" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); display:flex; flex-direction:column; align-items:center; z-index:100;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:3rem; color:var(--primary); margin-bottom:15px;"></i>
+                <p style="color:var(--text-muted); font-weight:500; font-family: 'Outfit', sans-serif;">A preparar preview do menu...</p>
+            </div>
+        </div>
+    `;
+
+    // Load PDF.js dynamically
+    if (window.pdfjsLib) {
+        _startPdfRender(data);
+    } else {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        script.onload = () => {
+            const pdfjsLib = window['pdfjs-dist/build/pdf'];
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            window.pdfjsLib = pdfjsLib;
+            _startPdfRender(data);
+        };
+        document.head.appendChild(script);
+    }
+}
+
+async function _startPdfRender(data) {
+    const pdfjsLib = window.pdfjsLib;
+    try {
+        const loadingTask = pdfjsLib.getDocument(data.pdf_url);
+        const pdf = await loadingTask.promise;
+        const container = document.getElementById('pdf-reels-container');
+        if (document.getElementById('pdfLoading')) document.getElementById('pdfLoading').style.display = 'none';
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'width:100%; max-width:500px; scroll-snap-align: start; flex-shrink:0;';
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.style.cssText = 'width:100%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 12px;';
+            wrapper.appendChild(pageCanvas);
+            container.appendChild(wrapper);
+
+            const page = await pdf.getPage(pageNum);
+            const viewport = page.getViewport({ scale: 2.0 });
+            const context = pageCanvas.getContext('2d');
+            pageCanvas.height = viewport.height;
+            pageCanvas.width = viewport.width;
+            await page.render({ canvasContext: context, viewport: viewport }).promise;
+        }
+    } catch (e) {
+        console.error(e);
+        if (document.getElementById('pdfLoading')) document.getElementById('pdfLoading').innerHTML = '<p style="color:red;">Error loading PDF.</p>';
+    }
+}
+
 // ─── Header ───────────────────────────────────────────────────────────────────
 export function renderHeader(data) {
     const canvas = document.querySelector('.editor-canvas');
