@@ -127,35 +127,27 @@ h1#restName {
     padding: 0 10px;
 }
 
-/* --- PREMIUM INFO BADGES --- */
+/* --- SIMPLE INFO BADGES (Clean Look) --- */
 .info-badges {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 12px;
-    margin: 25px 0 10px;
+    gap: 20px;
+    margin: 20px 0;
 }
 
 .info-badges span {
-    background: var(--bg-badge);
-    font-size: 0.85rem;
-    padding: 8px 18px;
-    border-radius: 100px;
-    /* Modern Pill */
+    background: transparent;
+    font-size: 0.9rem;
+    padding: 0;
+    border-radius: 0;
     color: var(--text);
-    font-weight: 700;
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    border: 1px solid var(--border);
-}
-
-.info-badges span:hover {
-    transform: translateY(-2px);
-    border-color: var(--primary);
-    background: var(--bg-card);
+    border: none;
+    box-shadow: none;
 }
 
 .info-badges i {
