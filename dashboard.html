@@ -62,7 +62,8 @@
     <!-- MODALS (Ultra-Minimalist) -->
 
     <!-- Profile/Auth Modal -->
-    <div id="profileModal" class="zen-modal" onclick="if(event.target===this) closeModal('profileModal')">
+    <div id="profileModal" class="zen-modal" style="display:none;"
+        onclick="if(event.target===this) closeModal('profileModal')">
         <div class="zen-modal-content">
             <header>
                 <h3>Definições</h3>
@@ -78,10 +79,13 @@
     </div>
 
     <!-- QR Modal -->
-    <div id="qrModal" class="zen-modal" onclick="if(event.target===this) closeModal('qrModal')">
+    <div id="qrModal" class="zen-modal" style="display:none;" onclick="if(event.target===this) closeModal('qrModal')">
         <div class="zen-modal-content small">
             <div id="qr-code-container" class="zen-qr-box"></div>
-            <button class="z-btn primary block" onclick="downloadQr()">Baixar QR Code</button>
+            <div class="modal-btns">
+                <button class="z-btn primary block" onclick="downloadQr()">Baixar QR Code</button>
+                <button class="z-btn block" onclick="closeModal('qrModal')">Fechar</button>
+            </div>
         </div>
     </div>
 
