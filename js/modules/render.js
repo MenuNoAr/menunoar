@@ -23,11 +23,12 @@ export function renderDirectEditor(data, items) {
     if (!canvas) return;
 
     const cats = _getOrderedCategories(items);
+    const groups = cats.reduce((acc, cat) => {
+        acc[cat] = items.filter(i => i.category === cat);
+        return acc;
+    }, {});
 
-    // Assuming a nav element exists or needs to be created/targeted for the category chips
-    // For this change, we'll assume there's a 'categoryNav' element to update.
-    // If not, this part needs further clarification on where the nav should be rendered.
-    // For now, let's assume it's a separate element that gets updated.
+    // Update the category navigation bar
     const categoryNav = document.getElementById('categoryNav');
     if (categoryNav) {
         categoryNav.innerHTML = cats.map(cat => `
