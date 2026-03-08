@@ -1,22 +1,18 @@
 /**
- * ui-handlers.js - Luxe Studio Logic
- * Handles inline updates, high-end image uploads, and luxury branding.
+ * ui-handlers.js - Direct Edition
  */
 import { state } from './state.js';
 import { loadData } from './api.js';
 import { uploadFile } from '../upload-service.js';
 
-// ─── GLOBAL RESTAURANT UPDATES ───
 window.handleRestUpdate = async (field, value) => {
     const newVal = value.trim();
     if (!newVal || newVal === state.currentData[field]) return;
-
     await state.supabase.from('restaurants').update({ [field]: newVal }).eq('id', state.restaurantId);
     state.currentData[field] = newVal;
     if (field === 'name') document.getElementById('sidebarUserName').innerText = newVal;
 };
 
-// ─── CATEGORIES ───
 window.handleCategoryRename = async (oldName, rawNew) => {
     const newName = rawNew.trim();
     if (!newName || newName === oldName) return;
@@ -30,24 +26,36 @@ window.handleCategoryRename = async (oldName, rawNew) => {
 };
 
 window.addNewCategoryOptimized = async () => {
-    let name = 'Nova Categoria', counter = 1;
+    let name = 'Categoria...', counter = 1;
     const existing = new Set(state.menuItems.map(i => i.category));
     while (existing.has(name)) name = `Categoria ${++counter}`;
 
     const newOrder = [...(state.currentData.category_order || []), name];
     await state.supabase.from('restaurants').update({ category_order: newOrder }).eq('id', state.restaurantId);
-    loadData();
+
+    // Auto-insert one item so it's not empty
+    await state.supabase.from('menu_items').insert([{
+        name: 'Nome do Prato...',
+        price: 0,
+        description: 'Descrição...',
+        category: name,
+        restaurant_id: state.restaurantId,
+        available: true
+    }]);
+
+    await loadData();
+    // Move to bottom where new category is
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 };
 
 window.deleteCategory = async (catName) => {
-    if (!confirm(`Deseja remover a categoria "${catName}" e todos os seus pratos?`)) return;
+    if (!confirm(`Remover categoria "${catName}"?`)) return;
     await state.supabase.from('menu_items').delete().eq('category', catName).eq('restaurant_id', state.restaurantId);
     const order = (state.currentData.category_order || []).filter(c => c !== catName);
     await state.supabase.from('restaurants').update({ category_order: order }).eq('id', state.restaurantId);
     loadData();
 };
 
-// ─── ITEMS (Luxe Inline Edition) ───
 window.handleItemUpdate = async (id, field, value) => {
     const newVal = value.trim();
     const item = state.menuItems.find(i => i.id == id);
@@ -69,9 +77,9 @@ window.handleItemPriceUpdate = async (id, rawValue) => {
 
 window.addNewItem = async (cat) => {
     await state.supabase.from('menu_items').insert([{
-        name: 'Nome do Prato',
+        name: 'Novo Prato...',
         price: 0,
-        description: 'Breve descrição do prato...',
+        description: 'Descrição...',
         category: cat,
         restaurant_id: state.restaurantId,
         available: true
@@ -85,22 +93,17 @@ window.toggleAvailability = async (id, current) => {
 };
 
 window.deleteItem = async (id) => {
-    if (!confirm("Remover este prato do menu?")) return;
+    if (!confirm("Remover este prato?")) return;
     await state.supabase.from('menu_items').delete().eq('id', id);
     loadData();
 };
 
-// ─── LUXE IMAGE UPLOADS ───
 window.triggerCoverUpload = () => {
     const input = document.createElement('input');
     input.type = 'file'; input.accept = 'image/*';
     input.onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
-        const loader = document.getElementById('coverDisplay');
-        if (loader) loader.style.opacity = '0.5';
-
         const { data, error } = await uploadFile(file, 'cover');
         if (!error && data) {
             await state.supabase.from('restaurants').update({ cover_url: data.publicUrl }).eq('id', state.restaurantId);
@@ -116,7 +119,6 @@ window.triggerItemImageUpload = (itemId) => {
     input.onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         const { data, error } = await uploadFile(file, `item-${itemId}`);
         if (!error && data) {
             await state.supabase.from('menu_items').update({ image_url: data.publicUrl }).eq('id', itemId);
@@ -126,40 +128,20 @@ window.triggerItemImageUpload = (itemId) => {
     input.click();
 };
 
-// ─── SETTINGS & BRANDING ───
+// ─── SETTINGS ───
 window.openSettingsModal = () => {
-    const data = state.currentData;
-    document.getElementById('modalFont').value = data.font || 'Cormorant';
-    document.getElementById('modalAccent').value = data.accent_color || '#1FA8FF';
-
-    document.querySelectorAll('.color-pip').forEach(p => {
-        p.classList.toggle('active', p.dataset.color === (data.accent_color || '#1FA8FF'));
-    });
-
     document.getElementById('settingsModal').style.display = 'flex';
 };
 
 document.getElementById('settingsForm').onsubmit = async (e) => {
     e.preventDefault();
     const updates = {
-        font: document.getElementById('modalFont').value,
-        accent_color: document.getElementById('modalAccent').value,
         menu_type: document.querySelector('input[name="mtype"]:checked').value
     };
-
     await state.supabase.from('restaurants').update(updates).eq('id', state.restaurantId);
     window.location.reload();
 };
 
-document.querySelectorAll('.color-pip').forEach(pip => {
-    pip.onclick = () => {
-        document.querySelectorAll('.color-pip').forEach(p => p.classList.remove('active'));
-        pip.classList.add('active');
-        document.getElementById('modalAccent').value = pip.dataset.color;
-    };
-});
-
-// ─── MODALS ───
 window.toggleDarkMode = () => {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');

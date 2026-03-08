@@ -1,236 +1,130 @@
 /* 
-  Studio Luxe - Fine Dining Dashboard Architecture 
-  High contrast, ultra-refined minimalist UI.
+  Direct Edition Framework - Normal, Clean, Functional 
+  Focus: No luxury, no informal. Just the menu.
 */
 
 :root {
-    --studio-bg: #FDFCFB;
-    /* Champagne/Off-white */
-    --studio-text: #0F172A;
-    --studio-muted: #64748B;
-    --studio-border: #F1F5F9;
-    --studio-accent: #1FA8FF;
-    --studio-hud-h: 64px;
-    --studio-width: 620px;
-    --font-serif: 'Cormorant Garamond', serif;
-    --font-sans: 'Inter', sans-serif;
+    --menu-bg: #ffffff;
+    --menu-text: #1a1a1a;
+    --menu-muted: #666666;
+    --menu-border: #eeeeee;
+    --menu-accent: #1fa8ff;
+    --menu-width: 500px;
+    --hud-h: 56px;
+    --font-normal: Arial, Inter, Helvetica, sans-serif;
 }
 
 .dark-mode {
-    --studio-bg: #0A0A0A;
-    --studio-text: #F8FAFC;
-    --studio-muted: #94A3B8;
-    --studio-border: #1E293B;
+    --menu-bg: #111111;
+    --menu-text: #f0f0f0;
+    --menu-muted: #999999;
+    --menu-border: #222222;
 }
 
 body.zen-body {
-    background: var(--studio-bg);
-    color: var(--studio-text);
-    overflow-x: hidden;
-    font-family: var(--font-sans);
+    background: var(--menu-bg);
+    color: var(--menu-text);
+    font-family: var(--font-normal);
     margin: 0;
-    -webkit-font-smoothing: antialiased;
+    -webkit-font-smoothing: initial;
+    /* More "normal" rendering */
 }
 
-/* ─── HUD (Navigation) ─── */
+/* ─── HUD ─── */
 .zen-hud {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: var(--studio-hud-h);
-    background: var(--studio-bg);
-    border-bottom: 1px solid var(--studio-border);
+    height: var(--hud-h);
+    background: var(--menu-bg);
+    border-bottom: 1px solid var(--menu-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 32px;
+    padding: 0 20px;
     z-index: 1000;
 }
 
 .hud-left {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
 }
 
 .hud-logo img {
-    height: 26px;
-}
-
-.hud-sep {
-    width: 1px;
-    height: 20px;
-    background: var(--studio-border);
-}
-
-.hud-status {
-    font-family: var(--font-sans);
-    font-weight: 400;
-    font-size: 0.8rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--studio-muted);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #10B981;
+    height: 22px;
 }
 
 .hud-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .hud-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--menu-muted);
+    cursor: pointer;
+    font-size: 1.2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--studio-muted);
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    background: transparent;
-    border: none;
-    font-size: 1.25rem;
+    transition: all 0.2s;
 }
 
 .hud-btn:hover {
-    background: var(--studio-border);
-    color: var(--studio-accent);
-    transform: translateY(-2px);
+    background: var(--menu-border);
+    color: var(--menu-text);
 }
 
 .hud-user {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    background: var(--studio-text);
-    color: var(--studio-bg);
-    font-weight: 600;
-    font-size: 0.75rem;
+    background: var(--menu-text);
+    color: var(--menu-bg);
     border: none;
+    font-weight: 700;
+    font-size: 0.75rem;
     cursor: pointer;
-    margin-left: 12px;
+    margin-left: 8px;
 }
 
-/* ─── The Studio Stage ─── */
+/* ─── The Editor Canvas ─── */
 .zen-stage {
-    padding-top: calc(var(--studio-hud-h) + 100px);
-    padding-bottom: 160px;
+    padding-top: calc(var(--hud-h) + 40px);
+    padding-bottom: 120px;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Category Sticky Tabs */
-.zen-tabs-nav {
-    position: sticky;
-    top: var(--studio-hud-h);
-    background: var(--studio-bg);
-    width: 100%;
-    max-width: var(--studio-width);
-    display: flex;
-    gap: 24px;
-    padding: 20px 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-    z-index: 900;
-    border-bottom: 1px solid var(--studio-border);
-    margin-bottom: 60px;
-}
-
-.zen-tabs-nav::-webkit-scrollbar {
-    display: none;
-}
-
-.nav-chip {
-    background: transparent;
-    border: none;
-    color: var(--studio-muted);
-    font-size: 0.75rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    cursor: pointer;
-    white-space: nowrap;
-    padding-bottom: 8px;
-    position: relative;
-    transition: color 0.3s;
-}
-
-.nav-chip.active {
-    color: var(--studio-text);
-}
-
-.nav-chip.active::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--studio-text);
-}
-
-/* The Canvas Wrapper */
 .zen-canvas {
     width: 100%;
-    max-width: var(--studio-width);
-    animation: fadeInReveal 1s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: var(--menu-width);
 }
 
-@keyframes fadeInReveal {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ─── Inline Editor UI (Luxury Edition) ─── */
-[contenteditable="true"] {
-    transition: all 0.3s;
-    padding: 4px;
-    margin: -4px;
-    border-radius: 4px;
-}
-
-[contenteditable="true"]:hover {
-    background: rgba(31, 168, 255, 0.04);
-    cursor: text;
-}
-
+/* Editables */
 [contenteditable="true"]:focus {
     outline: none;
-    background: rgba(31, 168, 255, 0.06);
-    box-shadow: 0 0 0 1px var(--studio-border);
+    background: rgba(31, 168, 255, 0.05);
 }
 
 /* Master Cover */
 .zen-cover-zone {
     width: 100%;
-    aspect-ratio: 16/7;
-    background: var(--studio-border);
-    border-radius: 4px;
-    overflow: hidden;
-    position: relative;
+    aspect-ratio: 16/9;
+    background: #f5f5f5;
+    margin-bottom: 40px;
     cursor: pointer;
-    margin-bottom: 80px;
-    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 
 .zen-cover-zone img {
@@ -248,335 +142,222 @@ body.zen-body {
     justify-content: center;
     color: #fff;
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: 0.2s;
     font-size: 1.5rem;
 }
 
 .zen-cover-zone:hover .zen-img-overlay {
     opacity: 1;
-    backdrop-filter: blur(4px);
 }
 
-/* Restaurant Info */
-.zen-rest-info {
+.rest-info {
     text-align: center;
-    margin: 0 auto 100px;
-    max-width: 480px;
+    margin-bottom: 40px;
 }
 
-.zen-rest-info h1 {
-    font-family: var(--font-serif);
-    font-size: 4rem;
-    font-weight: 400;
-    margin-bottom: 16px;
-    letter-spacing: -0.02em;
-    line-height: 1;
+.rest-info h1 {
+    font-size: 2rem;
+    margin: 0 0 8px;
+    font-weight: 800;
 }
 
-.zen-rest-info p {
-    font-family: var(--font-sans);
-    color: var(--studio-muted);
-    font-size: 1.1rem;
-    font-weight: 300;
-    line-height: 1.6;
+.rest-info p {
+    font-size: 1rem;
+    color: var(--menu-muted);
+    margin: 0;
 }
 
-/* Category Blocks */
-.zen-cat-block {
-    margin-top: 100px;
+/* The Menu Body */
+.cat-section {
+    margin-top: 48px;
 }
 
-.zen-cat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 1px solid var(--studio-text);
-    padding-bottom: 12px;
-    margin-bottom: 48px;
-}
-
-.zen-cat-title {
-    font-family: var(--font-serif);
-    font-size: 2.2rem;
-    font-weight: 300;
-    letter-spacing: 0.02em;
-}
-
-/* Item Rows (The High-End Split) */
-.zen-item-row {
-    margin-bottom: 56px;
-    display: flex;
-    align-items: flex-start;
-    gap: 32px;
-    padding: 24px;
-    border-radius: 8px;
-    transition: all 0.4s;
+.cat-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--menu-text);
+    padding-bottom: 4px;
+    margin-bottom: 24px;
     position: relative;
-    border: 1px solid transparent;
 }
 
-.zen-item-row:hover {
-    background: var(--studio-bg);
-    border-color: var(--studio-border);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-}
-
-.item-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.item-head {
+.item-row {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding: 12px;
+    border-radius: 8px;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.item-row:hover {
+    background: var(--menu-border);
+}
+
+.item-left {
+    flex: 1;
 }
 
 .item-name {
-    font-family: var(--font-serif);
-    font-size: 1.6rem;
-    font-weight: 500;
-    color: var(--studio-text);
-}
-
-.item-price {
-    font-family: var(--font-sans);
-    font-weight: 600;
-    font-size: 0.95rem;
-    letter-spacing: 0.05em;
-    margin-left: 20px;
+    display: block;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 4px;
 }
 
 .item-desc {
-    font-family: var(--font-sans);
-    color: var(--studio-muted);
-    font-size: 0.9rem;
-    font-weight: 300;
-    line-height: 1.6;
-    max-width: 380px;
+    display: block;
+    font-size: 0.85rem;
+    color: var(--menu-muted);
+    line-height: 1.4;
 }
 
-/* Item Images (The Star of the Show) */
-.item-img-zone {
-    width: 140px;
-    height: 140px;
+.item-price {
+    font-weight: 800;
+    font-size: 1rem;
+    white-space: nowrap;
+    margin-left: 10px;
+}
+
+.item-img-mini {
+    width: 80px;
+    height: 80px;
+    background: #eee;
     flex-shrink: 0;
-    background: var(--studio-border);
     border-radius: 4px;
     overflow: hidden;
     cursor: pointer;
-    position: relative;
 }
 
-.item-img-zone img {
+.item-img-mini img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.item-img-zone:hover::after {
-    content: "\f078";
-    font-family: 'Phosphor';
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 1.5rem;
-    backdrop-filter: blur(2px);
-}
-
-/* Ghost Controls (Subtle UI) */
+/* Control Icons (Ghost) */
 .ghost-actions {
     position: absolute;
-    right: -48px;
-    top: 24px;
+    right: -36px;
+    top: 12px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     opacity: 0;
-    transition: 0.3s;
+    transition: 0.2s;
 }
 
-.zen-item-row:hover .ghost-actions {
+.item-row:hover .ghost-actions {
     opacity: 1;
-    right: -40px;
+    right: -30px;
 }
 
-.mini-btn {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
+.cat-title:hover .cat-ghost {
+    opacity: 1;
+}
+
+.cat-ghost {
+    position: absolute;
+    right: 0;
+    top: 0;
+    opacity: 0;
+}
+
+.mini-ico {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
     border: none;
-    background: var(--studio-border);
-    color: var(--studio-muted);
+    background: var(--menu-border);
+    color: var(--menu-muted);
     cursor: pointer;
+    font-size: 0.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
 }
 
-.mini-btn:hover {
-    background: var(--studio-accent);
-    color: #fff;
-    transform: scale(1.1);
-}
-
-.mini-btn.danger:hover {
-    background: #EF4444;
+.mini-ico:hover {
+    background: var(--menu-accent);
     color: #fff;
 }
 
-/* Add Dummy Placeholder */
-.item-add-dummy {
-    margin-top: 40px;
-    border: 1px dashed var(--studio-border);
-    padding: 24px;
+.mini-ico.red:hover {
+    background: #ff4d4d;
+    color: #fff;
+}
+
+/* Placeholder Slots ("Add New" as slots) */
+.placeholder-slot {
+    border: 1px dashed var(--menu-border);
+    color: var(--menu-muted);
     border-radius: 8px;
+    padding: 16px;
     text-align: center;
-    color: var(--studio-muted);
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
+    font-size: 0.8rem;
+    font-weight: 700;
     text-transform: uppercase;
     cursor: pointer;
-    transition: all 0.3s;
+    margin-top: 12px;
+    transition: 0.2s;
 }
 
-.item-add-dummy:hover {
-    background: var(--studio-border);
-    color: var(--studio-text);
+.placeholder-slot:hover {
     border-style: solid;
+    color: var(--menu-accent);
+    background: var(--menu-border);
 }
 
-/* Floating Fab */
-.zen-fab {
-    position: fixed;
-    bottom: 40px;
-    right: 40px;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--studio-text);
-    color: var(--studio-bg);
+.cat-placeholder {
+    margin-top: 60px;
+    font-size: 1.1rem;
     border: none;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
+    text-align: left;
+    padding: 12px 0;
+    border-bottom: 2px dashed var(--menu-border);
+}
+
+.cat-placeholder:hover {
+    border-bottom-style: solid;
+}
+
+/* Small HUD FAB */
+.fab-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--menu-accent);
+    color: #fff;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.zen-fab:hover {
-    transform: scale(1.1) rotate(90deg);
-    background: var(--studio-accent);
-    color: #fff;
-}
-
-/* Settings Form (Minimalist Panel) */
-.zen-modal-content {
-    background: var(--studio-bg);
-    width: 400px;
-    padding: 48px;
-    border-radius: 8px;
-    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.15);
-    border: 1px solid var(--studio-border);
-}
-
-.zen-form label {
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--studio-muted);
-    margin-bottom: 8px;
-    display: block;
-}
-
-.z-input {
-    width: 100%;
-    padding: 12px;
-    background: var(--studio-border);
-    border: none;
-    border-radius: 4px;
-    color: var(--studio-text);
-    font-family: var(--font-sans);
-}
-
-.color-presets {
-    display: flex;
-    gap: 12px;
-    margin-top: 10px;
-}
-
-.color-pip {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 2px solid transparent;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     cursor: pointer;
+    font-size: 1.2rem;
 }
 
-.color-pip.active {
-    border-color: var(--studio-text);
-    transform: scale(1.1);
-}
-
-.z-btn {
-    padding: 12px 24px;
-    border-radius: 4px;
-    font-weight: 500;
-    font-family: var(--font-sans);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.z-btn.primary {
-    background: var(--studio-text);
-    color: var(--studio-bg);
-}
-
-.z-btn.primary:hover {
-    filter: brightness(1.2);
-}
-
-.z-btn.block {
-    width: 100%;
-    margin-top: 16px;
-}
-
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     .zen-canvas {
-        padding: 0 20px;
-    }
-
-    .zen-rest-info h1 {
-        font-size: 3rem;
-    }
-
-    .zen-item-row {
-        flex-direction: column-reverse;
-        gap: 20px;
-    }
-
-    .item-img-zone {
-        width: 100%;
-        height: 200px;
+        padding: 0 16px;
     }
 
     .ghost-actions {
-        right: 20px;
-        top: -40px;
+        position: static;
         flex-direction: row;
         opacity: 1;
+        margin-top: 8px;
+    }
+
+    .cat-ghost {
+        position: static;
+        opacity: 1;
+        margin-top: 8px;
     }
 }
