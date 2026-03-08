@@ -157,119 +157,61 @@ button:disabled {
     }
 }
 
-/* --- NAV ITEM BUTTON STYLING --- */
-.btn-nav {
-    color: var(--text-muted);
-    background: transparent;
-    border: 1px solid transparent;
+/* --- ITEM CARD LAYOUT (Unified with menu.css) --- */
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 15px;
+    gap: 15px;
+    position: relative;
+    transition: transform 0.2s ease;
+    margin-bottom: 20px;
 }
 
-.btn-nav i {
-    font-size: 1.2rem;
+.item-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-.btn-nav:hover {
-    background: var(--bg-page);
+.item-text h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 6px;
     color: var(--text);
-    transform: translateY(-2px);
 }
 
-.btn-nav.active {
-    background: var(--primary-glow);
-    color: var(--primary);
-    border-color: var(--primary-glow);
+.item-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    line-height: 1.4;
 }
 
-
-
-/* --- ANIMATIONS --- */
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
-    }
-
-    70% {
-        transform: scale(1.1);
-        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
-    }
-
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-    }
+.item-price {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 1rem;
+    margin-top: auto;
 }
 
-.badge-pulse {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--danger);
-    color: white;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-weight: 800;
-    animation: pulse 2s infinite;
-    pointer-events: none;
-}
-
-/* --- TRIAL BADGE --- */
-.trial-timer-badge {
-    padding: 6px 14px;
-    border-radius: 50px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: none;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
+.item-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    overflow: hidden;
     flex-shrink: 0;
+    background: var(--bg-page);
 }
 
-.trial-timer-badge:hover {
-    transform: scale(1.05);
+.item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.trial-timer-badge.state-trial {
-    background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
-    color: #854d0e;
-    border: 1px solid #fde047;
-}
-
-.trial-timer-badge.state-pro {
-    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-    color: #15803d;
-    border: 1px solid #86efac;
-}
-
-.trial-timer-badge.state-expired {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    color: #b91c1c;
-    border: 1px solid #fca5a5;
-}
-
-.dark-mode .trial-timer-badge.state-trial {
-    background: #3f3f17;
-    color: #fef08a;
-    border-color: #854d0e;
-}
-
-.dark-mode .trial-timer-badge.state-pro {
-    background: #064e3b;
-    color: #6ee7b7;
-    border-color: #047857;
-}
-
-.dark-mode .trial-timer-badge.state-expired {
-    background: #7f1d1d;
-    color: #fecaca;
-    border-color: #b91c1c;
-}
-
-/* --- ITEM CARD LAYOUT --- */
 .item-footer {
     display: flex;
     align-items: center;
@@ -1206,12 +1148,90 @@ input:checked+.slider:before {
     box-shadow: 0 4px 12px var(--primary-glow);
 }
 
-.tab-btn {
-    padding: 12px 18px;
-    font-weight: 600;
-    color: var(--text-muted);
-    transition: all 0.2s;
+/* === CATEGORY NAVIGATION (Unified with menu.css) === */
+.category-tabs {
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    width: 100%;
+    gap: 15px;
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+    min-height: 55px;
+    align-items: center;
+    background: var(--bg-card);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
+
+.category-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-btn {
+    flex: 1;
+    min-width: fit-content;
+    text-align: center;
+    border: none;
+    background: transparent;
+    padding: 10px 8px;
+    margin: 0;
+    white-space: nowrap;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 0;
+    /* Override generic button radius */
+    height: auto;
+    /* Override generic button height */
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -11px;
+    /* Align with container bottom border */
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 3px 3px 0 0;
+}
+
+.tab-btn:hover {
+    color: var(--text);
+}
+
+.btn-add-cat {
+    background: var(--primary-glow) !important;
+    color: var(--primary) !important;
+    padding: 6px 14px !important;
+    border-radius: 50px !important;
+    font-size: 0.85rem !important;
+    height: 36px !important;
+    margin-left: 10px !important;
+    border-bottom: none !important;
+}
+
+.btn-add-cat::after {
+    display: none !important;
+}
+
 
 /* Final Footer */
 .app-footer {

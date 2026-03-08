@@ -37,6 +37,11 @@ export function renderHeader(data) {
         const fontType = fontName.includes('Playfair') ? 'serif' : (fontName.includes('Dancing') ? 'cursive' : 'sans-serif');
         canvas.style.setProperty('--font-heading', `'${fontName}', ${fontType}`);
         canvas.style.fontFamily = `'${fontName}', ${fontType}`;
+
+        // Sync Custom Colors
+        if (data.color_primary) canvas.style.setProperty('--primary', data.color_primary);
+        if (data.color_text) canvas.style.setProperty('--text', data.color_text);
+        if (data.color_background) canvas.style.setProperty('--bg-mobile', data.color_background);
     }
 
     const nameEl = document.getElementById('restNameEditor');
