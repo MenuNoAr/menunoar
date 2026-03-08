@@ -136,3 +136,8 @@ function _getOrderedCategories(items) {
     }
     return cats;
 }
+
+export function updateLiveLink(slug) {
+    const btn = document.getElementById('liveLinkBtn');
+    if (btn) btn.onclick = () => window.open(`https://menunoar.pt/menu.html?id=${slug}`, '_blank');
+}
