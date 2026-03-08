@@ -1,117 +1,136 @@
 /**
- * render.js - Optimized UI Rendering for Device Preview
+ * render.js - Hub "Command Hub" Version
+ * Renders the Blueprint (Left) and the Studio (Right)
  */
 import { state, updateState } from './state.js';
-import { saveCategoryOrder } from './api.js';
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 const escapeHTML = (str) => str ? String(str).replace(/[&<>"']/g, m => ESC[m]) : '';
 
-// ─── Live Link ────────────────────────────────────────────────────────────────
-export function updateLiveLink(slug) {
-    const url = `https://menunoar.pt/menu.html?id=${slug}`;
-    const btn = document.getElementById('liveLinkBtn');
-    if (btn) btn.onclick = () => window.open(url, '_blank');
+// ─── Main Render Dispatch ───
+export function renderAll() {
+    const data = state.currentData;
+    const items = state.menuItems;
+
+    if (data.menu_type === 'pdf') {
+        renderPdfStudio(data);
+    } else {
+        renderStudioPreview(data, items);
+        renderBlueprint(items);
+    }
 }
 
-// ─── Header Rendering ───
-export function renderHeader(data) {
+// ─── THE BLUEPRINT (Left Panel) ───
+export function renderBlueprint(items) {
+    const container = document.getElementById('categories-list');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    // Grouping
+    const cats = _getOrderedCategories(items);
+    const groups = cats.reduce((acc, cat) => {
+        acc[cat] = items.filter(i => i.category === cat);
+        return acc;
+    }, {});
+
+    cats.forEach((cat) => {
+        const catBox = document.createElement('div');
+        catBox.className = 'cat-blueprint-box animate-fade';
+
+        const catItems = groups[cat] || [];
+        const itemsHTML = catItems.map(item => `
+            <div class="item-row ${!item.available ? 'unavailable' : ''}" onclick="openItemModal('${item.id}')">
+                <div class="item-name-box">
+                    ${escapeHTML(item.name)}
+                </div>
+                <div class="item-price-box">${Number(item.price).toFixed(2)}€</div>
+                <i class="ph ph-note-pencil"></i>
+            </div>
+        `).join('');
+
+        catBox.innerHTML = `
+            <div class="cat-head-row">
+                <input class="cat-name-input" value="${escapeHTML(cat)}" 
+                    onblur="window.handleCategoryRename('${cat}', this.value)">
+                <div class="cat-actions">
+                    <button class="icon-btn" onclick="openAddItemModal('${cat}')"><i class="ph ph-plus"></i></button>
+                    <button class="icon-btn text-danger" onclick="deleteCategory('${cat}')"><i class="ph ph-trash"></i></button>
+                </div>
+            </div>
+            <div class="items-blueprint-list">
+                ${itemsHTML || '<p class="muted center">Nenhum prato aqui.</p>'}
+            </div>
+        `;
+        container.appendChild(catBox);
+    });
+}
+
+// ─── THE STUDIO PREVIEW (Right Panel Card) ───
+export function renderStudioPreview(data, items) {
     const canvas = document.getElementById('menuContainer');
     if (!canvas) return;
 
-    // Apply Fonts
-    const fontName = data.font || 'Inter';
-    const fontType = fontName.includes('Playfair') ? 'serif' : (fontName.includes('Dancing') ? 'cursive' : 'sans-serif');
-    canvas.style.setProperty('--font-heading', `'${fontName}', ${fontType}`);
-    canvas.style.fontFamily = `'${fontName}', ${fontType}`;
+    // Build the visual "Menu" inside the card as it would look on mobile
+    const cats = _getOrderedCategories(items);
+    const groups = cats.reduce((acc, cat) => {
+        acc[cat] = items.filter(i => i.category === cat);
+        return acc;
+    }, {});
 
-    // Clear and build the core skeleton if not present
-    if (!canvas.querySelector('.rest-info')) {
-        canvas.innerHTML = `
-            <div id="coverEditor" class="cover-container" onclick="triggerCoverUpload()">
-                <div class="cover-overlay"><i class="ph-bold ph-camera"></i></div>
-            </div>
-            <div class="rest-info">
-                <h1 id="restNameEditor" class="inline-edit" contenteditable="true" spellcheck="false">Nome do Restaurante</h1>
-                <p id="restDescEditor" class="inline-edit" contenteditable="true" spellcheck="false">Descrição do restaurante...</p>
-                <div class="badges-row">
-                    <div id="badgeWifi" class="badge-item"><i class="ph-fill ph-wifi"></i> <span id="textWifi">Wi-Fi</span></div>
-                    <div id="badgePhone" class="badge-item"><i class="ph-fill ph-phone"></i> <span id="textPhone">Telefone</span></div>
-                    <div id="badgeAddress" class="badge-item"><i class="ph-fill ph-map-pin"></i> <span id="textAddress">Morada</span></div>
+    const font = data.font || 'Inter';
+    canvas.style.fontFamily = `'${font}', sans-serif`;
+
+    canvas.innerHTML = `
+        <div class="preview-header" style="background-image: url('${data.cover_url || ''}'); height: 200px; background-size: cover; background-position: center; position:relative;">
+            <div style="position:absolute; inset:0; background: rgba(0,0,0,0.3);"></div>
+        </div>
+        <div class="preview-info" style="padding: 32px 24px; text-align: center;">
+            <h1 style="font-size: 1.8rem; margin-bottom: 8px;">${escapeHTML(data.name)}</h1>
+            <p class="muted">${escapeHTML(data.description)}</p>
+        </div>
+        <div class="preview-menu-content" style="padding: 0 24px 80px;">
+            ${cats.map(cat => `
+                <div style="margin-bottom: 40px;">
+                    <h3 style="font-size: 1.25rem; font-weight: 800; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 16px;">${escapeHTML(cat)}</h3>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        ${(groups[cat] || []).map(i => `
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <div>
+                                    <strong style="font-size: 0.95rem; display:block;">${escapeHTML(i.name)}</strong>
+                                    <span style="font-size: 0.8rem; color: #666;">${escapeHTML(i.description)}</span>
+                                </div>
+                                <span style="font-weight: 800; font-size: 0.95rem;">${Number(i.price).toFixed(2)}€</span>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
-            <div id="categoryNav" class="category-tabs sticky-nav"></div>
-            <div id="menuSections" class="menu-sections"></div>
-            <div class="canvas-footer" style="padding: 40px; text-align: center; opacity: 0.5; font-size: 0.8rem;">
-                Feito com Menu no Ar
+            `).join('')}
+        </div>
+    `;
+}
+
+// ─── PDF Render ───
+export function renderPdfStudio(data) {
+    const canvas = document.getElementById('menuContainer');
+    if (canvas) {
+        canvas.innerHTML = `
+            <div style="padding: 100px 40px; text-align: center;">
+                <i class="ph ph-file-pdf" style="font-size: 4rem; color: #ff0000; margin-bottom: 20px;"></i>
+                <h2>Modo PDF Ativo</h2>
+                <p class="muted">O seu menu está a ser servido via ficheiro.</p>
+                <a href="${data.pdf_url}" target="_blank" class="hub-btn block primary" style="margin-top:20px;">Ver PDF</a>
             </div>
         `;
-        // Setup initial event listeners for heading edits
-        _setupHeaderListeners();
     }
-
-    // Update Values
-    const nameEl = document.getElementById('restNameEditor');
-    const descEl = document.getElementById('restDescEditor');
-    if (nameEl) nameEl.textContent = data.name || 'Nome do Restaurante';
-    if (descEl) descEl.textContent = data.description || 'Descrição curta (clica para editar)';
-
-    const coverDiv = document.getElementById('coverEditor');
-    if (coverDiv) {
-        if (data.cover_url) {
-            coverDiv.style.backgroundImage = `url('${data.cover_url}')`;
-            coverDiv.style.backgroundSize = 'cover';
-            coverDiv.style.backgroundPosition = 'center';
-            coverDiv.style.height = '240px';
-        } else {
-            coverDiv.style.backgroundImage = 'none';
-            coverDiv.style.backgroundColor = '#f1f5f9';
-            coverDiv.style.height = '120px';
-        }
-    }
-
-    _updateBadge('badgeWifi', 'textWifi', data.wifi_password);
-    _updateBadge('badgePhone', 'textPhone', data.phone);
-    _updateBadge('badgeAddress', 'textAddress', data.address);
 }
 
-function _updateBadge(badgeId, textId, value) {
-    const el = document.getElementById(badgeId);
-    const span = document.getElementById(textId);
-    if (!el || !span) return;
-    span.textContent = value || 'Adicionar...';
-    el.style.opacity = value ? '1' : '0.4';
-}
-
-function _setupHeaderListeners() {
-    const nameEl = document.getElementById('restNameEditor');
-    const descEl = document.getElementById('restDescEditor');
-
-    nameEl?.addEventListener('blur', (e) => window.handleRestUpdate('name', e.target.innerText));
-    descEl?.addEventListener('blur', (e) => window.handleRestUpdate('description', e.target.innerText));
-
-    // Wifi, Phone, Address triggers
-    document.getElementById('badgeWifi')?.addEventListener('click', () => window.openBadgeEdit('wifi'));
-    document.getElementById('badgePhone')?.addEventListener('click', () => window.openBadgeEdit('phone'));
-    document.getElementById('badgeAddress')?.addEventListener('click', () => window.openBadgeEdit('address'));
-}
-
-// ─── Menu Rendering ───
-export function renderMenu(items) {
-    const nav = document.getElementById('categoryNav');
-    const sections = document.getElementById('menuSections');
-    if (!nav || !sections) return;
-
-    sections.innerHTML = '';
-    nav.innerHTML = '';
-
-    // Categories Logic
+// ─── Helpers ───
+function _getOrderedCategories(items) {
     const catSet = new Set(items.map(i => i.category));
     (state.currentData.category_order || []).forEach(c => catSet.add(c));
     let cats = Array.from(catSet);
 
-    // Sort by order
     if (state.currentData.category_order?.length) {
         const order = state.currentData.category_order;
         cats.sort((a, b) => {
@@ -119,137 +138,10 @@ export function renderMenu(items) {
             return (ia === -1 ? 9999 : ia) - (ib === -1 ? 9999 : ib);
         });
     }
-
-    const groups = cats.reduce((acc, cat) => {
-        acc[cat] = items.filter(i => i.category === cat);
-        return acc;
-    }, {});
-
-    const navFrag = document.createDocumentFragment();
-    const sectionsFrag = document.createDocumentFragment();
-
-    cats.forEach((cat, idx) => {
-        // Nav Tab
-        const tab = document.createElement('button');
-        tab.className = `tab-btn draggable-tab ${idx === 0 ? 'active' : ''}`;
-        tab.dataset.category = cat;
-        tab.innerHTML = `<span>${escapeHTML(cat)}</span>`;
-        tab.onclick = () => {
-            document.getElementById(`cat-sec-${idx}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
-        navFrag.appendChild(tab);
-
-        // Section
-        const section = document.createElement('div');
-        section.className = 'menu-category-section';
-        section.id = `cat-sec-${idx}`;
-
-        const catItems = groups[cat] || [];
-        const itemsHTML = catItems.map(createItemCard).join('');
-
-        section.innerHTML = `
-            <div class="category-title-row">
-                <h2 class="category-title" 
-                    contenteditable="true" 
-                    onblur="window.handleCategoryRename('${cat}', this.innerText)"
-                >${escapeHTML(cat)}</h2>
-                <button class="icon-btn text-danger" onclick="deleteCategory('${cat}')" title="Apagar"><i class="ph ph-trash"></i></button>
-            </div>
-            <div class="items-grid">
-                ${itemsHTML}
-                <div class="add-item-trigger" onclick="openAddItemModal('${cat}')">
-                    <i class="ph ph-plus"></i>
-                    <span>Adicionar Prato</span>
-                </div>
-            </div>
-        `;
-        sectionsFrag.appendChild(section);
-    });
-
-    nav.appendChild(navFrag);
-    sections.appendChild(sectionsFrag);
-
-    // Sortable for categories
-    if (window.Sortable) {
-        new Sortable(nav, {
-            animation: 150,
-            draggable: '.draggable-tab',
-            onEnd: async () => {
-                const newOrder = Array.from(nav.querySelectorAll('.draggable-tab')).map(t => t.dataset.category);
-                await saveCategoryOrder(newOrder);
-            }
-        });
-    }
+    return cats;
 }
 
-// ─── Item Card ───
-export function createItemCard(item) {
-    const { id, name, description, price, available: isAvail, image_url } = item;
-
-    return `
-        <div class="menu-item-card ${!isAvail ? 'unavailable' : ''}" onclick="openItemModal('${id}')">
-            <div class="item-img editable-trigger" onclick="event.stopPropagation(); openImageModal('${id}')">
-                ${image_url
-            ? `<img src="${image_url}" loading="lazy" alt="${escapeHTML(name)}">`
-            : `<div class="edit-overlay" style="opacity: 1;"><i class="ph ph-camera"></i></div>`
-        }
-            </div>
-            <div class="item-info">
-                <div class="item-name-row">
-                    <span class="item-name">${escapeHTML(name)}</span>
-                    <span class="item-price">${Number(price).toFixed(2)}€</span>
-                </div>
-                <p class="item-desc">${escapeHTML(description) || 'Sem descrição'}</p>
-            </div>
-        </div>
-    `;
-}
-
-// ─── PDF Viewer ───
-export function renderPdfViewer(data) {
-    const canvas = document.getElementById('menuContainer');
-    if (!canvas) return;
-
-    canvas.innerHTML = `
-        <div id="pdf-reels-container">
-            <div id="pdfLoading" style="padding: 100px 40px; text-align: center;">
-                <div class="spinner"></div>
-                <p style="margin-top: 16px;">A processar preview do PDF...</p>
-            </div>
-        </div>
-    `;
-
-    if (!data.pdf_url) return;
-
-    // Direct embed or use PDF.js fallback
-    // For the "Functional" feeling, let's keep the reel logic but cleaner.
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    script.onload = () => {
-        const pdfjsLib = window['pdfjs-dist/build/pdf'];
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-        pdfjsLib.getDocument(data.pdf_url).promise.then(async (pdf) => {
-            const container = document.getElementById('pdf-reels-container');
-            container.innerHTML = ''; // clear loading
-
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 2.0 });
-                const wrapper = document.createElement('div');
-                wrapper.className = 'pdf-reel-slide';
-
-                const pCanvas = document.createElement('canvas');
-                pCanvas.className = 'pdf-canvas';
-                pCanvas.height = viewport.height;
-                pCanvas.width = viewport.width;
-
-                wrapper.appendChild(pCanvas);
-                container.appendChild(wrapper);
-
-                await page.render({ canvasContext: pCanvas.getContext('2d'), viewport }).promise;
-            }
-        });
-    };
-    document.head.appendChild(script);
+export function updateLiveLink(slug) {
+    const btn = document.getElementById('liveLinkBtn');
+    if (btn) btn.onclick = () => window.open(`https://menunoar.pt/menu.html?id=${slug}`, '_blank');
 }

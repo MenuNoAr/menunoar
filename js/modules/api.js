@@ -1,8 +1,8 @@
 /**
- * api.js - Supabase & Data Sync
+ * api.js - Hub Version
  */
 import { state, updateState } from './state.js';
-import { renderHeader, renderMenu, renderPdfViewer, updateLiveLink } from './render.js';
+import { renderAll, updateLiveLink } from './render.js';
 
 export async function loadData() {
     const { supabase, currentUser } = state;
@@ -17,7 +17,6 @@ export async function loadData() {
 
     if (error) return console.error('Error:', error);
 
-    // Toggle Setup Screen
     const setupEl = document.getElementById('setup-screen');
     const mainEl = document.getElementById('main-dashboard');
 
@@ -35,51 +34,52 @@ export async function loadData() {
         .order('category')
         .order('name');
 
-    // Update State
-    updateState({ restaurantId: rest.id, currentData: rest, menuItems: items || [] });
+    // Update Global State
+    updateState({
+        restaurantId: rest.id,
+        currentData: rest,
+        menuItems: items || []
+    });
 
-    // UI Updates
+    // Visibility
     if (setupEl) setupEl.style.display = 'none';
-    if (mainEl) mainEl.style.display = 'flex'; // Use flex for the app-shell
+    if (mainEl) mainEl.style.display = 'flex';
 
-    // User Info
-    const userDisplay = document.getElementById('userDisplayName');
-    if (userDisplay) userDisplay.textContent = (rest.name || currentUser.email || 'U').charAt(0).toUpperCase();
+    // UI Topbar updates
+    const nameLabel = document.getElementById('sidebarUserName');
+    if (nameLabel) nameLabel.textContent = rest.name || 'Restaurante';
 
-    const sidebarName = document.getElementById('sidebarUserName');
-    if (sidebarName) sidebarName.textContent = rest.name || 'Restaurante';
+    const userLabel = document.getElementById('userDisplayName');
+    if (userLabel) userLabel.textContent = (rest.name || 'U').charAt(0).toUpperCase();
 
-    // Render Logic
-    if (rest.menu_type === 'pdf') {
-        renderPdfViewer(rest);
-    } else {
-        renderHeader(rest);
-        renderMenu(items || []);
-    }
+    // Trigger Complete Render
+    renderAll();
 
     updateLiveLink(rest.slug);
-    _updateTrialStatus(rest);
+    _updateStatusPill(rest);
 }
 
-function _updateTrialStatus(rest) {
-    const badge = document.getElementById('trialTimer');
-    if (!badge) return;
+function _updateStatusPill(rest) {
+    const pill = document.getElementById('trialTimer');
+    if (!pill) return;
 
+    const isActive = rest.subscription_status === 'active';
     const trialEnds = new Date(rest.trial_ends_at);
-    const now = new Date();
-    const daysLeft = Math.ceil((trialEnds - now) / (1000 * 60 * 60 * 24));
+    const days = Math.ceil((trialEnds - new Date()) / (1000 * 60 * 60 * 24));
 
-    if (rest.subscription_status === 'active') {
-        badge.innerHTML = '<i class="ph-fill ph-check-circle"></i> PRO';
-        badge.style.background = 'var(--success)';
-        badge.style.display = 'flex';
-    } else if (daysLeft > 0) {
-        badge.innerHTML = `<i class="ph ph-clock"></i> ${daysLeft} dias trial`;
-        badge.style.display = 'flex';
+    if (isActive) {
+        pill.textContent = 'Membro Pro';
+        pill.className = 'status-pill pro';
+        pill.style.background = '#000';
+        pill.style.color = '#fff';
+    } else if (days > 0) {
+        pill.textContent = `${days} dias trial`;
+        pill.className = 'status-pill trial';
     } else {
-        badge.innerHTML = '<i class="ph ph-warning-circle"></i> Expirado';
-        badge.style.background = 'var(--danger)';
-        badge.style.display = 'flex';
+        pill.textContent = 'Trial Expirado';
+        pill.className = 'status-pill expired';
+        pill.style.background = '#ef4444';
+        pill.style.color = '#fff';
     }
 }
 
