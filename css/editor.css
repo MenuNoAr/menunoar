@@ -11,6 +11,8 @@
     --border: #e2e8f0;
     --text: #0f172a;
     --text-muted: #64748b;
+    --bg-mobile: #ffffff;
+    /* Match menu.css */
     --navbar-height: 72px;
     --radius-lg: 32px;
     --radius-md: 16px;
@@ -24,6 +26,8 @@
     --bg-card: #121212;
     --border: #222222;
     --text: #ffffff;
+    --bg-mobile: #121212;
+    /* Match menu.css dark */
     --text-muted: #888888;
     --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
@@ -457,6 +461,26 @@ button:disabled {
 
 
 
+
+/* --- BANNER & HERO SYNC --- */
+.cover-image {
+    width: 100%;
+    height: 250px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    background-color: var(--bg-page);
+}
+
+/* Gradient Overlay - MUST match menu.css exactly */
+.cover-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--bg-mobile) 5%, transparent 60%);
+    pointer-events: none;
+    z-index: 1;
+}
 
 /* Clean Overlays */
 .editable-trigger {
