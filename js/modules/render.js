@@ -1,139 +1,216 @@
 /**
- * render.js - Precise Screenshot Matching
+ * render.js - UI Rendering (Modern Clean Expansion)
+ * Removed horizontal slider logic for a full-width vertical workspace.
  */
-import { state } from './state.js';
+import { state, updateState } from './state.js';
+import { saveCategoryOrder } from './api.js';
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 const escapeHTML = (str) => str ? String(str).replace(/[&<>"']/g, m => ESC[m]) : '';
 
-export function renderAll() {
-    const data = state.currentData;
-    const items = state.menuItems;
-    if (data.menu_type === 'pdf') return renderPdfView(data);
-    renderScreenshotEditor(data, items);
+// ─── Live Link ────────────────────────────────────────────────────────────────
+export function updateLiveLink(slug) {
+    const url = `${window.location.origin}/menu.html?id=${slug}`;
+    const btn = document.getElementById('liveLinkBtn');
+    if (btn) {
+        btn.onclick = () => window.open(url, '_blank');
+    }
 }
 
-export function renderScreenshotEditor(data, items) {
-    const container = document.getElementById('menuContainer');
-    if (!container) return;
+// ─── Header ───────────────────────────────────────────────────────────────────
+export function renderHeader(data) {
+    const nameEl = document.getElementById('restNameEditor');
+    const descEl = document.getElementById('restDescEditor');
+    if (nameEl) nameEl.textContent = data.name || 'Nome do Restaurante';
+    if (descEl) descEl.textContent = data.description || 'Descrição curta do seu restaurante...';
 
-    const cats = _getOrderedCategories(items);
+    const coverDiv = document.getElementById('coverEditor');
+    if (coverDiv) {
+        const existingImg = coverDiv.querySelector('img');
+        if (data.cover_url) {
+            if (existingImg) {
+                existingImg.src = data.cover_url;
+            } else {
+                coverDiv.insertAdjacentHTML('afterbegin', `<img src="${data.cover_url}" alt="Capa" style="width:100%; height:100%; object-fit:cover;">`);
+            }
+            coverDiv.style.height = '300px';
+        } else {
+            if (existingImg) existingImg.remove();
+            coverDiv.style.height = '180px';
+            coverDiv.style.backgroundColor = 'var(--bg-page)';
+        }
+    }
+
+    _updateBadge('badgeWifi', 'textWifi', data.wifi_password, 'Wi-Fi');
+    _updateBadge('badgePhone', 'textPhone', data.phone, 'Contacto');
+}
+
+function _updateBadge(badgeId, textId, value, defaultText) {
+    const el = document.getElementById(badgeId);
+    const span = document.getElementById(textId);
+    if (!el || !span) return;
+    span.textContent = value || defaultText;
+    el.style.opacity = value ? '1' : '0.4';
+}
+
+// ─── PDF Viewer ───────────────────────────────────────────────────────────────
+export function renderPdfViewer(data) {
+    const container = document.getElementById('pdf-reels-container');
+    const menuSec = document.getElementById('menuSections');
+    if (container) container.style.display = 'flex';
+    if (menuSec) menuSec.style.display = 'none';
+
+    if (!data.pdf_url) return;
+
+    // Load PDF.js dynamically
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    script.onload = () => {
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const loadingTask = pdfjsLib.getDocument(data.pdf_url);
+        loadingTask.promise.then(async (pdf) => {
+            if (container) container.innerHTML = ''; // Clear previous
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const pageCanvas = document.createElement('canvas');
+                pageCanvas.style.cssText = 'width:100%; max-width:800px; margin: 0 auto; box-shadow: var(--shadow-md); border-radius: var(--radius-md); background:#fff;';
+                container.appendChild(pageCanvas);
+
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 2.0 });
+                const context = pageCanvas.getContext('2d');
+                pageCanvas.height = viewport.height;
+                pageCanvas.width = viewport.width;
+
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+            }
+        });
+    };
+    if (!document.querySelector('script[src*="pdf.min.js"]')) {
+        document.head.appendChild(script);
+    } else {
+        script.onload();
+    }
+}
+
+// ─── Menu Rendering ──────────────────────────────────────────────────────────
+export function renderMenu(items) {
+    const container = document.getElementById('menuSections');
+    const nav = document.getElementById('categoryNav');
+    if (!container || !nav) return;
+
+    // Build categories order
+    const catSet = new Set(items.map(i => i.category));
+    (state.currentData.category_order || []).forEach(c => catSet.add(c));
+    let cats = Array.from(catSet);
+
+    if (state.currentData.category_order?.length) {
+        const order = state.currentData.category_order;
+        cats.sort((a, b) => {
+            const ia = order.indexOf(a), ib = order.indexOf(b);
+            return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+        });
+    }
+
     const groups = cats.reduce((acc, cat) => {
         acc[cat] = items.filter(i => i.category === cat);
         return acc;
     }, {});
 
-    // 0. Identity Update
-    const nameEl = document.getElementById('restName');
-    const descEl = document.getElementById('restDesc');
-    const wifiEl = document.getElementById('metaWifi');
-    const phoneEl = document.getElementById('metaPhone');
-    const addrEl = document.getElementById('metaAddr');
-    const coverEl = document.getElementById('coverDisplay');
+    // Render Menu Sections
+    container.innerHTML = '';
+    cats.forEach(cat => {
+        const section = document.createElement('section');
+        section.id = `cat-sec-${cat.replace(/\s+/g, '-')}`;
+        section.className = 'menu-section animate-fade';
 
-    if (nameEl) {
-        nameEl.innerText = data.name || 'Taberna do Mercado';
-        nameEl.onblur = (e) => window.handleRestUpdate('name', e.target.innerText);
-    }
-    if (descEl) {
-        descEl.innerText = data.description || 'Descrição do Restaurante';
-        descEl.onblur = (e) => window.handleRestUpdate('description', e.target.innerText);
-    }
-    if (wifiEl) {
-        wifiEl.innerText = data.wifi_name || 'wifi_gratis';
-        wifiEl.onblur = (e) => window.handleRestUpdate('wifi_name', e.target.innerText);
-    }
-    if (phoneEl) {
-        phoneEl.innerText = data.phone || '+351 000 000 000';
-        phoneEl.onblur = (e) => window.handleRestUpdate('phone', e.target.innerText);
-    }
-    if (addrEl) {
-        addrEl.innerText = data.address || 'Rua Exemplo, 123';
-        addrEl.onblur = (e) => window.handleRestUpdate('address', e.target.innerText);
-    }
-    if (coverEl && data.cover_url) {
-        coverEl.src = data.cover_url;
-    }
-
-    // 1. Navigation (Screenshot Style)
-    const navBar = document.getElementById('categoryNav');
-    if (navBar) {
-        navBar.innerHTML = cats.map((cat, idx) => `
-            <button class="cat-item-link ${idx === state.activeCategoryIdx ? 'active' : ''}" 
-                    onclick="window.switchCategory(${idx})">
-                <span class="cat-link-text">${escapeHTML(cat)}</span>
-                <span class="cat-link-lines">||</span>
-            </button>
-        `).join('') + `
-            <button class="cat-add-link" onclick="window.addNewCategoryOptimized()">
-                <i class="ph ph-plus"></i> Nova Categoria
-            </button>
-        `;
-    }
-
-    // 2. Slider Rendering
-    container.innerHTML = `
-        <div class="menu-slides-wrapper" id="categorySlider" style="transform: translateX(-${(state.activeCategoryIdx || 0) * 100}%)">
-            ${cats.map(cat => {
         const catItems = groups[cat] || [];
-        // Find category image (if any)
-        const catImage = catItems.find(i => i.category_image)?.category_image || 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1974';
+        const itemsHTML = catItems.map(createItemCard).join('');
 
-        return `
-                    <div class="menu-slide">
-                        <div class="cat-image-header" onclick="window.triggerCategoryImageUpload('${cat}')">
-                            <img src="${catImage}">
-                            <div class="cat-image-overlay">
-                                <h2 contenteditable="true" onblur="window.handleCategoryRename('${cat}', this.innerText)">${escapeHTML(cat)}</h2>
-                            </div>
-                            <button class="cat-delete-btn" onclick="window.deleteCategory('${cat}')" title="Apagar Categoria">
-                                <i class="ph ph-trash"></i>
-                            </button>
-                        </div>
-
-                        <div class="items-list">
-                            ${catItems.map(i => `
-                                <div class="item-card">
-                                    <div class="item-card-left">
-                                        <div class="item-card-header">
-                                            <span class="it-name" contenteditable="true" 
-                                                onblur="window.handleItemUpdate('${i.id}', 'name', this.innerText)">${escapeHTML(i.name)}</span>
-                                            <span class="it-price" contenteditable="true" 
-                                                onblur="window.handleItemPriceUpdate('${i.id}', this.innerText)">${Number(i.price).toFixed(2)}€</span>
-                                        </div>
-                                        <span class="it-desc" contenteditable="true" 
-                                            onblur="window.handleItemUpdate('${i.id}', 'description', this.innerText)">${escapeHTML(i.description)}</span>
-                                    </div>
-                                    <div class="item-visual" onclick="window.triggerItemImageUpload('${i.id}')">
-                                        <img src="${i.image_url || 'https://images.unsplash.com/photo-1546241072-48010ad28c2c?q=80&w=1974'}">
-                                    </div>
-                                </div>
-                            `).join('')}
-                            
-                            <div class="bottom-add-slot" onclick="window.addNewItem('${cat}')">
-                                <i class="ph ph-plus"></i> ADICIONAR PRATO
-                            </div>
-                        </div>
+        section.innerHTML = `
+            <div class="category-header">
+                <h2 class="category-title inline-edit" 
+                    contenteditable="true" 
+                    onblur="handleCategoryRename('${cat}', this.innerText)"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${escapeHTML(cat)}</h2>
+                <div class="flex gap-2">
+                    <button class="btn btn-ghost" onclick="deleteCategory('${cat}')" style="color:var(--danger)" title="Eliminar Categoria"><i class="ph ph-trash"></i></button>
+                </div>
+            </div>
+            <div class="items-grid">
+                ${itemsHTML}
+                <div class="menu-item-card add-item-trigger" onclick="openAddItemModal('${cat}')" style="border: 2px dashed var(--border-color); background: transparent; cursor: pointer; align-items: center; justify-content: center; min-height: 200px; opacity: 0.6; transition: var(--transition);">
+                    <div style="text-align: center;">
+                        <i class="ph ph-plus-circle" style="font-size: 2.5rem; margin-bottom: 12px; color: var(--text-muted);"></i>
+                        <div style="font-weight: 600; color: var(--text-muted);">Adicionar Prato</div>
                     </div>
-                `;
-    }).join('')}
-        </div>
+                </div>
+            </div>
+        `;
+        container.appendChild(section);
+    });
+
+    // Add Category Button at the bottom
+    const addCatBox = document.createElement('div');
+    addCatBox.className = 'add-category-inline';
+    addCatBox.innerHTML = `
+        <button class="btn btn-secondary" onclick="window.addNewCategoryOptimized()" style="width:100%; border: 2px dashed var(--border-color); background: transparent; padding: 24px;">
+            <i class="ph ph-plus-circle"></i> Adicionar Nova Categoria
+        </button>
+    `;
+    container.appendChild(addCatBox);
+
+    // Enable Vertical Drag for Categories
+    if (window.Sortable) {
+        new Sortable(container, {
+            animation: 150,
+            handle: '.category-title', // Drag by the title
+            draggable: '.menu-section',
+            onEnd: async () => {
+                const newOrder = Array.from(container.querySelectorAll('.menu-section')).map(s => {
+                    // Extract cat name from ID: cat-sec-Name -> Name
+                    return s.querySelector('.category-title').innerText.trim();
+                });
+                await saveCategoryOrder(newOrder);
+            }
+        });
+    }
+}
+
+export function createItemCard(item) {
+    const { id, name, description, price, available, image_url } = item;
+    return `
+        <article class="menu-item-card ${available ? '' : 'unavailable'}" id="item-${id}">
+            <div class="item-visual" onclick="openImageModal('${id}')">
+                ${image_url ? `<img src="${image_url}" loading="lazy" alt="${escapeHTML(name)}">` : `<div style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-muted); opacity:0.3;"><i class="ph ph-image-square" style="font-size:3rem;"></i></div>`}
+                <div class="cover-overlay"><i class="ph ph-camera"></i></div>
+            </div>
+            <div class="item-details">
+                <div class="item-top">
+                    <h3 class="item-name inline-edit" contenteditable="true" onblur="handleItemUpdate('${id}', 'name', this.innerText)">${escapeHTML(name)}</h3>
+                    <span class="item-price inline-edit" contenteditable="true" onblur="handleItemUpdate('${id}', 'price', this.innerText)">${Number(price).toFixed(2)}</span>
+                </div>
+                <p class="item-description inline-edit" contenteditable="true" onblur="handleItemUpdate('${id}', 'description', this.innerText)">${escapeHTML(description)}</p>
+                <div class="item-actions">
+                    <button class="btn btn-ghost" onclick="openEditItemModal('${id}')"><i class="ph ph-pencil"></i></button>
+                    <button class="btn btn-ghost" onclick="toggleAvailability('${id}', ${available}, this)" style="color:${available ? 'var(--success)' : 'var(--text-muted)'}"><i class="ph ph-${available ? 'eye' : 'eye-slash'}"></i></button>
+                    <button class="btn btn-ghost" onclick="deleteItem('${id}')" style="color:var(--danger)"><i class="ph ph-trash"></i></button>
+                </div>
+            </div>
+        </article>
     `;
 }
 
-export function renderPdfView(data) {
-    const container = document.getElementById('menuContainer');
-    if (!container) return;
-    container.innerHTML = `<div style="padding:100px;text-align:center;"><h2>MENU PDF EM USO</h2></div>`;
+// Backward compatibility for existing event handlers
+export function scrollToSlide(index) {
+    // In the new vertical layout, we scroll to the category section instead of a slide
+    const nav = document.getElementById('categoryNav');
+    if (!nav) return;
+    const tabs = nav.querySelectorAll('.draggable-tab');
+    if (tabs[index]) {
+        tabs[index].click();
+    }
 }
-
-export function updateLiveLink(slug) {
-    const btn = document.getElementById('liveLinkBtn');
-    if (btn) btn.onclick = () => window.open(`/${slug}`, '_blank');
-}
-
-function _getOrderedCategories(items) {
-    const catSet = new Set(state.currentData.category_order || []);
-    items.forEach(i => catSet.add(i.category));
-    return Array.from(catSet);
-}
+window.scrollToSlide = scrollToSlide;

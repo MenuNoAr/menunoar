@@ -1,53 +1,182 @@
 /**
- * api.js - Zen Edition
+ * api.js - Supabase & Server Interactions
+ * Optimizations: parallel fetch (sync + items via Promise.allSettled),
+ * single updateState call, removed redundant .limit(1).
  */
 import { state, updateState } from './state.js';
-import { renderAll, updateLiveLink } from './render.js';
+import { renderHeader, renderMenu, renderPdfViewer, updateLiveLink } from './render.js';
+import { initHeaderEditing } from './ui-handlers.js';
 
+// ─── Load All Dashboard Data ──────────────────────────────────────────────────
 export async function loadData() {
     const { supabase, currentUser } = state;
     if (!supabase || !currentUser) return;
 
-    const { data: rest, error } = await supabase
+    // Step 1: fetch restaurant (blocking – needed for everything else)
+    const { data: restRaw, error } = await supabase
         .from('restaurants')
         .select('*')
         .eq('owner_id', currentUser.id)
         .maybeSingle();
 
-    if (error) return console.error('Error:', error);
-
-    const setupEl = document.getElementById('setup-screen');
-    if (!rest) {
-        if (setupEl) setupEl.style.display = 'flex';
+    if (error) {
+        console.error('Erro ao carregar restaurante:', error.message);
         return;
     }
 
-    if (setupEl) setupEl.style.display = 'none';
+    // Step 2: show/hide UI
+    if (!restRaw) {
+        document.getElementById('setup-screen').style.display = 'flex';
+        document.getElementById('main-dashboard').style.display = 'none';
+        return;
+    }
 
-    const { data: items } = await supabase
-        .from('menu_items')
-        .select('*')
-        .eq('restaurant_id', rest.id)
-        .order('category')
-        .order('name');
+    // Step 3: sync status + fetch items in PARALLEL
+    // Optimization: Skip sync if already done this session
+    const syncCacheKey = `sync_done_${currentUser.id}`;
+    const shouldSync = !sessionStorage.getItem(syncCacheKey) && restRaw.subscription_status !== 'active';
 
-    updateState({
-        restaurantId: rest.id,
-        currentData: rest,
-        menuItems: items || []
-    });
+    const [syncResult, itemsResult] = await Promise.allSettled([
+        shouldSync ? fetch('/api/sync_status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentUser.email, userId: currentUser.id }),
+        }).then(r => (r.ok ? r.json() : null)).catch(() => null) : Promise.resolve(null),
 
-    // Topbar updates
-    const nameLabel = document.getElementById('sidebarUserName');
-    if (nameLabel) nameLabel.innerText = rest.name || 'Menu';
+        supabase
+            .from('menu_items')
+            .select('*')
+            .eq('restaurant_id', restRaw.id)
+            .order('category')
+            .order('name'),
+    ]);
 
-    const userLabel = document.getElementById('userDisplayName');
-    if (userLabel) userLabel.innerText = (rest.name || 'U').charAt(0).toUpperCase();
+    // Mark as synced if request was made
+    if (shouldSync && syncResult.status === 'fulfilled') {
+        sessionStorage.setItem(syncCacheKey, 'true');
+    }
 
-    renderAll();
+    // Re-fetch restaurant only if sync changed something
+    let rest = restRaw;
+    if (syncResult.status === 'fulfilled' && syncResult.value?.updated) {
+        const { data: refreshed } = await supabase
+            .from('restaurants')
+            .select('*')
+            .eq('id', rest.id)
+            .maybeSingle();
+        if (refreshed) rest = refreshed;
+    }
+
+    const items = itemsResult.status === 'fulfilled'
+        ? (itemsResult.value.data ?? [])
+        : [];
+
+    // Single state update
+    updateState({ restaurantId: rest.id, currentData: rest, menuItems: items });
+
+    // Render all UI
+    if (rest.menu_type === 'pdf') {
+        renderPdfViewer(rest);
+        document.querySelectorAll('button[onclick*="toggleDarkMode"]').forEach(btn => btn.style.display = 'none');
+    } else {
+        renderHeader(rest);
+        renderMenu(items);
+        initHeaderEditing();
+        document.querySelectorAll('button[onclick*="toggleDarkMode"]').forEach(btn => btn.style.display = '');
+    }
+
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('main-dashboard').style.display = 'grid';
+
     updateLiveLink(rest.slug);
+    _checkSubscription(rest);
+    _updateTrialBadge(rest);
 }
 
+// ─── Subscription Display ─────────────────────────────────────────────────────
+function _checkSubscription(rest) {
+    const isActive = rest.subscription_status === 'active';
+    const isPaidTrial = rest.subscription_status === 'trialing' && !!rest.stripe_customer_id;
+
+    const planText = document.getElementById('currentPlanText');
+    if (planText) {
+        if (isActive || isPaidTrial) {
+            planText.textContent = isActive
+                ? 'Profissional (Membro Premium)'
+                : 'Profissional (Teste Confirmado)';
+            planText.style.color = '#16a34a';
+        } else {
+            const daysLeft = _daysLeft(rest.trial_ends_at);
+            planText.textContent = daysLeft > 0
+                ? `Teste Grátis (${daysLeft} dias restantes)`
+                : 'Teste Expirado';
+            planText.style.color = daysLeft > 0 ? '#16a34a' : '#ef4444';
+        }
+    }
+
+    // Update upgrade button for paying users
+    const upgradeBtn = document.querySelector('.edit-modal-content a[href="subscription.html"]');
+    if (upgradeBtn) {
+        if (isActive || isPaidTrial) {
+            upgradeBtn.innerHTML = '<i class="fa-solid fa-gear"></i> Gerir';
+            upgradeBtn.style.display = 'inline-flex';
+        } else {
+            upgradeBtn.innerHTML = '<i class="fa-solid fa-crown"></i> Upgrade';
+            upgradeBtn.style.display = 'inline-flex';
+        }
+    }
+
+    // Show expired blocker
+    if (!isActive && !isPaidTrial && _daysLeft(rest.trial_ends_at) <= 0) {
+        const blocker = document.getElementById('expiredBlocker');
+        if (blocker) blocker.style.display = 'flex';
+    }
+}
+
+function _updateTrialBadge(rest) {
+    const badge = document.getElementById('trialTimer');
+    if (!badge) return;
+
+    badge.className = 'trial-timer-badge';
+
+    const isActive = rest.subscription_status === 'active' || !!rest.stripe_customer_id;
+    const isTrial = rest.subscription_status === 'trialing' && !rest.stripe_customer_id;
+
+    if (isActive) {
+        badge.innerHTML = '<i class="fa-solid fa-crown"></i> PRO';
+        badge.classList.add('state-pro');
+        badge.style.display = 'inline-flex';
+    } else if (isTrial) {
+        const days = _daysLeft(rest.trial_ends_at);
+        if (days > 0) {
+            badge.innerHTML = `<i class="fa-solid fa-clock"></i> ${days} dias`;
+            badge.classList.add('state-trial');
+        } else {
+            badge.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Expirado';
+            badge.classList.add('state-expired');
+        }
+        badge.style.display = 'inline-flex';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function _daysLeft(dateStr) {
+    return Math.ceil((new Date(dateStr) - Date.now()) / 86_400_000);
+}
+
+// ─── Category Order ───────────────────────────────────────────────────────────
 export async function saveCategoryOrder(order) {
-    await state.supabase.from('restaurants').update({ category_order: order }).eq('id', state.restaurantId);
+    const { error } = await state.supabase
+        .from('restaurants')
+        .update({ category_order: order })
+        .eq('id', state.restaurantId);
+
+    if (error) {
+        console.error('Erro ao guardar ordem:', error.message);
+        return;
+    }
+
+    state.currentData.category_order = order;
+    renderMenu(state.menuItems);
 }

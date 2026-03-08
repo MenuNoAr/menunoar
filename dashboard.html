@@ -3,178 +3,221 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor | Menu no Ar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Menu no Ar | Ementas Digitais Premium</title>
 
-    <!-- Base + Theme Integration -->
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/dashboard.css">
 
-    <!-- Simple & Functional Fonts -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/index.css">
 </head>
 
-<body class="zen-body">
+<body>
 
-    <!-- TOP HUD -->
-    <header class="zen-hud">
-        <div class="hud-left">
-            <img src="assets/images/logo.svg" alt="Menu no Ar" class="hud-logo-img">
-        </div>
-        <div class="hud-actions">
-            <button class="hud-btn" title="Dashboard"><i class="ph ph-squares-four"></i></button>
-            <button class="hud-btn" id="liveLinkBtn" title="Ver Menu"><i class="ph ph-arrow-square-out"></i></button>
-            <button class="hud-btn" onclick="openSettingsModal()" title="Definições"><i class="ph ph-gear"></i></button>
-            <button class="hud-btn" onclick="toggleDarkMode()" title="Tema"><i id="themeIcon"
-                    class="ph ph-moon"></i></button>
-            <button class="hud-btn premium" title="Premium"><i class="ph ph-crown"></i></button>
-            <div class="hud-btn-badge">
-                <button class="hud-btn" title="Tutorial"><i class="ph ph-graduation-cap"></i></button>
-                <span class="badge-tag">NOVO</span>
-            </div>
-            <button class="hud-btn exit" onclick="signOut()" title="Sair"><i class="ph ph-sign-out"></i></button>
+    <!-- NAVIGATION -->
+    <header class="nav-header">
+        <div class="container flex items-center justify-between" style="height: 100%;">
+            <a href="/" class="flex items-center" style="text-decoration: none;">
+                <img src="assets/images/Ilogo.svg" alt="Menu no Ar" style="height: 48px;">
+            </a>
+
+            <nav class="flex items-center gap-6">
+                <a href="login.html" class="btn btn-ghost"
+                    style="font-weight: 600; color: #fff; font-size: 0.9rem;">Entrar</a>
+                <a href="signup.html" class="btn btn-primary"
+                    style="padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9rem;">Criar Menu</a>
+            </nav>
         </div>
     </header>
 
-    <!-- THE STAGE -->
-    <main class="zen-stage">
-        <div id="editor-container" class="zen-canvas">
-            <!-- Master Cover Upload -->
-            <div class="cover-container" onclick="window.triggerCoverUpload()">
-                <img src="https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=2070" id="coverDisplay">
-                <div class="cover-fade"></div>
-            </div>
+    <main style="position: relative;">
+        <!-- CURVED SCROLL PROGRESS -->
+        <div class="curved-scroll-container">
+            <!-- 
+               ViewBox 0 0 100 400 maps directly to our 400vh space.
+               The path curves beautifully between left and right as it descends.
+               Points map to vertical percentage: 
+               - Y=0: Hero center
+               - Y=100: Mockup center
+               - Y=200: Features center
+               - Y=300: Pricing center
+               - Y=400: CTA center
+            -->
+            <svg id="scrollSvg" preserveAspectRatio="none" viewBox="0 0 100 400">
+                <path class="path-bg"
+                    d="M 50,0 C 90,40 90,60 90,100 C 90,140 10,160 10,200 C 10,240 90,260 90,300 C 90,340 50,360 50,380" />
+                <path id="pathLineFg" class="path-line"
+                    d="M 50,0 C 90,40 90,60 90,100 C 90,140 10,160 10,200 C 10,240 90,260 90,300 C 90,340 50,360 50,380" />
+            </svg>
+            <div id="scrollArrow" class="scroll-arrow"><i class="ph ph-arrow-down"></i></div>
+        </div>
 
-            <!-- Restaurant Identity -->
-            <div class="rest-identity">
-                <h1 id="restName" contenteditable="true">Taberna do Mercado</h1>
-                <p id="restDesc" contenteditable="true">Sabores autênticos da cozinha portuguesa...</p>
+        <!-- HERO -->
+        <section class="hero">
+            <div class="container">
+                <h1 class="reveal delay-1">Ementas digitais<br>feitas para design.</h1>
+                <p class="reveal delay-2">O sistema de gestão de menus ágil e limpo. Digitalize a
+                    operação do seu restaurante.</p>
 
-                <div class="rest-meta">
-                    <div class="meta-item"><i class="ph-fill ph-wifi-high"></i> <span contenteditable="true"
-                            id="metaWifi">taberna_gratis</span></div>
-                    <div class="meta-item"><i class="ph-fill ph-phone"></i> <span contenteditable="true"
-                            id="metaPhone">+351 210 999 888</span></div>
-                    <div class="meta-item"><i class="ph-fill ph-map-pin"></i> <span contenteditable="true"
-                            id="metaAddr">Rua Augusta, 150, Lisboa</span></div>
+                <div class="flex items-center justify-center gap-4 reveal delay-3">
+                    <a href="signup.html" class="btn btn-primary btn-hero">Começar Agora</a>
+                    <a href="#funciona" class="btn btn-hero-secondary">Ver Dashboard</a>
                 </div>
             </div>
+        </section>
 
-            <!-- Category Navigation -->
-            <nav id="categoryNav" class="category-grid-nav"></nav>
+        <!-- CREATION OPTIONS -->
+        <section class="creation-options" style="z-index: 10;">
+            <div class="container drop-shadow-lg">
+                <div class="options-grid">
+                    <div class="option-card">
+                        <div class="option-icon"><i class="ph ph-magic-wand"></i></div>
+                        <h3>Comece do Zero</h3>
+                        <p>Utilize os nossos modelos desenhados à medida e o editor Pure Canvas para construir um menu
+                            perfeito à sua imagem.</p>
+                        <a href="signup.html" class="btn option-btn">Criar Menu <i class="ph ph-arrow-right"></i></a>
+                    </div>
+                    <div class="option-card">
+                        <div class="option-icon" style="background: rgba(0,0,0,0.05); color: #000;"><i
+                                class="ph ph-file-pdf"></i></div>
+                        <h3>Importe o seu PDF</h3>
+                        <p>Já tem o design feito? Importe o ficheiro PDF de alta resolução da sua ementa atual em apenas
+                            2 cliques.</p>
+                        <a href="signup.html" class="btn option-btn option-btn-secondary">Importar <i
+                                class="ph ph-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-            <!-- Sliding Menu Content -->
-            <div id="menuContainer" class="menu-slider-viewport"></div>
-        </div>
+        <!-- BENTO FEATURES -->
+        <section id="funciona">
+            <div class="container">
+                <div style="text-align: center; margin-bottom: 64px;" class="reveal">
+                    <h2 style="font-size: 3rem; margin-bottom: 16px; letter-spacing: -0.03em;">Engenharia visual
+                        aplicada.</h2>
+                    <p style="font-size: 1.15rem; color: var(--text-muted); max-width: 600px; margin: 0 auto;">Tudo o
+                        que precisa para gerir o seu menu digital com máxima performance.</p>
+                </div>
+
+                <div class="bento-grid">
+                    <div class="bento-card reveal delay-1">
+                        <i class="ph ph-qr-code"></i>
+                        <h3>QR Code Dinâmico</h3>
+                        <p>Altere o seu menu em tempo real sem nunca trocar o código impresso. Atualizações
+                            instantâneas.</p>
+                    </div>
+                    <div class="bento-card reveal delay-2">
+                        <i class="ph ph-layout"></i>
+                        <h3>Editor Pure Canvas</h3>
+                        <p>Interface direta. Sem abas escondidas. O que vê no editor é exatamente o que o cliente
+                            recebe.</p>
+                    </div>
+                    <div class="bento-card reveal delay-3">
+                        <i class="ph ph-sparkle"></i>
+                        <h3>Design Minimal</h3>
+                        <p>Focado na leitura e conversão. Menus que não apenas informam, mas elevam a marca.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRICING SECTION -->
+        <section class="pricing-minimal">
+            <div class="container reveal">
+                <div class="pricing-card-refined">
+                    <div class="pricing-info">
+                        <div class="plan-label">PLANO PRO</div>
+                        <div class="price-value">15€<span>/mês</span></div>
+                        <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem;">Acesso total a
+                            todas as ferramentas de gestão e personalização.</p>
+                        <a href="signup.html" class="btn btn-primary"
+                            style="padding: 14px 32px; font-weight: 700;">Subscrever Agora</a>
+                    </div>
+                    <div class="pricing-features">
+                        <ul class="feature-list">
+                            <li><i class="ph ph-check-circle"></i> Categorias e itens ilimitados</li>
+                            <li><i class="ph ph-check-circle"></i> QR Code dinâmico personalizável</li>
+                            <li><i class="ph ph-check-circle"></i> Editor 'Pure Canvas' em tempo real</li>
+                            <li><i class="ph ph-check-circle"></i> Modo 'Smart PDF' incluído</li>
+                            <li><i class="ph ph-check-circle"></i> Suporte prioritário 24/7</li>
+                            <li><i class="ph ph-check-circle"></i> Sem fidelização, cancele quando quiser</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FINAL CTA SECTION -->
+        <section style="position: relative; justify-content: flex-start; padding-top: 35vh;">
+            <div class="container reveal" style="text-align: center; position: relative; z-index: 20;">
+                <h2 style="font-size: 3.5rem; margin-bottom: 24px; letter-spacing: -0.03em;">Pronto para elevar o seu
+                    restaurante?</h2>
+                <a href="signup.html" class="btn btn-primary"
+                    style="padding: 18px 48px; border-radius: 6px; font-size: 1.1rem; font-weight: 700;">Criar Conta
+                    Gratuita</a>
+            </div>
+
+            <!-- FOOTER INTEGRATED IN LAST SECTION -->
+            <footer class="footer" style="position: absolute; bottom: 0; left: 0; width: 100%; height: auto;">
+                <div class="container">
+                    <div class="footer-grid">
+                        <div class="footer-col" style="grid-column: span 1;">
+                            <div
+                                style="font-weight: 800; font-size: 1.25rem; margin-bottom: 20px; letter-spacing: -0.04em;">
+                                MENU NO AR</div>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">Design em
+                                Portugal.<br>Performance Global.</p>
+                        </div>
+                        <div class="footer-col">
+                            <h4
+                                style="font-size: 0.8rem; font-weight: 700; color: #000; margin-bottom: 20px; text-transform: uppercase;">
+                                Recursos</h4>
+                            <a href="#"
+                                style="font-size: 0.9rem; color: var(--text-muted); text-decoration: none; display: block; margin-bottom: 12px;">Preços</a>
+                            <a href="#"
+                                style="font-size: 0.9rem; color: var(--text-muted); text-decoration: none; display: block; margin-bottom: 12px;">Blog</a>
+                        </div>
+                        <div class="footer-col">
+                            <h4
+                                style="font-size: 0.8rem; font-weight: 700; color: #000; margin-bottom: 20px; text-transform: uppercase;">
+                                Legal</h4>
+                            <a href="#"
+                                style="font-size: 0.9rem; color: var(--text-muted); text-decoration: none; display: block; margin-bottom: 12px;">Privacidade</a>
+                            <a href="#"
+                                style="font-size: 0.9rem; color: var(--text-muted); text-decoration: none; display: block; margin-bottom: 12px;">Termos</a>
+                        </div>
+                        <div class="footer-col">
+                            <h4
+                                style="font-size: 0.8rem; font-weight: 700; color: #000; margin-bottom: 20px; text-transform: uppercase;">
+                                Social</h4>
+                            <a href="#"
+                                style="font-size: 0.9rem; color: var(--text-muted); text-decoration: none; display: block; margin-bottom: 12px;">Instagram</a>
+                            <a href="#"
+                                style="font-size: 0.9rem; color: var(--text-muted); text-decoration: none; display: block; margin-bottom: 12px;">LinkedIn</a>
+                        </div>
+                    </div>
+                    <div
+                        style="margin-top: 60px; border-top: 1px solid var(--border-color); padding-top: 32px; font-size: 0.85rem; color: var(--text-muted);">
+                        &copy; 2026 Menu no Ar. Todos os direitos reservados.
+                    </div>
+                </div>
+            </footer>
     </main>
 
-    <!-- Minimal Floating Action (Add Category) -->
-    <button class="zen-fab" onclick="addNewCategoryOptimized()" title="Nova Categoria">
-        <i class="ph ph-plus"></i>
-    </button>
-
-    <!-- MODALS (Ultra-Minimalist) -->
-
-    <!-- Settings Modal (Advanced) -->
-    <div id="settingsModal" class="zen-modal" style="display:none;"
-        onclick="if(event.target===this) closeModal('settingsModal')">
-        <div class="zen-modal-content">
-            <header>
-                <h3>Configurações</h3>
-            </header>
-            <form id="settingsForm" class="zen-form">
-                <div class="f-group">
-                    <label>Tipo de Letra</label>
-                    <select id="modalFont" class="z-input">
-                        <option value="Inter">Inter (Clean)</option>
-                        <option value="Outfit">Outfit (Bold)</option>
-                        <option value="Playfair Display">Elegante</option>
-                    </select>
-                </div>
-                <div class="f-group">
-                    <label>Cor de Acento</label>
-                    <div class="color-presets">
-                        <button type="button" class="color-pip" data-color="#1fa8ff"
-                            style="background:#1fa8ff"></button>
-                        <button type="button" class="color-pip" data-color="#10b981"
-                            style="background:#10b981"></button>
-                        <button type="button" class="color-pip" data-color="#f59e0b"
-                            style="background:#f59e0b"></button>
-                        <button type="button" class="color-pip" data-color="#ef4444"
-                            style="background:#ef4444"></button>
-                        <button type="button" class="color-pip" data-color="#000000"
-                            style="background:#000000"></button>
-                    </div>
-                    <input type="hidden" id="modalAccent" value="#1fa8ff">
-                </div>
-                <div class="f-group">
-                    <label>Estilo de Menu</label>
-                    <div class="menu-type-toggle">
-                        <label><input type="radio" name="mtype" value="digital" checked> Digital</label>
-                        <label><input type="radio" name="mtype" value="pdf"> PDF</label>
-                    </div>
-                </div>
-                <div class="modal-btns">
-                    <button type="submit" class="z-btn primary block">Guardar</button>
-                    <button type="button" class="z-btn block" onclick="closeModal('settingsModal')">Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Profile/Auth Modal -->
-    <div id="profileModal" class="zen-modal" style="display:none;"
-        onclick="if(event.target===this) closeModal('profileModal')">
-        <div class="zen-modal-content">
-            <header>
-                <h3>Definições</h3>
-            </header>
-            <div class="modal-body">
-                <p class="muted" id="profileEmail">...</p>
-                <div class="modal-btns">
-                    <button class="z-btn danger" onclick="signOut()">Sair da Conta</button>
-                    <button class="z-btn" onclick="closeModal('profileModal')">Fechar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- QR Modal -->
-    <div id="qrModal" class="zen-modal" style="display:none;" onclick="if(event.target===this) closeModal('qrModal')">
-        <div class="zen-modal-content small">
-            <div id="qr-code-container" class="zen-qr-box"></div>
-            <div class="modal-btns">
-                <button class="z-btn primary block" onclick="downloadQr()">Baixar QR Code</button>
-                <button class="z-btn block" onclick="closeModal('qrModal')">Fechar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Background Setup Overlay -->
-    <div id="setup-screen" class="zen-overlay" style="display:none;">
-        <div class="zen-setup-card">
-            <h2>Bem-vindo</h2>
-            <p>Dê um nome ao seu novo menu digital.</p>
-            <form id="setupForm" class="zen-setup-form">
-                <input type="text" id="setupName" placeholder="Nome do Restaurante" required
-                    oninput="generateSlug(this.value)">
-                <div class="slug-hint">menunoar.pt/<span id="slug-view">...</span></div>
-                <input type="hidden" id="setupSlug">
-                <button type="submit" class="z-btn primary">Criar e Editar <i class="ph ph-pencil-simple"></i></button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Logic -->
-    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
-    <script type="module" src="js/dashboard.js"></script>
+    <!-- Scripts -->
+    <script type="module" src="js/script.js"></script>
 </body>
 
 </html>

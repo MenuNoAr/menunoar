@@ -1,66 +1,405 @@
 /**
- * dashboard.js - Zen Editor Entry
+ * dashboard.js - Entry Point
+ * Optimizations: early return guards, cleaner initials logic, no duplicate
+ * loadData calls on auth re-fires for same user.
  */
 import { state, updateState } from './modules/state.js';
 import { loadData } from './modules/api.js';
-import './modules/ui-handlers.js'; // Register global handlers
-import { initAuthListener, getSupabase } from './auth-service.js';
-import { initUploadService } from './upload-service.js';
+import { openTutorial } from './modules/tutorial.js';
+import { initAuthListener, signOut, getSupabase } from './auth-service.js';
+import { initUploadService, uploadFile } from './upload-service.js';
 
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
 async function init() {
-    const supabase = await getSupabase();
-    if (!supabase) return;
+    try {
+        const supabase = await getSupabase();
+        if (!supabase) return;
 
-    initUploadService(supabase);
-    updateState({ supabase });
+        initUploadService(supabase);
+        updateState({ supabase });
 
-    // Enforce theme
-    if (localStorage.getItem('theme') === 'dark') {
-        document.body.classList.add('dark-mode');
-        const icon = document.getElementById('themeIcon');
-        if (icon) icon.className = 'ph ph-sun';
-    }
+        initAuthListener(async (user) => {
+            // Skip re-init if same user is already loaded
+            if (state.currentUser?.id === user.id) return;
+            updateState({ currentUser: user });
 
-    initAuthListener(async (user) => {
-        if (!user) {
+            // Display first name in the navbar
+            const rawName = user.user_metadata?.full_name
+                ?? user.user_metadata?.name
+                ?? user.email.split('@')[0];
+            const cleanName = rawName.replace(/[._]/g, ' ').trim();
+
+            // Use saved custom name if available, otherwise derive first name
+            const savedName = localStorage.getItem('user_display_name');
+            const firstName = savedName || cleanName.split(' ')[0];
+
+            const el = document.getElementById('userDisplayName');
+            if (el) el.textContent = firstName;
+
+            const greetEl = document.getElementById('setupGreetingName');
+            if (greetEl) greetEl.textContent = firstName + '!';
+
+            const sidebarNameEl = document.getElementById('sidebarUserName');
+            if (sidebarNameEl) sidebarNameEl.textContent = firstName;
+
+            await loadData();
+
+            // Fire tutorial + confetti after first restaurant creation
+            if (localStorage.getItem('just_created_rest') === 'true') {
+                localStorage.removeItem('just_created_rest');
+                setTimeout(() => {
+                    if (window.confetti) {
+                        confetti({
+                            particleCount: 150,
+                            spread: 70,
+                            origin: { y: 0.6 },
+                            colors: ['#1fa8ff', '#16a34a', '#ffffff'],
+                        });
+                    }
+                    if (state.currentData?.menu_type !== 'pdf') {
+                        openTutorial();
+                    }
+                }, 1000);
+            } else if (localStorage.getItem('tutorial_running') === 'true') {
+                // Resume tutorial if it was running before a reload
+                setTimeout(() => {
+                    window.openTutorial(true);
+                }, 1000);
+            }
+        }, () => {
             window.location.href = 'login.html';
-            return;
+        });
+
+    } catch (err) {
+        console.error('Init Error:', err);
+        const setupScreen = document.getElementById('setup-screen');
+        if (setupScreen) {
+            setupScreen.style.display = 'flex';
+            setupScreen.innerHTML = `
+                <div class="setup-card">
+                    <h2 style="color:#ef4444">Erro de Configuração</h2>
+                    <p>Não foi possível ligar ao Supabase. Verifique se as variáveis de ambiente (SUPABASE_URL e ANON_KEY) estão configuradas no Vercel.</p>
+                    <button onclick="window.location.reload()" class="btn-confirm" style="margin-top:20px">Tentar Novamente</button>
+                </div>
+            `;
         }
-        updateState({ currentUser: user });
-        await loadData();
-    }, () => {
-        window.location.href = 'login.html';
-    });
+    }
 }
 
-// SETUP FLOW
+// ─── Global Helpers ───────────────────────────────────────────────────────────
+window.signOut = () => signOut();
+window.openTutorial = openTutorial;
+
+window.openProfileModal = () => {
+    // Current display name
+    const currentName = document.getElementById('userDisplayName')?.textContent || '';
+    const nameInput = document.getElementById('profileName');
+    if (nameInput) nameInput.value = currentName;
+
+    // Load extra fields from local storage or from auth state
+    const profileEstablishment = document.getElementById('profileEstablishment');
+    if (profileEstablishment) profileEstablishment.value = localStorage.getItem('profile_establishment') || '';
+
+    const profileEmail = document.getElementById('profileEmail');
+    if (profileEmail) profileEmail.value = localStorage.getItem('profile_email') || state.currentUser?.email || '';
+
+    const profilePhone = document.getElementById('profilePhone');
+    if (profilePhone) profilePhone.value = localStorage.getItem('profile_phone') || '';
+
+    document.getElementById('profileModal')?.classList.add('open');
+    setTimeout(() => nameInput?.focus(), 100);
+};
+
+document.getElementById('profileForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const origText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    btn.disabled = true;
+
+    try {
+        const newName = document.getElementById('profileName').value.trim();
+        const est = document.getElementById('profileEstablishment').value.trim();
+        const email = document.getElementById('profileEmail').value.trim();
+        const phone = document.getElementById('profilePhone').value.trim();
+
+        if (!newName) return;
+
+        // Save to LocalStorage
+        localStorage.setItem('user_display_name', newName);
+        localStorage.setItem('profile_establishment', est);
+        localStorage.setItem('profile_email', email);
+        localStorage.setItem('profile_phone', phone);
+
+        // Save to central metadata on Supabase if possible
+        if (state.supabase && state.currentUser) {
+            await state.supabase.auth.updateUser({
+                data: {
+                    full_name: newName,
+                    establishment: est,
+                    contact_email: email,
+                    contact_phone: phone
+                }
+            });
+        }
+
+        // Update UI
+        const el = document.getElementById('userDisplayName');
+        if (el) el.textContent = newName;
+        const greetEl = document.getElementById('setupGreetingName');
+        if (greetEl) greetEl.textContent = newName + '!';
+
+        const sidebarNameEl = document.getElementById('sidebarUserName');
+        if (sidebarNameEl) sidebarNameEl.textContent = newName;
+
+        window.closeModal('profileModal');
+        window.showToast("Perfil atualizado com sucesso!", "success");
+    } catch (err) {
+        console.error(err);
+        window.showToast("Erro ao guardar perfil.", "error");
+    } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+    }
+});
+
+window.toggleDarkMode = () => {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('menu_theme', isDark ? 'dark' : 'light');
+
+    // Use requestAnimationFrame to sync JS changes with the style/paint cycle
+    requestAnimationFrame(() => {
+        // Update Logos as fast as possible
+        const logoPath = isDark ? 'assets/images/Ilogo.svg' : 'assets/images/logo.svg';
+        ['dashboardLogo', 'sidebarLogo', 'setupLogo', 'qrLogoImg'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            // Only update QR logo if it's the default one
+            if (id === 'qrLogoImg' && !el.src.includes('assets/images/logo.svg') && !el.src.includes('assets/images/Ilogo.svg')) return;
+            el.src = logoPath;
+        });
+
+        // Update Icons
+        const iconClass = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        const desktopIcon = document.getElementById('themeIcon');
+        if (desktopIcon) desktopIcon.className = iconClass;
+
+        const mobileIcon = document.getElementById('themeIconMobile');
+        if (mobileIcon) mobileIcon.className = iconClass;
+    });
+};
+
+window.toggleNavDropdown = (forceClose = false) => {
+    const dropbar = document.getElementById('mobileDropbar');
+    const overlay = document.getElementById('mobileSidebarOverlay');
+    const icon = document.getElementById('navMobileIcon');
+    if (!dropbar) return;
+
+    if (forceClose) {
+        dropbar.classList.remove('open');
+        if (overlay) overlay.classList.remove('open');
+        if (icon) icon.className = 'fa-solid fa-bars-staggered';
+        return;
+    }
+
+    const isOpen = dropbar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('open');
+    if (icon) {
+        icon.className = isOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars-staggered';
+    }
+};
+
+// ─── Toast Notification System ────────────────────────────────────────────────
+window.showToast = (msg, type = 'success') => {
+    let container = document.getElementById('toast-container');
+    const isMobile = window.innerWidth <= 850;
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        Object.assign(container.style, {
+            position: 'fixed',
+            top: isMobile ? 'auto' : '20px',
+            bottom: isMobile ? '20px' : 'auto',
+            right: isMobile ? '0' : '20px',
+            left: isMobile ? '0' : 'auto',
+            zIndex: '200000',
+            display: 'flex', flexDirection: 'column', gap: '10px',
+            alignItems: 'center', width: isMobile ? '100%' : 'auto'
+        });
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    Object.assign(toast.style, {
+        background: type === 'success' ? '#10b981' : (type === 'error' ? '#ef4444' : '#3b82f6'),
+        color: '#fff', padding: '12px 20px', borderRadius: '12px',
+        boxShadow: '0 8px 20px rgba(0,0,0,0.2)', display: 'flex',
+        alignItems: 'center', gap: '10px', fontWeight: '600', fontSize: '0.9rem',
+        opacity: '0', transform: isMobile ? 'translateY(20px)' : 'translateX(100%)',
+        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)', pointerEvents: 'none'
+    });
+
+    toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-circle-exclamation'}"></i> <span>${msg}</span>`;
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = isMobile ? 'translateY(0)' : 'translateX(0)';
+    });
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = isMobile ? 'translateY(20px)' : 'translateX(100%)';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+};
+
+// ─── Setup Wizard ─────────────────────────────────────────────────────────────
+window.showSetupForm = (type) => {
+    document.getElementById('setup-choice-card').style.display = 'none';
+    if (type === 'scratch') {
+        document.getElementById('setup-form-card').style.display = 'block';
+    } else {
+        document.getElementById('setup-import-card').style.display = 'block';
+    }
+};
+
+window.goBackToSetupChoice = () => {
+    document.getElementById('setup-form-card').style.display = 'none';
+    document.getElementById('setup-import-card').style.display = 'none';
+    document.getElementById('setup-choice-card').style.display = 'block';
+};
+
 window.generateSlugString = (name) => {
-    return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+    return name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\w\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
 };
 
 window.generateSlug = (name) => {
     const slug = window.generateSlugString(name);
-    const view = document.getElementById('slug-view');
-    const input = document.getElementById('setupSlug');
-    if (view) view.innerText = slug || '...';
-    if (input) input.value = slug;
+    const el = document.getElementById('setupSlug');
+    if (el) el.value = slug;
 };
 
-document.getElementById('setupForm')?.addEventListener('submit', async (e) => {
+document.getElementById('importForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('setupName').value;
-    const slug = document.getElementById('setupSlug').value;
+    const btn = e.target.querySelector('button[type="submit"]');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A criar e carregar...';
+    btn.disabled = true;
 
-    const { error } = await state.supabase.from('restaurants').insert([{
-        owner_id: state.currentUser.id,
-        name, slug,
-        menu_type: 'digital',
-        subscription_status: 'trialing',
-        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-    }]);
+    const name = document.getElementById('importRestName').value.trim();
+    let slug = window.generateSlugString(name);
+    if (!slug) slug = 'menu-' + Math.floor(Math.random() * 10000);
 
-    if (error) alert("Este link já existe ou houve um erro.");
-    else window.location.reload();
+    // Get the file
+    const fileInput = document.getElementById('importFile');
+    if (!fileInput.files.length) {
+        window.showToast("Por favor, selecione um ficheiro PDF.", "error");
+        btn.innerHTML = orig;
+        btn.disabled = false;
+        return;
+    }
+    const file = fileInput.files[0];
+
+    // Upload the file
+    const { data: uploadData, error: uploadError } = await uploadFile(file, 'menu-pdf', 'menu-pdfs');
+
+    if (uploadError) {
+        window.showToast('Erro ao carregar o PDF: ' + uploadError.message, 'error');
+        btn.innerHTML = orig;
+        btn.disabled = false;
+        return;
+    }
+
+    const publicUrl = uploadData.publicUrl;
+
+    const { data: created, error } = await state.supabase
+        .from('restaurants')
+        .insert([{
+            owner_id: state.currentUser.id,
+            name, slug,
+            description: "O meu menu em PDF.",
+            menu_type: 'pdf',
+            pdf_url: publicUrl,
+            subscription_plan: 'pro',
+            subscription_status: 'trialing',
+            trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        }])
+        .select()
+        .single();
+
+    if (error) {
+        window.showToast('Erro ao criar restaurante. O link talvez já esteja em uso, tente outro nome.', 'error');
+        btn.innerHTML = orig;
+        btn.disabled = false;
+        return;
+    }
+
+    window.showToast('Menu PDF criado com sucesso!', 'success');
+    localStorage.setItem('just_created_rest', 'true');
+    setTimeout(() => window.location.reload(), 2000);
 });
 
+document.getElementById('setupForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A Criar...';
+    btn.disabled = true;
+
+    const name = document.getElementById('setupName').value.trim();
+    let slug = window.generateSlugString(name);
+    if (!slug) slug = 'menu-' + Math.floor(Math.random() * 10000);
+    const desc = document.getElementById('setupDesc').value.trim();
+
+    const { data: created, error } = await state.supabase
+        .from('restaurants')
+        .insert([{
+            owner_id: state.currentUser.id,
+            name, slug,
+            description: desc,
+            menu_type: 'digital',
+            subscription_plan: 'pro',
+            subscription_status: 'trialing',
+            trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        }])
+        .select()
+        .single();
+
+    if (error) {
+        window.showToast(error.code === '23505' ? 'Este link já existe. Escolha outro.' : error.message, 'error');
+        btn.innerHTML = orig;
+        btn.disabled = false;
+        return;
+    }
+
+    localStorage.setItem('just_created_rest', 'true');
+    window.location.reload();
+};
+
+// ─── Modal Utilities ──────────────────────────────────────────────────────────
+window.closeModal = (id) => document.getElementById(id)?.classList.remove('open');
+
+window.closeAllModals = () =>
+    document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('open'));
+
+// Close modals or dropbar on backdrop click
+document.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('modal-backdrop')) window.closeAllModals();
+
+    // Close mobile dropbar if clicking outside
+    const dropbar = document.getElementById('mobileDropbar');
+    const trigger = document.querySelector('.mobile-nav-trigger');
+    if (dropbar && dropbar.classList.contains('open') && !dropbar.contains(e.target) && !trigger.contains(e.target)) {
+        window.toggleNavDropdown();
+    }
+});
+
+// ─── Start ────────────────────────────────────────────────────────────────────
 init();
