@@ -1,6 +1,5 @@
 /**
- * render.js - Direct Edition
- * The Menu is the Editor. No-UI focus.
+ * render.js - Direct Slider Edition
  */
 import { state } from './state.js';
 
@@ -12,15 +11,15 @@ export function renderAll() {
     const items = state.menuItems;
 
     if (data.menu_type === 'pdf') {
-        renderPdfDirect(data);
+        renderPdfView(data);
     } else {
-        renderDirectEditor(data, items);
+        renderSliderEditor(data, items);
     }
 }
 
-export function renderDirectEditor(data, items) {
-    const canvas = document.getElementById('menuContainer');
-    if (!canvas) return;
+export function renderSliderEditor(data, items) {
+    const container = document.getElementById('menuContainer');
+    if (!container) return;
 
     const cats = _getOrderedCategories(items);
     const groups = cats.reduce((acc, cat) => {
@@ -28,88 +27,98 @@ export function renderDirectEditor(data, items) {
         return acc;
     }, {});
 
-    // Update the category navigation bar
-    const categoryNav = document.getElementById('categoryNav');
-    if (categoryNav) {
-        categoryNav.innerHTML = cats.map((cat, idx) => `
-            <button class="nav-chip ${idx === 0 ? 'active' : ''}" onclick="document.getElementById('cat-${cat.replace(/\s+/g, '-')}').scrollIntoView({behavior:'smooth', block: 'center'})">${escapeHTML(cat)}</button>
+    // 0. Update Top Info (Outside Slider)
+    const nameEl = document.getElementById('restName');
+    const descEl = document.getElementById('restDesc');
+    if (nameEl) {
+        nameEl.innerText = data.name || 'Nome do Restaurante';
+        nameEl.onblur = (e) => window.handleRestUpdate('name', e.target.innerText);
+    }
+    if (descEl) {
+        descEl.innerText = data.description || 'Slogan ou descrição curta...';
+        descEl.onblur = (e) => window.handleRestUpdate('description', e.target.innerText);
+    }
+
+    // 1. Render Navigation Bar
+    const navBar = document.getElementById('categoryNav');
+    if (navBar) {
+        navBar.className = "category-nav-bar";
+        navBar.innerHTML = cats.map((cat, idx) => `
+            <button class="cat-chip ${idx === state.activeCategoryIdx ? 'active' : ''}" 
+                    onclick="window.switchCategory(${idx})">${escapeHTML(cat)}</button>
         `).join('') + `
-            <button class="nav-chip add-cat-btn" onclick="window.addNewCategoryOptimized()" title="Adicionar Categoria"><i class="ph ph-plus"></i></button>
+            <button class="cat-chip add-btn" onclick="window.addNewCategoryOptimized()"><i class="ph ph-plus"></i></button>
         `;
     }
 
-    canvas.innerHTML = `
-        <!-- Main Image -->
-        <div class="zen-cover-zone" onclick="window.triggerCoverUpload()">
-            <img src="${data.cover_url || 'https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=2070'}" id="coverDisplay">
-            <div class="zen-img-overlay"><i class="ph ph-camera"></i></div>
-        </div>
-
-        <div class="rest-info">
-            <h1 contenteditable="true" onblur="window.handleRestUpdate('name', this.innerText)">${escapeHTML(data.name)}</h1>
-            <p contenteditable="true" onblur="window.handleRestUpdate('description', this.innerText)">${escapeHTML(data.description)}</p>
-        </div>
-
-        <div class="menu-sections">
-            ${cats.map(cat => {
+    // 2. Render Main Viewport & Slider
+    container.innerHTML = `
+        <div class="menu-viewport">
+            <div class="category-slider" id="categorySlider" style="transform: translateX(-${(state.activeCategoryIdx || 0) * 100}%)">
+                ${cats.map(cat => {
         const catItems = groups[cat] || [];
         return `
-                    <div class="cat-section" id="cat-${cat.replace(/\s+/g, '-')}">
-                        <div class="cat-title">
-                            <span contenteditable="true" onblur="window.handleCategoryRename('${cat}', this.innerText)">${escapeHTML(cat)}</span>
-                            <div class="cat-ghost">
-                                <button class="mini-ico red" onclick="window.deleteCategory('${cat}')"><i class="ph ph-trash"></i></button>
-                            </div>
-                        </div>
+                        <div class="category-slide">
+                            <h2 class="cat-title" contenteditable="true" 
+                                onblur="window.handleCategoryRename('${cat}', this.innerText)"
+                                style="font-size: 1.4rem; font-weight: 800; margin-bottom: 24px; border-bottom: 2px solid var(--menu-text); padding-bottom: 8px;">
+                                ${escapeHTML(cat)}
+                            </h2>
+                            
+                            <div class="items-list">
+                                ${catItems.map(i => `
+                                    <div class="item-card ${!i.available ? 'muted' : ''}">
+                                        <div class="item-info">
+                                            <div class="item-title-row">
+                                                <span class="item-name" contenteditable="true" 
+                                                    onblur="window.handleItemUpdate('${i.id}', 'name', this.innerText)">${escapeHTML(i.name)}</span>
+                                                <span class="item-price" contenteditable="true" 
+                                                    onblur="window.handleItemPriceUpdate('${i.id}', this.innerText)">${Number(i.price).toFixed(2)}€</span>
+                                            </div>
+                                            <span class="item-desc" contenteditable="true" 
+                                                onblur="window.handleItemUpdate('${i.id}', 'description', this.innerText)">${escapeHTML(i.description)}</span>
+                                        </div>
+                                        
+                                        <div class="item-thumb" onclick="window.triggerItemImageUpload('${i.id}')">
+                                            <img src="${i.image_url || 'https://images.unsplash.com/photo-1546241072-48010ad28c2c?q=80&w=1974'}" id="item-img-${i.id}">
+                                        </div>
 
-                        ${catItems.map(i => `
-                            <div class="item-row ${!i.available ? 'muted' : ''}">
-                                <div class="item-left">
-                                    <div style="display:flex; justify-content:space-between; align-items:baseline;">
-                                        <span class="item-name" contenteditable="true" 
-                                            onblur="window.handleItemUpdate('${i.id}', 'name', this.innerText)">${escapeHTML(i.name)}</span>
-                                        <span class="item-price" contenteditable="true" 
-                                            onblur="window.handleItemPriceUpdate('${i.id}', this.innerText)">${Number(i.price).toFixed(2)}€</span>
+                                        <div class="card-tools">
+                                            <button class="tool-btn" onclick="window.toggleAvailability('${i.id}', ${i.available})">
+                                                <i class="ph ph-${i.available ? 'eye' : 'eye-slash'}"></i>
+                                            </button>
+                                            <button class="tool-btn red" onclick="window.deleteItem('${i.id}')">
+                                                <i class="ph ph-x"></i>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <span class="item-desc" contenteditable="true" 
-                                        onblur="window.handleItemUpdate('${i.id}', 'description', this.innerText)">${escapeHTML(i.description)}</span>
-                                </div>
+                                `).join('')}
                                 
-                                <div class="item-img-mini" onclick="window.triggerItemImageUpload('${i.id}')">
-                                    <img src="${i.image_url || 'https://images.unsplash.com/photo-1546241072-48010ad28c2c?q=80&w=1974'}" id="item-img-${i.id}">
-                                </div>
-
-                                <div class="ghost-actions">
-                                    <button class="mini-ico" onclick="window.toggleAvailability('${i.id}', ${i.available})" title="Disponível">
-                                        <i class="ph ph-${i.available ? 'eye' : 'eye-slash'}"></i>
-                                    </button>
-                                    <button class="mini-ico red" onclick="window.deleteItem('${i.id}')" title="Apagar">
-                                        <i class="ph ph-x"></i>
-                                    </button>
+                                <div class="add-slot" onclick="window.addNewItem('${cat}')">
+                                    <i class="ph ph-plus"></i> Novo Prato em ${escapeHTML(cat)}
                                 </div>
                             </div>
-                        `).join('')}
-                        
-                        <!-- Item Slot Placeholder -->
-                        <div class="placeholder-slot" onclick="window.addNewItem('${cat}')">
-                            <i class="ph ph-plus"></i> Novo Prato
+                            
+                            <div style="margin-top: 40px; text-align: right;">
+                                <button class="tool-btn red" onclick="window.deleteCategory('${cat}')" style="width: auto; padding: 0 12px; font-size: 0.7rem;">APAGAR CATEGORIA</button>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
     }).join('')}
+            </div>
         </div>
     `;
 }
 
-export function renderPdfDirect(data) {
-    const canvas = document.getElementById('menuContainer');
-    if (!canvas) return;
-    canvas.innerHTML = `
+export function renderPdfView(data) {
+    const container = document.getElementById('menuContainer');
+    if (!container) return;
+    container.innerHTML = `
         <div style="padding: 100px 0; text-align: center;">
-            <i class="ph ph-file-pdf" style="font-size: 3rem; color: #ff4d4d; margin-bottom: 20px;"></i>
+            <i class="ph ph-file-pdf" style="font-size: 3rem; color: #EF4444; margin-bottom: 20px;"></i>
             <h2 style="font-weight: 800;">MENU PDF ATIVO</h2>
-            <p style="color: #666; margin-top: 10px;">A sua ementa está a ser servida digitalmente.</p>
-            <button class="z-btn block" style="margin-top:40px; border:1px solid #ddd;" onclick="window.openSettingsModal()">Configurar Menu Digital</button>
+            <p style="color: var(--menu-muted); margin-top: 10px;">A ementa está a ser servida digitalmente.</p>
+            <button class="cat-chip active" style="margin-top:40px;" onclick="window.openSettingsModal()">Configurações</button>
         </div>
     `;
 }
@@ -126,9 +135,4 @@ function _getOrderedCategories(items) {
         });
     }
     return cats;
-}
-
-export function updateLiveLink(slug) {
-    const btn = document.getElementById('liveLinkBtn');
-    if (btn) btn.onclick = () => window.open(`https://menunoar.pt/menu.html?id=${slug}`, '_blank');
 }

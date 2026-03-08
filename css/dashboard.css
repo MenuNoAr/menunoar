@@ -1,28 +1,31 @@
+/* 
+  Menu no Ar - Clean Direct Editor 
+  Neutral, Functional, Sans-Serif.
+*/
+
 :root {
-    --menu-bg: #ffffff;
-    --menu-text: #1a1a1a;
-    --menu-muted: #666666;
-    --menu-border: #eeeeee;
-    --menu-accent: #1fa8ff;
-    --menu-width: 500px;
-    --hud-h: 56px;
-    --font-normal: 'Inter', Arial, sans-serif;
+    --menu-bg: #FFFFFF;
+    --menu-text: #111827;
+    --menu-muted: #6B7280;
+    --menu-border: #E5E7EB;
+    --menu-accent: #1FA8FF;
+    --hud-h: 60px;
+    --canvas-w: 480px;
 }
 
 .dark-mode {
-    --menu-bg: #111111;
-    --menu-text: #f0f0f0;
-    --menu-muted: #999999;
-    --menu-border: #222222;
+    --menu-bg: #0F172A;
+    --menu-text: #F8FAFC;
+    --menu-muted: #94A3B8;
+    --menu-border: #1E293B;
 }
 
 body.zen-body {
     background: var(--menu-bg);
     color: var(--menu-text);
-    font-family: var(--font-normal);
+    font-family: 'Inter', Arial, sans-serif;
     margin: 0;
-    -webkit-font-smoothing: initial;
-    /* More "normal" rendering */
+    overflow-x: hidden;
 }
 
 /* ─── HUD ─── */
@@ -37,40 +40,34 @@ body.zen-body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
+    padding: 0 24px;
     z-index: 1000;
 }
 
 .hud-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 0.9rem;
-}
-
-.hud-logo img {
-    height: 22px;
+    letter-spacing: -0.02em;
 }
 
 .hud-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .hud-btn {
     width: 36px;
     height: 36px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: none;
     background: transparent;
     color: var(--menu-muted);
     cursor: pointer;
-    font-size: 1.2rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.2rem;
     transition: all 0.2s;
 }
 
@@ -89,290 +86,229 @@ body.zen-body {
     font-weight: 700;
     font-size: 0.75rem;
     cursor: pointer;
-    margin-left: 8px;
+    margin-left: 10px;
 }
 
-/* ─── The Editor Canvas ─── */
+/* ─── The Stage ─── */
 .zen-stage {
-    padding-top: calc(var(--hud-h) + 20px);
-    padding-bottom: 120px;
+    padding-top: var(--hud-h);
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: 100vh;
 }
 
-.zen-canvas {
+/* Sticky Nav for Categories */
+.category-nav-bar {
+    position: sticky;
+    top: var(--hud-h);
+    background: var(--menu-bg);
+    z-index: 950;
     width: 100%;
-    max-width: var(--menu-width);
-}
-
-/* Editables */
-[contenteditable="true"]:focus {
-    outline: none;
-    background: rgba(31, 168, 255, 0.05);
-}
-
-/* Master Cover */
-.zen-cover-zone {
-    width: 100%;
-    aspect-ratio: 16/9;
-    background: #f5f5f5;
-    margin-bottom: 40px;
-    cursor: pointer;
-    position: relative;
-}
-
-.zen-cover-zone img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.zen-img-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.1);
+    max-width: var(--canvas-w);
+    padding: 16px 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: #fff;
-    opacity: 0;
-    transition: 0.2s;
-    font-size: 1.5rem;
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--menu-border);
 }
 
-.zen-cover-zone:hover .zen-img-overlay {
-    opacity: 1;
+.category-nav-bar::-webkit-scrollbar {
+    display: none;
 }
 
-.rest-info {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.rest-info h1 {
-    font-size: 2rem;
-    margin: 0 0 8px;
-    font-weight: 800;
-}
-
-.rest-info p {
-    font-size: 1rem;
-    color: var(--menu-muted);
-    margin: 0;
-}
-
-/* The Menu Body */
-.cat-section {
-    margin-top: 48px;
-}
-
-.cat-title {
-    font-size: 1.2rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    border-bottom: 2px solid var(--menu-text);
-    padding-bottom: 4px;
-    margin-bottom: 24px;
-    position: relative;
-}
-
-.item-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 24px;
-    padding: 12px;
-    border-radius: 8px;
-    position: relative;
-    transition: background 0.2s;
-}
-
-.item-row:hover {
+.cat-chip {
+    padding: 6px 14px;
+    border-radius: 50px;
     background: var(--menu-border);
+    color: var(--menu-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
 }
 
-.item-left {
+.cat-chip.active {
+    background: var(--menu-accent);
+    color: #fff;
+}
+
+.cat-chip.add-btn {
+    background: transparent;
+    border: 1px dashed var(--menu-muted);
+    color: var(--menu-muted);
+    padding: 5px 10px;
+}
+
+.cat-chip.add-btn:hover {
+    border-style: solid;
+    color: var(--menu-accent);
+}
+
+/* Sliding Content Wrapper */
+.menu-viewport {
+    width: 100%;
+    max-width: var(--canvas-w);
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.category-slider {
+    display: flex;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100%;
+}
+
+.category-slide {
+    flex-shrink: 0;
+    width: 100%;
+    padding: 0 16px;
+}
+
+/* Item Rows */
+.item-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    transition: 0.2s;
+    position: relative;
+}
+
+.item-card:hover {
+    border-color: var(--menu-border);
+    background: rgba(0, 0, 0, 0.01);
+}
+
+.item-info {
     flex: 1;
 }
 
-.item-name {
-    display: block;
-    font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 4px;
+.item-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
 }
 
-.item-desc {
-    display: block;
-    font-size: 0.85rem;
-    color: var(--menu-muted);
-    line-height: 1.4;
+.item-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--menu-text);
 }
 
 .item-price {
     font-weight: 800;
-    font-size: 1rem;
-    white-space: nowrap;
-    margin-left: 10px;
+    font-size: 0.95rem;
+    color: var(--menu-accent);
+    margin-left: 12px;
 }
 
-.item-img-mini {
+.item-desc {
+    font-size: 0.85rem;
+    color: var(--menu-muted);
+    line-height: 1.4;
+    margin-top: 4px;
+    display: block;
+}
+
+.item-thumb {
     width: 80px;
     height: 80px;
-    background: #eee;
-    flex-shrink: 0;
-    border-radius: 4px;
+    border-radius: 8px;
+    background: #f3f4f6;
     overflow: hidden;
+    flex-shrink: 0;
     cursor: pointer;
 }
 
-.item-img-mini img {
+.item-thumb img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-/* Control Icons (Ghost) */
-.ghost-actions {
-    position: absolute;
-    right: -36px;
-    top: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    opacity: 0;
-    transition: 0.2s;
-}
-
-.item-row:hover .ghost-actions {
-    opacity: 1;
-    right: -30px;
-}
-
-.cat-title:hover .cat-ghost {
-    opacity: 1;
-}
-
-.cat-ghost {
+/* Control Tools */
+.card-tools {
     position: absolute;
     right: 0;
     top: 0;
     opacity: 0;
+    transition: 0.2s;
+    display: flex;
+    gap: 4px;
+    transform: translateY(-50%);
 }
 
-.mini-ico {
+.item-card:hover .card-tools {
+    opacity: 1;
+    top: 0;
+}
+
+.tool-btn {
     width: 24px;
     height: 24px;
     border-radius: 4px;
     border: none;
-    background: var(--menu-border);
-    color: var(--menu-muted);
-    cursor: pointer;
+    background: var(--menu-text);
+    color: var(--menu-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    cursor: pointer;
 }
 
-.mini-ico:hover {
-    background: var(--menu-accent);
-    color: #fff;
+.tool-btn.red {
+    background: #EF4444;
 }
 
-.nav-chip.active {
-    background: var(--menu-accent);
-    color: #fff;
-}
-
-.nav-chip.add-cat-btn {
-    background: transparent;
-    border: 1px dashed var(--menu-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-}
-
-.nav-chip.add-cat-btn:hover {
-    background: var(--menu-border);
-    color: var(--menu-accent);
-    border-style: solid;
-}
-
-.mini-ico.red:hover {
-    background: #ff4d4d;
-    color: #fff;
-}
-
-/* Placeholder Slots ("Add New" as slots) */
-.placeholder-slot {
+/* Placeholder Slots */
+.add-slot {
     border: 1px dashed var(--menu-border);
     color: var(--menu-muted);
-    border-radius: 8px;
-    padding: 16px;
+    padding: 20px;
+    border-radius: 12px;
     text-align: center;
     font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
     cursor: pointer;
-    margin-top: 12px;
+    margin-top: 20px;
     transition: 0.2s;
 }
 
-.placeholder-slot:hover {
+.add-slot:hover {
     border-style: solid;
     color: var(--menu-accent);
     background: var(--menu-border);
 }
 
-.cat-placeholder {
-    margin-top: 60px;
-    font-size: 1.1rem;
-    border: none;
-    text-align: left;
-    padding: 12px 0;
-    border-bottom: 2px dashed var(--menu-border);
+/* Inline Editing */
+[contenteditable="true"] {
+    padding: 2px 4px;
+    border-radius: 4px;
+    margin: -2px -4px;
+    transition: 0.2s;
 }
 
-.cat-placeholder:hover {
-    border-bottom-style: solid;
+[contenteditable="true"]:focus {
+    outline: none;
+    background: rgba(31, 168, 255, 0.08);
 }
 
-/* Small HUD FAB */
-.fab-btn {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--menu-accent);
-    color: #fff;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    font-size: 1.2rem;
-}
-
-@media (max-width: 600px) {
+@media (max-width: 500px) {
     .zen-canvas {
-        padding: 0 16px;
+        padding: 0;
     }
 
-    .ghost-actions {
-        position: static;
-        flex-direction: row;
-        opacity: 1;
-        margin-top: 8px;
-    }
-
-    .cat-ghost {
-        position: static;
-        opacity: 1;
-        margin-top: 8px;
+    .category-nav-bar {
+        padding: 12px 16px;
     }
 }

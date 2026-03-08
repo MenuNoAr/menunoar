@@ -50,9 +50,20 @@
         <nav id="categoryNav" class="zen-tabs-nav"></nav>
 
         <div id="editor-container" class="zen-canvas">
-            <!-- This is the direct Menu Editor -->
+            <!-- Restaurant Info (Non-sliding) -->
+            <div class="rest-info" style="padding: 20px 16px; margin-top:20px;">
+                <h1 id="restName" contenteditable="true"
+                    style="font-size: 2.2rem; font-weight: 900; margin: 0; letter-spacing:-0.03em;">...</h1>
+                <p id="restDesc" contenteditable="true"
+                    style="color: var(--menu-muted); font-size: 1rem; margin-top: 8px;">...</p>
+            </div>
+
+            <!-- Sticky Category Nav -->
+            <nav id="categoryNav" class="category-nav-bar"></nav>
+
+            <!-- This is the direct Menu Editor Slider -->
             <div id="menuContainer" class="zen-menu-root">
-                <div class="zen-loading">A carregar o seu espaço...</div>
+                <!-- Slider renders here -->
             </div>
         </div>
     </main>
