@@ -203,3 +203,64 @@ if (contactForm) {
         }
     });
 }
+// --- REELS STYLE SCROLL SNAP ---
+let isScrolling = false;
+const sections = document.querySelectorAll('main > section');
+
+function handleSnapScroll(direction) {
+    if (isScrolling) return;
+
+    // Find current active section
+    let currentIndex = -1;
+    const scrollPos = window.scrollY;
+    const windowHeight = window.innerHeight;
+
+    sections.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        // If the section is mostly in view
+        if (rect.top >= -windowHeight / 2 && rect.top <= windowHeight / 2) {
+            currentIndex = index;
+        }
+    });
+
+    if (direction === 'down' && currentIndex < sections.length - 1) {
+        scrollToIndex(currentIndex + 1);
+    } else if (direction === 'up' && currentIndex > 0) {
+        scrollToIndex(currentIndex - 1);
+    }
+}
+
+function scrollToIndex(index) {
+    isScrolling = true;
+    sections[index].scrollIntoView({ behavior: 'smooth' });
+
+    // Lock scrolling for a moment to prevent multiple jumps
+    setTimeout(() => {
+        isScrolling = false;
+    }, 800);
+}
+
+// Wheel Listener (Desktop)
+window.addEventListener('wheel', (e) => {
+    // Determine direction
+    if (Math.abs(e.deltaY) < 10) return; // Ignore tiny scrolls
+
+    const direction = e.deltaY > 0 ? 'down' : 'up';
+    handleSnapScroll(direction);
+}, { passive: true });
+
+// Touch Handling (Mobile)
+let touchStartY = 0;
+window.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+window.addEventListener('touchend', (e) => {
+    const touchEndY = e.changedTouches[0].clientY;
+    const diff = touchStartY - touchEndY;
+
+    if (Math.abs(diff) > 50) { // Threshold for swipe
+        const direction = diff > 0 ? 'down' : 'up';
+        handleSnapScroll(direction);
+    }
+}, { passive: true });

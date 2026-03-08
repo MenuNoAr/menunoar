@@ -15,7 +15,7 @@ body {
 }
 
 main>section {
-    height: 100vh;
+    min-height: 100vh;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -600,15 +600,16 @@ footer {
     }
 
     main>section {
-        height: auto !important;
-        /* Using dvh on mobile respects native browser expanding bars */
+        height: 100dvh;
+        /* Force 100vh for reels style */
         min-height: 100dvh;
-        padding: 120px 0 100px !important;
+        padding: 80px 0 !important;
+        /* Reduced padding to fit content better */
         justify-content: center !important;
-        /* Removed align-items center to allow .container to fluidly fill width 100% without horizontal shrink bug */
         overflow-x: hidden;
         display: flex;
         flex-direction: column;
+        scroll-snap-align: start;
     }
 
     /* 2. Hide SVG background tracker on mobile */
