@@ -98,92 +98,85 @@ body.zen-body {
     min-height: 100vh;
 }
 
-/* Sticky Nav for Categories */
+/* ─── Category Navigation ─── */
 .category-nav-bar {
-    position: sticky;
-    top: var(--hud-h);
-    background: var(--menu-bg);
-    z-index: 950;
     width: 100%;
     max-width: var(--canvas-w);
-    padding: 16px 0;
+    padding: 20px 0;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     overflow-x: auto;
     scrollbar-width: none;
-    border-bottom: 1px solid var(--menu-border);
+    border-bottom: 2px solid var(--menu-text);
+    margin-bottom: 30px;
 }
 
 .category-nav-bar::-webkit-scrollbar {
     display: none;
 }
 
-.cat-chip {
-    padding: 6px 14px;
-    border-radius: 50px;
-    background: var(--menu-border);
-    color: var(--menu-muted);
-    font-size: 0.85rem;
-    font-weight: 600;
-    white-space: nowrap;
-    cursor: pointer;
-    border: none;
-    transition: 0.2s;
-}
-
-.cat-chip.active {
-    background: var(--menu-accent);
-    color: #fff;
-}
-
-.cat-chip.add-btn {
+.cat-btn {
     background: transparent;
-    border: 1px dashed var(--menu-muted);
+    border: none;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     color: var(--menu-muted);
-    padding: 5px 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+    border-radius: 4px;
 }
 
-.cat-chip.add-btn:hover {
-    border-style: solid;
+.cat-btn.active {
+    color: var(--menu-text);
+    background: var(--menu-border);
+}
+
+.cat-btn.add-cat {
     color: var(--menu-accent);
+    font-size: 1.2rem;
+    padding: 0 10px;
 }
 
-/* Sliding Content Wrapper */
+.cat-btn:hover {
+    color: var(--menu-text);
+}
+
+/* Sliding Content */
 .menu-viewport {
     width: 100%;
     max-width: var(--canvas-w);
     overflow: hidden;
-    margin-top: 20px;
 }
 
 .category-slider {
     display: flex;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
     width: 100%;
 }
 
 .category-slide {
     flex-shrink: 0;
     width: 100%;
-    padding: 0 16px;
+    padding: 0;
 }
 
-/* Item Rows */
+/* Item Card (Standard Menu Style) */
 .item-card {
     display: flex;
     align-items: flex-start;
-    gap: 16px;
-    padding: 16px;
-    margin-bottom: 12px;
-    border-radius: 12px;
-    border: 1px solid transparent;
-    transition: 0.2s;
+    gap: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--menu-border);
     position: relative;
+    transition: 0.2s;
 }
 
 .item-card:hover {
-    border-color: var(--menu-border);
     background: rgba(0, 0, 0, 0.01);
 }
 
@@ -191,38 +184,38 @@ body.zen-body {
     flex: 1;
 }
 
-.item-title-row {
+.item-header {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
 }
 
 .item-name {
-    font-weight: 700;
-    font-size: 1rem;
+    font-weight: 800;
+    font-size: 1.05rem;
     color: var(--menu-text);
 }
 
 .item-price {
     font-weight: 800;
-    font-size: 0.95rem;
-    color: var(--menu-accent);
-    margin-left: 12px;
+    font-size: 1rem;
+    color: var(--menu-text);
+    white-space: nowrap;
 }
 
 .item-desc {
     font-size: 0.85rem;
     color: var(--menu-muted);
-    line-height: 1.4;
-    margin-top: 4px;
+    margin-top: 6px;
     display: block;
+    line-height: 1.5;
 }
 
 .item-thumb {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     border-radius: 8px;
-    background: #f3f4f6;
+    background: #f0f0f0;
     overflow: hidden;
     flex-shrink: 0;
     cursor: pointer;
@@ -233,6 +226,7 @@ body.zen-body {
     height: 100%;
     object-fit: cover;
 }
+
 
 /* Control Tools */
 .card-tools {
@@ -252,21 +246,21 @@ body.zen-body {
 }
 
 .tool-btn {
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     border: none;
     background: var(--menu-text);
     color: var(--menu-bg);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     cursor: pointer;
 }
 
 .tool-btn.red {
-    background: #EF4444;
+    background: #ff4d4d;
 }
 
 /* Placeholder Slots */

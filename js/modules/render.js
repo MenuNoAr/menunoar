@@ -44,10 +44,10 @@ export function renderSliderEditor(data, items) {
     if (navBar) {
         navBar.className = "category-nav-bar";
         navBar.innerHTML = cats.map((cat, idx) => `
-            <button class="cat-chip ${idx === state.activeCategoryIdx ? 'active' : ''}" 
+            <button class="cat-btn ${idx === state.activeCategoryIdx ? 'active' : ''}" 
                     onclick="window.switchCategory(${idx})">${escapeHTML(cat)}</button>
         `).join('') + `
-            <button class="cat-chip add-btn" onclick="window.addNewCategoryOptimized()"><i class="ph ph-plus"></i></button>
+            <button class="cat-btn add-cat" onclick="window.addNewCategoryOptimized()" title="Nova Categoria"><i class="ph ph-plus"></i></button>
         `;
     }
 
@@ -59,17 +59,12 @@ export function renderSliderEditor(data, items) {
         const catItems = groups[cat] || [];
         return `
                         <div class="category-slide">
-                            <h2 class="cat-title" contenteditable="true" 
-                                onblur="window.handleCategoryRename('${cat}', this.innerText)"
-                                style="font-size: 1.4rem; font-weight: 800; margin-bottom: 24px; border-bottom: 2px solid var(--menu-text); padding-bottom: 8px;">
-                                ${escapeHTML(cat)}
-                            </h2>
                             
                             <div class="items-list">
                                 ${catItems.map(i => `
                                     <div class="item-card ${!i.available ? 'muted' : ''}">
                                         <div class="item-info">
-                                            <div class="item-title-row">
+                                            <div class="item-header">
                                                 <span class="item-name" contenteditable="true" 
                                                     onblur="window.handleItemUpdate('${i.id}', 'name', this.innerText)">${escapeHTML(i.name)}</span>
                                                 <span class="item-price" contenteditable="true" 
@@ -95,7 +90,7 @@ export function renderSliderEditor(data, items) {
                                 `).join('')}
                                 
                                 <div class="add-slot" onclick="window.addNewItem('${cat}')">
-                                    <i class="ph ph-plus"></i> Novo Prato em ${escapeHTML(cat)}
+                                    <i class="ph ph-plus"></i> Adicionar Prato
                                 </div>
                             </div>
                             

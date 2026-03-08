@@ -14,9 +14,9 @@ window.switchCategory = (idx) => {
     if (slider) {
         slider.style.transform = `translateX(-${idx * 100}%)`;
     }
-    // Update active chip
-    document.querySelectorAll('.cat-chip').forEach((chip, i) => {
-        chip.classList.toggle('active', i === idx);
+    // Update active state
+    document.querySelectorAll('.cat-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', i === idx);
     });
 };
 
