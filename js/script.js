@@ -210,6 +210,8 @@ const snapSections = document.querySelectorAll('main > section');
 let scrollCooldown = false;
 
 function performSmoothSnap(index, duration = 650) {
+    if (!window.matchMedia("(min-width: 769px)").matches) return;
+
     if (index < 0) index = 0;
     if (index >= snapSections.length) index = snapSections.length - 1;
 
@@ -219,7 +221,6 @@ function performSmoothSnap(index, duration = 650) {
     isAnimating = true;
 
     function animate() {
-        // Use dH (dynamic height) to account for mobile bars
         const windowHeight = window.innerHeight;
         const startY = window.pageYOffset || document.documentElement.scrollTop;
         const currentTargetY = targetIdx * windowHeight;
@@ -258,8 +259,10 @@ function performSmoothSnap(index, duration = 650) {
     animate();
 }
 
-// Global Wheel Listener
+// Wheel Listener (Desktop Only)
 window.addEventListener('wheel', (e) => {
+    if (!window.matchMedia("(min-width: 769px)").matches) return;
+
     if (e.cancelable) e.preventDefault();
     if (scrollCooldown || isAnimating && Math.abs(e.deltaY) < 50) return;
     if (Math.abs(e.deltaY) < 30) return;
@@ -275,30 +278,12 @@ window.addEventListener('wheel', (e) => {
     setTimeout(() => { scrollCooldown = false; }, 150);
 }, { passive: false });
 
-// Global Touch Listener for Mobile Reels
-let touchStartY = 0;
-window.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
-}, { passive: true });
-
-window.addEventListener('touchmove', (e) => {
-    // Only prevent if we're in the middle of a snap AND the event can be cancelled
-    if (isAnimating && e.cancelable) e.preventDefault();
-}, { passive: false });
-
-window.addEventListener('touchend', (e) => {
-    if (isAnimating) return;
-    const touchEndY = e.changedTouches[0].clientY;
-    const diff = touchStartY - touchEndY;
-
-    if (Math.abs(diff) > 40) { // Swipe threshold
-        const direction = diff > 0 ? 1 : -1;
-        performSmoothSnap(targetIdx + direction);
-    }
-}, { passive: true });
+// Mobile Touch events are handled by native CSS scroll-snap from index.css
 
 // Keyboard
 window.addEventListener('keydown', (e) => {
+    if (!window.matchMedia("(min-width: 769px)").matches) return;
+
     if (e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault();
         performSmoothSnap(targetIdx + 1);
