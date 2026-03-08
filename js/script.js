@@ -49,23 +49,26 @@ window.addEventListener('scroll', () => {
 });
 
 function updateScrollPath() {
+    // Only run on desktop where the SVG tracker is visible
+    if (!window.matchMedia("(min-width: 769px)").matches) return;
+
     const path = document.getElementById('pathLineFg');
     const arrow = document.getElementById('scrollArrow');
     if (!path || !arrow) return;
 
     const length = path.getTotalLength();
+    if (!length || length === 0) return; // Guard for zero length
+
     path.style.strokeDasharray = length;
 
-    // Calculate progress: Hero center (0) to last section center
-    // The container is 500vh, top starts at 50vh.
-    const scrollStart = window.innerHeight * 0.5;
-    const scrollEnd = window.innerHeight * 5.5; // Final section center at 5.5vh? 
-    // Wait, hero=0, mockup=1, exp=2, bento=3, pricing=4, cta=5. 
-    // Container starts at 50vh (hero center) and ends at 550vh (cta center).
-    // Total height = 500vh.
-
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercentage = Math.max(0, Math.min(1, window.scrollY / maxScroll));
+
+    // Safety check for scrollPercentage
+    let scrollPercentage = (maxScroll > 0) ? (scrollY / maxScroll) : 0;
+    scrollPercentage = Math.max(0, Math.min(1, scrollPercentage));
+
+    if (!isFinite(scrollPercentage)) scrollPercentage = 0;
 
     path.style.strokeDashoffset = length * (1 - scrollPercentage);
 
@@ -210,6 +213,8 @@ const snapSections = document.querySelectorAll('main > section');
 let scrollCooldown = false;
 
 function performSmoothSnap(index, duration = 650) {
+    if (!window.matchMedia("(min-width: 769px)").matches) return;
+
     if (index < 0) index = 0;
     if (index >= snapSections.length) index = snapSections.length - 1;
 
@@ -219,7 +224,6 @@ function performSmoothSnap(index, duration = 650) {
     isAnimating = true;
 
     function animate() {
-        // Use dH (dynamic height) to account for mobile bars
         const windowHeight = window.innerHeight;
         const startY = window.pageYOffset || document.documentElement.scrollTop;
         const currentTargetY = targetIdx * windowHeight;
@@ -258,8 +262,10 @@ function performSmoothSnap(index, duration = 650) {
     animate();
 }
 
-// Global Wheel Listener
+// Wheel Listener (Desktop Only)
 window.addEventListener('wheel', (e) => {
+    if (!window.matchMedia("(min-width: 769px)").matches) return;
+
     if (e.cancelable) e.preventDefault();
     if (scrollCooldown || isAnimating && Math.abs(e.deltaY) < 50) return;
     if (Math.abs(e.deltaY) < 30) return;
@@ -275,30 +281,12 @@ window.addEventListener('wheel', (e) => {
     setTimeout(() => { scrollCooldown = false; }, 150);
 }, { passive: false });
 
-// Global Touch Listener for Mobile Reels
-let touchStartY = 0;
-window.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
-}, { passive: true });
-
-window.addEventListener('touchmove', (e) => {
-    // Only prevent if we're in the middle of a snap AND the event can be cancelled
-    if (isAnimating && e.cancelable) e.preventDefault();
-}, { passive: false });
-
-window.addEventListener('touchend', (e) => {
-    if (isAnimating) return;
-    const touchEndY = e.changedTouches[0].clientY;
-    const diff = touchStartY - touchEndY;
-
-    if (Math.abs(diff) > 40) { // Swipe threshold
-        const direction = diff > 0 ? 1 : -1;
-        performSmoothSnap(targetIdx + direction);
-    }
-}, { passive: true });
+// Mobile Touch events are handled by native CSS scroll-snap from index.css
 
 // Keyboard
 window.addEventListener('keydown', (e) => {
+    if (!window.matchMedia("(min-width: 769px)").matches) return;
+
     if (e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault();
         performSmoothSnap(targetIdx + 1);
