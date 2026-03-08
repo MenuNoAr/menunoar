@@ -1,48 +1,336 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 
 <head>
     <meta charset="UTF-8">
-    <title>Criar Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Criar Conta - Menu no Ar</title>
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #1fa8ff;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --bg-light: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            padding: 3rem 2rem;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .logo {
+            margin-bottom: 2rem;
+            height: 50px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(31, 168, 255, 0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            cursor: pointer;
+            color: var(--text-gray);
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .password-wrapper input {
+            padding-right: 45px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-google {
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: var(--text-dark);
+        }
+
+        .btn-google:hover {
+            background: #f8fafc;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            margin: 1.5rem 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+
+        .divider span {
+            padding: 0 10px;
+        }
+
+        .links {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        #error-msg {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        #error-msg.error {
+            color: #ef4444;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+        }
+
+        #error-msg.success {
+            color: #16a34a;
+            background: #f0fdf4;
+            border: 1px solid #dcfce7;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>A criar utilizador admin...</h1>
-    <p id="status">Aguarde...</p>
+
+    <div class="auth-card">
+        <a href="index.html">
+            <img src="assets/images/logo.svg" alt="Menu no Ar" class="logo">
+        </a>
+        <h1>Começa Grátis</h1>
+        <p>Digitaliza o teu menu em 2 minutos.</p>
+
+        <div id="error-msg"></div>
+
+        <form id="signupForm">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" required placeholder="exemplo@email.com">
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" required placeholder="Mínimo 6 caracteres">
+                    <button type="button" class="password-toggle" onclick="togglePassword('password', this)">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Criar Conta</button>
+        </form>
+
+        <div class="divider"><span>OU</span></div>
+
+        <button id="googleBtn" class="btn btn-google">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" style="width:20px;">
+            Entrar com Google
+        </button>
+
+        <div class="links">
+            Já tens conta? <a href="login.html">Entrar</a>
+        </div>
+    </div>
 
     <script type="module">
-        // 1. Fetch Config
-        const res = await fetch('/api/config');
-        const config = await res.json();
-        const supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+        import { initAuthListener, signUp, signInWithGoogle } from './js/auth-service.js';
 
-        async function createAdmin() {
-            const status = document.getElementById('status');
+        // Check session
+        initAuthListener((user) => {
+            window.location.replace('dashboard.html');
+        });
 
-            // Tenta criar o user pela API oficial (muito mais seguro que SQL manual)
-            const { data, error } = await supabase.auth.signUp({
-                email: 'admin@teste.com',
-                password: 'admin',
-            });
+        const form = document.getElementById('signupForm');
+        const errorMsg = document.getElementById('error-msg');
 
-            if (error) {
-                console.error(error);
-                status.textContent = "Erro: " + error.message;
-                status.style.color = "red";
-            } else {
-                console.log(data);
-                status.textContent = "Sucesso! Utilizador criado. Podes ir fazer login.";
-                status.style.color = "green";
-
-                // Se o email confirmation estiver ligado, pode aparecer msg a dizer "Verifica o email".
-                if (data.user && !data.session) {
-                    status.textContent += " (Verifica o teu email para confirmar, se necessário).";
-                }
-            }
+        function showMsg(msg, type = 'error') {
+            errorMsg.textContent = msg;
+            errorMsg.className = type;
+            errorMsg.style.display = 'block';
         }
 
-        createAdmin();
+        window.togglePassword = function (inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        };
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMsg.style.display = 'none';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (password.length < 6) {
+                showMsg("A password deve ter pelo menos 6 caracteres.", 'error');
+                return;
+            }
+
+            // Show loading state
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+            btn.textContent = 'A criar conta...';
+            btn.disabled = true;
+
+            const { data, error } = await signUp(email, password);
+
+            if (error) {
+                showMsg("Erro: " + error.message, 'error');
+                btn.textContent = originalText;
+                btn.disabled = false;
+            } else {
+                // If email confirmation is off, it might auto-login, or wait for confirmation
+                // For now, let's assume auto-login or redirect to dashboard check
+                // If session created immediately:
+                if (data.session) {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    // Set flag and redirect to login
+                    localStorage.setItem('signupEmailPending', 'true');
+                    window.location.href = 'login.html';
+                }
+            }
+        });
+
+        document.getElementById('googleBtn').addEventListener('click', async () => {
+            const { error } = await signInWithGoogle();
+            if (error) {
+                if (error.message.includes("provider is not enabled")) {
+                    showMsg("O login com Google ainda não foi ativado no sistema (Supabase).", 'error');
+                } else {
+                    showMsg("Erro: " + error.message, 'error');
+                }
+            }
+        });
     </script>
 </body>
 

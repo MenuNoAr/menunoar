@@ -18,9 +18,6 @@
     <!-- Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/index.css">
@@ -57,11 +54,11 @@
                - Y=300: Pricing center
                - Y=400: CTA center
             -->
-            <svg id="scrollSvg" preserveAspectRatio="none" viewBox="0 0 100 500">
+            <svg id="scrollSvg" preserveAspectRatio="none" viewBox="0 0 100 400">
                 <path class="path-bg"
-                    d="M 50,0 C 90,40 90,60 90,100 C 90,140 10,160 10,200 C 10,240 90,260 90,300 C 90,340 10,360 10,400 C 10,440 50,460 50,500" />
+                    d="M 50,0 C 90,40 90,60 90,100 C 90,140 10,160 10,200 C 10,240 90,260 90,300 C 90,340 50,360 50,380" />
                 <path id="pathLineFg" class="path-line"
-                    d="M 50,0 C 90,40 90,60 90,100 C 90,140 10,160 10,200 C 10,240 90,260 90,300 C 90,340 10,360 10,400 C 10,440 50,460 50,500" />
+                    d="M 50,0 C 90,40 90,60 90,100 C 90,140 10,160 10,200 C 10,240 90,260 90,300 C 90,340 50,360 50,380" />
             </svg>
             <div id="scrollArrow" class="scroll-arrow"><i class="ph ph-arrow-down"></i></div>
         </div>
@@ -104,26 +101,6 @@
             </div>
         </section>
 
-        <!-- EXPERIENCE THE FUTURE -->
-        <section class="experience-section">
-            <div class="container grid-2">
-                <div class="experience-content reveal">
-                    <span class="label">O FUTURO É AGORA</span>
-                    <h2>A primeira impressão <br>nunca foi tão rápida.</h2>
-                    <p>O seu menu não é apenas uma lista de preços, é uma extensão da sua marca. Com o Menu no Ar, a
-                        transição do físico para o digital é instantânea e luxuosa.</p>
-                    <ul class="check-list">
-                        <li><i class="ph ph-fast-forward"></i> Carregamento ultra-rápido</li>
-                        <li><i class="ph ph-device-mobile"></i> Mobile-first design</li>
-                        <li><i class="ph ph-lightning"></i> Edição em tempo real</li>
-                    </ul>
-                </div>
-                <div class="experience-image reveal delay-2">
-                    <img src="assets/images/qr_scan.png" alt="QR Scan Experience" class="premium-img">
-                </div>
-            </div>
-        </section>
-
         <!-- BENTO FEATURES -->
         <section id="funciona">
             <div class="container">
@@ -136,36 +113,21 @@
 
                 <div class="bento-grid">
                     <div class="bento-card reveal delay-1">
-                        <div class="bento-img-container">
-                            <img src="assets/images/qr_scan.png" alt="QR Code">
-                        </div>
-                        <div class="bento-text">
-                            <i class="ph ph-qr-code"></i>
-                            <h3>QR Code Dinâmico</h3>
-                            <p>Altere o seu menu em tempo real sem nunca trocar o código impresso. Atualizações
-                                instantâneas.</p>
-                        </div>
+                        <i class="ph ph-qr-code"></i>
+                        <h3>QR Code Dinâmico</h3>
+                        <p>Altere o seu menu em tempo real sem nunca trocar o código impresso. Atualizações
+                            instantâneas.</p>
                     </div>
                     <div class="bento-card reveal delay-2">
-                        <div class="bento-img-container">
-                            <img src="assets/images/chef.png" alt="Editor">
-                        </div>
-                        <div class="bento-text">
-                            <i class="ph ph-layout"></i>
-                            <h3>Editor Pure Canvas</h3>
-                            <p>Interface direta. Sem abas escondidas. O que vê no editor é exatamente o que o cliente
-                                recebe.</p>
-                        </div>
+                        <i class="ph ph-layout"></i>
+                        <h3>Editor Pure Canvas</h3>
+                        <p>Interface direta. Sem abas escondidas. O que vê no editor é exatamente o que o cliente
+                            recebe.</p>
                     </div>
                     <div class="bento-card reveal delay-3">
-                        <div class="bento-img-container">
-                            <img src="assets/images/hero.png" alt="Design">
-                        </div>
-                        <div class="bento-text">
-                            <i class="ph ph-sparkle"></i>
-                            <h3>Design Minimal</h3>
-                            <p>Focado na leitura e conversão. Menus que não apenas informam, mas elevam a marca.</p>
-                        </div>
+                        <i class="ph ph-sparkle"></i>
+                        <h3>Design Minimal</h3>
+                        <p>Focado na leitura e conversão. Menus que não apenas informam, mas elevam a marca.</p>
                     </div>
                 </div>
             </div>
@@ -198,7 +160,7 @@
         </section>
 
         <!-- FINAL CTA SECTION -->
-        <section style="position: relative;">
+        <section style="position: relative; justify-content: flex-start; padding-top: 35vh;">
             <div class="container reveal" style="text-align: center; position: relative; z-index: 20;">
                 <h2 style="font-size: 3.5rem; margin-bottom: 24px; letter-spacing: -0.03em;">Pronto para elevar o seu
                     restaurante?</h2>

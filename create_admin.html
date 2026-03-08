@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Criar Admin - Menu no Ar</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Recriar Utilizador Admin</h1>
+    <p>Vamos criar o utilizador pela API para evitar erros de SQL.</p>
+
+    <div style="background:#eee; padding:20px; border-radius:10px; display:inline-block;">
+        <p>Email: <b>admin@teste.com</b></p>
+        <p>Password: <b>admin123</b> <span style="color:red">(Nova!)</span></p>
+        <button onclick="createAdmin()" style="font-size:1.2rem; padding:10px 20px; cursor:pointer;">Criar Conta
+            Agora</button>
+    </div>
+
+    <p id="status" style="margin-top:20px; font-weight:bold;"></p>
+    <a href="login.html" id="loginLink" style="display:none; margin-top:20px; font-size:1.2rem;">Ir para Login -></a>
+
+    <script type="module">
+        async function createAdmin() {
+            const status = document.getElementById('status');
+            status.textContent = "A carregar config...";
+
+            try {
+                // 1. Config
+                const res = await fetch('/api/config');
+                const config = await res.json();
+
+                if (!config.supabaseUrl) {
+                    throw new Error("Falha ao carregar API Config. Estás a usar 'vercel dev'?");
+                }
+
+                const supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+
+                status.textContent = "A criar conta no Supabase...";
+
+                // 2. Criar Conta (signUp)
+                const { data, error } = await supabase.auth.signUp({
+                    email: 'admin@teste.com',
+                    password: 'admin123', // PASSWORD SEGURA (Min 6 chars)
+                });
+
+                if (error) {
+                    console.error(error);
+                    status.textContent = "ERRO: " + error.message;
+                    status.style.color = "red";
+                } else {
+                    console.log(data);
+                    status.textContent = "Sucesso! Utilizador criado.";
+                    status.style.color = "green";
+
+                    if (data.user && !data.session) {
+                        status.innerHTML += "<br>⚠️ O utilizador foi criado mas precisa de confirmação de email!<br><b>VÁ AO SQL EDITOR E CORRA O FICHEIRO 'confirm_email.sql' AGORA.</b>";
+                        status.style.color = "orange";
+                    } else {
+                        status.textContent += " (Sessão iniciada automaticamente).";
+                        document.getElementById('loginLink').style.display = 'inline-block';
+                    }
+                }
+            } catch (e) {
+                status.textContent = "Erro Fatal: " + e.message;
+                status.style.color = "red";
+            }
+        }
+
+        // Expose to window
+        window.createAdmin = createAdmin;
+    </script>
+</body>
+
+</html>
