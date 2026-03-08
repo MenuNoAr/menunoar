@@ -653,6 +653,13 @@ window.openBadgeModal = (type) => {
 
     window.closeAllModals();
     modal.classList.add('open');
+
+    // Auto-focus the first input
+    setTimeout(() => {
+        if (type === 'wifi') document.getElementById('badgeInputWifiName').focus();
+        else if (type === 'phone') document.getElementById('badgeInputPhone').focus();
+        else if (type === 'address') document.getElementById('badgeInputAddress').focus();
+    }, 50);
 };
 
 document.getElementById('badgeForm').onsubmit = async (e) => {
@@ -702,6 +709,7 @@ window.openAddItemModal = (prefillCat = '') => {
     window.closeAllModals();
     document.getElementById('itemModal').classList.add('open');
     window.checkTutorialStep('add_item_open');
+    setTimeout(() => document.getElementById('editItemName').focus(), 50);
 };
 
 window.openEditItemModal = (id) => {
@@ -715,6 +723,7 @@ window.openEditItemModal = (id) => {
     document.getElementById('modalTitle').textContent = 'Editar Prato';
     window.closeAllModals();
     document.getElementById('itemModal').classList.add('open');
+    setTimeout(() => document.getElementById('editItemName').focus(), 50);
 };
 
 document.getElementById('itemEditForm').onsubmit = async (e) => {
