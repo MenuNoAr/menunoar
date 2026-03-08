@@ -16,6 +16,16 @@ export function setupInlineEdit(elementId, fieldName) {
     el.setAttribute('contenteditable', 'true');
     el.setAttribute('spellcheck', 'false');
     el.classList.add('inline-editable');
+    el.classList.toggle('is-empty', el.innerText.trim() === "");
+
+    el.addEventListener('input', () => {
+        const isEmpty = el.innerText.trim() === "";
+        el.classList.toggle('is-empty', isEmpty);
+        // If it's effectively empty but contains junk like <br>, clear it to help CSS :empty
+        if (isEmpty && el.innerHTML !== "") {
+            el.innerHTML = "";
+        }
+    });
 
     el.addEventListener('blur', async () => {
         const newVal = el.innerText.trim();

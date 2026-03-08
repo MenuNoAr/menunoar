@@ -484,7 +484,8 @@ button:disabled {
 }
 
 /* Intelligent Placeholder - Stays visible on focus, disappears when typing content */
-.inline-editable:empty::before {
+.inline-editable:empty::before,
+.inline-editable.is-empty::before {
     content: attr(placeholder);
     color: var(--text-muted);
     opacity: 0.6;

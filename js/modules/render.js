@@ -41,8 +41,14 @@ export function renderHeader(data) {
 
     const nameEl = document.getElementById('restNameEditor');
     const descEl = document.getElementById('restDescEditor');
-    if (nameEl) nameEl.textContent = data.name || '';
-    if (descEl) descEl.textContent = data.description || '';
+    if (nameEl) {
+        nameEl.textContent = data.name || '';
+        nameEl.classList.toggle('is-empty', !data.name);
+    }
+    if (descEl) {
+        descEl.textContent = data.description || '';
+        descEl.classList.toggle('is-empty', !data.description);
+    }
 
     const coverDiv = document.getElementById('coverEditor');
     if (coverDiv) {
