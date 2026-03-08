@@ -203,85 +203,85 @@ if (contactForm) {
         }
     });
 }
-// --- REELS STYLE SCROLL SNAP ---
-let isScrolling = false;
-const sections = document.querySelectorAll('main > section');
+// --- INTELLIGENT REELS SCROLL ---
+let isAnimating = false;
+let currentIdx = 0;
+const snapSections = document.querySelectorAll('main > section');
 
-function handleSnapScroll(direction) {
-    if (isScrolling) return;
+function smoothScrollTo(targetY, duration) {
+    const startY = window.pageYOffset || document.documentElement.scrollTop;
+    const diff = targetY - startY;
+    let start = null;
 
-    // Find current active section
-    let currentIndex = -1;
-    const scrollPos = window.pageYOffset || document.documentElement.scrollTop;
-    const windowHeight = window.innerHeight;
+    function step(timestamp) {
+        if (!start) start = timestamp;
+        const progress = timestamp - start;
+        const percent = Math.min(progress / duration, 1);
 
-    // Determine which section is currently most visible
-    sections.forEach((section, index) => {
-        const rect = section.getBoundingClientRect();
-        // If the section is mostly in view
-        if (rect.top >= -windowHeight / 2 && rect.top <= windowHeight / 2) {
-            currentIndex = index;
+        // Easing: easeInOutQuad
+        const easing = percent < 0.5 ? 2 * percent * percent : -1 + (4 - 2 * percent) * percent;
+
+        window.scrollTo(0, startY + diff * easing);
+
+        if (progress < duration) {
+            window.requestAnimationFrame(step);
+        } else {
+            // Animation finished
+            setTimeout(() => {
+                isAnimating = false;
+            }, 50); // Small buffer to ensure browser settles
         }
-    });
-
-    if (direction === 'down' && currentIndex < sections.length - 1) {
-        scrollToIndex(currentIndex + 1);
-    } else if (direction === 'up' && currentIndex > 0) {
-        scrollToIndex(currentIndex - 1);
     }
+    window.requestAnimationFrame(step);
 }
 
-function scrollToIndex(index) {
-    if (isScrolling) return;
-    isScrolling = true;
+function performSnap(direction) {
+    if (isAnimating) return;
 
-    // Disable body scroll to prevent accumulation/jitters during animation
-    document.body.style.overflow = 'hidden';
+    // Find current index based on actual scroll position (in case they jumped via menu)
+    const windowHeight = window.innerHeight;
+    const scrollPos = window.pageYOffset || document.documentElement.scrollTop;
+    currentIdx = Math.round(scrollPos / windowHeight);
 
-    sections[index].scrollIntoView({ behavior: 'smooth' });
+    let nextIdx = currentIdx;
+    if (direction === 'down' && currentIdx < snapSections.length - 1) {
+        nextIdx = currentIdx + 1;
+    } else if (direction === 'up' && currentIdx > 0) {
+        nextIdx = currentIdx - 1;
+    }
 
-    // Duration should match or slightly exceed the smooth scroll duration
-    // Browser smooth scroll usually takes around 500-800ms
-    setTimeout(() => {
-        isScrolling = false;
-        document.body.style.overflow = ''; // Re-enable for the next interaction
-    }, 1000);
+    if (nextIdx !== currentIdx) {
+        isAnimating = true;
+        smoothScrollTo(nextIdx * windowHeight, 700); // 700ms is standard buttery duration
+    }
 }
 
 // Wheel Listener (Desktop)
 window.addEventListener('wheel', (e) => {
-    // Determine direction and prevent default if we're handling it
-    if (Math.abs(e.deltaY) < 10) return;
+    // Only on Desktop
+    if (!window.matchMedia("(min-width: 769px)").matches) return;
 
-    if (isScrolling) {
-        e.preventDefault();
-        return;
-    }
+    e.preventDefault(); // Take full control of the scroll event
+
+    if (isAnimating) return;
+    if (Math.abs(e.deltaY) < 20) return; // Sensitivity threshold
 
     const direction = e.deltaY > 0 ? 'down' : 'up';
-    handleSnapScroll(direction);
-}, { passive: false }); // Needs to be passive: false to allow preventDefault
-
-// Touch Handling (Mobile)
-let touchStartY = 0;
-window.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
-}, { passive: true });
-
-window.addEventListener('touchmove', (e) => {
-    if (isScrolling) {
-        e.preventDefault(); // Block movement during animation
-    }
+    performSnap(direction);
 }, { passive: false });
 
-window.addEventListener('touchend', (e) => {
-    if (isScrolling) return;
+// Keyboard Listeners (Arrows, Space, etc.)
+window.addEventListener('keydown', (e) => {
+    if (isAnimating) return;
 
-    const touchEndY = e.changedTouches[0].clientY;
-    const diff = touchStartY - touchEndY;
-
-    if (Math.abs(diff) > 50) {
-        const direction = diff > 0 ? 'down' : 'up';
-        handleSnapScroll(direction);
+    if (e.key === 'ArrowDown' || e.key === ' ') {
+        e.preventDefault();
+        performSnap('down');
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        performSnap('up');
     }
-}, { passive: true });
+});
+
+// Touch (Keep native behavior but can be enhanced if needed)
+// For mobile, the CSS snap-type from index.css handles it cleanly.
