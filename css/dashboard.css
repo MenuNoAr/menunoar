@@ -7,6 +7,7 @@
     grid-template-columns: 70px 1fr;
     min-height: 100vh;
     background: var(--bg-page);
+    position: relative;
 }
 
 .sidebar {
@@ -19,7 +20,7 @@
     height: 100vh;
     position: sticky;
     top: 0;
-    z-index: 200;
+    z-index: 2000;
 }
 
 .sidebar-header {
@@ -41,30 +42,28 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-md);
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
     text-decoration: none;
     color: var(--text-muted);
-    transition: var(--transition);
-}
-
-.nav-item i {
-    font-size: 1.4rem;
-}
-
-.nav-item span {
-    display: none;
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
 }
 
 .nav-item:hover {
-    background: var(--bg-page);
+    background: rgba(0, 0, 0, 0.05);
     color: var(--text-main);
 }
 
 .nav-item.active {
-    background: var(--primary-soft);
-    color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(31, 168, 255, 0.3);
+}
+
+.nav-item i {
+    font-size: 1.25rem;
 }
 
 .main-content {
@@ -74,17 +73,17 @@
 }
 
 .top-bar {
-    height: 52px;
+    height: 64px;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-color);
-    padding: 0 32px;
+    padding: 0 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
 }
 
 /* Editor Workspace - Pure Canvas */
