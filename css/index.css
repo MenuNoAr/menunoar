@@ -882,8 +882,15 @@ footer {
     }
 
     .label {
-        font-size: 0.65rem !important;
-        margin-bottom: 12px !important;
+        display: inline-block;
+        font-size: 0.75rem !important;
+        font-weight: 700;
+        color: var(--primary) !important;
+        background: rgba(var(--primary-rgb), 0.1);
+        padding: 4px 12px;
+        border-radius: 100px;
+        letter-spacing: 0.05em;
+        margin-bottom: 20px !important;
     }
 
     /* 6.1 Section Specific Adjustments */
@@ -900,29 +907,46 @@ footer {
     .experience-section {
         background: #000 !important;
         color: #fff !important;
+        text-align: left !important;
+    }
+
+    .experience-section .experience-content {
+        padding: 0 !important;
+    }
+
+    .experience-section .check-list {
+        margin: 32px 0 !important;
+        display: flex;
+        flex-direction: column;
+        gap: 12px !important;
+        width: 100%;
     }
 
     .experience-section .check-list li {
         color: #fff !important;
+        font-size: 0.95rem !important;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 16px 20px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 16px !important;
+        text-align: left;
+    }
+
+    .experience-section .check-list li i {
+        color: var(--primary);
+        font-size: 1.25rem;
     }
 
     .premium-img {
-        max-height: 180px;
-        /* Cap height to leave room for text */
-        width: auto !important;
-        object-fit: contain;
-        margin: 12px auto 0;
-    }
-
-    .experience-section .check-list {
-        margin: 16px 0 !important;
-        display: flex;
-        flex-direction: column;
-        gap: 8px !important;
-    }
-
-    .experience-section .check-list li {
-        font-size: 0.95rem !important;
+        max-height: 220px;
+        width: 100% !important;
+        object-fit: cover;
+        border-radius: 20px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(var(--primary-rgb), 0.2);
+        margin: 24px auto 0;
     }
 
     /* 6.2 Bento Grid: Horizontal Slider for Mobile */
