@@ -39,9 +39,6 @@ async function init() {
             const greetEl = document.getElementById('setupGreetingName');
             if (greetEl) greetEl.textContent = firstName + '!';
 
-            const sidebarNameEl = document.getElementById('sidebarUserName');
-            if (sidebarNameEl) sidebarNameEl.textContent = firstName;
-
             await loadData();
 
             // Fire tutorial + confetti after first restaurant creation
@@ -79,120 +76,49 @@ async function init() {
 window.signOut = () => signOut();
 window.openTutorial = openTutorial;
 
-window.openProfileModal = () => {
-    // Current display name
+window.openRenameModal = () => {
     const currentName = document.getElementById('userDisplayName')?.textContent || '';
-    const nameInput = document.getElementById('profileName');
-    if (nameInput) nameInput.value = currentName;
-
-    // Load extra fields from local storage or from auth state
-    const profileEstablishment = document.getElementById('profileEstablishment');
-    if (profileEstablishment) profileEstablishment.value = localStorage.getItem('profile_establishment') || '';
-
-    const profileEmail = document.getElementById('profileEmail');
-    if (profileEmail) profileEmail.value = localStorage.getItem('profile_email') || state.currentUser?.email || '';
-
-    const profilePhone = document.getElementById('profilePhone');
-    if (profilePhone) profilePhone.value = localStorage.getItem('profile_phone') || '';
-
-    document.getElementById('profileModal')?.classList.add('open');
-    setTimeout(() => nameInput?.focus(), 100);
+    const input = document.getElementById('renameInput');
+    if (input) input.value = currentName;
+    document.getElementById('renameModal')?.classList.add('open');
+    setTimeout(() => input?.focus(), 100);
 };
 
-document.getElementById('profileForm')?.addEventListener('submit', async (e) => {
+document.getElementById('renameForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const btn = e.target.querySelector('button[type="submit"]');
-    const origText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-    btn.disabled = true;
-
-    try {
-        const newName = document.getElementById('profileName').value.trim();
-        const est = document.getElementById('profileEstablishment').value.trim();
-        const email = document.getElementById('profileEmail').value.trim();
-        const phone = document.getElementById('profilePhone').value.trim();
-
-        if (!newName) return;
-
-        // Save to LocalStorage
-        localStorage.setItem('user_display_name', newName);
-        localStorage.setItem('profile_establishment', est);
-        localStorage.setItem('profile_email', email);
-        localStorage.setItem('profile_phone', phone);
-
-        // Save to central metadata on Supabase if possible
-        if (state.supabase && state.currentUser) {
-            await state.supabase.auth.updateUser({
-                data: {
-                    full_name: newName,
-                    establishment: est,
-                    contact_email: email,
-                    contact_phone: phone
-                }
-            });
-        }
-
-        // Update UI
-        const el = document.getElementById('userDisplayName');
-        if (el) el.textContent = newName;
-        const greetEl = document.getElementById('setupGreetingName');
-        if (greetEl) greetEl.textContent = newName + '!';
-
-        const sidebarNameEl = document.getElementById('sidebarUserName');
-        if (sidebarNameEl) sidebarNameEl.textContent = newName;
-
-        window.closeModal('profileModal');
-        window.showToast("Perfil atualizado com sucesso!", "success");
-    } catch (err) {
-        console.error(err);
-        window.showToast("Erro ao guardar perfil.", "error");
-    } finally {
-        btn.innerHTML = origText;
-        btn.disabled = false;
-    }
+    const newName = document.getElementById('renameInput').value.trim();
+    if (!newName) return;
+    localStorage.setItem('user_display_name', newName);
+    const el = document.getElementById('userDisplayName');
+    if (el) el.textContent = newName;
+    const greetEl = document.getElementById('setupGreetingName');
+    if (greetEl) greetEl.textContent = newName + '!';
+    window.closeModal('renameModal');
 });
 
 window.toggleDarkMode = () => {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('menu_theme', isDark ? 'dark' : 'light');
 
-    // Use requestAnimationFrame to sync JS changes with the style/paint cycle
-    requestAnimationFrame(() => {
-        // Update Logos as fast as possible
-        const logoPath = isDark ? 'assets/images/Ilogo.svg' : 'assets/images/logo.svg';
-        ['dashboardLogo', 'sidebarLogo', 'setupLogo', 'qrLogoImg'].forEach(id => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            // Only update QR logo if it's the default one
-            if (id === 'qrLogoImg' && !el.src.includes('assets/images/logo.svg') && !el.src.includes('assets/images/Ilogo.svg')) return;
-            el.src = logoPath;
-        });
+    // Update Logo
+    const logo = document.getElementById('dashboardLogo');
+    if (logo) logo.src = isDark ? 'assets/images/Ilogo.svg' : 'assets/images/logo.svg';
 
-        // Update Icons
-        const iconClass = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-        const desktopIcon = document.getElementById('themeIcon');
-        if (desktopIcon) desktopIcon.className = iconClass;
+    // Update Desktop Icon
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) themeIcon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
 
-        const mobileIcon = document.getElementById('themeIconMobile');
-        if (mobileIcon) mobileIcon.className = iconClass;
-    });
+    // Update Mobile Icon
+    const themeIconMobile = document.getElementById('themeIconMobile');
+    if (themeIconMobile) themeIconMobile.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
 };
 
-window.toggleNavDropdown = (forceClose = false) => {
+window.toggleNavDropdown = () => {
     const dropbar = document.getElementById('mobileDropbar');
-    const overlay = document.getElementById('mobileSidebarOverlay');
     const icon = document.getElementById('navMobileIcon');
     if (!dropbar) return;
 
-    if (forceClose) {
-        dropbar.classList.remove('open');
-        if (overlay) overlay.classList.remove('open');
-        if (icon) icon.className = 'fa-solid fa-bars-staggered';
-        return;
-    }
-
     const isOpen = dropbar.classList.toggle('open');
-    if (overlay) overlay.classList.toggle('open');
     if (icon) {
         icon.className = isOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars-staggered';
     }

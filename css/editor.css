@@ -153,28 +153,6 @@ button:disabled {
     }
 }
 
-.nav-tools-desktop {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.mobile-nav-trigger,
-.mobile-help-trigger {
-    display: none;
-    /* Hidden by default on PC */
-    background: var(--primary-glow) !important;
-    color: var(--primary) !important;
-    border-radius: 12px;
-}
-
-.mobile-dropbar,
-.mobile-sidebar,
-.mobile-sidebar-overlay {
-    display: none !important;
-    /* Hidden by default on PC */
-}
-
 /* --- NAV ITEM BUTTON STYLING --- */
 .btn-nav {
     color: var(--text-muted);
@@ -598,7 +576,7 @@ button:disabled {
 .category-tabs {
     /* Ensure sticking works in editor context */
     position: sticky;
-    top: var(--navbar-height);
+    top: 0;
     z-index: 100;
     background: var(--bg-mobile);
     padding-top: 10px;
@@ -704,12 +682,11 @@ button:disabled {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     backdrop-filter: blur(25px);
     gap: 12px;
-    pointer-events: auto !important;
 }
 
-/* body.tutorial-active .dashboard-navbar { pointer-events: none; } */
-/* Disabling global block to allow nav interactions while keeping target highlight */
-
+body.tutorial-active .dashboard-navbar {
+    pointer-events: none;
+}
 
 body.tutorial-active .dashboard-navbar .tutorial-active-target,
 body.tutorial-active .dashboard-navbar .tutorial-active-target * {
@@ -1195,178 +1172,260 @@ img {
     justify-content: center;
 }
 
-/* --- DESKTOP SPLIT VIEW: Editor Canvas + Sidebar --- */
-@media (min-width: 851px) {
-    body {
-        background: var(--bg-page);
+/* --- TUTORIAL SYSTEM --- */
+.tutorial-progress {
+    height: 6px;
+    background: var(--border);
+    width: 100%;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width 0.4s ease;
+}
+
+.tutorial-body {
+    animation: fadeInStep 0.3s ease;
+}
+
+.tutorial-step {
+    text-align: center;
+}
+
+.tutorial-step img {
+    width: 100%;
+    max-height: 250px;
+    object-fit: contain;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    background: var(--bg-page);
+    border: 1px solid var(--border);
+}
+
+.tutorial-step h3 {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+    color: var(--text);
+}
+
+.tutorial-step p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.tutorial-footer {
+    padding: 20px 30px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-card);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.tutorial-footer button {
+    height: 48px !important;
+    min-width: 140px;
+    border-radius: 14px;
+}
+
+.tut-page-counter {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg-page);
+    padding: 6px 12px;
+    border-radius: 50px;
+}
+
+.tutorial-feature-list {
+    text-align: left;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-page);
+    border-radius: 12px;
+}
+
+.feature-item i {
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+@keyframes fadeInStep {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
 
-    #main-dashboard {
-        display: flex !important;
-        flex-direction: row;
-        height: 100vh;
-        overflow: hidden;
-        align-items: stretch;
-    }
-
-    .dashboard-navbar {
-        position: static !important;
-        width: 320px !important;
-        height: 100vh !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        justify-content: flex-start !important;
-        padding: 40px 30px !important;
-        border-right: 1px solid var(--border) !important;
-        border-bottom: none !important;
-        background: var(--bg-card) !important;
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.03) !important;
-        z-index: 10;
-        gap: 0 !important;
-    }
-
-    .nav-brand {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 20px;
-        margin-bottom: 40px;
-        width: 100%;
-    }
-
-    .nav-brand img {
-        height: 45px;
-        margin-left: 18px;
-    }
-
-    .nav-brand .divider {
-        display: none;
-    }
-
-    .nav-tools-desktop .desktop-badge-novo {
-        position: static !important;
-        margin-left: auto !important;
-        transform: none !important;
-        margin-right: 5px;
-    }
-
-    .user-name-btn {
-        width: 100%;
-        justify-content: space-between;
-        padding: 14px 18px;
-        border-radius: 12px;
-        background: var(--bg-page);
-        color: var(--text);
-        font-size: 0.95rem;
-    }
-
-    .dark-mode .user-name-btn {
-        background: rgba(255, 255, 255, 0.05);
-    }
-
-    .user-name-btn:hover {
-        background: var(--primary-glow);
-        color: var(--primary);
-    }
-
-    .nav-tools {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        width: 100%;
-    }
-
-    .nav-tools-desktop {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        width: 100%;
-        gap: 12px;
-    }
-
-    .nav-tools-desktop .btn-nav {
-        width: 100%;
-        justify-content: flex-start;
-        padding: 14px 20px;
-        border-radius: 14px;
-        font-size: 1.05rem;
-        background: transparent;
-        border: 1px solid transparent;
-        font-weight: 600;
-        color: var(--text-muted);
-        transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-
-    .nav-tools-desktop .btn-nav i {
-        width: 24px;
-        text-align: center;
-        margin-right: 12px;
-        font-size: 1.3rem;
-    }
-
-    .nav-tools-desktop .btn-nav:hover,
-    .nav-tools-desktop .btn-nav.active {
-        background: var(--bg-page);
-        color: var(--primary);
+    to {
+        opacity: 1;
         transform: translateY(0);
-        margin-left: 5px;
-        width: calc(100% - 5px);
+    }
+}
+
+/* --- DYNAMIC TUTORIAL SYSTEM --- */
+.tutorial-spotlight {
+    position: fixed;
+    z-index: 20001;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+    border-radius: 16px;
+    pointer-events: none;
+    border: 3px solid var(--primary);
+    transition: opacity 0.3s ease;
+    /* Remove position/size transitions to eliminate lag */
+}
+
+.tutorial-tooltip {
+    position: fixed;
+    z-index: 110000;
+    background: var(--bg-card);
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    width: 540px;
+    max-width: 90vw;
+    pointer-events: auto;
+    transition: opacity 0.3s ease;
+    /* Only opacity for smooth fade, no transform sliding */
+    border: 1px solid var(--border);
+    opacity: 0;
+    visibility: hidden;
+}
+
+@keyframes tooltipAppear {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
     }
 
-    .dark-mode .nav-tools-desktop .btn-nav:hover {
-        background: rgba(255, 255, 255, 0.05);
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.tutorial-tooltip h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tutorial-tooltip p {
+    margin: 0 0 20px 0;
+    font-size: 0.95rem;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.tutorial-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    /* Tighter gap to help content fit */
+}
+
+.tutorial-btn-next {
+    background: var(--primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.tutorial-btn-next:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.tutorial-btn-skip {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: none;
+    padding: 8px;
+}
+
+.tutorial-btn-skip:hover {
+    color: var(--text);
+}
+
+.tutorial-step-dots {
+    display: flex;
+    gap: 5px;
+}
+
+.tutorial-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.3s;
+}
+
+.tutorial-dot.active {
+    background: var(--primary);
+    width: 15px;
+    border-radius: 3px;
+}
+
+.tutorial-arrow {
+    position: fixed;
+    z-index: 20004;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    pointer-events: none;
+}
+
+@keyframes popSuccess {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
     }
 
-    /* Target the logout button directly */
-    .nav-tools-desktop .btn-danger-soft {
-        margin-top: auto;
-        color: var(--danger);
-        background: rgba(239, 68, 68, 0.05);
-        margin-left: 0 !important;
-        width: 100% !important;
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
+}
 
-    .nav-tools-desktop .btn-danger-soft:hover {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger);
-        transform: translateY(-2px);
-    }
+.tutorial-blocker {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    background: transparent;
+    pointer-events: auto;
+}
 
-    /* Setup Screens and Loaders within flex container */
-    .setup-container {
-        z-index: 99999;
-    }
+.tutorial-parent-boost {
+    z-index: 20001 !important;
+    pointer-events: none !important;
+}
 
-    /* Container for the mobile preview */
-    .editor-canvas {
-        margin: auto !important;
-        /* Centers block vertically and horizontally in remaining space */
-        height: calc(100vh - 80px) !important;
-        max-width: 414px !important;
-        /* Authentic mobile preview width */
-        width: 100% !important;
-        border-radius: 40px !important;
-        box-shadow: 0 0 0 12px var(--text), 0 20px 60px rgba(0, 0, 0, 0.15) !important;
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
-        background: var(--bg-card);
-        position: relative;
-        flex-shrink: 0;
-        padding-bottom: 30px;
-    }
+.tutorial-active-target {
+    position: relative !important;
+    z-index: 20005 !important;
+    pointer-events: auto !important;
+}
 
-    .dark-mode .editor-canvas {
-        box-shadow: 0 0 0 12px #2a2a2a, 0 20px 60px rgba(0, 0, 0, 0.6) !important;
-    }
-
-    .editor-canvas::-webkit-scrollbar {
-        width: 0;
-        display: none;
-    }
-
-    .category-tabs {
-        top: 0 !important;
-        border-radius: 0 !important;
-    }
+.tutorial-active-target * {
+    pointer-events: auto !important;
 }

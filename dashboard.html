@@ -31,7 +31,7 @@
     <link rel="stylesheet" href="css/menu.css?v=1.1">
     <!-- Editor Styles (Overlays) -->
     <link rel="stylesheet" href="css/editor.css?v=3.2">
-    <link rel="stylesheet" href="css/mobile-fix.css?v=1.9">
+    <link rel="stylesheet" href="css/mobile-fix.css?v=1.1">
 
     <!-- Defer non-critical scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
@@ -44,7 +44,7 @@
     <div id="setup-screen" class="setup-container" style="display:none;">
         <div class="setup-card" id="setup-choice-card">
             <div class="setup-header">
-                <img id="setupLogo" src="assets/images/logo.svg" alt="Logo" class="setup-logo">
+                <img src="assets/images/logo.svg" alt="Logo" class="setup-logo">
                 <h2>Bem-vindo, <span id="setupGreetingName">!</span></h2>
                 <p>Já tens um menu ou queres começar do zero?</p>
             </div>
@@ -135,10 +135,10 @@
                 <img id="dashboardLogo" src="assets/images/logo.svg" alt="MenuNoAr"
                     onclick="window.location.href='index.html'" style="cursor: pointer;">
                 <span class="divider">|</span>
-                <button id="userDisplay" class="user-name-btn" onclick="openProfileModal()"
-                    title="Clica para ver ou alterar o perfil">
+                <button id="userDisplay" class="user-name-btn" onclick="openRenameModal()"
+                    title="Clica para alterar o nome">
                     <span id="userDisplayName">...</span>
-                    <i class="fa-solid fa-user-pen user-edit-icon"></i>
+                    <i class="fa-solid fa-pen-to-square user-edit-icon"></i>
                 </button>
             </div>
 
@@ -155,18 +155,18 @@
                         <i class="fa-solid fa-gear"></i> <span class="desktop-only">Configurar</span>
                     </button>
                     <button class="btn-nav" onclick="toggleDarkMode()" title="Tema">
-                        <i class="fa-solid fa-moon" id="themeIcon"></i> <span class="desktop-only">Mudar Tema</span>
+                        <i class="fa-solid fa-moon" id="themeIcon"></i>
                     </button>
                     <button class="btn-nav" onclick="openSettingsTab('billing')" title="Planos">
                         <i class="fa-solid fa-crown" style="color:var(--primary);"></i> <span
                             class="desktop-only">Premium</span>
                     </button>
-                    <button class="btn-nav" onclick="openTutorial()" title="Tutorial">
+                    <button class="btn-nav" onclick="openTutorial()" title="Tutorial" style="position:relative;">
                         <i class="fa-solid fa-graduation-cap"></i> <span class="desktop-only">Ajuda</span>
-                        <span class="badge-pulse desktop-badge-novo">NOVO</span>
+                        <span class="badge-pulse">NOVO</span>
                     </button>
                     <button class="btn-nav btn-danger-soft" onclick="signOut()" title="Sair">
-                        <i class="fa-solid fa-right-from-bracket"></i> <span class="desktop-only">Sair da conta</span>
+                        <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
                 </div>
 
@@ -182,43 +182,25 @@
             </div>
         </div>
 
-        <div id="mobileSidebarOverlay" class="mobile-sidebar-overlay" onclick="toggleNavDropdown(true)"></div>
-        <div id="mobileDropbar" class="mobile-sidebar">
-            <div class="sidebar-header">
-                <img id="sidebarLogo" src="assets/images/logo.svg" alt="Logo" class="sidebar-logo">
-                <button class="btn-close-sidebar" onclick="toggleNavDropdown(true)">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="sidebar-user">
-                <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
-                <div class="user-info">
-                    <span id="sidebarUserName">Utilizador</span>
-                    <small>Gestor</small>
-                </div>
-            </div>
-            <div class="sidebar-menu">
-                <button class="sidebar-item" onclick="openQrModal(); toggleNavDropdown(true)">
-                    <i class="fa-solid fa-qrcode"></i> <span>QR Code</span>
-                </button>
-                <button class="sidebar-item" id="liveLinkBtnMobile" onclick="toggleNavDropdown(true)">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Ver Menu</span>
-                </button>
-                <button class="sidebar-item" onclick="openSettingsModal(); toggleNavDropdown(true)">
-                    <i class="fa-solid fa-gear"></i> <span>Configurar</span>
-                </button>
-                <button class="sidebar-item" onclick="toggleDarkMode()">
-                    <i class="fa-solid fa-moon" id="themeIconMobile"></i> <span>Mudar Tema</span>
-                </button>
-                <button class="sidebar-item premium" onclick="openSettingsTab('billing'); toggleNavDropdown(true)">
-                    <i class="fa-solid fa-crown"></i> <span>Premium</span>
-                </button>
-            </div>
-            <div class="sidebar-footer">
-                <button class="sidebar-item btn-danger-soft" onclick="signOut()">
-                    <i class="fa-solid fa-right-from-bracket"></i> <span>Sair da conta</span>
-                </button>
-            </div>
+        <div id="mobileDropbar" class="mobile-dropbar">
+            <button class="dropbar-item" onclick="openQrModal(); toggleNavDropdown()">
+                <i class="fa-solid fa-qrcode"></i> <span>QR Code</span>
+            </button>
+            <button class="dropbar-item" id="liveLinkBtnMobile" onclick="toggleNavDropdown()">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Ver Menu</span>
+            </button>
+            <button class="dropbar-item" onclick="openSettingsModal(); toggleNavDropdown()">
+                <i class="fa-solid fa-gear"></i> <span>Configurar</span>
+            </button>
+            <button class="dropbar-item" onclick="toggleDarkMode(); toggleNavDropdown()">
+                <i class="fa-solid fa-moon" id="themeIconMobile"></i> <span>Mudar Tema</span>
+            </button>
+            <button class="dropbar-item" onclick="openSettingsTab('billing'); toggleNavDropdown()">
+                <i class="fa-solid fa-crown" style="color:var(--primary);"></i> <span>Premium</span>
+            </button>
+            <button class="dropbar-item btn-danger-soft" onclick="signOut()">
+                <i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span>
+            </button>
         </div>
 
         <!-- EDITOR CANVAS (Mimics menu.html structure but editable) -->
@@ -573,47 +555,23 @@
 
 
 
-    <!-- PROFILE MODAL -->
-    <div id="profileModal" class="edit-modal">
-        <div class="edit-modal-content" style="max-width:480px;">
-            <h2 style="margin-bottom:6px; color:var(--text);">Perfil e Contacto</h2>
-            <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Estes dados são privados e
-                essenciais para podermos entrar em contacto consigo se necessário.</p>
-            <form id="profileForm">
+    <!-- RENAME MODAL -->
+    <div id="renameModal" class="edit-modal">
+        <div class="edit-modal-content" style="max-width:380px;">
+            <h2 style="margin-bottom:6px; color:var(--color-text);">Alterar Nome</h2>
+            <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Este nome é apenas para
+                referência pessoal no painel.</p>
+            <form id="renameForm">
                 <div class="form-group">
-                    <label>Nome do Responsável</label>
+                    <label>O teu nome</label>
                     <div class="input-with-icon">
                         <i class="fa-solid fa-user"></i>
-                        <input type="text" id="profileName" placeholder="ex: João Silva" maxlength="40" required>
+                        <input type="text" id="renameInput" placeholder="ex: João Silva" maxlength="40" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Nome do Estabelecimento</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-store"></i>
-                        <input type="text" id="profileEstablishment" placeholder="ex: O Tasco do Zé" maxlength="60"
-                            required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Email de Contacto</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="profileEmail" placeholder="ex: contacto@restaurante.pt" maxlength="60"
-                            required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Telemóvel / Telefone</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-phone"></i>
-                        <input type="tel" id="profilePhone" placeholder="ex: 912 345 678" maxlength="20" required>
-                    </div>
-                </div>
-                <div class="modal-actions" style="margin-top: 25px;">
-                    <button type="button" class="btn-cancel" onclick="closeModal('profileModal')">Cancelar</button>
-                    <button type="submit" class="btn-confirm"><i class="fa-solid fa-floppy-disk"></i> Guardar
-                        Perfil</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('renameModal')">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Guardar</button>
                 </div>
             </form>
         </div>
@@ -638,12 +596,8 @@
         // Dark mode initial sync
         if (localStorage.getItem('menu_theme') === 'dark') {
             document.body.classList.add('dark-mode');
-            ['dashboardLogo', 'sidebarLogo', 'setupLogo', 'qrLogoImg'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.src = 'assets/images/Ilogo.svg';
-            });
-
-
+            const logo = document.getElementById('dashboardLogo');
+            if (logo) logo.src = 'assets/images/Ilogo.svg';
 
             const themeIcon = document.getElementById('themeIcon');
             if (themeIcon) themeIcon.className = 'fa-solid fa-sun';
