@@ -49,23 +49,26 @@ window.addEventListener('scroll', () => {
 });
 
 function updateScrollPath() {
+    // Only run on desktop where the SVG tracker is visible
+    if (!window.matchMedia("(min-width: 769px)").matches) return;
+
     const path = document.getElementById('pathLineFg');
     const arrow = document.getElementById('scrollArrow');
     if (!path || !arrow) return;
 
     const length = path.getTotalLength();
+    if (!length || length === 0) return; // Guard for zero length
+
     path.style.strokeDasharray = length;
 
-    // Calculate progress: Hero center (0) to last section center
-    // The container is 500vh, top starts at 50vh.
-    const scrollStart = window.innerHeight * 0.5;
-    const scrollEnd = window.innerHeight * 5.5; // Final section center at 5.5vh? 
-    // Wait, hero=0, mockup=1, exp=2, bento=3, pricing=4, cta=5. 
-    // Container starts at 50vh (hero center) and ends at 550vh (cta center).
-    // Total height = 500vh.
-
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercentage = Math.max(0, Math.min(1, window.scrollY / maxScroll));
+
+    // Safety check for scrollPercentage
+    let scrollPercentage = (maxScroll > 0) ? (scrollY / maxScroll) : 0;
+    scrollPercentage = Math.max(0, Math.min(1, scrollPercentage));
+
+    if (!isFinite(scrollPercentage)) scrollPercentage = 0;
 
     path.style.strokeDashoffset = length * (1 - scrollPercentage);
 
