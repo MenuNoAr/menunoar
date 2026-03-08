@@ -602,12 +602,68 @@ footer {
         padding: 40px;
     }
 
+    .nav-btn-ghost {
+        font-weight: 600;
+        color: #fff !important;
+        font-size: 0.9rem;
+    }
+
+    .nav-btn-primary {
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .plan-description {
+        color: var(--text-muted);
+        margin-bottom: 32px;
+        font-size: 0.95rem;
+    }
+
+    .btn-pricing {
+        padding: 14px 32px;
+        font-weight: 700;
+    }
+
     .hero h1 {
         font-size: 3.5rem;
     }
 
     .bento-grid {
         grid-template-columns: 1fr;
+    }
+
+    /* Refined Typography classes to replace inline styles */
+    .section-header {
+        text-align: center;
+        margin-bottom: 64px;
+    }
+
+    .section-header h2 {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        letter-spacing: -0.03em;
+    }
+
+    .section-header p {
+        font-size: 1.15rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .cta-heading {
+        font-size: 3.5rem;
+        margin-bottom: 24px;
+        letter-spacing: -0.03em;
+    }
+
+    .btn-cta {
+        padding: 18px 48px;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 700;
     }
 }
 
@@ -617,15 +673,24 @@ footer {
 
 @media (max-width: 768px) {
 
-    /* 1. Unlock Scroll & Height constraints */
-    html {
-        overflow-y: auto !important;
-        /* Critical to allow touch swiping! */
+    /* 1. Reels Style Snapping on Mobile */
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        /* Lock body, use main for scroll */
     }
 
     main {
-        position: static !important;
-        /* Avoid relative context issues on mobile */
+        height: 100dvh;
+        overflow-y: scroll;
+        scroll-snap-type: y mandatory;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        position: relative !important;
+        background: #000;
     }
 
     main>section {
@@ -637,16 +702,15 @@ footer {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 40px 0 !important;
-        /* Balanced padding */
-        overflow: hidden;
-        /* Prevent internal scroll weirdness */
+        padding: 100px 24px 40px !important;
+        /* Fixed padding for the header */
         scroll-snap-align: start;
         scroll-snap-stop: always;
-        z-index: 1;
+        overflow: hidden;
+        text-align: center;
     }
 
-    /* Override any specific section styles that might cause overlaps */
+    /* Fixed sections overlap prevention */
     .hero,
     .creation-options,
     .experience-section,
@@ -655,6 +719,7 @@ footer {
         position: relative !important;
         top: auto !important;
         left: auto !important;
+        margin: 0 !important;
     }
 
     /* 2. Hide SVG background tracker on mobile */
@@ -664,25 +729,43 @@ footer {
 
     /* 3. Header Adjustments */
     .nav-header {
+        position: fixed;
+        /* Keep it fixed over the scroller */
         top: 0;
-        height: auto;
-        padding: 12px 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0;
+        z-index: 2000;
+    }
+
+    .nav-btn-ghost,
+    .nav-btn-primary {
+        font-size: 0.8rem !important;
+        padding: 8px 12px !important;
     }
 
     /* 4. Hero Visuals */
     .hero {
-        background-position: left center;
+        background-position: center;
     }
 
     .hero h1 {
-        font-size: 2.75rem !important;
-        margin-bottom: 16px;
+        font-size: 2.25rem !important;
+        /* Smaller for mobile */
+        margin-bottom: 12px;
+        line-height: 1.2;
     }
 
     .hero p {
-        font-size: 1.05rem;
-        padding: 0 10px;
-        margin-bottom: 32px;
+        font-size: 1rem;
+        padding: 0;
+        margin-bottom: 24px;
+        color: rgba(255, 255, 255, 0.7);
     }
 
     .hero .flex.items-center.justify-center {
@@ -717,62 +800,101 @@ footer {
         margin-bottom: 24px;
     }
 
-    /* 6. Typography Downscaling for specific sections */
-    h2[style*="font-size: 3rem"],
-    h2[style*="font-size: 3.5rem"] {
-        font-size: 2rem !important;
+    /* 6. Typography Downscaling for all sections */
+    h2 {
+        font-size: 1.85rem !important;
+        margin-bottom: 12px !important;
+        line-height: 1.2 !important;
     }
 
-    /* 6.5 Center internal card layouts that were left-aligned on desktop */
+    .experience-content p,
+    .bento-text p {
+        font-size: 0.95rem !important;
+        margin-bottom: 16px !important;
+        line-height: 1.5 !important;
+    }
+
+    .label {
+        font-size: 0.65rem !important;
+        margin-bottom: 12px !important;
+    }
+
+    /* 6.1 Experience Section specific fits */
+    .experience-section .grid-2 {
+        gap: 20px !important;
+    }
+
+    .check-list li {
+        font-size: 0.9rem !important;
+        margin-bottom: 8px !important;
+        gap: 8px !important;
+    }
+
+    .premium-img {
+        max-height: 200px;
+        width: auto !important;
+        margin: 0 auto;
+    }
+
+    /* 6.5 Center internal card layouts */
     .bento-card {
         text-align: center;
         align-items: center;
+        background: #f9fafb !important;
+    }
+
+    .bento-img-container {
+        height: 120px !important;
+    }
+
+    .bento-text {
+        padding: 16px !important;
     }
 
     .bento-card i {
-        margin: 0 auto 24px;
+        font-size: 1.5rem !important;
+        margin-bottom: 12px !important;
     }
 
     /* 7. Pricing adjustments */
+    .pricing-minimal {
+        background: #fff !important;
+    }
+
     .pricing-info {
-        padding: 30px 20px !important;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        padding: 24px !important;
     }
 
     .price-value {
-        font-size: 3.5rem;
+        font-size: 2.5rem !important;
     }
 
     .pricing-features {
-        padding: 30px 20px !important;
-        align-items: center;
+        padding: 20px !important;
     }
 
     .feature-list {
-        margin: 0 auto;
-        display: inline-flex;
+        font-size: 0.85rem !important;
+        gap: 10px !important;
     }
 
     /* 8. Footer Reformat */
     .footer-grid {
         grid-template-columns: 1fr;
-        gap: 32px;
+        gap: 24px;
         text-align: center;
     }
 
     .footer {
         position: relative !important;
-        /* Release from 'absolute' bottom to stack natively */
-        padding-top: 60px;
-        margin-top: auto;
+        padding: 40px 20px !important;
+        background: #000;
+        color: #fff;
     }
 
     /* 9. Final CTA Layout */
-    section[style*="padding-top: 35vh"] {
-        padding-top: 90px !important;
-        padding-bottom: 20px !important;
+    section[style*="padding-top: 35vh"],
+    .final-cta {
+        padding: 100px 24px !important;
     }
 }
