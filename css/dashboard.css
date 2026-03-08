@@ -81,27 +81,28 @@ body.zen-body {
 .hud-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
 }
 
 .hud-btn {
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
     background: transparent;
     border: none;
     color: var(--zen-muted);
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
-    transition: all 0.2s;
+    font-size: 1.25rem;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hud-btn:hover {
     background: var(--zen-border);
-    color: var(--zen-text);
+    color: var(--zen-accent);
+    transform: translateY(-2px);
 }
 
 .hud-user {
@@ -110,24 +111,70 @@ body.zen-body {
     border-radius: 50%;
     background: var(--zen-accent);
     color: #fff;
-    border: none;
-    font-weight: 700;
+    border: 2px solid var(--zen-bg);
+    font-weight: 800;
     cursor: pointer;
     font-size: 0.8rem;
     margin-left: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* ─── The Stage ─── */
-.zen-stage {
-    padding-top: calc(var(--zen-hud-h) + 60px);
-    padding-bottom: 120px;
+/* ─── Horizontal Nav ─── */
+.zen-tabs-nav {
+    position: sticky;
+    top: var(--zen-hud-h);
+    background: var(--zen-bg);
+    z-index: 900;
+    width: 100%;
+    max-width: var(--zen-width);
+    margin: 0 auto 32px;
     display: flex;
-    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--zen-border);
+}
+
+.zen-tabs-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.nav-chip {
+    padding: 6px 16px;
+    border-radius: 50px;
+    background: var(--zen-border);
+    color: var(--zen-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.nav-chip.active {
+    background: var(--zen-accent);
+    color: #fff;
 }
 
 .zen-canvas {
     width: 100%;
     max-width: var(--zen-width);
+    animation: revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes revealUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .zen-menu-root {
@@ -427,6 +474,66 @@ body.zen-body {
     font-size: 0.8rem;
     color: var(--zen-muted);
     margin: 4px 0 16px;
+}
+
+/* Settings Form */
+.f-group {
+    margin-bottom: 20px;
+}
+
+.f-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--zen-muted);
+    margin-bottom: 8px;
+}
+
+.z-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--zen-border);
+    background: var(--zen-bg);
+    color: var(--zen-text);
+}
+
+.color-presets {
+    display: flex;
+    gap: 8px;
+}
+
+.color-pip {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.color-pip.active {
+    border-color: var(--zen-text);
+    transform: scale(1.1);
+}
+
+.item-add-dummy {
+    border: 1px dashed var(--zen-border);
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    color: var(--zen-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.item-add-dummy:hover {
+    background: var(--zen-border);
+    color: var(--zen-accent);
+    border-style: solid;
 }
 
 @media (max-width: 600px) {

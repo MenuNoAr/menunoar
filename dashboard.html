@@ -37,6 +37,8 @@
         <div class="hud-actions">
             <button class="hud-btn" id="liveLinkBtn" title="Ver Link Público"><i
                     class="ph ph-arrow-square-out"></i></button>
+            <button class="hud-btn" onclick="openSettingsModal()" title="Definições"><i
+                    class="ph ph-sliders"></i></button>
             <button class="hud-btn" onclick="openQrModal()" title="Código QR"><i class="ph ph-qr-code"></i></button>
             <button class="hud-btn" onclick="toggleDarkMode()" title="Tema"><i id="themeIcon"
                     class="ph ph-moon"></i></button>
@@ -46,6 +48,9 @@
 
     <!-- THE STAGE (Centered Editor) -->
     <main class="zen-stage">
+        <!-- Sticky Category Nav -->
+        <nav id="category-nav" class="zen-tabs-nav"></nav>
+
         <div id="editor-container" class="zen-canvas">
             <!-- This is the direct Menu Editor -->
             <div id="menuContainer" class="zen-menu-root">
@@ -60,6 +65,53 @@
     </button>
 
     <!-- MODALS (Ultra-Minimalist) -->
+
+    <!-- Settings Modal (Advanced) -->
+    <div id="settingsModal" class="zen-modal" style="display:none;"
+        onclick="if(event.target===this) closeModal('settingsModal')">
+        <div class="zen-modal-content">
+            <header>
+                <h3>Configurações</h3>
+            </header>
+            <form id="settingsForm" class="zen-form">
+                <div class="f-group">
+                    <label>Tipo de Letra</label>
+                    <select id="modalFont" class="z-input">
+                        <option value="Inter">Inter (Clean)</option>
+                        <option value="Outfit">Outfit (Bold)</option>
+                        <option value="Playfair Display">Elegante</option>
+                    </select>
+                </div>
+                <div class="f-group">
+                    <label>Cor de Acento</label>
+                    <div class="color-presets">
+                        <button type="button" class="color-pip" data-color="#1fa8ff"
+                            style="background:#1fa8ff"></button>
+                        <button type="button" class="color-pip" data-color="#10b981"
+                            style="background:#10b981"></button>
+                        <button type="button" class="color-pip" data-color="#f59e0b"
+                            style="background:#f59e0b"></button>
+                        <button type="button" class="color-pip" data-color="#ef4444"
+                            style="background:#ef4444"></button>
+                        <button type="button" class="color-pip" data-color="#000000"
+                            style="background:#000000"></button>
+                    </div>
+                    <input type="hidden" id="modalAccent" value="#1fa8ff">
+                </div>
+                <div class="f-group">
+                    <label>Estilo de Menu</label>
+                    <div class="menu-type-toggle">
+                        <label><input type="radio" name="mtype" value="digital" checked> Digital</label>
+                        <label><input type="radio" name="mtype" value="pdf"> PDF</label>
+                    </div>
+                </div>
+                <div class="modal-btns">
+                    <button type="submit" class="z-btn primary block">Guardar</button>
+                    <button type="button" class="z-btn block" onclick="closeModal('settingsModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Profile/Auth Modal -->
     <div id="profileModal" class="zen-modal" style="display:none;"

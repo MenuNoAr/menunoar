@@ -11,11 +11,32 @@ export function renderAll() {
     const data = state.currentData;
     const items = state.menuItems;
 
+    // Apply accent color & font globally
+    _applyBranding(data);
+
     if (data.menu_type === 'pdf') {
         renderPdfZen(data);
     } else {
         renderZenEditor(data, items);
+        renderCategoryNav(items);
     }
+}
+
+function _applyBranding(data) {
+    const root = document.documentElement;
+    if (data.accent_color) root.style.setProperty('--zen-accent', data.accent_color);
+    if (data.font) root.style.setProperty('--font-family', `'${data.font}', sans-serif`);
+    document.body.style.fontFamily = data.font ? `'${data.font}', sans-serif` : "'Inter', sans-serif";
+}
+
+export function renderCategoryNav(items) {
+    const nav = document.getElementById('category-nav');
+    if (!nav) return;
+
+    const cats = _getOrderedCategories(items);
+    nav.innerHTML = cats.map(cat => `
+        <button class="nav-chip" onclick="document.getElementById('cat-${cat.replace(/\s+/g, '-')}').scrollIntoView({behavior:'smooth', block: 'center'})">${escapeHTML(cat)}</button>
+    `).join('');
 }
 
 export function renderZenEditor(data, items) {
@@ -31,7 +52,7 @@ export function renderZenEditor(data, items) {
     canvas.innerHTML = `
         <!-- Header Zone -->
         <div class="zen-cover-zone" onclick="window.triggerCoverUpload()">
-            <img src="${data.cover_url || ''}" id="coverDisplay">
+            <img src="${data.cover_url || 'https://images.unsplash.com/photo-1514361892635-6b07e31e75f9?q=80&w=2070'}" id="coverDisplay">
             <div class="zen-img-overlay"><i class="ph ph-camera"></i></div>
         </div>
 
@@ -44,12 +65,11 @@ export function renderZenEditor(data, items) {
             ${cats.map(cat => {
         const catItems = groups[cat] || [];
         return `
-                    <section class="zen-cat-block">
+                    <section class="zen-cat-block" id="cat-${cat.replace(/\s+/g, '-')}">
                         <div class="zen-cat-header">
                             <h3 class="zen-cat-title" contenteditable="true" 
                                 onblur="window.handleCategoryRename('${cat}', this.innerText)">${escapeHTML(cat)}</h3>
                             <div class="cat-micro-actions">
-                                <button class="mini-btn" onclick="window.addNewItem('${cat}')" title="Novo Prato"><i class="ph ph-plus"></i></button>
                                 <button class="mini-btn danger" onclick="window.deleteCategory('${cat}')"><i class="ph ph-trash"></i></button>
                             </div>
                         </div>
@@ -76,6 +96,9 @@ export function renderZenEditor(data, items) {
                                     </div>
                                 </div>
                             `).join('')}
+                            <div class="item-add-dummy" onclick="window.addNewItem('${cat}')">
+                                <i class="ph ph-plus-circle"></i> Adicionar Prato
+                            </div>
                         </div>
                     </section>
                 `;

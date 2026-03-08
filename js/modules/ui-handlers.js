@@ -136,6 +136,40 @@ window.openQrModal = () => {
 
 window.downloadQr = () => window._qr?.download({ name: "qr-menu", extension: "png" });
 
+window.openSettingsModal = () => {
+    const data = state.currentData;
+    document.getElementById('modalFont').value = data.font || 'Inter';
+    document.getElementById('modalAccent').value = data.accent_color || '#1fa8ff';
+    document.querySelector(`input[name="mtype"][value="${data.menu_type || 'digital'}"]`).checked = true;
+
+    // Highlight active color pip
+    document.querySelectorAll('.color-pip').forEach(p => {
+        p.classList.toggle('active', p.dataset.color === (data.accent_color || '#1fa8ff'));
+    });
+
+    document.getElementById('settingsModal').style.display = 'flex';
+};
+
+document.getElementById('settingsForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const updates = {
+        font: document.getElementById('modalFont').value,
+        accent_color: document.getElementById('modalAccent').value,
+        menu_type: document.querySelector('input[name="mtype"]:checked').value
+    };
+
+    await state.supabase.from('restaurants').update(updates).eq('id', state.restaurantId);
+    window.location.reload();
+};
+
+document.querySelectorAll('.color-pip').forEach(pip => {
+    pip.onclick = () => {
+        document.querySelectorAll('.color-pip').forEach(p => p.classList.remove('active'));
+        pip.classList.add('active');
+        document.getElementById('modalAccent').value = pip.dataset.color;
+    };
+});
+
 window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
 window.signOut = async () => {
