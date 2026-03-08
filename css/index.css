@@ -917,48 +917,45 @@ footer {
     }
 
     .experience-section h2 {
-        font-size: 1.6rem !important;
-        margin-bottom: 8px !important;
+        font-size: 1.5rem !important;
+        margin-bottom: 6px !important;
     }
 
     .experience-section p {
-        font-size: 0.9rem !important;
-        margin-bottom: 12px !important;
+        font-size: 0.85rem !important;
+        margin-bottom: 10px !important;
     }
 
     .experience-section .check-list {
-        margin: 12px 0 !important;
+        margin: 8px 0 !important;
         display: flex;
         flex-direction: column;
-        gap: 8px !important;
+        gap: 6px !important;
         width: 100%;
     }
 
     .experience-section .check-list li {
         color: #fff !important;
-        font-size: 0.85rem !important;
-        /* Smaller text */
+        font-size: 0.8rem !important;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 10px 16px;
-        /* Tighter padding */
-        border-radius: 10px;
+        padding: 8px 12px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
-        gap: 12px !important;
+        gap: 10px !important;
         text-align: left;
     }
 
     .experience-section .check-list li i {
         color: var(--primary);
-        font-size: 1.25rem;
+        font-size: 1.1rem;
     }
 
     .premium-img {
-        max-height: 150px;
-        /* Crucial: make room */
-        width: auto !important;
-        object-fit: contain;
+        max-height: 210px;
+        width: 100% !important;
+        object-fit: cover;
         border-radius: 16px;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         margin: 12px auto 0;
