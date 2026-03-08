@@ -615,6 +615,44 @@ footer {
         font-size: 0.9rem;
     }
 
+    /* Standard Footer Styles (Desktop/Common) */
+    .footer-logo {
+        font-weight: 800;
+        font-size: 1.25rem;
+        margin-bottom: 20px;
+        letter-spacing: -0.04em;
+    }
+
+    .footer-tagline {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .footer-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #000;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+    }
+
+    .footer a {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .footer-bottom {
+        margin-top: 60px;
+        border-top: 1px solid var(--border-color);
+        padding-top: 32px;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
     .plan-description {
         color: var(--text-muted);
         margin-bottom: 32px;
@@ -782,29 +820,26 @@ footer {
     /* 5. Creation Options Grid */
     .options-grid {
         grid-template-columns: 1fr !important;
-        gap: 20px;
+        gap: 16px;
     }
 
     .option-card {
-        padding: 40px 20px;
-    }
-
-    .option-card h3 {
-        font-size: 1.5rem;
-    }
-
-    .option-icon {
-        width: 52px;
-        height: 52px;
-        font-size: 1.5rem;
-        margin-bottom: 24px;
+        padding: 24px !important;
     }
 
     /* 6. Typography Downscaling for all sections */
     h2 {
-        font-size: 1.85rem !important;
+        font-size: 2.15rem !important;
+        /* Slightly larger for better impact */
         margin-bottom: 12px !important;
-        line-height: 1.2 !important;
+        line-height: 1.15 !important;
+    }
+
+    .experience-content p,
+    .bento-text p,
+    .hero p {
+        font-size: 1.05rem !important;
+        line-height: 1.4 !important;
     }
 
     .experience-content p,
@@ -836,24 +871,54 @@ footer {
         margin: 0 auto;
     }
 
-    /* 6.5 Center internal card layouts */
+    /* 6.2 Bento Grid: Horizontal Slider for Mobile */
+    .bento-grid {
+        display: flex !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory;
+        padding: 0 0 20px !important;
+        gap: 16px !important;
+        width: calc(100% + 48px);
+        /* Bleed into side paddings */
+        margin-left: -24px !important;
+        padding: 0 24px !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .bento-card {
+        flex: 0 0 85%;
+        scroll-snap-align: center;
         text-align: center;
-        align-items: center;
-        background: #f9fafb !important;
+        background: #fff !important;
+        border: 1px solid var(--border-color) !important;
+        height: auto !important;
+        margin-bottom: 0 !important;
+        border-radius: 12px !important;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .bento-img-container {
-        height: 120px !important;
+        height: 160px !important;
     }
 
     .bento-text {
-        padding: 16px !important;
+        padding: 24px 20px !important;
+        flex: 1;
+    }
+
+    .bento-card h3 {
+        font-size: 1.4rem !important;
+        margin-bottom: 12px !important;
+        font-weight: 700;
+        color: #000;
     }
 
     .bento-card i {
-        font-size: 1.5rem !important;
+        font-size: 1.6rem !important;
         margin-bottom: 12px !important;
+        color: var(--primary);
     }
 
     /* 7. Pricing adjustments */
@@ -881,20 +946,29 @@ footer {
     /* 8. Footer Reformat */
     .footer-grid {
         grid-template-columns: 1fr;
-        gap: 24px;
+        gap: 32px;
         text-align: center;
     }
 
     .footer {
-        position: relative !important;
-        padding: 40px 20px !important;
+        height: auto !important;
+        min-height: auto !important;
+        padding: 60px 24px !important;
         background: #000;
         color: #fff;
+        scroll-snap-align: start;
+        /* New snapping point */
     }
 
-    /* 9. Final CTA Layout */
-    section[style*="padding-top: 35vh"],
+    /* 9. Final CTA Layout: Separate from footer */
     .final-cta {
-        padding: 100px 24px !important;
+        padding: 120px 24px !important;
+        height: calc(100dvh - 300px) !important;
+        /* Smaller to leave room or just one slice */
+        min-height: 80dvh !important;
+    }
+
+    .final-cta h2 {
+        font-size: 2.25rem !important;
     }
 }
