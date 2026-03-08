@@ -212,9 +212,10 @@ function handleSnapScroll(direction) {
 
     // Find current active section
     let currentIndex = -1;
-    const scrollPos = window.scrollY;
+    const scrollPos = window.pageYOffset || document.documentElement.scrollTop;
     const windowHeight = window.innerHeight;
 
+    // Determine which section is currently most visible
     sections.forEach((section, index) => {
         const rect = section.getBoundingClientRect();
         // If the section is mostly in view
@@ -231,23 +232,35 @@ function handleSnapScroll(direction) {
 }
 
 function scrollToIndex(index) {
+    if (isScrolling) return;
     isScrolling = true;
+
+    // Disable body scroll to prevent accumulation/jitters during animation
+    document.body.style.overflow = 'hidden';
+
     sections[index].scrollIntoView({ behavior: 'smooth' });
 
-    // Lock scrolling for a moment to prevent multiple jumps
+    // Duration should match or slightly exceed the smooth scroll duration
+    // Browser smooth scroll usually takes around 500-800ms
     setTimeout(() => {
         isScrolling = false;
-    }, 800);
+        document.body.style.overflow = ''; // Re-enable for the next interaction
+    }, 1000);
 }
 
 // Wheel Listener (Desktop)
 window.addEventListener('wheel', (e) => {
-    // Determine direction
-    if (Math.abs(e.deltaY) < 10) return; // Ignore tiny scrolls
+    // Determine direction and prevent default if we're handling it
+    if (Math.abs(e.deltaY) < 10) return;
+
+    if (isScrolling) {
+        e.preventDefault();
+        return;
+    }
 
     const direction = e.deltaY > 0 ? 'down' : 'up';
     handleSnapScroll(direction);
-}, { passive: true });
+}, { passive: false }); // Needs to be passive: false to allow preventDefault
 
 // Touch Handling (Mobile)
 let touchStartY = 0;
@@ -255,11 +268,19 @@ window.addEventListener('touchstart', (e) => {
     touchStartY = e.touches[0].clientY;
 }, { passive: true });
 
+window.addEventListener('touchmove', (e) => {
+    if (isScrolling) {
+        e.preventDefault(); // Block movement during animation
+    }
+}, { passive: false });
+
 window.addEventListener('touchend', (e) => {
+    if (isScrolling) return;
+
     const touchEndY = e.changedTouches[0].clientY;
     const diff = touchStartY - touchEndY;
 
-    if (Math.abs(diff) > 50) { // Threshold for swipe
+    if (Math.abs(diff) > 50) {
         const direction = diff > 0 ? 'down' : 'up';
         handleSnapScroll(direction);
     }
