@@ -355,7 +355,11 @@ button:disabled {
 .editor-canvas {
     max-width: 600px;
     width: 100%;
-    margin: var(--navbar-height) auto 0 auto;
+    margin-top: var(--navbar-height);
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0;
+    padding: 0;
     background: var(--bg-mobile);
     /* Match menu bg */
     border-radius: 0;
@@ -367,6 +371,7 @@ button:disabled {
     /* Internal Scroll */
     height: calc(100vh - var(--navbar-height));
     border: none;
+    padding-top: 0 !important;
 }
 
 /* === HERO / HEADER UNIFIED === */
@@ -620,15 +625,9 @@ button:disabled {
     /* Force relative for action buttons */
 }
 
-/* Category Nav Overrides for Dragging */
-.category-tabs {
-    /* Ensure sticking works in editor context */
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: var(--bg-mobile);
-    padding-top: 10px;
-}
+/* --- CATEGORY NAVIGATION SYSTEM (Refined) --- */
+/* (Base styles defined in Unified Block at line 1156) */
+
 
 /* --- ADD ITEM BUTTON (Editor Only) --- */
 .add-item-btn {
