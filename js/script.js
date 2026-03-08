@@ -203,83 +203,107 @@ if (contactForm) {
         }
     });
 }
-// --- INTELLIGENT REELS SCROLL ---
+// --- INTELLIGENT & FAST REELS SCROLL ---
 let isAnimating = false;
-let currentIdx = 0;
+let targetIdx = 0;
 const snapSections = document.querySelectorAll('main > section');
+let scrollCooldown = false;
 
-function smoothScrollTo(targetY, duration) {
-    const startY = window.pageYOffset || document.documentElement.scrollTop;
-    const diff = targetY - startY;
-    let start = null;
+function performSmoothSnap(index, duration = 650) {
+    if (index < 0) index = 0;
+    if (index >= snapSections.length) index = snapSections.length - 1;
 
-    function step(timestamp) {
-        if (!start) start = timestamp;
-        const progress = timestamp - start;
-        const percent = Math.min(progress / duration, 1);
+    targetIdx = index;
+    if (isAnimating) return; // The animation loop will handle the target change
 
-        // Easing: easeInOutQuad
-        const easing = percent < 0.5 ? 2 * percent * percent : -1 + (4 - 2 * percent) * percent;
-
-        window.scrollTo(0, startY + diff * easing);
-
-        if (progress < duration) {
-            window.requestAnimationFrame(step);
-        } else {
-            // Animation finished
-            setTimeout(() => {
-                isAnimating = false;
-            }, 50); // Small buffer to ensure browser settles
-        }
-    }
-    window.requestAnimationFrame(step);
-}
-
-function performSnap(direction) {
-    if (isAnimating) return;
-
-    // Find current index based on actual scroll position (in case they jumped via menu)
+    isAnimating = true;
     const windowHeight = window.innerHeight;
-    const scrollPos = window.pageYOffset || document.documentElement.scrollTop;
-    currentIdx = Math.round(scrollPos / windowHeight);
 
-    let nextIdx = currentIdx;
-    if (direction === 'down' && currentIdx < snapSections.length - 1) {
-        nextIdx = currentIdx + 1;
-    } else if (direction === 'up' && currentIdx > 0) {
-        nextIdx = currentIdx - 1;
+    function animate() {
+        const startY = window.pageYOffset || document.documentElement.scrollTop;
+        const currentTargetY = targetIdx * windowHeight;
+        const diff = currentTargetY - startY;
+        let start = null;
+
+        // If distance is huge, speed up slightly
+        const distanceMultiplier = Math.min(2, Math.max(1, Math.abs(diff) / windowHeight));
+        const adjustedDuration = duration * (distanceMultiplier > 1 ? 1.2 : 1);
+
+        function step(timestamp) {
+            if (!start) start = timestamp;
+            const progress = timestamp - start;
+            const percent = Math.min(progress / adjustedDuration, 1);
+
+            // Easing: easeOutQuart (feels faster/snappier)
+            const easing = 1 - Math.pow(1 - percent, 4);
+
+            window.scrollTo(0, startY + diff * easing);
+
+            if (progress < adjustedDuration) {
+                // Check if target changed during this specific animation frame
+                if (currentTargetY !== targetIdx * windowHeight) {
+                    // Target changed! restart from current position
+                    start = null; // reset start for the next sub-animation
+                    // We don't return, we just let it continue with new diff on next frames?
+                    // Better to just restart the whole animation loop for the next segment
+                    window.requestAnimationFrame(animate);
+                    return;
+                }
+                window.requestAnimationFrame(step);
+            } else {
+                // Done with this segment, check if we're at the REAL target
+                const finalY = targetIdx * windowHeight;
+                if (Math.abs(window.pageYOffset - finalY) > 2) {
+                    window.requestAnimationFrame(animate);
+                } else {
+                    isAnimating = false;
+                }
+            }
+        }
+        window.requestAnimationFrame(step);
     }
 
-    if (nextIdx !== currentIdx) {
-        isAnimating = true;
-        smoothScrollTo(nextIdx * windowHeight, 700); // 700ms is standard buttery duration
-    }
+    animate();
 }
 
 // Wheel Listener (Desktop)
 window.addEventListener('wheel', (e) => {
-    // Only on Desktop
     if (!window.matchMedia("(min-width: 769px)").matches) return;
+    e.preventDefault();
 
-    e.preventDefault(); // Take full control of the scroll event
+    if (scrollCooldown) return;
+    if (Math.abs(e.deltaY) < 30) return;
 
-    if (isAnimating) return;
-    if (Math.abs(e.deltaY) < 20) return; // Sensitivity threshold
+    // Detect fast spin/momentum
+    let jumpCount = 1;
+    if (Math.abs(e.deltaY) > 300) jumpCount = 2; // Jump 2 if they spin hard
+    if (Math.abs(e.deltaY) > 800) jumpCount = 3; // Jump 3 if they spin REALLY hard
 
-    const direction = e.deltaY > 0 ? 'down' : 'up';
-    performSnap(direction);
+    const direction = e.deltaY > 0 ? 1 : -1;
+
+    // Calculate new target based on current target (not current scroll)
+    let newTarget = targetIdx + (direction * jumpCount);
+    performSmoothSnap(newTarget);
+
+    // Short cooldown to prevent "ultra-spinning" 100 slides in 1 sec
+    scrollCooldown = true;
+    setTimeout(() => { scrollCooldown = false; }, 120);
 }, { passive: false });
 
-// Keyboard Listeners (Arrows, Space, etc.)
+// Keyboard
 window.addEventListener('keydown', (e) => {
-    if (isAnimating) return;
-
     if (e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault();
-        performSnap('down');
+        performSmoothSnap(targetIdx + 1);
     } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        performSnap('up');
+        performSmoothSnap(targetIdx - 1);
+    } else if (e.key === 'End') {
+        e.preventDefault();
+        performSmoothSnap(snapSections.length - 1);
+    } else if (e.key === 'Home') {
+        e.preventDefault();
+        performSmoothSnap(0);
     }
 });
 
