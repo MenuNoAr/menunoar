@@ -3,250 +3,103 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>Menu Studio | Painel Premium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor | Menu no Ar</title>
 
-    <!-- Global Styles & Inter font (Imported in style.css) -->
+    <!-- Base + Theme Integration -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/dashboard.css">
 
-    <!-- Branding Fonts -->
+    <!-- Design Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap"
         rel="stylesheet">
 
-    <!-- Premium Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
-    <!-- Runtime Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body class="studio-body">
+<body class="zen-body">
 
-    <!-- SETUP FLOW (REVEAL ANIMATION) -->
-    <div id="setup-screen" class="studio-setup-overlay" style="display:none;">
-        <div class="setup-container reveal-shadow">
-            <header class="setup-header">
-                <img src="assets/images/logo.svg" alt="Menu no Ar" class="setup-brand">
-                <h1>Eleve o seu Negócio</h1>
-                <p>O futuro da restauração começa agora.</p>
-            </header>
-
-            <div class="setup-cards-row">
-                <button class="setup-card" onclick="showSetupForm('scratch')">
-                    <div class="card-glow"></div>
-                    <i class="ph-fill ph-sparkle"></i>
-                    <div class="card-content">
-                        <strong>Menu Digital</strong>
-                        <span>Editor Visual Pro</span>
-                    </div>
-                </button>
-                <button class="setup-card" onclick="showSetupForm('import')">
-                    <div class="card-glow"></div>
-                    <i class="ph-fill ph-file-pdf"></i>
-                    <div class="card-content">
-                        <strong>Ementa em PDF</strong>
-                        <span>Upload Instantâneo</span>
-                    </div>
-                </button>
+    <!-- GLOBAL HUD (Minimal fixed top bar) -->
+    <header class="zen-hud">
+        <div class="hud-left">
+            <a href="/" class="hud-logo"><img src="assets/images/logo.svg" alt="logo"></a>
+            <div class="hud-sep"></div>
+            <div class="hud-status">
+                <div class="dot green"></div> <span id="sidebarUserName">...</span>
             </div>
+        </div>
 
-            <!-- Contextual Form (Revealed based on choice) -->
-            <form id="setupForm" class="setup-input-group" style="display:none;">
-                <div class="fancy-input-wrapper">
-                    <input type="text" id="setupName" placeholder="Nome do Restaurante" required
-                        oninput="generateSlug(this.value)">
-                    <div class="input-focus-border"></div>
+        <div class="hud-actions">
+            <button class="hud-btn" id="liveLinkBtn" title="Ver Link Público"><i
+                    class="ph ph-arrow-square-out"></i></button>
+            <button class="hud-btn" onclick="openQrModal()" title="Código QR"><i class="ph ph-qr-code"></i></button>
+            <button class="hud-btn" onclick="toggleDarkMode()" title="Tema"><i id="themeIcon"
+                    class="ph ph-moon"></i></button>
+            <button class="hud-user" onclick="openProfileModal()" id="userDisplayName">U</button>
+        </div>
+    </header>
+
+    <!-- THE STAGE (Centered Editor) -->
+    <main class="zen-stage">
+        <div id="editor-container" class="zen-canvas">
+            <!-- This is the direct Menu Editor -->
+            <div id="menuContainer" class="zen-menu-root">
+                <div class="zen-loading">A carregar o seu espaço...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Minimal Floating Action (Add Category) -->
+    <button class="zen-fab" onclick="addNewCategoryOptimized()" title="Nova Categoria">
+        <i class="ph ph-plus"></i>
+    </button>
+
+    <!-- MODALS (Ultra-Minimalist) -->
+
+    <!-- Profile/Auth Modal -->
+    <div id="profileModal" class="zen-modal" onclick="if(event.target===this) closeModal('profileModal')">
+        <div class="zen-modal-content">
+            <header>
+                <h3>Definições</h3>
+            </header>
+            <div class="modal-body">
+                <p class="muted" id="profileEmail">...</p>
+                <div class="modal-btns">
+                    <button class="z-btn danger" onclick="signOut()">Sair da Conta</button>
+                    <button class="z-btn" onclick="closeModal('profileModal')">Fechar</button>
                 </div>
-                <div class="slug-badge">
-                    menunoar.pt/<span id="setupSlugPreview">...</span>
-                    <input type="hidden" id="setupSlug">
-                </div>
-                <button type="submit" class="btn btn-primary btn-full">Começar Experiência <i
-                        class="ph ph-arrow-right"></i></button>
-                <button type="button" class="btn btn-ghost btn-full" onclick="goBackToSetupChoice()">Voltar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Modal -->
+    <div id="qrModal" class="zen-modal" onclick="if(event.target===this) closeModal('qrModal')">
+        <div class="zen-modal-content small">
+            <div id="qr-code-container" class="zen-qr-box"></div>
+            <button class="z-btn primary block" onclick="downloadQr()">Baixar QR Code</button>
+        </div>
+    </div>
+
+    <!-- Background Setup Overlay -->
+    <div id="setup-screen" class="zen-overlay" style="display:none;">
+        <div class="zen-setup-card">
+            <h2>Bem-vindo</h2>
+            <p>Dê um nome ao seu novo menu digital.</p>
+            <form id="setupForm" class="zen-setup-form">
+                <input type="text" id="setupName" placeholder="Nome do Restaurante" required
+                    oninput="generateSlug(this.value)">
+                <div class="slug-hint">menunoar.pt/<span id="slug-view">...</span></div>
+                <input type="hidden" id="setupSlug">
+                <button type="submit" class="z-btn primary">Criar e Editar <i class="ph ph-pencil-simple"></i></button>
             </form>
         </div>
     </div>
 
-    <!-- STUDIO CORE SHELL -->
-    <div id="main-dashboard" class="studio-app" style="display:none;">
-
-        <!-- SIDE NAVIGATION (Nike Style Column) -->
-        <nav class="studio-sidebar">
-            <div class="sidebar-top">
-                <a href="/" class="studio-logo">
-                    <img src="assets/images/logo.svg" alt="Logo" id="studioLogo">
-                </a>
-            </div>
-
-            <div class="sidebar-menu">
-                <button class="side-btn active" onclick="switchView('editor')" title="Menu Editor">
-                    <i class="ph ph-layout"></i>
-                    <span>Menu</span>
-                </button>
-                <button class="side-btn" onclick="openSettingsModal('design')" title="Design Language">
-                    <i class="ph ph-palette"></i>
-                    <span>Design</span>
-                </button>
-                <button class="side-btn" onclick="openQrModal()" title="QR Studio">
-                    <i class="ph ph-qr-code"></i>
-                    <span>QR</span>
-                </button>
-                <button class="side-btn" id="billingLink" onclick="openSettingsModal('billing')" title="Subscription">
-                    <i class="ph ph-credit-card"></i>
-                    <span>Conta</span>
-                </button>
-            </div>
-
-            <div class="sidebar-bottom">
-                <button class="side-btn logout" onclick="signOut()" title="Logout">
-                    <i class="ph ph-sign-out"></i>
-                </button>
-            </div>
-        </nav>
-
-        <!-- MAIN CANVAS AREA -->
-        <main class="studio-viewport">
-
-            <!-- TOP BAR (Contextual Navigation) -->
-            <header class="studio-topbar">
-                <div class="bar-left">
-                    <div class="status-indicator">
-                        <div class="pulse-dot"></div>
-                        <span id="sidebarUserName">Studio</span>
-                    </div>
-                </div>
-
-                <div class="bar-right">
-                    <div id="trialTimer" class="premium-badge">PRO</div>
-
-                    <button class="btn btn-secondary glass" id="liveLinkBtn">
-                        <i class="ph ph-eye"></i>
-                        <span>Live Preview</span>
-                    </button>
-
-                    <div class="divider"></div>
-
-                    <button class="theme-switch" onclick="toggleDarkMode()">
-                        <i id="themeIcon" class="ph ph-moon"></i>
-                    </button>
-
-                    <button class="user-pill" onclick="openProfileModal()">
-                        <span id="userDisplayName">U</span>
-                    </button>
-                </div>
-            </header>
-
-            <!-- EDITING WORKSPACE -->
-            <section class="studio-workspace">
-
-                <!-- CONTENT PANEL (Management) -->
-                <div class="workspace-panel blueprint-panel">
-                    <header class="panel-head">
-                        <h2 class="section-title">Blueprint</h2>
-                        <button class="btn btn-primary sm" onclick="addNewCategoryOptimized()">
-                            <i class="ph ph-plus"></i>
-                        </button>
-                    </header>
-                    <div id="categories-blueprint" class="categories-grid scroll-y">
-                        <!-- Bento Cards injected here -->
-                    </div>
-                </div>
-
-                <!-- PREVIEW PANEL (Visual Result) -->
-                <div class="workspace-panel preview-panel">
-                    <div class="preview-controls">
-                        <button class="view-btn active" onclick="setPreviewSize('mobile')"><i
-                                class="ph ph-smartphone"></i></button>
-                        <button class="view-btn" onclick="setPreviewSize('tablet')"><i
-                                class="ph ph-tablet"></i></button>
-                    </div>
-
-                    <div id="viewport-frame" class="device-frame">
-                        <div class="device-content" id="menuContainer">
-                            <!-- Live Menu Render -->
-                        </div>
-                    </div>
-                </div>
-
-            </section>
-
-        </main>
-    </div>
-
-    <!-- PREMIUM MODALS (Glassmorphism) -->
-
-    <!-- Item/Product Modal -->
-    <div id="itemModal" class="modal-root" onclick="if(event.target===this) closeModal('itemModal')">
-        <div class="modal-glass">
-            <div class="modal-header">
-                <h3 id="modalTitle">Detalhes do Prato</h3>
-                <button class="close-x" onclick="closeModal('itemModal')"><i class="ph ph-x"></i></button>
-            </div>
-            <form id="itemEditForm" class="modal-body">
-                <input type="hidden" id="editItemId">
-                <input type="hidden" id="editItemCat">
-
-                <div class="form-row">
-                    <div class="column">
-                        <label>Nome</label>
-                        <input type="text" id="editItemName" class="studio-input" placeholder="Ex: Risoto Mare"
-                            required>
-                    </div>
-                    <div class="column narrow">
-                        <label>Preço (€)</label>
-                        <input type="number" step="0.01" id="editItemPrice" class="studio-input" required>
-                    </div>
-                </div>
-
-                <label>Descrição</label>
-                <textarea id="editItemDesc" class="studio-input" rows="3"
-                    placeholder="Ingredientes e detalhes..."></textarea>
-
-                <div class="form-row">
-                    <div class="column">
-                        <label>Disponibilidade</label>
-                        <select id="editItemVisibility" class="studio-input">
-                            <option value="true">Disponível</option>
-                            <option value="false">Esgotado</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary btn-full">Guardar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Image Studio Modal -->
-    <div id="imageModal" class="modal-root" onclick="if(event.target===this) closeModal('imageModal')">
-        <div class="modal-glass small">
-            <div class="modal-header">
-                <h3>Visual Studio</h3>
-                <button class="close-x" onclick="closeModal('imageModal')"><i class="ph ph-x"></i></button>
-            </div>
-            <div class="modal-body studio-light">
-                <div class="image-studio-preview" id="imgPreviewZone">
-                    <img id="imgPreviewDisplay" style="display:none;">
-                    <i class="ph ph-cloud-arrow-up"></i>
-                </div>
-                <input type="file" id="modalImageUpload" hidden accept="image/*">
-                <div class="studio-actions">
-                    <button class="btn btn-primary" id="btnChangeImage">Upload <i class="ph ph-camera"></i></button>
-                    <button class="btn btn-ghost text-danger" id="btnRemoveImage">Remover</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Core Runtime Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <!-- Logic -->
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
     <script type="module" src="js/dashboard.js"></script>
 </body>

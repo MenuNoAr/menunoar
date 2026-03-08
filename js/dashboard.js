@@ -1,6 +1,5 @@
 /**
- * dashboard.js - Studio Edition Entry Point
- * Aligned with the premium lifestyle identity.
+ * dashboard.js - Zen Editor Entry
  */
 import { state, updateState } from './modules/state.js';
 import { loadData } from './modules/api.js';
@@ -14,14 +13,11 @@ async function init() {
     initUploadService(supabase);
     updateState({ supabase });
 
-    // Enforce saved theme accurately
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    if (savedTheme === 'dark') {
+    // Enforce theme
+    if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');
         const icon = document.getElementById('themeIcon');
         if (icon) icon.className = 'ph ph-sun';
-        const logo = document.getElementById('studioLogo');
-        if (logo) logo.style.filter = 'invert(1)';
     }
 
     initAuthListener(async (user) => {
@@ -36,36 +32,34 @@ async function init() {
     });
 }
 
-// ─── SETUP FLOW HELPERS ───
-window.showSetupForm = (type) => {
-    document.querySelector('.setup-cards-row').style.display = 'none';
-    document.getElementById('setupForm').style.display = 'flex';
-    document.getElementById('setupForm').classList.add('animate-fade');
-};
-
-window.goBackToSetupChoice = () => {
-    document.querySelector('.setup-cards-row').style.display = 'grid';
-    document.getElementById('setupForm').style.display = 'none';
-};
-
+// SETUP FLOW
 window.generateSlugString = (name) => {
-    return name
-        .toLowerCase()
-        .normalize('NFD') // handle accents
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^\w\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
+    return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
 };
 
 window.generateSlug = (name) => {
     const slug = window.generateSlugString(name);
-    const viewer = document.getElementById('setupSlugPreview');
-    const hiddenInput = document.getElementById('setupSlug');
-    if (viewer) viewer.textContent = slug || '...';
-    if (hiddenInput) hiddenInput.value = slug;
+    const view = document.getElementById('slug-view');
+    const input = document.getElementById('setupSlug');
+    if (view) view.innerText = slug || '...';
+    if (input) input.value = slug;
 };
 
-// ─── START ───
+document.getElementById('setupForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('setupName').value;
+    const slug = document.getElementById('setupSlug').value;
+
+    const { error } = await state.supabase.from('restaurants').insert([{
+        owner_id: state.currentUser.id,
+        name, slug,
+        menu_type: 'digital',
+        subscription_status: 'trialing',
+        trial_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    }]);
+
+    if (error) alert("Este link já existe ou houve um erro.");
+    else window.location.reload();
+});
+
 init();
