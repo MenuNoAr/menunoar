@@ -81,7 +81,7 @@ function updateScrollPath() {
     const svgHeight = svgRect.height;
 
     const x = (point.x / 100) * svgWidth;
-    const y = (point.y / 500) * svgHeight;
+    const y = (point.y / 600) * svgHeight;
 
     arrow.style.left = `${x}px`;
     arrow.style.top = `${y}px`;
@@ -92,11 +92,11 @@ function updateScrollPath() {
     if (scrollPercentage < 0.99) {
         const nextPoint = path.getPointAtLength(Math.min(length, length * scrollPercentage + 2));
         dx = (nextPoint.x - point.x) * (svgWidth / 100);
-        dy = (nextPoint.y - point.y) * (svgHeight / 500);
+        dy = (nextPoint.y - point.y) * (svgHeight / 600);
     } else {
         const prevPoint = path.getPointAtLength(Math.max(0, length * scrollPercentage - 2));
         dx = (point.x - prevPoint.x) * (svgWidth / 100);
-        dy = (point.y - prevPoint.y) * (svgHeight / 500);
+        dy = (point.y - prevPoint.y) * (svgHeight / 600);
     }
 
     const angle = Math.atan2(dy, dx);
