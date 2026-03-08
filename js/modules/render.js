@@ -41,8 +41,8 @@ export function renderHeader(data) {
 
     const nameEl = document.getElementById('restNameEditor');
     const descEl = document.getElementById('restDescEditor');
-    if (nameEl) nameEl.textContent = data.name || 'Nome do Restaurante';
-    if (descEl) descEl.textContent = data.description || 'Descrição curta (clica para editar)';
+    if (nameEl) nameEl.textContent = data.name || '';
+    if (descEl) descEl.textContent = data.description || '';
 
     const coverDiv = document.getElementById('coverEditor');
     if (coverDiv) {
@@ -86,7 +86,7 @@ function _updateBadge(badgeId, textId, value) {
     const span = document.getElementById(textId);
     if (!el || !span) return;
 
-    span.textContent = value || 'Adicionar...';
+    span.textContent = value || '';
     el.style.opacity = value ? '1' : '0.5';
 
     // Force icon and text color to be consistent across all badges
