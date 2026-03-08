@@ -612,17 +612,38 @@ footer {
         /* Critical to allow touch swiping! */
     }
 
+    main {
+        position: static !important;
+        /* Avoid relative context issues on mobile */
+    }
+
     main>section {
         height: 100dvh;
-        /* Force 100vh for reels style */
         min-height: 100dvh;
-        padding: 80px 0 !important;
-        /* Reduced padding to fit content better */
-        justify-content: center !important;
-        overflow-x: hidden;
+        width: 100%;
+        position: relative !important;
         display: flex;
         flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 0 !important;
+        /* Balanced padding */
+        overflow: hidden;
+        /* Prevent internal scroll weirdness */
         scroll-snap-align: start;
+        scroll-snap-stop: always;
+        z-index: 1;
+    }
+
+    /* Override any specific section styles that might cause overlaps */
+    .hero,
+    .creation-options,
+    .experience-section,
+    #funciona,
+    .pricing-minimal {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
     }
 
     /* 2. Hide SVG background tracker on mobile */

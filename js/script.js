@@ -203,7 +203,7 @@ if (contactForm) {
         }
     });
 }
-// --- INTELLIGENT & FAST REELS SCROLL ---
+// --- INTELLIGENT ALL-DEVICE REELS SCROLL ---
 let isAnimating = false;
 let targetIdx = 0;
 const snapSections = document.querySelectorAll('main > section');
@@ -214,18 +214,18 @@ function performSmoothSnap(index, duration = 650) {
     if (index >= snapSections.length) index = snapSections.length - 1;
 
     targetIdx = index;
-    if (isAnimating) return; // The animation loop will handle the target change
+    if (isAnimating) return;
 
     isAnimating = true;
-    const windowHeight = window.innerHeight;
 
     function animate() {
+        // Use dH (dynamic height) to account for mobile bars
+        const windowHeight = window.innerHeight;
         const startY = window.pageYOffset || document.documentElement.scrollTop;
         const currentTargetY = targetIdx * windowHeight;
         const diff = currentTargetY - startY;
         let start = null;
 
-        // If distance is huge, speed up slightly
         const distanceMultiplier = Math.min(2, Math.max(1, Math.abs(diff) / windowHeight));
         const adjustedDuration = duration * (distanceMultiplier > 1 ? 1.2 : 1);
 
@@ -234,24 +234,17 @@ function performSmoothSnap(index, duration = 650) {
             const progress = timestamp - start;
             const percent = Math.min(progress / adjustedDuration, 1);
 
-            // Easing: easeOutQuart (feels faster/snappier)
             const easing = 1 - Math.pow(1 - percent, 4);
-
             window.scrollTo(0, startY + diff * easing);
 
             if (progress < adjustedDuration) {
-                // Check if target changed during this specific animation frame
                 if (currentTargetY !== targetIdx * windowHeight) {
-                    // Target changed! restart from current position
-                    start = null; // reset start for the next sub-animation
-                    // We don't return, we just let it continue with new diff on next frames?
-                    // Better to just restart the whole animation loop for the next segment
+                    start = null;
                     window.requestAnimationFrame(animate);
                     return;
                 }
                 window.requestAnimationFrame(step);
             } else {
-                // Done with this segment, check if we're at the REAL target
                 const finalY = targetIdx * windowHeight;
                 if (Math.abs(window.pageYOffset - finalY) > 2) {
                     window.requestAnimationFrame(animate);
@@ -262,33 +255,47 @@ function performSmoothSnap(index, duration = 650) {
         }
         window.requestAnimationFrame(step);
     }
-
     animate();
 }
 
-// Wheel Listener (Desktop)
+// Global Wheel Listener
 window.addEventListener('wheel', (e) => {
-    if (!window.matchMedia("(min-width: 769px)").matches) return;
     e.preventDefault();
-
-    if (scrollCooldown) return;
+    if (scrollCooldown || isAnimating && Math.abs(e.deltaY) < 50) return;
     if (Math.abs(e.deltaY) < 30) return;
 
-    // Detect fast spin/momentum
     let jumpCount = 1;
-    if (Math.abs(e.deltaY) > 300) jumpCount = 2; // Jump 2 if they spin hard
-    if (Math.abs(e.deltaY) > 800) jumpCount = 3; // Jump 3 if they spin REALLY hard
+    if (Math.abs(e.deltaY) > 300) jumpCount = 2;
+    if (Math.abs(e.deltaY) > 800) jumpCount = 3;
 
     const direction = e.deltaY > 0 ? 1 : -1;
+    performSmoothSnap(targetIdx + (direction * jumpCount));
 
-    // Calculate new target based on current target (not current scroll)
-    let newTarget = targetIdx + (direction * jumpCount);
-    performSmoothSnap(newTarget);
-
-    // Short cooldown to prevent "ultra-spinning" 100 slides in 1 sec
     scrollCooldown = true;
-    setTimeout(() => { scrollCooldown = false; }, 120);
+    setTimeout(() => { scrollCooldown = false; }, 150);
 }, { passive: false });
+
+// Global Touch Listener for Mobile Reels
+let touchStartY = 0;
+window.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+window.addEventListener('touchmove', (e) => {
+    // Only prevent if we're in the middle of a snap OR if we want total control
+    if (isAnimating) e.preventDefault();
+}, { passive: false });
+
+window.addEventListener('touchend', (e) => {
+    if (isAnimating) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diff = touchStartY - touchEndY;
+
+    if (Math.abs(diff) > 40) { // Swipe threshold
+        const direction = diff > 0 ? 1 : -1;
+        performSmoothSnap(targetIdx + direction);
+    }
+}, { passive: true });
 
 // Keyboard
 window.addEventListener('keydown', (e) => {
@@ -298,14 +305,5 @@ window.addEventListener('keydown', (e) => {
     } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         performSmoothSnap(targetIdx - 1);
-    } else if (e.key === 'End') {
-        e.preventDefault();
-        performSmoothSnap(snapSections.length - 1);
-    } else if (e.key === 'Home') {
-        e.preventDefault();
-        performSmoothSnap(0);
     }
 });
-
-// Touch (Keep native behavior but can be enhanced if needed)
-// For mobile, the CSS snap-type from index.css handles it cleanly.
