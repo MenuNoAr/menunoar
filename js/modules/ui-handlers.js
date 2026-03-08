@@ -58,10 +58,14 @@ window.handleItemUpdate = async (id, field, value) => {
 };
 
 window.handleItemPriceUpdate = async (id, rawValue) => {
-    const val = parseFloat(rawValue.replace('€', '').trim());
-    if (isNaN(val)) return loadData(); // reset on error
+    // Regex to extract number, handling both . and , as decimal separators
+    const cleaned = rawValue.replace(/[^\d.,]/g, '').replace(',', '.');
+    const val = parseFloat(cleaned);
+    if (isNaN(val)) return loadData();
 
     await state.supabase.from('menu_items').update({ price: val }).eq('id', id);
+    const item = state.menuItems.find(i => i.id == id);
+    if (item) item.price = val;
 };
 
 window.addNewItem = async (cat) => {

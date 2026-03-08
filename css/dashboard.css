@@ -138,16 +138,23 @@ body.zen-body {
 /* ─── Inline Editor UI ─── */
 
 /* Editable states */
+[contenteditable="true"] {
+    transition: background 0.2s, box-shadow 0.2s;
+    padding: 2px 4px;
+    margin: -2px -4px;
+    border-radius: 4px;
+}
+
 [contenteditable="true"]:hover {
     outline: none;
-    background: rgba(31, 168, 255, 0.05);
-    border-radius: 4px;
+    background: rgba(31, 168, 255, 0.04);
+    cursor: text;
 }
 
 [contenteditable="true"]:focus {
     outline: none;
-    background: rgba(31, 168, 255, 0.1);
-    box-shadow: 0 0 0 4px rgba(31, 168, 255, 0.05);
+    background: rgba(31, 168, 255, 0.08);
+    box-shadow: 0 0 0 2px rgba(31, 168, 255, 0.05);
 }
 
 /* Cover Image */
@@ -347,19 +354,26 @@ body.zen-body {
 }
 
 .z-btn {
-    padding: 8px 16px;
+    padding: 6px 12px;
     border-radius: 6px;
     border: 1px solid var(--zen-border);
     background: transparent;
     color: var(--zen-text);
     font-weight: 600;
     cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
 }
 
 .z-btn.primary {
     background: var(--zen-accent);
     color: #fff;
     border-color: var(--zen-accent);
+}
+
+.z-btn.primary:hover {
+    background: var(--zen-accent);
+    filter: brightness(1.1);
 }
 
 .z-btn.danger {

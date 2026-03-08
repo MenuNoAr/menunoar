@@ -3,6 +3,7 @@
  */
 import { state, updateState } from './modules/state.js';
 import { loadData } from './modules/api.js';
+import './modules/ui-handlers.js'; // Register global handlers
 import { initAuthListener, getSupabase } from './auth-service.js';
 import { initUploadService } from './upload-service.js';
 
