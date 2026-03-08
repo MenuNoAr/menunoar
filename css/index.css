@@ -908,30 +908,44 @@ footer {
         background: #000 !important;
         color: #fff !important;
         text-align: left !important;
+        justify-content: flex-start !important;
+        padding-top: 80px !important;
     }
 
     .experience-section .experience-content {
         padding: 0 !important;
     }
 
+    .experience-section h2 {
+        font-size: 1.6rem !important;
+        margin-bottom: 8px !important;
+    }
+
+    .experience-section p {
+        font-size: 0.9rem !important;
+        margin-bottom: 12px !important;
+    }
+
     .experience-section .check-list {
-        margin: 32px 0 !important;
+        margin: 12px 0 !important;
         display: flex;
         flex-direction: column;
-        gap: 12px !important;
+        gap: 8px !important;
         width: 100%;
     }
 
     .experience-section .check-list li {
         color: #fff !important;
-        font-size: 0.95rem !important;
+        font-size: 0.85rem !important;
+        /* Smaller text */
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 16px 20px;
-        border-radius: 12px;
+        padding: 10px 16px;
+        /* Tighter padding */
+        border-radius: 10px;
         display: flex;
         align-items: center;
-        gap: 16px !important;
+        gap: 12px !important;
         text-align: left;
     }
 
@@ -941,12 +955,13 @@ footer {
     }
 
     .premium-img {
-        max-height: 220px;
-        width: 100% !important;
-        object-fit: cover;
-        border-radius: 20px;
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(var(--primary-rgb), 0.2);
-        margin: 24px auto 0;
+        max-height: 150px;
+        /* Crucial: make room */
+        width: auto !important;
+        object-fit: contain;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        margin: 12px auto 0;
     }
 
     /* 6.2 Bento Grid: Horizontal Slider for Mobile */
