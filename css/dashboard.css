@@ -1,107 +1,112 @@
 /* 
-  Zen Framework - Minimalist Dashboard CSS 
-  Industrial precision, zero friction.
+  Studio Luxe - Fine Dining Dashboard Architecture 
+  High contrast, ultra-refined minimalist UI.
 */
 
 :root {
-    --zen-bg: #ffffff;
-    --zen-text: #0f172a;
-    --zen-muted: #64748b;
-    --zen-border: #f1f5f9;
-    --zen-accent: #1fa8ff;
-    --zen-hud-h: 60px;
-    --zen-width: 520px;
+    --studio-bg: #FDFCFB;
+    /* Champagne/Off-white */
+    --studio-text: #0F172A;
+    --studio-muted: #64748B;
+    --studio-border: #F1F5F9;
+    --studio-accent: #1FA8FF;
+    --studio-hud-h: 64px;
+    --studio-width: 620px;
+    --font-serif: 'Cormorant Garamond', serif;
+    --font-sans: 'Inter', sans-serif;
 }
 
 .dark-mode {
-    --zen-bg: #020617;
-    --zen-text: #f8fafc;
-    --zen-muted: #94a3b8;
-    --zen-border: #1e293b;
+    --studio-bg: #0A0A0A;
+    --studio-text: #F8FAFC;
+    --studio-muted: #94A3B8;
+    --studio-border: #1E293B;
 }
 
 body.zen-body {
-    background: var(--zen-bg);
-    color: var(--zen-text);
+    background: var(--studio-bg);
+    color: var(--studio-text);
     overflow-x: hidden;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     margin: 0;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* ─── Global Topbar (HUD) ─── */
+/* ─── HUD (Navigation) ─── */
 .zen-hud {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: var(--zen-hud-h);
-    background: var(--zen-bg);
-    border-bottom: 1px solid var(--zen-border);
+    height: var(--studio-hud-h);
+    background: var(--studio-bg);
+    border-bottom: 1px solid var(--studio-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 24px;
+    padding: 0 32px;
     z-index: 1000;
 }
 
 .hud-left {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
 }
 
 .hud-logo img {
-    height: 24px;
+    height: 26px;
 }
 
 .hud-sep {
     width: 1px;
-    height: 16px;
-    background: var(--zen-border);
+    height: 20px;
+    background: var(--studio-border);
 }
 
 .hud-status {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--studio-muted);
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    font-size: 0.85rem;
+    gap: 10px;
 }
 
 .dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-}
-
-.dot.green {
-    background: #10b981;
+    background: #10B981;
 }
 
 .hud-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
 }
 
 .hud-btn {
-    width: 38px;
-    height: 38px;
-    background: transparent;
-    border: none;
-    color: var(--zen-muted);
-    cursor: pointer;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--studio-muted);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background: transparent;
+    border: none;
     font-size: 1.25rem;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hud-btn:hover {
-    background: var(--zen-border);
-    color: var(--zen-accent);
+    background: var(--studio-border);
+    color: var(--studio-accent);
     transform: translateY(-2px);
 }
 
@@ -109,32 +114,39 @@ body.zen-body {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--zen-accent);
-    color: #fff;
-    border: 2px solid var(--zen-bg);
-    font-weight: 800;
+    background: var(--studio-text);
+    color: var(--studio-bg);
+    font-weight: 600;
+    font-size: 0.75rem;
+    border: none;
     cursor: pointer;
-    font-size: 0.8rem;
-    margin-left: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-left: 12px;
 }
 
-/* ─── Horizontal Nav ─── */
+/* ─── The Studio Stage ─── */
+.zen-stage {
+    padding-top: calc(var(--studio-hud-h) + 100px);
+    padding-bottom: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Category Sticky Tabs */
 .zen-tabs-nav {
     position: sticky;
-    top: var(--zen-hud-h);
-    background: var(--zen-bg);
-    z-index: 900;
+    top: var(--studio-hud-h);
+    background: var(--studio-bg);
     width: 100%;
-    max-width: var(--zen-width);
-    margin: 0 auto 32px;
+    max-width: var(--studio-width);
     display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 16px 0;
+    gap: 24px;
+    padding: 20px 0;
     overflow-x: auto;
     scrollbar-width: none;
-    border-bottom: 1px solid var(--zen-border);
+    z-index: 900;
+    border-bottom: 1px solid var(--studio-border);
+    margin-bottom: 60px;
 }
 
 .zen-tabs-nav::-webkit-scrollbar {
@@ -142,33 +154,45 @@ body.zen-body {
 }
 
 .nav-chip {
-    padding: 6px 16px;
-    border-radius: 50px;
-    background: var(--zen-border);
-    color: var(--zen-muted);
-    font-size: 0.85rem;
-    font-weight: 600;
-    white-space: nowrap;
-    cursor: pointer;
+    background: transparent;
     border: none;
-    transition: all 0.2s;
+    color: var(--studio-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    white-space: nowrap;
+    padding-bottom: 8px;
+    position: relative;
+    transition: color 0.3s;
 }
 
 .nav-chip.active {
-    background: var(--zen-accent);
-    color: #fff;
+    color: var(--studio-text);
 }
 
+.nav-chip.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--studio-text);
+}
+
+/* The Canvas Wrapper */
 .zen-canvas {
     width: 100%;
-    max-width: var(--zen-width);
-    animation: revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    max-width: var(--studio-width);
+    animation: fadeInReveal 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes revealUp {
+@keyframes fadeInReveal {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px);
     }
 
     to {
@@ -177,42 +201,36 @@ body.zen-body {
     }
 }
 
-.zen-menu-root {
-    background: var(--zen-bg);
-    transition: all 0.2s;
-}
-
-/* ─── Inline Editor UI ─── */
-
-/* Editable states */
+/* ─── Inline Editor UI (Luxury Edition) ─── */
 [contenteditable="true"] {
-    transition: background 0.2s, box-shadow 0.2s;
-    padding: 2px 4px;
-    margin: -2px -4px;
+    transition: all 0.3s;
+    padding: 4px;
+    margin: -4px;
     border-radius: 4px;
 }
 
 [contenteditable="true"]:hover {
-    outline: none;
     background: rgba(31, 168, 255, 0.04);
     cursor: text;
 }
 
 [contenteditable="true"]:focus {
     outline: none;
-    background: rgba(31, 168, 255, 0.08);
-    box-shadow: 0 0 0 2px rgba(31, 168, 255, 0.05);
+    background: rgba(31, 168, 255, 0.06);
+    box-shadow: 0 0 0 1px var(--studio-border);
 }
 
-/* Cover Image */
+/* Master Cover */
 .zen-cover-zone {
     width: 100%;
-    aspect-ratio: 16/9;
-    background: var(--zen-border);
-    border-radius: 12px;
+    aspect-ratio: 16/7;
+    background: var(--studio-border);
+    border-radius: 4px;
     overflow: hidden;
     position: relative;
     cursor: pointer;
+    margin-bottom: 80px;
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);
 }
 
 .zen-cover-zone img {
@@ -224,326 +242,341 @@ body.zen-body {
 .zen-img-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity 0.3s;
+    font-size: 1.5rem;
 }
 
 .zen-cover-zone:hover .zen-img-overlay {
     opacity: 1;
+    backdrop-filter: blur(4px);
 }
 
+/* Restaurant Info */
 .zen-rest-info {
     text-align: center;
-    margin: 40px 0;
+    margin: 0 auto 100px;
+    max-width: 480px;
 }
 
 .zen-rest-info h1 {
-    font-family: 'Outfit', sans-serif;
-    font-size: 2.2rem;
-    margin-bottom: 8px;
-    font-weight: 800;
+    font-family: var(--font-serif);
+    font-size: 4rem;
+    font-weight: 400;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+    line-height: 1;
 }
 
 .zen-rest-info p {
-    color: var(--zen-muted);
-    font-size: 1rem;
+    font-family: var(--font-sans);
+    color: var(--studio-muted);
+    font-size: 1.1rem;
+    font-weight: 300;
+    line-height: 1.6;
 }
 
-/* Categories & Items */
+/* Category Blocks */
 .zen-cat-block {
-    margin-top: 60px;
-    position: relative;
+    margin-top: 100px;
 }
 
 .zen-cat-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--zen-border);
-    padding-bottom: 8px;
-    margin-bottom: 24px;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--studio-text);
+    padding-bottom: 12px;
+    margin-bottom: 48px;
 }
 
 .zen-cat-title {
-    font-family: 'Outfit', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    flex: 1;
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    font-weight: 300;
+    letter-spacing: 0.02em;
 }
 
+/* Item Rows (The High-End Split) */
 .zen-item-row {
-    margin-bottom: 32px;
+    margin-bottom: 56px;
     display: flex;
-    justify-content: space-between;
-    gap: 24px;
-    position: relative;
-    padding: 12px;
+    align-items: flex-start;
+    gap: 32px;
+    padding: 24px;
     border-radius: 8px;
-    transition: all 0.2s;
+    transition: all 0.4s;
+    position: relative;
+    border: 1px solid transparent;
 }
 
 .zen-item-row:hover {
-    background: var(--zen-border);
+    background: var(--studio-bg);
+    border-color: var(--studio-border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
 
 .item-main {
     flex: 1;
-}
-
-.item-name {
-    font-weight: 700;
-    font-size: 1rem;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.item-desc {
-    color: var(--zen-muted);
-    font-size: 0.85rem;
-    line-height: 1.4;
-    display: block;
-    max-width: 340px;
-}
-
-.item-price {
-    font-weight: 800;
-    font-size: 0.95rem;
-    white-space: nowrap;
-}
-
-/* Ghost Controls (Tiny Icons) */
-.ghost-actions {
-    position: absolute;
-    right: -40px;
-    top: 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.item-name {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--studio-text);
+}
+
+.item-price {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    margin-left: 20px;
+}
+
+.item-desc {
+    font-family: var(--font-sans);
+    color: var(--studio-muted);
+    font-size: 0.9rem;
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 380px;
+}
+
+/* Item Images (The Star of the Show) */
+.item-img-zone {
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+    background: var(--studio-border);
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+}
+
+.item-img-zone img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-img-zone:hover::after {
+    content: "\f078";
+    font-family: 'Phosphor';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.5rem;
+    backdrop-filter: blur(2px);
+}
+
+/* Ghost Controls (Subtle UI) */
+.ghost-actions {
+    position: absolute;
+    right: -48px;
+    top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: 0.3s;
 }
 
 .zen-item-row:hover .ghost-actions {
     opacity: 1;
+    right: -40px;
 }
 
 .mini-btn {
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
     border: none;
-    background: var(--zen-border);
-    color: var(--zen-muted);
+    background: var(--studio-border);
+    color: var(--studio-muted);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 1rem;
 }
 
 .mini-btn:hover {
-    background: var(--zen-accent);
+    background: var(--studio-accent);
     color: #fff;
-}
-
-.mini-btn.danger:hover {
-    background: var(--danger);
-    color: #fff;
-}
-
-/* Floating Action Button (FAB) */
-.zen-fab {
-    position: fixed;
-    bottom: 32px;
-    right: 32px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: var(--zen-accent);
-    color: #fff;
-    border: none;
-    box-shadow: 0 8px 24px rgba(31, 168, 255, 0.4);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    transition: transform 0.2s;
-}
-
-.zen-fab:hover {
     transform: scale(1.1);
 }
 
-/* Modals */
-.zen-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    z-index: 5000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.zen-modal.show {
-    display: flex;
-}
-
-.zen-modal-content {
-    background: var(--zen-bg);
-    width: 320px;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-.z-btn {
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--zen-border);
-    background: transparent;
-    color: var(--zen-text);
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-}
-
-.z-btn.primary {
-    background: var(--zen-accent);
+.mini-btn.danger:hover {
+    background: #EF4444;
     color: #fff;
-    border-color: var(--zen-accent);
 }
 
-.z-btn.primary:hover {
-    background: var(--zen-accent);
-    filter: brightness(1.1);
+/* Add Dummy Placeholder */
+.item-add-dummy {
+    margin-top: 40px;
+    border: 1px dashed var(--studio-border);
+    padding: 24px;
+    border-radius: 8px;
+    text-align: center;
+    color: var(--studio-muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
 }
 
-.z-btn.danger {
-    color: var(--danger);
+.item-add-dummy:hover {
+    background: var(--studio-border);
+    color: var(--studio-text);
+    border-style: solid;
 }
 
-.z-btn.block {
-    width: 100%;
-    margin-top: 12px;
-}
-
-/* Setup Overlay */
-.zen-overlay {
+/* Floating Fab */
+.zen-fab {
     position: fixed;
-    inset: 0;
-    background: var(--zen-bg);
-    z-index: 9999;
+    bottom: 40px;
+    right: 40px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--studio-text);
+    color: var(--studio-bg);
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.zen-setup-card {
-    text-align: center;
-    max-width: 360px;
+.zen-fab:hover {
+    transform: scale(1.1) rotate(90deg);
+    background: var(--studio-accent);
+    color: #fff;
 }
 
-.zen-setup-form {
-    margin-top: 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.zen-setup-form input {
-    padding: 12px;
+/* Settings Form (Minimalist Panel) */
+.zen-modal-content {
+    background: var(--studio-bg);
+    width: 400px;
+    padding: 48px;
     border-radius: 8px;
-    border: 1px solid var(--zen-border);
-    background: var(--zen-bg);
-    color: var(--zen-text);
-    font-size: 1rem;
-    width: 100%;
+    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--studio-border);
 }
 
-.slug-hint {
-    font-size: 0.8rem;
-    color: var(--zen-muted);
-    margin: 4px 0 16px;
-}
-
-/* Settings Form */
-.f-group {
-    margin-bottom: 20px;
-}
-
-.f-group label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 800;
+.zen-form label {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--zen-muted);
+    color: var(--studio-muted);
     margin-bottom: 8px;
+    display: block;
 }
 
 .z-input {
     width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--zen-border);
-    background: var(--zen-bg);
-    color: var(--zen-text);
+    padding: 12px;
+    background: var(--studio-border);
+    border: none;
+    border-radius: 4px;
+    color: var(--studio-text);
+    font-family: var(--font-sans);
 }
 
 .color-presets {
     display: flex;
-    gap: 8px;
+    gap: 12px;
+    margin-top: 10px;
 }
 
 .color-pip {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     border: 2px solid transparent;
     cursor: pointer;
-    transition: transform 0.2s;
 }
 
 .color-pip.active {
-    border-color: var(--zen-text);
+    border-color: var(--studio-text);
     transform: scale(1.1);
 }
 
-.item-add-dummy {
-    border: 1px dashed var(--zen-border);
-    padding: 16px;
-    border-radius: 12px;
-    text-align: center;
-    color: var(--zen-muted);
+.z-btn {
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    border: none;
     cursor: pointer;
-    transition: all 0.2s;
-    font-size: 0.85rem;
-    font-weight: 600;
+    transition: all 0.3s;
 }
 
-.item-add-dummy:hover {
-    background: var(--zen-border);
-    color: var(--zen-accent);
-    border-style: solid;
+.z-btn.primary {
+    background: var(--studio-text);
+    color: var(--studio-bg);
 }
 
-@media (max-width: 600px) {
+.z-btn.primary:hover {
+    filter: brightness(1.2);
+}
+
+.z-btn.block {
+    width: 100%;
+    margin-top: 16px;
+}
+
+@media (max-width: 768px) {
     .zen-canvas {
-        padding: 0 16px;
+        padding: 0 20px;
+    }
+
+    .zen-rest-info h1 {
+        font-size: 3rem;
+    }
+
+    .zen-item-row {
+        flex-direction: column-reverse;
+        gap: 20px;
+    }
+
+    .item-img-zone {
+        width: 100%;
+        height: 200px;
     }
 
     .ghost-actions {
-        right: 8px;
-        top: -30px;
+        right: 20px;
+        top: -40px;
         flex-direction: row;
+        opacity: 1;
     }
 }

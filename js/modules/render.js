@@ -1,6 +1,6 @@
 /**
- * render.js - Zen Editor Edition
- * Focus: 100% Inline editing directly on the menu.
+ * render.js - LUXE Fine Dining Studio Edition
+ * Focus: High-end typography, large dish imagery, and sophisticated whitespace.
  */
 import { state } from './state.js';
 
@@ -11,8 +11,8 @@ export function renderAll() {
     const data = state.currentData;
     const items = state.menuItems;
 
-    // Apply accent color & font globally
-    _applyBranding(data);
+    // Apply branding settings globally
+    _applyLuxuryBranding(data);
 
     if (data.menu_type === 'pdf') {
         renderPdfZen(data);
@@ -22,11 +22,18 @@ export function renderAll() {
     }
 }
 
-function _applyBranding(data) {
+function _applyLuxuryBranding(data) {
     const root = document.documentElement;
-    if (data.accent_color) root.style.setProperty('--zen-accent', data.accent_color);
-    if (data.font) root.style.setProperty('--font-family', `'${data.font}', sans-serif`);
-    document.body.style.fontFamily = data.font ? `'${data.font}', sans-serif` : "'Inter', sans-serif";
+    // Set custom font pairings
+    if (data.font === 'Outfit') {
+        root.style.setProperty('--font-serif', "'Outfit', sans-serif");
+    } else if (data.font === 'Playfair Display') {
+        root.style.setProperty('--font-serif', "'Playfair Display', serif");
+    } else {
+        root.style.setProperty('--font-serif', "'Cormorant Garamond', serif");
+    }
+
+    if (data.accent_color) root.style.setProperty('--studio-accent', data.accent_color);
 }
 
 export function renderCategoryNav(items) {
@@ -50,9 +57,9 @@ export function renderZenEditor(data, items) {
     }, {});
 
     canvas.innerHTML = `
-        <!-- Header Zone -->
+        <!-- Minimalist Hero Zone -->
         <div class="zen-cover-zone" onclick="window.triggerCoverUpload()">
-            <img src="${data.cover_url || 'https://images.unsplash.com/photo-1514361892635-6b07e31e75f9?q=80&w=2070'}" id="coverDisplay">
+            <img src="${data.cover_url || 'https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=2070'}" id="coverDisplay">
             <div class="zen-img-overlay"><i class="ph ph-camera"></i></div>
         </div>
 
@@ -78,14 +85,20 @@ export function renderZenEditor(data, items) {
                             ${catItems.map(i => `
                                 <div class="zen-item-row ${!i.available ? 'muted' : ''}">
                                     <div class="item-main">
-                                        <span class="item-name" contenteditable="true" 
-                                            onblur="window.handleItemUpdate('${i.id}', 'name', this.innerText)">${escapeHTML(i.name)}</span>
+                                        <div class="item-head">
+                                            <span class="item-name" contenteditable="true" 
+                                                onblur="window.handleItemUpdate('${i.id}', 'name', this.innerText)">${escapeHTML(i.name)}</span>
+                                            <span class="item-price" contenteditable="true" 
+                                                onblur="window.handleItemPriceUpdate('${i.id}', this.innerText)">${Number(i.price).toFixed(2)}€</span>
+                                        </div>
                                         <span class="item-desc" contenteditable="true" 
                                             onblur="window.handleItemUpdate('${i.id}', 'description', this.innerText)">${escapeHTML(i.description)}</span>
                                     </div>
-                                    <div class="item-price" contenteditable="true" 
-                                        onblur="window.handleItemPriceUpdate('${i.id}', this.innerText)">${Number(i.price).toFixed(2)}€</div>
                                     
+                                    <div class="item-img-zone" onclick="window.triggerItemImageUpload('${i.id}')" title="Upload Imagem do Prato">
+                                        <img src="${i.image_url || 'https://images.unsplash.com/photo-1546241072-48010ad28c2c?q=80&w=1974'}" id="item-img-${i.id}">
+                                    </div>
+
                                     <div class="ghost-actions">
                                         <button class="mini-btn" onclick="window.toggleAvailability('${i.id}', ${i.available})" title="Disponibilidade">
                                             <i class="ph ph-${i.available ? 'eye' : 'eye-slash'}"></i>
@@ -96,13 +109,14 @@ export function renderZenEditor(data, items) {
                                     </div>
                                 </div>
                             `).join('')}
+                            
                             <div class="item-add-dummy" onclick="window.addNewItem('${cat}')">
-                                <i class="ph ph-plus-circle"></i> Adicionar Prato
+                                <i class="ph ph-plus-circle"></i> Novo Prato em ${escapeHTML(cat)}
                             </div>
                         </div>
                     </section>
                 `;
-    }).join('')}
+    }).join('') || '<div style="text-align:center; color: #64748B; margin: 100px 0;">Crie a sua primeira categoria para começar.</div>'}
         </div>
     `;
 }
@@ -111,11 +125,11 @@ export function renderPdfZen(data) {
     const canvas = document.getElementById('menuContainer');
     if (!canvas) return;
     canvas.innerHTML = `
-        <div style="padding: 100px 40px; text-align: center;">
-            <i class="ph ph-file-pdf" style="font-size: 3rem; color: #ef4444; margin-bottom: 20px;"></i>
-            <h2>Modo PDF Ativo</h2>
-            <p class="muted">Menu servido via ficheiro.</p>
-            <button class="z-btn primary block" style="margin-top:24px;" onclick="window.openSettingsModal()">Definições de PDF</button>
+        <div style="padding: 160px 40px; text-align: center;">
+            <i class="ph ph-file-pdf" style="font-size: 4rem; color: #EF4444; margin-bottom: 24px;"></i>
+            <h2 style="font-family: var(--font-serif); font-size: 2.2rem; font-weight: 300;">MODO PDF ATIVO</h2>
+            <p style="color: #64748B; font-weight: 300; margin-top: 12px; letter-spacing: 0.1em; text-transform: uppercase;">A sua ementa está a ser servida digitalmente.</p>
+            <button class="z-btn primary block" style="margin-top:48px;" onclick="window.openSettingsModal()">Definições de Menu</button>
         </div>
     `;
 }

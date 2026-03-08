@@ -1,5 +1,6 @@
 /**
- * ui-handlers.js - Zen Editor Logic
+ * ui-handlers.js - Luxe Studio Logic
+ * Handles inline updates, high-end image uploads, and luxury branding.
  */
 import { state } from './state.js';
 import { loadData } from './api.js';
@@ -31,7 +32,7 @@ window.handleCategoryRename = async (oldName, rawNew) => {
 window.addNewCategoryOptimized = async () => {
     let name = 'Nova Categoria', counter = 1;
     const existing = new Set(state.menuItems.map(i => i.category));
-    while (existing.has(name)) name = `Nova Categoria ${++counter}`;
+    while (existing.has(name)) name = `Categoria ${++counter}`;
 
     const newOrder = [...(state.currentData.category_order || []), name];
     await state.supabase.from('restaurants').update({ category_order: newOrder }).eq('id', state.restaurantId);
@@ -39,26 +40,24 @@ window.addNewCategoryOptimized = async () => {
 };
 
 window.deleteCategory = async (catName) => {
-    if (!confirm(`Apagar categoria "${catName}"?`)) return;
+    if (!confirm(`Deseja remover a categoria "${catName}" e todos os seus pratos?`)) return;
     await state.supabase.from('menu_items').delete().eq('category', catName).eq('restaurant_id', state.restaurantId);
     const order = (state.currentData.category_order || []).filter(c => c !== catName);
     await state.supabase.from('restaurants').update({ category_order: order }).eq('id', state.restaurantId);
     loadData();
 };
 
-// ─── ITEMS (Inline updates) ───
+// ─── ITEMS (Luxe Inline Edition) ───
 window.handleItemUpdate = async (id, field, value) => {
     const newVal = value.trim();
     const item = state.menuItems.find(i => i.id == id);
     if (item && item[field] === newVal) return;
 
     await state.supabase.from('menu_items').update({ [field]: newVal }).eq('id', id);
-    // Don't reload full data for speed, just update local state
     if (item) item[field] = newVal;
 };
 
 window.handleItemPriceUpdate = async (id, rawValue) => {
-    // Regex to extract number, handling both . and , as decimal separators
     const cleaned = rawValue.replace(/[^\d.,]/g, '').replace(',', '.');
     const val = parseFloat(cleaned);
     if (isNaN(val)) return loadData();
@@ -70,9 +69,9 @@ window.handleItemPriceUpdate = async (id, rawValue) => {
 
 window.addNewItem = async (cat) => {
     await state.supabase.from('menu_items').insert([{
-        name: 'Novo Prato',
+        name: 'Nome do Prato',
         price: 0,
-        description: 'Breve descrição...',
+        description: 'Breve descrição do prato...',
         category: cat,
         restaurant_id: state.restaurantId,
         available: true
@@ -86,19 +85,22 @@ window.toggleAvailability = async (id, current) => {
 };
 
 window.deleteItem = async (id) => {
-    if (!confirm("Apagar este prato?")) return;
+    if (!confirm("Remover este prato do menu?")) return;
     await state.supabase.from('menu_items').delete().eq('id', id);
     loadData();
 };
 
-// ─── COVER ───
+// ─── LUXE IMAGE UPLOADS ───
 window.triggerCoverUpload = () => {
     const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
+    input.type = 'file'; input.accept = 'image/*';
     input.onchange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        const loader = document.getElementById('coverDisplay');
+        if (loader) loader.style.opacity = '0.5';
+
         const { data, error } = await uploadFile(file, 'cover');
         if (!error && data) {
             await state.supabase.from('restaurants').update({ cover_url: data.publicUrl }).eq('id', state.restaurantId);
@@ -108,43 +110,30 @@ window.triggerCoverUpload = () => {
     input.click();
 };
 
-// ─── MODALS & THEME ───
-window.toggleDarkMode = () => {
-    const isDark = document.body.classList.toggle('dark-mode');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    const icon = document.getElementById('themeIcon');
-    if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
+window.triggerItemImageUpload = (itemId) => {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const { data, error } = await uploadFile(file, `item-${itemId}`);
+        if (!error && data) {
+            await state.supabase.from('menu_items').update({ image_url: data.publicUrl }).eq('id', itemId);
+            loadData();
+        }
+    };
+    input.click();
 };
 
-window.openProfileModal = () => {
-    document.getElementById('profileEmail').innerText = state.currentUser.email;
-    document.getElementById('profileModal').style.display = 'flex';
-};
-
-window.openQrModal = () => {
-    const modal = document.getElementById('qrModal');
-    modal.style.display = 'flex';
-    const container = document.getElementById('qr-code-container');
-    container.innerHTML = '';
-    const qr = new QRCodeStyling({
-        width: 200, height: 200, data: `https://menunoar.pt/menu.html?id=${state.currentData.slug}`,
-        dotsOptions: { color: "#000", type: "rounded" }, backgroundOptions: { color: "#fff" }
-    });
-    qr.append(container);
-    window._qr = qr;
-};
-
-window.downloadQr = () => window._qr?.download({ name: "qr-menu", extension: "png" });
-
+// ─── SETTINGS & BRANDING ───
 window.openSettingsModal = () => {
     const data = state.currentData;
-    document.getElementById('modalFont').value = data.font || 'Inter';
-    document.getElementById('modalAccent').value = data.accent_color || '#1fa8ff';
-    document.querySelector(`input[name="mtype"][value="${data.menu_type || 'digital'}"]`).checked = true;
+    document.getElementById('modalFont').value = data.font || 'Cormorant';
+    document.getElementById('modalAccent').value = data.accent_color || '#1FA8FF';
 
-    // Highlight active color pip
     document.querySelectorAll('.color-pip').forEach(p => {
-        p.classList.toggle('active', p.dataset.color === (data.accent_color || '#1fa8ff'));
+        p.classList.toggle('active', p.dataset.color === (data.accent_color || '#1FA8FF'));
     });
 
     document.getElementById('settingsModal').style.display = 'flex';
@@ -169,6 +158,34 @@ document.querySelectorAll('.color-pip').forEach(pip => {
         document.getElementById('modalAccent').value = pip.dataset.color;
     };
 });
+
+// ─── MODALS ───
+window.toggleDarkMode = () => {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    const icon = document.getElementById('themeIcon');
+    if (icon) icon.className = isDark ? 'ph ph-sun' : 'ph ph-moon';
+};
+
+window.openProfileModal = () => {
+    document.getElementById('profileEmail').innerText = state.currentUser.email;
+    document.getElementById('profileModal').style.display = 'flex';
+};
+
+window.openQrModal = () => {
+    const modal = document.getElementById('qrModal');
+    modal.style.display = 'flex';
+    const container = document.getElementById('qr-code-container');
+    container.innerHTML = '';
+    const qr = new QRCodeStyling({
+        width: 200, height: 200, data: `https://menunoar.pt/menu.html?id=${state.currentData.slug}`,
+        dotsOptions: { color: "#000", type: "rounded" }, backgroundOptions: { color: "#FFF" }
+    });
+    qr.append(container);
+    window._qr = qr;
+};
+
+window.downloadQr = () => window._qr?.download({ name: "qr-menu", extension: "png" });
 
 window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
