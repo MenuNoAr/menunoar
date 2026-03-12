@@ -92,30 +92,32 @@ button:disabled {
 .user-name-btn {
     background: var(--primary-glow);
     color: var(--primary);
-    padding: 6px 12px;
-    border-radius: 50px;
+    padding: 0 16px;
+    border-radius: 12px;
     font-weight: 700;
-    font-size: 0.85rem;
-    letter-spacing: 0.3px;
+    font-size: 0.88rem;
+    letter-spacing: 0.2px;
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    height: auto;
-    border: 1px solid transparent;
-    transition: all 0.2s ease;
+    gap: 8px;
+    height: 40px;
+    border: 1.5px solid transparent;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
 }
 
 .dark-mode .user-name-btn {
-    background: rgba(31, 168, 255, 0.15);
+    background: rgba(31, 168, 255, 0.12);
     border-color: rgba(31, 168, 255, 0.2);
+    color: #58c0ff;
 }
 
 .user-name-btn:hover {
     background: var(--primary);
     color: #fff;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(31, 168, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(31, 168, 255, 0.25);
+    border-color: var(--primary);
 }
 
 .user-edit-icon {
@@ -149,12 +151,60 @@ button:disabled {
 }
 
 .nav-tools .btn-nav {
-    background: rgba(0, 0, 0, 0.02);
-    border-radius: 14px;
+    background: var(--primary-glow);
+    color: var(--primary);
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1.5px solid transparent;
+    font-weight: 700;
 }
 
-.dark-mode .nav-tools .btn-nav {
-    background: rgba(255, 255, 255, 0.05);
+.nav-tools .btn-nav:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    box-shadow: 0 6px 15px rgba(31, 168, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Specific logout button style in navbar */
+.nav-tools .btn-nav.btn-danger-soft {
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--danger);
+}
+
+.nav-tools .btn-nav.btn-danger-soft:hover {
+    background: var(--danger);
+    color: #fff;
+    border-color: var(--danger);
+    box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3);
+}
+
+.btn-nav i {
+    font-size: 1.05rem;
+}
+
+.dark-mode .btn-nav {
+    background: rgba(31, 168, 255, 0.12) !important;
+    color: #58c0ff !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark-mode .btn-nav.btn-danger-soft {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ff6b6b !important;
+}
+
+.dark-mode .btn-nav:hover {
+    background: var(--primary) !important;
+    color: #fff !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 6px 20px rgba(31, 168, 255, 0.4);
+}
+
+.dark-mode .btn-nav.btn-danger-soft:hover {
+    background: var(--danger) !important;
 }
 
 .mobile-nav-trigger {
@@ -224,8 +274,8 @@ button:disabled {
     background: transparent;
     border: none;
     color: var(--text);
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 0.95rem; /* Slightly smaller for density but bolder for legibility */
+    font-weight: 700;
     text-align: left;
     transition: background 0.2s;
     cursor: pointer;

@@ -14,6 +14,8 @@
         height: 60px !important;
         padding: 0 12px !important;
         gap: 8px !important;
+        background: var(--bg-card) !important;
+        border-bottom: 1px solid var(--border) !important;
     }
 
     .nav-brand img {
@@ -25,8 +27,10 @@
     }
 
     .btn-nav {
-        padding: 8px !important;
-        font-size: 0.8rem !important;
+        padding: 0 12px !important;
+        font-size: 0.85rem !important;
+        height: 38px !important;
+        font-weight: 700 !important;
     }
 
     #trialTimer,
