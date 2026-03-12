@@ -37,12 +37,12 @@
 }
 
 .dark-mode {
-    --bg-page: #020617;
-    --bg-surface: #0f172a;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --border-color: #1e293b;
-    --primary-soft: rgba(79, 70, 229, 0.1);
+    --bg-page: #0a0a0a;
+    --bg-surface: #161616;
+    --text-main: #ffffff;
+    --text-muted: #a1a1aa;
+    --border-color: #2a2a2a;
+    --primary-soft: rgba(31, 168, 255, 0.1);
 }
 
 * {

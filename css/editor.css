@@ -20,16 +20,16 @@
     --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
 }
 
-/* UI Palette - Neutral Dark Mode (Pitch Black) */
+/* UI Palette - Neutral Dark Mode (Premium Night) */
 .dark-mode {
-    --bg-page: #000000;
-    --bg-card: #121212;
-    --border: #222222;
+    --bg-page: #0a0a0a;
+    --bg-card: #161616;
+    --border: #2a2a2a;
     --text: #ffffff;
-    --bg-mobile: #121212;
+    --bg-mobile: #101010;
     /* Match menu.css dark */
-    --text-muted: #888888;
-    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
+    --text-muted: #a1a1aa;
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 
 /* Global Reset */
@@ -106,6 +106,11 @@ button:disabled {
     cursor: pointer;
 }
 
+.dark-mode .user-name-btn {
+    background: rgba(31, 168, 255, 0.15);
+    border-color: rgba(31, 168, 255, 0.2);
+}
+
 .user-name-btn:hover {
     background: var(--primary);
     color: #fff;
@@ -129,6 +134,11 @@ button:disabled {
     color: var(--border);
     font-size: 1.2rem;
     font-weight: 300;
+    opacity: 0.5;
+}
+
+.dark-mode .nav-brand .divider {
+    color: rgba(255, 255, 255, 0.2);
 }
 
 .nav-tools {
@@ -147,6 +157,33 @@ button:disabled {
     background: rgba(255, 255, 255, 0.05);
 }
 
+.mobile-nav-trigger {
+    display: none;
+}
+
+@media (max-width: 850px) {
+    .nav-tools-desktop {
+        display: none;
+    }
+
+    .mobile-nav-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: var(--primary-glow);
+        color: var(--primary);
+        border: none;
+        cursor: pointer;
+    }
+
+    .dark-mode .mobile-nav-trigger {
+        background: rgba(31, 168, 255, 0.15);
+    }
+}
+
 @media (max-width: 1200px) {
     .nav-tools .desktop-only {
         display: none;
@@ -155,6 +192,60 @@ button:disabled {
     .btn-nav {
         padding: 8px 10px;
     }
+}
+
+/* --- MOBILE DROPBAR --- */
+.mobile-dropbar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    width: 100%;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    z-index: 94000;
+    transform: translateY(-110%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 10px 0;
+}
+
+.mobile-dropbar.open {
+    transform: translateY(0);
+}
+
+.dropbar-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 24px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: left;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.dropbar-item i {
+    width: 20px;
+    color: var(--primary);
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.dropbar-item:active {
+    background: var(--bg-page);
+}
+
+.dark-mode .mobile-dropbar {
+    background: rgba(22, 22, 22, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* --- ITEM CARD LAYOUT (Unified with menu.css) --- */
@@ -745,6 +836,11 @@ button:disabled {
     gap: 12px;
 }
 
+.dark-mode .dashboard-navbar {
+    background: rgba(22, 22, 22, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 body.tutorial-active .dashboard-navbar {
     pointer-events: none;
 }
@@ -817,9 +913,6 @@ body.tutorial-active .dashboard-navbar .tutorial-active-target * {
     overflow-y: auto;
 }
 
-.dark-mode .dashboard-navbar {
-    background: rgba(18, 18, 18, 0.9);
-}
 
 .action-btn {
     width: 32px;
