@@ -3,670 +3,100 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Painel de Gestão - Menu no Ar</title>
-    <meta name="description"
-        content="Gere o seu menu digital de forma simples e profissional com o Menu no Ar. Editor em tempo real, QR Code e muito mais.">
-    <meta name="keywords" content="menu digital, qr code restaurante, e-menu, gestão restaurante, portugal">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Menu no Ar</title>
+    <meta name="description" content="Dashboard autenticado do Menu no Ar.">
     <link rel="icon" type="image/svg+xml" href="assets/images/logominimal.svg">
-
-    <!-- Open Graph / Social -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Menu no Ar - Gestão de Menu Digital">
-    <meta property="og:description" content="O editor de menus mais rápido e intuitivo para o seu restaurante.">
-    <meta property="og:image" content="assets/images/logominimal.svg">
-
-    <!-- Preconnect to Font Provider -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <!-- Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=Inter:wght@400;600&family=Playfair+Display:wght@400;600&family=Oswald:wght@400;600&family=Montserrat:wght@400;600&family=Lato:wght@400;700&family=Raleway:wght@400;600&family=Dancing+Script:wght@400;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         media="print" onload="this.media='all'">
-
-    <!-- Menu Styles (Visuals for preview) -->
-    <link rel="stylesheet" href="css/menu.css?v=1.1">
-    <!-- Editor Styles (Overlays) -->
-    <link rel="stylesheet" href="css/editor.css?v=3.2">
-    <link rel="stylesheet" href="css/mobile-fix.css?v=1.1">
-
-    <!-- Defer non-critical scripts -->
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js" defer></script>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/cursor.js" defer></script>
 </head>
 
 <body>
-
-    <!-- SETUP SCREEN (Visible only if no restaurant) -->
-    <div id="setup-screen" class="setup-container" style="display:none;">
-        <div class="setup-card" id="setup-choice-card">
-            <div class="setup-header">
-                <img src="assets/images/logominimal.svg" alt="Logo" class="setup-logo">
-                <h2>Bem-vindo, <span id="setupGreetingName">!</span></h2>
-                <p>Já tens um menu ou queres começar do zero?</p>
-            </div>
-            <div class="setup-actions" style="display:flex; flex-direction:column; gap:15px; margin-top: 20px;">
-                <button type="button" class="btn-confirm btn-full" onclick="showSetupForm('import')"
-                    style="flex: none;">
-                    <i class="fa-solid fa-file-import"></i> Já tenho um menu (Importar)
-                </button>
-                <button type="button" class="btn-secondary btn-full" onclick="showSetupForm('scratch')"
-                    style="flex: none;">
-                    <i class="fa-solid fa-plus"></i> Criar do Zero
-                </button>
-            </div>
-        </div>
-
-        <div class="setup-card" id="setup-form-card" style="display:none;">
-            <button type="button" class="btn-cancel" onclick="goBackToSetupChoice()"
-                style="margin-bottom: 20px; width: 100%;">
-                <i class="fa-solid fa-arrow-left"></i> Voltar
-            </button>
-            <div class="setup-header">
-                <h2>Criar Menu do Zero</h2>
-                <p>Vamos dar vida ao teu menu digital.</p>
-            </div>
-            <form id="setupForm" class="setup-form">
-                <div class="form-group">
-                    <label for="setupName">Nome do Restaurante</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-store"></i>
-                        <input type="text" id="setupName" placeholder="ex: O Tasco do Zé" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="setupDesc">Descrição Curta</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-align-left"></i>
-                        <textarea id="setupDesc" rows="2" placeholder="Descreve o teu espaço..."></textarea>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-confirm btn-full">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Criar Menu
-                </button>
-            </form>
-        </div>
-
-        <div class="setup-card" id="setup-import-card" style="display:none;">
-            <button type="button" class="btn-cancel" onclick="goBackToSetupChoice()"
-                style="margin-bottom: 20px; width: 100%;">
-                <i class="fa-solid fa-arrow-left"></i> Voltar
-            </button>
-            <div class="setup-header">
-                <h2>Configura o teu menu</h2>
-            </div>
-            <form id="importForm" class="setup-form">
-                <div class="form-group">
-                    <label for="importRestName">Nome do Restaurante</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-store"></i>
-                        <input type="text" id="importRestName" required placeholder="ex: O Tasco do Zé">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Ficheiro do Menu (Formato PDF)</label>
-                    <div class="file-upload-wrapper" onclick="document.getElementById('importFile').click()"
-                        style="margin-top: 5px;">
-                        <div class="upload-icon"><i class="fa-solid fa-file-pdf"></i></div>
-                        <div class="upload-text">
-                            <span id="importFileNameDisplay">Clique para selecionar o PDF do Menu</span>
-                        </div>
-                    </div>
-                    <input type="file" id="importFile" accept=".pdf" required style="display:none;"
-                        onchange="document.getElementById('importFileNameDisplay').textContent = this.files[0] ? this.files[0].name : 'Clique para selecionar o PDF do Menu'">
-                </div>
-                <button type="submit" class="btn-confirm btn-full">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Criar Menu Rapidamente
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MAIN DASHBOARD (Hidden by default until loaded) -->
-    <div id="main-dashboard" style="display:none;">
-
-        <div class="dashboard-navbar">
-            <div class="nav-brand">
-                <img id="dashboardLogo" src="assets/images/logominimal.svg" alt="MenuNoAr"
-                    onclick="window.location.href='index.html'" style="cursor: pointer;">
-                <button id="userDisplay" class="user-name-btn" onclick="openRenameModal()"
-                    title="Clica para alterar o nome">
-                    <span id="userDisplayName">...</span>
-                    <i class="fa-solid fa-pen-to-square user-edit-icon"></i>
-                </button>
-            </div>
-
-            <div class="nav-tools">
-                <div class="nav-tools-desktop">
-                    <button class="btn-nav btn-nav-primary" id="liveLinkBtn" title="Ver ao Vivo">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="desktop-only">Ver
-                            Menu</span>
-                    </button>
-                    <button class="btn-nav" onclick="openQrModal()" title="QR Code">
-                        <i class="fa-solid fa-qrcode"></i> <span class="desktop-only">QR</span>
-                    </button>
-                    <button class="btn-nav" onclick="openSettingsModal()" title="Configurações">
-                        <i class="fa-solid fa-sliders"></i> <span class="desktop-only">Preferencias</span>
-                    </button>
-                    <button class="btn-nav" onclick="toggleDarkMode()" title="Tema">
-                        <i class="fa-solid fa-moon" id="themeIcon"></i>
-                    </button>
-                    <button class="btn-nav" onclick="openSettingsTab('billing')" title="Planos">
-                        <i class="fa-solid fa-credit-card"></i> <span class="desktop-only">Plano</span>
-                    </button>
-                    <button class="btn-nav btn-danger-soft" onclick="signOut()" title="Sair">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </div>
-
-
-
-                <button class="btn-nav mobile-nav-trigger" onclick="toggleNavDropdown()" title="Menu">
-                    <i class="fa-solid fa-bars-staggered" id="navMobileIcon"></i>
-                </button>
-            </div>
-        </div>
-
-        <div id="mobileDropbar" class="mobile-dropbar">
-            <button class="dropbar-item" id="liveLinkBtnMobile" onclick="toggleNavDropdown()">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Ver Menu</span>
-            </button>
-            <button class="dropbar-item" onclick="openQrModal(); toggleNavDropdown()">
-                <i class="fa-solid fa-qrcode"></i> <span>QR</span>
-            </button>
-            <button class="dropbar-item" onclick="openSettingsModal(); toggleNavDropdown()">
-                <i class="fa-solid fa-sliders"></i> <span>Preferencias</span>
-            </button>
-            <button class="dropbar-item" onclick="toggleDarkMode(); toggleNavDropdown()">
-                <i class="fa-solid fa-moon" id="themeIconMobile"></i> <span>Tema</span>
-            </button>
-            <button class="dropbar-item" onclick="openSettingsTab('billing'); toggleNavDropdown()">
-                <i class="fa-solid fa-credit-card"></i> <span>Plano</span>
-            </button>
-            <button class="dropbar-item btn-danger-soft" onclick="signOut()">
-                <i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span>
-            </button>
-        </div>
-
-        <!-- EDITOR CANVAS (Mimics menu.html structure but editable) -->
-        <main class="editor-canvas">
-            <section class="editor-helper-strip">
-                <div class="editor-helper-copy">
-                    <span class="editor-helper-kicker">Edicao direta</span>
-                    <p>Este e o menu final. Clique em qualquer texto, preco, categoria ou imagem para editar.</p>
-                </div>
-            </section>
-
-            <header id="heroHeader" class="menu-header">
-                <div id="coverEditor" class="cover-image editable-trigger" onclick="triggerCoverUpload()">
-                    <div class="edit-overlay"><i class="fa-solid fa-camera"></i> Alterar Capa</div>
-                    <input type="file" id="coverUpload" accept="image/*" style="display:none;">
-                </div>
-
-                <div class="header-content container">
-                    <!-- Inline Editable Fields -->
-                    <h1 id="restNameEditor" class="inline-editable" placeholder="Nome do Restaurante"></h1>
-                    <p id="restDescEditor" class="inline-editable" placeholder="Descrição curta (clica para editar)">
-                    </p>
-
-                    <div class="info-badges">
-                        <span id="badgeWifi" class="badge clickable-badge" onclick="openBadgeModal('wifi')">
-                            <i class="fa-solid fa-wifi"></i> <span id="textWifi">Wifi</span>
-                        </span>
-                        <span id="badgePhone" class="badge clickable-badge" onclick="openBadgeModal('phone')">
-                            <i class="fa-solid fa-phone"></i> <span id="textPhone">Telefone</span>
-                        </span>
-                        <span id="badgeAddress" class="badge clickable-badge" onclick="openBadgeModal('address')">
-                            <i class="fa-solid fa-location-dot"></i> <span id="textAddress">Morada</span>
-                        </span>
-                    </div>
-                </div>
-            </header>
-
-            <!-- CATEGORY NAV -->
-            <div id="categoryNav" class="category-scroll-nav sticky-nav">
-                <!-- Tabs Injected via JS -->
-            </div>
-
-            <!-- MENU GRID -->
-            <div class="container menu-grid-layout">
-                <div id="menuContainer" class="menu-sections">
-                    <!-- Items Injected via JS -->
-                </div>
-            </div>
-
-            <footer class="app-footer">
-                <p>Menu no Ar &copy; 2026</p>
-            </footer>
-
-        </main>
-    </div>
-
-    <!-- SETTINGS MODAL (TABBED) -->
-    <div id="settingsModal" class="edit-modal">
-        <div class="edit-modal-content settings-modal-modern">
-
-            <div class="settings-layout">
-                <!-- Sidebar Nav -->
-                <div class="settings-sidebar">
-                    <h2 class="settings-sidebar-title">Preferências</h2>
-                    <div class="settings-sidebar-tabs">
-                        <button type="button" class="tab-btn-settings active" onclick="switchSettingsTab('general')"
-                            id="tab-btn-general">
-                            <i class="fa-solid fa-store"></i> <span>O Meu Menu</span>
-                        </button>
-                        <button type="button" class="tab-btn-settings" onclick="switchSettingsTab('billing')"
-                            id="tab-btn-billing">
-                            <i class="fa-solid fa-credit-card"></i> <span>Faturação & Plano</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Content Area -->
-                <div class="settings-content">
-
-                    <!-- TAB: GENERAL -->
-                    <div id="tab-general" class="settings-tab-pane active" style="display: block;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                            <h3 style="color: var(--text); font-size: 1.4rem;">Geral</h3>
-                            <button type="button" class="btn-secondary small" onclick="closeModal('settingsModal')"><i
-                                    class="fa-solid fa-xmark"></i> Fechar</button>
-                        </div>
-
-                        <form id="settingsForm">
-                            <div class="form-group">
-                                <label>Link do Menu (Slug)</label>
-                                <div class="input-with-icon">
-                                    <i class="fa-solid fa-link"></i>
-                                    <input type="text" id="modalSlug" readonly
-                                        style="background: var(--bg-page); color: var(--text-muted); cursor: not-allowed;"
-                                        title="O link do teu menu.">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Estilo do Menu (Letra)</label>
-                                <select id="modalFont"
-                                    onchange="this.style.fontFamily = this.options[this.selectedIndex].style.fontFamily;">
-                                    <option value="Inter" style="font-family: 'Inter', sans-serif;">Inter (Limpa /
-                                        Padrão)</option>
-                                    <option value="Outfit" style="font-family: 'Outfit', sans-serif;">Outfit (Moderna)
-                                    </option>
-                                    <option value="Montserrat" style="font-family: 'Montserrat', sans-serif;">Montserrat
-                                        (Geométrica)</option>
-                                    <option value="Lato" style="font-family: 'Lato', sans-serif;">Lato (Suave)</option>
-                                    <option value="Raleway" style="font-family: 'Raleway', sans-serif;">Raleway
-                                        (Sofisticada)</option>
-                                    <option value="Playfair Display" style="font-family: 'Playfair Display', serif;">
-                                        Playfair Display (Elegante)</option>
-                                    <option value="Oswald" style="font-family: 'Oswald', sans-serif;">Oswald (Forte /
-                                        Expressiva)</option>
-                                    <option value="Dancing Script"
-                                        style="font-family: 'Dancing Script', cursive; font-size: 1.1rem;">Dancing
-                                        Script (Manuscrita)</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group"
-                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:var(--bg-page); padding:15px; border-radius:12px; border: 1px solid var(--border);">
-                                <label style="margin:0; display:flex; align-items:center; gap:8px; font-weight:600;">
-                                    <i class="fa-solid fa-file-pdf" style="color: var(--danger);"></i> Ativar Menu por
-                                    PDF
-                                </label>
-                                <label class="switch">
-                                    <input type="checkbox" id="pdfToggle" onchange="togglePdfDetails()">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-
-                            <div class="form-group" id="pdfDetails"
-                                style="display:none; animation: fadeIn 0.3s; padding: 20px; border: 2px dashed var(--border); border-radius: 12px;">
-                                <label style="margin-bottom: 10px; display: block;">Ficheiro PDF do Menu</label>
-                                <div id="pdfUploadState">
-                                    <div class="file-upload-wrapper"
-                                        onclick="document.getElementById('pdfUploadInput').click()">
-                                        <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                                        <div class="upload-text">
-                                            <span id="pdfFileNameDisplay">Clica para fazer upload do PDF</span>
-                                            <small>Tamanho máx: 10MB</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="pdfActionsState"
-                                    style="display:none; background: var(--bg-page); padding: 15px; border-radius: 12px; margin-top: 10px;">
-                                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                                        <i class="fa-solid fa-file-pdf" style="font-size: 2rem; color: #ef4444;"></i>
-                                        <div style="flex: 1; overflow: hidden;">
-                                            <div style="font-weight: 700; font-size: 0.95rem; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;"
-                                                id="pdfCurrentFileName">Menu.pdf</div>
-                                            <div style="font-size: 0.8rem; color: var(--text-muted);"><a href="#"
-                                                    id="pdfViewLink" target="_blank"
-                                                    style="color: var(--primary); text-decoration: none;">Abrir
-                                                    Documento atual</a></div>
-                                        </div>
-                                    </div>
-                                    <div style="display: flex; gap: 10px;">
-                                        <button type="button" class="btn-secondary small" style="flex: 1;"
-                                            onclick="document.getElementById('pdfUploadInput').click()"><i
-                                                class="fa-solid fa-pen"></i> Alterar</button>
-                                        <button type="button" class="btn-secondary small"
-                                            style="flex: 1; color: #ef4444; border-color: #fee2e2;"
-                                            onclick="window.deletePdfFile()"><i class="fa-solid fa-trash"></i>
-                                            Apagar</button>
-                                    </div>
-                                </div>
-                                <input type="file" id="pdfUploadInput" style="display:none;" accept="application/pdf"
-                                    onchange="handlePdfSelect(this)">
-                                <p
-                                    style="font-size:0.8rem; color:var(--text-muted); margin-top:10px; display:flex; gap:6px;">
-                                    <i class="fa-solid fa-circle-info" style="margin-top:2px;"></i> Ligar isto desativa
-                                    o menu tátil (digital) original.
-                                </p>
-                            </div>
-
-                            <button type="submit" class="btn-confirm btn-full" style="margin-top: 25px;"><i
-                                    class="fa-solid fa-check"></i> Guardar Atualizações</button>
-                        </form>
-                    </div>
-
-                    <!-- TAB: BILLING -->
-                    <div id="tab-billing" class="settings-tab-pane" style="display: none;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                            <h3 style="color: var(--text); font-size: 1.4rem;">Faturação</h3>
-                            <button type="button" class="btn-secondary small" onclick="closeModal('settingsModal')"><i
-                                    class="fa-solid fa-xmark"></i> Fechar</button>
-                        </div>
-
-                        <div
-                            style="background: var(--bg-card); padding: 30px; border-radius: 16px; border: 2px solid var(--primary); margin-bottom: 30px; position:relative; box-shadow: 0 10px 30px rgba(31,168,255,0.08);">
-                            <div
-                                style="position: absolute; top: -14px; right: 25px; background: var(--primary); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(31,168,255,0.3);">
-                                MENU NO AR PRO
-                            </div>
-
-                            <div
-                                style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 20px;">
-                                <div>
-                                    <h4
-                                        style="font-size: 1.6rem; color: var(--text); margin-bottom:5px; font-weight: 800;">
-                                        Plano Profissional</h4>
-                                    <div id="billingStatusText"
-                                        style="font-weight: 600; color: var(--text-muted); font-size: 1rem;"><i
-                                            class="fa-solid fa-circle-notch fa-spin"></i> A analisar a tua licença...
-                                    </div>
-                                </div>
-                            </div>
-
-                            <ul class="check-list"
-                                style="margin-bottom: 30px; font-size:0.95rem; display:flex; flex-direction:column; gap:12px; color: var(--text-muted); list-style: none;">
-                                <li style="display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-rocket"
-                                        style="color:var(--primary); font-size:1.1rem; width: 20px;"></i> Menus digitais
-                                    e PDFs Ilimitados</li>
-                                <li style="display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-qrcode"
-                                        style="color:var(--primary); font-size:1.1rem; width: 20px;"></i> Códigos QR e
-                                    Visitas Ilimitadas</li>
-                                <li style="display:flex; align-items:center; gap:10px;"><i
-                                        class="fa-solid fa-shield-halved"
-                                        style="color:var(--primary); font-size:1.1rem; width: 20px;"></i> Remoção de
-                                    menções do MenuNoAr</li>
-                            </ul>
-
-                            <div style="display:flex; flex-direction:column; gap:10px;">
-                                <button id="btnActionBilling" type="button" class="btn-primary"
-                                    style="width: 100%; height: 50px; font-size: 1.05rem;"
-                                    onclick="window.handleBillingAction()">
-                                    <i class="fa-solid fa-spinner fa-spin"></i> A carregar...
-                                </button>
-                                <p
-                                    style="font-size: 0.8rem; text-align: center; color: var(--text-muted); margin-top: 5px;">
-                                    Cancela facilmente a qualquer momento.</p>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 30px; text-align: center;">
-                            <button type="button"
-                                style="background:none; border:none; color:var(--text-muted); font-size:0.85rem; cursor:pointer; text-decoration:underline; opacity: 0.7; transition: opacity 0.2s;"
-                                onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'"
-                                onclick="promptDeleteRestaurant()">
-                                Apagar restaurante permanentemente
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    <div id="authLoading" class="auth-loading">
+        <div class="auth-loading-card">
+            <img src="assets/images/logominimal.svg" alt="Menu no Ar" class="loading-logo">
+            <div class="loading-copy">
+                <span class="loading-kicker">Acesso protegido</span>
+                <h1>A validar a tua sessao</h1>
+                <p>Estamos a confirmar o acesso ao dashboard.</p>
             </div>
         </div>
     </div>
 
-    <!-- ITEM EDIT MODAL -->
-    <div id="itemModal" class="edit-modal">
-        <div class="edit-modal-content">
-            <h2 id="modalTitle" style="margin-bottom:20px; color:var(--color-text);">Editar Produto</h2>
-            <form id="itemEditForm">
-                <input type="hidden" id="editItemId">
-                <div class="form-group">
-                    <label>Nome do Prato</label>
-                    <input type="text" id="editItemName" required>
-                </div>
-                <div class="form-group">
-                    <label>Preço (€)</label>
-                    <input type="number" step="0.01" id="editItemPrice" required>
-                </div>
-                <div class="form-group">
-                    <label>Descrição</label>
-                    <textarea id="editItemDesc" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Categoria</label>
-                    <input list="catSuggestions" id="editItemCat" required>
-                    <datalist id="catSuggestions">
-                        <option value="Entradas">
-                        <option value="Pratos Principais">
-                        <option value="Sobremesas">
-                        <option value="Bebidas">
-                    </datalist>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModal('itemModal')">Cancelar</button>
-                    <button type="submit" class="btn-confirm">Guardar</button>
-                </div>
-            </form>
+    <div id="authError" class="auth-feedback" hidden>
+        <div class="feedback-card">
+            <span class="feedback-badge">Ligacao</span>
+            <h2>Não foi possível carregar o dashboard.</h2>
+            <p>Confirma a configuração do projeto e tenta novamente.</p>
+            <a class="feedback-link" href="login.html">Voltar ao login</a>
         </div>
     </div>
 
-    <!-- SETUP WIZARD MODAL REMOVED (DUPLICATE OF SETUP SCREEN) -->
+    <main id="dashboardShell" class="dashboard-shell" hidden>
+        <header class="shell-header">
+            <a class="brand" href="index.html" aria-label="Voltar ao inicio">
+                <img src="assets/images/logominimal.svg" alt="Menu no Ar">
+                <span>Menu no Ar</span>
+            </a>
 
-    <!-- IMAGE PREVIEW MODAL -->
-    <div id="imageModal" class="edit-modal">
-        <div class="edit-modal-content" style="text-align:center; max-width:400px;">
-            <h2 style="margin-bottom:15px; color:var(--text);">Imagem do Prato</h2>
-
-            <div id="imgPreviewContainer"
-                style="width:100%; height:250px; background:#f5f5f5; border-radius:12px; overflow:hidden; margin-bottom:20px; display:flex; align-items:center; justify-content:center;">
-                <img id="imgPreviewDisplay" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
-                <i id="imgPreviewPlaceholder" class="fa-solid fa-image" style="font-size:3rem; color:#ccc;"></i>
-            </div>
-
-            <div class="modal-actions" style="justify-content:center; flex-wrap:wrap; gap:10px;">
-                <button class="btn-secondary small" onclick="closeModal('imageModal')">Fechar</button>
-                <button class="btn-secondary small" id="btnRemoveImage" style="color:#ef4444; border-color:#fee2e2;">
-                    <i class="fa-solid fa-trash"></i> Remover
-                </button>
-                <button class="btn-confirm small" id="btnChangeImage">
-                    <i class="fa-solid fa-camera"></i> Alterar
+            <div class="header-actions">
+                <div class="user-pill">
+                    <span class="user-label">Conta autenticada</span>
+                    <strong id="userDisplayName">Utilizador</strong>
+                    <small id="userDisplayEmail">email@dominio.com</small>
+                </div>
+                <button type="button" class="signout-btn" onclick="signOut()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Sair</span>
                 </button>
             </div>
+        </header>
 
-            <input type="file" id="modalImageUpload" accept="image/*" style="display:none;">
-        </div>
-    </div>
+        <section class="shell-hero">
+            <div class="hero-copy">
+                <span class="hero-kicker">Dashboard novo</span>
+                <h1>O dashboard antigo foi removido.</h1>
+                <p>Ficou apenas a autenticação de entrada. Esta área está pronta para reconstruirmos a nova base do
+                    zero.</p>
+            </div>
+        </section>
 
-    <!-- GENERIC TEXT EDIT MODAL REMOVED -->
-
-    <!-- QR CODE MODAL -->
-    <div id="qrModal" class="edit-modal">
-        <div class="edit-modal-content" style="text-align:center; max-width:480px;">
-            <h2 style="margin-bottom:20px; color:var(--text);">O Teu QR Code</h2>
-
-            <!-- QR Preview -->
-            <div id="qr-code-container" style="margin: 0 auto 20px auto; display:flex; justify-content:center;"></div>
-
-            <!-- Logo Customizer -->
-            <div class="qr-logo-section">
-
-                <div class="qr-logo-row">
-                    <div id="qrLogoPreview" class="qr-logo-preview">
-                        <img id="qrLogoImg" src="assets/images/logominimal.svg" alt="Logo QR">
-                    </div>
-                    <div class="qr-logo-actions">
-                        <button class="btn-secondary small" onclick="document.getElementById('qrLogoUpload').click()">
-                            <i class="fa-solid fa-upload"></i> Trocar Logo
-                        </button>
-                        <button class="btn-secondary small" id="btnResetQrLogo" onclick="resetQrLogo()"
-                            style="display:none;">
-                            <i class="fa-solid fa-rotate-left"></i> Repor Padrão
-                        </button>
-                    </div>
-                </div>
-                <input type="file" id="qrLogoUpload" accept="image/*" style="display:none;"
-                    onchange="handleQrLogoChange(this)">
+        <section class="shell-workspace">
+            <div class="workspace-panel">
+                <span class="panel-label">Estado</span>
+                <h2>Base limpa</h2>
+                <p>Sem editor, sem modais, sem fluxo legado. Apenas uma shell autenticada pronta para a próxima fase.</p>
             </div>
 
-            <p style="margin:16px 0 20px; color:var(--text-muted); font-size:0.875rem;">Imprime este código e coloca-o
-                nas mesas.</p>
+            <div class="workspace-grid">
+                <article class="info-card">
+                    <span class="info-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                    <h3>Autenticação mantida</h3>
+                    <p>O acesso continua protegido pela mesma lógica de sessão e redirecionamento.</p>
+                </article>
 
-            <div class="modal-actions" style="justify-content:center;">
-                <button class="btn-cancel" onclick="closeModal('qrModal')">Fechar</button>
-                <button class="btn-confirm" onclick="downloadQr()">
-                    <i class="fa-solid fa-download" style="margin-right:8px;"></i>Baixar PNG
-                </button>
+                <article class="info-card">
+                    <span class="info-icon"><i class="fa-solid fa-broom"></i></span>
+                    <h3>Interface limpa</h3>
+                    <p>Todo o dashboard visual antigo foi substituído por uma estrutura mínima e neutra.</p>
+                </article>
+
+                <article class="info-card">
+                    <span class="info-icon"><i class="fa-solid fa-layer-group"></i></span>
+                    <h3>Pronto para refazer</h3>
+                    <p>Agora podemos definir a nova arquitetura do backoffice sem carregar dívida visual anterior.</p>
+                </article>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
-
-
-    <!-- RENAME MODAL -->
-    <div id="renameModal" class="edit-modal">
-        <div class="edit-modal-content" style="max-width:380px;">
-            <h2 style="margin-bottom:6px; color:var(--color-text);">Alterar Nome</h2>
-            <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Este nome é apenas para
-                referência pessoal no painel.</p>
-            <form id="renameForm">
-                <div class="form-group">
-                    <label>O teu nome</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-user"></i>
-                        <input type="text" id="renameInput" placeholder="ex: João Silva" maxlength="40" required>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModal('renameModal')">Cancelar</button>
-                    <button type="submit" class="btn-confirm">Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- INFO BADGE MODAL -->
-    <div id="badgeModal" class="edit-modal">
-        <div class="edit-modal-content" style="max-width:420px;">
-            <h2 id="badgeModalTitle" style="margin-bottom:10px; color:var(--text);">Título</h2>
-            <p id="badgeModalDesc" style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Descrição
-            </p>
-
-            <form id="badgeForm">
-                <!-- Phone Fields -->
-                <div id="group-phone" class="badge-form-group" style="display:none;">
-                    <div class="form-group">
-                        <label>Número de Telemóvel</label>
-                        <div class="input-with-icon">
-                            <i class="fa-solid fa-phone"></i>
-                            <input type="text" id="badgeInputPhone" placeholder="ex: +351 912 345 678">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Address Fields -->
-                <div id="group-address" class="badge-form-group" style="display:none;">
-                    <div class="form-group">
-                        <label>Texto da Morada</label>
-                        <div class="input-with-icon">
-                            <i class="fa-solid fa-location-dot"></i>
-                            <input type="text" id="badgeInputAddress" placeholder="ex: Rua de Santa Catarina, Porto">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Link Google Maps (URL)</label>
-                        <div class="input-with-icon">
-                            <i class="fa-solid fa-link"></i>
-                            <input type="url" id="badgeInputMaps" placeholder="https://goo.gl/maps/...">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Wifi Fields -->
-                <div id="group-wifi" class="badge-form-group" style="display:none;">
-                    <div class="form-group">
-                        <label>Nome da Rede (SSID)</label>
-                        <div class="input-with-icon">
-                            <i class="fa-solid fa-wifi"></i>
-                            <input type="text" id="badgeInputWifiName" placeholder="ex: Wifi-Restaurante">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <div class="input-with-icon">
-                            <i class="fa-solid fa-lock"></i>
-                            <input type="text" id="badgeInputWifiPass" placeholder="ex: senha123">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModal('badgeModal')">Cancelar</button>
-                    <button type="submit" class="btn-confirm">Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- SORTABLE, CONFETTI, ETC -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-
-    <!-- Scripts -->
-    <script type="module" src="js/dashboard.js?v=3.1"></script>
-    <script type="module">
-        // Inline helpers moved to module scope for cleanliness
-        window.handlePdfSelect = (input) => {
-            const fileName = input.files[0] ? input.files[0].name : "Clique para selecionar o PDF";
-            const display = document.getElementById('pdfFileNameDisplay');
-            if (display) display.textContent = fileName;
-            const wrapper = document.querySelector('.file-upload-wrapper');
-            if (wrapper) wrapper.classList.add('selected');
-        };
-
-        // Dark mode initial sync
-        if (localStorage.getItem('menu_theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-            const logo = document.getElementById('dashboardLogo');
-            if (logo) logo.src = 'assets/images/Ilogo.svg';
-
-            const themeIcon = document.getElementById('themeIcon');
-            if (themeIcon) themeIcon.className = 'fa-solid fa-sun';
-
-            const themeIconMobile = document.getElementById('themeIconMobile');
-            if (themeIconMobile) themeIconMobile.className = 'fa-solid fa-sun';
-        }
-    </script>
+    <script type="module" src="js/dashboard.js?v=4.0"></script>
 </body>
 
 </html>
