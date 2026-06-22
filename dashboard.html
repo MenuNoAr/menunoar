@@ -136,7 +136,6 @@
             <div class="nav-brand">
                 <img id="dashboardLogo" src="assets/images/logominimal.svg" alt="MenuNoAr"
                     onclick="window.location.href='index.html'" style="cursor: pointer;">
-                <span class="divider">|</span>
                 <button id="userDisplay" class="user-name-btn" onclick="openRenameModal()"
                     title="Clica para alterar o nome">
                     <span id="userDisplayName">...</span>
@@ -146,26 +145,21 @@
 
             <div class="nav-tools">
                 <div class="nav-tools-desktop">
-                    <button class="btn-nav" onclick="openQrModal()" title="QR Code">
-                        <i class="fa-solid fa-qrcode"></i> <span class="desktop-only">QR Code</span>
-                    </button>
-                    <button class="btn-nav" id="liveLinkBtn" title="Ver ao Vivo">
+                    <button class="btn-nav btn-nav-primary" id="liveLinkBtn" title="Ver ao Vivo">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> <span class="desktop-only">Ver
                             Menu</span>
                     </button>
+                    <button class="btn-nav" onclick="openQrModal()" title="QR Code">
+                        <i class="fa-solid fa-qrcode"></i> <span class="desktop-only">QR</span>
+                    </button>
                     <button class="btn-nav" onclick="openSettingsModal()" title="Configurações">
-                        <i class="fa-solid fa-gear"></i> <span class="desktop-only">Configurar</span>
+                        <i class="fa-solid fa-sliders"></i> <span class="desktop-only">Preferencias</span>
                     </button>
                     <button class="btn-nav" onclick="toggleDarkMode()" title="Tema">
                         <i class="fa-solid fa-moon" id="themeIcon"></i>
                     </button>
                     <button class="btn-nav" onclick="openSettingsTab('billing')" title="Planos">
-                        <i class="fa-solid fa-crown" style="color:var(--primary);"></i> <span
-                            class="desktop-only">Premium</span>
-                    </button>
-                    <button class="btn-nav" onclick="openTutorial()" title="Tutorial" style="position:relative;">
-                        <i class="fa-solid fa-graduation-cap"></i> <span class="desktop-only">Tutorial</span>
-                        <span class="badge-pulse">NOVO</span>
+                        <i class="fa-solid fa-credit-card"></i> <span class="desktop-only">Plano</span>
                     </button>
                     <button class="btn-nav btn-danger-soft" onclick="signOut()" title="Sair">
                         <i class="fa-solid fa-right-from-bracket"></i>
@@ -181,20 +175,20 @@
         </div>
 
         <div id="mobileDropbar" class="mobile-dropbar">
-            <button class="dropbar-item" onclick="openQrModal(); toggleNavDropdown()">
-                <i class="fa-solid fa-qrcode"></i> <span>QR Code</span>
-            </button>
             <button class="dropbar-item" id="liveLinkBtnMobile" onclick="toggleNavDropdown()">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Ver Menu</span>
             </button>
+            <button class="dropbar-item" onclick="openQrModal(); toggleNavDropdown()">
+                <i class="fa-solid fa-qrcode"></i> <span>QR</span>
+            </button>
             <button class="dropbar-item" onclick="openSettingsModal(); toggleNavDropdown()">
-                <i class="fa-solid fa-gear"></i> <span>Configurar</span>
+                <i class="fa-solid fa-sliders"></i> <span>Preferencias</span>
             </button>
             <button class="dropbar-item" onclick="toggleDarkMode(); toggleNavDropdown()">
-                <i class="fa-solid fa-moon" id="themeIconMobile"></i> <span>Mudar Tema</span>
+                <i class="fa-solid fa-moon" id="themeIconMobile"></i> <span>Tema</span>
             </button>
             <button class="dropbar-item" onclick="openSettingsTab('billing'); toggleNavDropdown()">
-                <i class="fa-solid fa-crown" style="color:var(--primary);"></i> <span>Premium</span>
+                <i class="fa-solid fa-credit-card"></i> <span>Plano</span>
             </button>
             <button class="dropbar-item btn-danger-soft" onclick="signOut()">
                 <i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span>
@@ -203,6 +197,12 @@
 
         <!-- EDITOR CANVAS (Mimics menu.html structure but editable) -->
         <main class="editor-canvas">
+            <section class="editor-helper-strip">
+                <div class="editor-helper-copy">
+                    <span class="editor-helper-kicker">Edicao direta</span>
+                    <p>Este e o menu final. Clique em qualquer texto, preco, categoria ou imagem para editar.</p>
+                </div>
+            </section>
 
             <header id="heroHeader" class="menu-header">
                 <div id="coverEditor" class="cover-image editable-trigger" onclick="triggerCoverUpload()">

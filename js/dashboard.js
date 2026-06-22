@@ -41,27 +41,16 @@ async function init() {
 
             await loadData();
 
-            // Fire tutorial + confetti after first restaurant creation
             if (localStorage.getItem('just_created_rest') === 'true') {
                 localStorage.removeItem('just_created_rest');
+                localStorage.removeItem('tutorial_running');
                 setTimeout(() => {
-                    if (window.confetti) {
-                        confetti({
-                            particleCount: 150,
-                            spread: 70,
-                            origin: { y: 0.6 },
-                            colors: ['#1fa8ff', '#16a34a', '#ffffff'],
-                        });
+                    if (window.showToast) {
+                        window.showToast('Menu criado. Edite diretamente nesta pagina.', 'success');
                     }
-                    if (state.currentData?.menu_type !== 'pdf') {
-                        openTutorial();
-                    }
-                }, 1000);
-            } else if (localStorage.getItem('tutorial_running') === 'true') {
-                // Resume tutorial if it was running before a reload
-                setTimeout(() => {
-                    window.openTutorial(true);
-                }, 1000);
+                }, 500);
+            } else {
+                localStorage.removeItem('tutorial_running');
             }
         }, () => {
             window.location.href = 'login.html';

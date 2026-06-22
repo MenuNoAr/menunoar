@@ -333,7 +333,11 @@ export function renderMenu(items) {
         const itemsHTML = groups[cat].map(createItemCard).join('');
         const addItemBtn = `
             <div class="add-item-btn" onclick="openAddItemModal('${cat}')">
-                <span><i class="fa-solid fa-plus"></i> Adicionar Prato em "${escapeHTML(cat)}"</span>
+                <i class="fa-solid fa-plus"></i>
+                <div class="add-item-copy">
+                    <strong>Adicionar prato</strong>
+                    <span>${escapeHTML(cat)}</span>
+                </div>
             </div>`;
 
         section.innerHTML = headerHTML + `<div class="items-grid">${itemsHTML}</div>` + addItemBtn;
