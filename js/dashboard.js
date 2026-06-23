@@ -10,6 +10,8 @@ const app = {
     previewReady: false,
 };
 
+let authBootstrappedForUser = null;
+
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
 function escapeHTML(value) {
@@ -642,11 +644,16 @@ async function init() {
         initUploadService(supabase);
 
         initAuthListener(async (user) => {
+            if (authBootstrappedForUser === user.id) return;
+            authBootstrappedForUser = user.id;
             app.user = user;
             const loading = qs('authLoading');
-            if (loading) loading.hidden = false;
-            await loadDashboardData();
+            const error = qs('authError');
+            const shell = qs('dashboardShell');
             if (loading) loading.hidden = true;
+            if (error) error.hidden = true;
+            if (shell) shell.hidden = false;
+            await loadDashboardData();
         }, () => {
             window.location.href = 'login.html';
         });
