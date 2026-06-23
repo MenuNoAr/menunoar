@@ -5,98 +5,195 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Menu no Ar</title>
-    <meta name="description" content="Dashboard autenticado do Menu no Ar.">
+    <meta name="description" content="Dashboard premium do Menu no Ar.">
     <link rel="icon" type="image/svg+xml" href="assets/images/logominimal.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=1.0">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=2.0">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 
 <body>
-    <div id="authLoading" class="auth-loading">
-        <div class="auth-loading-card">
-            <img src="assets/images/logominimal.svg" alt="Menu no Ar" class="loading-logo">
-            <div class="loading-copy">
-                <span class="loading-kicker">Acesso protegido</span>
-                <h1>A validar a tua sessao</h1>
-                <p>Estamos a confirmar o acesso ao dashboard.</p>
+    <div id="authLoading" class="state-screen">
+        <div class="state-card">
+            <span class="state-kicker">Acesso protegido</span>
+            <h1>A validar a tua sessao</h1>
+            <p>Estamos a preparar o dashboard premium.</p>
+        </div>
+    </div>
+
+    <div id="authError" class="state-screen" hidden>
+        <div class="state-card">
+            <span class="state-kicker">Erro de acesso</span>
+            <h1>Não foi possível carregar o dashboard.</h1>
+            <p>Confirma a ligação ao projeto e volta a tentar.</p>
+            <a class="state-link" href="login.html">Voltar ao login</a>
+        </div>
+    </div>
+
+    <div id="emptyState" class="state-screen" hidden>
+        <div class="state-card">
+            <span class="state-kicker">Sem menu</span>
+            <h1>Não há restaurante ligado a esta conta.</h1>
+            <p>Cria o teu menu para começares a editar no dashboard.</p>
+            <div class="state-actions">
+                <a class="btn btn-primary" href="create_admin.html">Criar menu</a>
+                <a class="btn btn-ghost" href="index.html">Voltar ao site</a>
             </div>
         </div>
     </div>
 
-    <div id="authError" class="auth-feedback" hidden>
-        <div class="feedback-card">
-            <span class="feedback-badge">Ligacao</span>
-            <h2>Não foi possível carregar o dashboard.</h2>
-            <p>Confirma a configuração do projeto e tenta novamente.</p>
-            <a class="feedback-link" href="login.html">Voltar ao login</a>
-        </div>
-    </div>
-
     <main id="dashboardShell" class="dashboard-shell" hidden>
-        <header class="shell-header">
-            <a class="brand" href="index.html" aria-label="Voltar ao inicio">
+        <header class="topbar">
+            <a class="brand" href="index.html" aria-label="Menu no Ar">
                 <img src="assets/images/logominimal.svg" alt="Menu no Ar">
                 <span>Menu no Ar</span>
             </a>
 
-            <div class="header-actions">
-                <div class="user-pill">
-                    <span class="user-label">Conta autenticada</span>
-                    <strong id="userDisplayName">Utilizador</strong>
-                    <small id="userDisplayEmail">email@dominio.com</small>
-                </div>
-                <button type="button" class="signout-btn" onclick="signOut()">
+            <div class="topbar-actions">
+                <span class="session-pill" id="sessionPill">Sessao autenticada</span>
+                <a class="btn btn-ghost" id="openLiveBtn" href="#" target="_blank" rel="noreferrer">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    <span>Menu real</span>
+                </a>
+                <button class="btn btn-ghost" id="refreshPreviewBtn" type="button">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span>Atualizar preview</span>
+                </button>
+                <button class="btn btn-danger-soft" type="button" onclick="signOut()">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     <span>Sair</span>
                 </button>
             </div>
         </header>
 
-        <section class="shell-hero">
-            <div class="hero-copy">
-                <span class="hero-kicker">Dashboard novo</span>
-                <h1>O dashboard antigo foi removido.</h1>
-                <p>Ficou apenas a autenticação de entrada. Esta área está pronta para reconstruirmos a nova base do
-                    zero.</p>
-            </div>
-        </section>
+        <section class="dashboard-layout">
+            <aside class="editor-column">
+                <div class="editor-stack">
+                    <section class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <span class="panel-kicker">Base</span>
+                                <h2>Editar menu</h2>
+                            </div>
+                            <span class="panel-chip" id="menuTypeChip">Digital</span>
+                        </div>
 
-        <section class="shell-workspace">
-            <div class="workspace-panel">
-                <span class="panel-label">Estado</span>
-                <h2>Base limpa</h2>
-                <p>Sem editor, sem modais, sem fluxo legado. Apenas uma shell autenticada pronta para a próxima fase.</p>
-            </div>
+                        <div class="field-grid">
+                            <label class="field">
+                                <span>Nome do restaurante</span>
+                                <input id="restaurantNameInput" type="text" placeholder="Nome do restaurante">
+                            </label>
 
-            <div class="workspace-grid">
-                <article class="info-card">
-                    <span class="info-icon"><i class="fa-solid fa-shield-halved"></i></span>
-                    <h3>Autenticação mantida</h3>
-                    <p>O acesso continua protegido pela mesma lógica de sessão e redirecionamento.</p>
-                </article>
+                            <label class="field">
+                                <span>Descrição</span>
+                                <textarea id="restaurantDescInput" rows="3"
+                                    placeholder="Uma descrição curta para o menu"></textarea>
+                            </label>
 
-                <article class="info-card">
-                    <span class="info-icon"><i class="fa-solid fa-broom"></i></span>
-                    <h3>Interface limpa</h3>
-                    <p>Todo o dashboard visual antigo foi substituído por uma estrutura mínima e neutra.</p>
-                </article>
+                            <div class="meta-row">
+                                <div>
+                                    <span class="meta-label">Link publico</span>
+                                    <strong id="slugText">-</strong>
+                                </div>
+                                <button class="btn btn-ghost small" type="button" id="copySlugBtn">
+                                    <i class="fa-solid fa-copy"></i>
+                                    <span>Copiar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
 
-                <article class="info-card">
-                    <span class="info-icon"><i class="fa-solid fa-layer-group"></i></span>
-                    <h3>Pronto para refazer</h3>
-                    <p>Agora podemos definir a nova arquitetura do backoffice sem carregar dívida visual anterior.</p>
-                </article>
-            </div>
+                    <section class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <span class="panel-kicker">Banner</span>
+                                <h2>Capa do menu</h2>
+                            </div>
+                            <span class="panel-chip subtle">Tempo real</span>
+                        </div>
+
+                        <div class="cover-preview" id="coverPreview">
+                            <div class="cover-empty" id="coverEmpty">
+                                <i class="fa-regular fa-image"></i>
+                                <span>Sem capa definida</span>
+                            </div>
+                        </div>
+
+                        <div class="panel-actions">
+                            <input id="coverInput" type="file" accept="image/*" hidden>
+                            <button class="btn btn-primary" type="button" id="uploadCoverBtn">
+                                <i class="fa-solid fa-upload"></i>
+                                <span>Alterar banner</span>
+                            </button>
+                            <button class="btn btn-ghost" type="button" id="removeCoverBtn">
+                                <i class="fa-solid fa-trash"></i>
+                                <span>Remover</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <span class="panel-kicker">Categorias</span>
+                                <h2>Ordem e nomes</h2>
+                            </div>
+                        </div>
+
+                        <form id="newCategoryForm" class="inline-create">
+                            <input id="newCategoryInput" type="text" placeholder="Nova categoria">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Adicionar</span>
+                            </button>
+                        </form>
+
+                        <div id="categoryList" class="category-list"></div>
+                    </section>
+
+                    <section class="panel">
+                        <div class="panel-head">
+                            <div>
+                                <span class="panel-kicker">Pratos</span>
+                                <h2>Editar, apagar e imagens</h2>
+                            </div>
+                            <span class="panel-chip subtle">Auto-save</span>
+                        </div>
+
+                        <div id="categorySections" class="category-sections"></div>
+                    </section>
+                </div>
+            </aside>
+
+            <section class="preview-column">
+                <div class="preview-shell">
+                    <div class="preview-head">
+                        <div>
+                            <span class="panel-kicker">Preview 1x1</span>
+                            <h2>Menu real em tempo real</h2>
+                        </div>
+                        <span class="preview-status" id="previewStatus">A sincronizar...</span>
+                    </div>
+
+                    <div class="preview-frame-wrap">
+                        <div class="preview-overlay" id="previewOverlay">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            <span>A carregar preview...</span>
+                        </div>
+                        <iframe id="menuPreviewFrame" title="Preview do menu"></iframe>
+                    </div>
+                </div>
+            </section>
         </section>
     </main>
 
-    <script type="module" src="js/dashboard.js?v=4.0"></script>
+    <script type="module" src="js/dashboard.js?v=5.0"></script>
 </body>
 
 </html>
