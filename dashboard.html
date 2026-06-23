@@ -13,7 +13,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/menu.css?v=2.0">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.4">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.5">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 
@@ -99,14 +99,22 @@
                     </button>
 
                     <div class="header-content">
-                        <h1 id="restName" class="editable-copy" contenteditable="true" spellcheck="false"></h1>
-                        <p id="restDesc" class="description editable-copy" contenteditable="true"
-                            spellcheck="false"></p>
+                        <button class="item-edit-btn" type="button" data-action="open-hero-modal"
+                            aria-label="Editar restaurante" title="Editar restaurante">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <h1 id="restName" class="editable-copy"></h1>
+                        <p id="restDesc" class="description editable-copy"></p>
                         <div id="infoBadges" class="info-badges editor-info-badges"></div>
                     </div>
                 </header>
 
-                <nav id="categoryTabs" class="category-tabs" aria-label="Categorias"></nav>
+                <nav id="categoryTabs" class="category-tabs" aria-label="Categorias">
+                    <button class="item-edit-btn" type="button" data-action="open-categories-modal"
+                        aria-label="Editar categorias" title="Editar categorias">
+                        <i class="fa-solid fa-pencil"></i>
+                    </button>
+                </nav>
 
                 <div id="menuSliderWindow" class="slider-window">
                     <div id="menuSliderTrack" class="slider-track">
@@ -165,7 +173,79 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=7.5"></script>
+    <div id="heroModal" class="modal-backdrop" hidden>
+        <section class="editor-modal editor-modal-wide" role="dialog" aria-modal="true"
+            aria-labelledby="heroModalTitle">
+            <div class="modal-head">
+                <div class="modal-head-copy">
+                    <span class="state-kicker">Restaurante</span>
+                    <h2 id="heroModalTitle">Editar restaurante</h2>
+                </div>
+                <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="heroForm" class="modal-form">
+                <div class="hero-form-grid">
+                    <label class="form-field">
+                        <span>Nome</span>
+                        <input id="heroNameInput" type="text" required>
+                    </label>
+                    <label class="form-field">
+                        <span>Telefone</span>
+                        <input id="heroPhoneInput" type="text" inputmode="tel">
+                    </label>
+                    <label class="form-field hero-form-span-2">
+                        <span>Descrição</span>
+                        <textarea id="heroDescInput" rows="4"></textarea>
+                    </label>
+                    <label class="form-field">
+                        <span>Wi-Fi</span>
+                        <input id="heroWifiInput" type="text" placeholder="Nome da rede">
+                    </label>
+                    <label class="form-field">
+                        <span>Password Wi-Fi</span>
+                        <input id="heroWifiPasswordInput" type="text" placeholder="Password">
+                    </label>
+                    <label class="form-field hero-form-span-2">
+                        <span>Morada</span>
+                        <input id="heroAddressInput" type="text">
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button class="button-secondary" type="button" data-close-modal>Cancelar</button>
+                    <button class="button-primary" type="submit">Guardar</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <div id="categoriesModal" class="modal-backdrop" hidden>
+        <section class="editor-modal editor-modal-wide" role="dialog" aria-modal="true"
+            aria-labelledby="categoriesModalTitle">
+            <div class="modal-head">
+                <div class="modal-head-copy">
+                    <span class="state-kicker">Categorias</span>
+                    <h2 id="categoriesModalTitle">Editar categorias</h2>
+                </div>
+                <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="categoriesForm" class="modal-form">
+                <div id="categoriesList" class="categories-list"></div>
+                <button id="addCategoryRowBtn" class="button-secondary" type="button">Adicionar categoria</button>
+                <div class="modal-actions">
+                    <button class="button-secondary" type="button" data-close-modal>Cancelar</button>
+                    <button class="button-primary" type="submit">Guardar</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script type="module" src="js/dashboard.js?v=7.7"></script>
 </body>
 
 </html>

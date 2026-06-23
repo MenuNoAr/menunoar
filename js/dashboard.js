@@ -121,12 +121,6 @@ function renderInfoBadges() {
             </span>`);
     }
 
-    badges.push(`
-        <button class="badge-editor-action" type="button" data-badge="add"
-            aria-label="Editar informaÃ§Ãµes" title="Editar informaÃ§Ãµes">
-            <i class="fa-solid fa-plus"></i>
-        </button>`);
-
     container.innerHTML = badges.join('');
 }
 
@@ -167,9 +161,9 @@ function renderCategoryTabs(categories) {
             ${escapeHTML(category)}
         </button>
     `).join('') + `
-        <button class="tab-btn tab-add" type="button" data-action="add-category"
-            aria-label="Adicionar categoria" title="Adicionar categoria">
-            <i class="fa-solid fa-plus"></i>
+        <button class="item-edit-btn" type="button" data-action="open-categories-modal"
+            aria-label="Editar categorias" title="Editar categorias">
+            <i class="fa-solid fa-pencil"></i>
         </button>
     `;
 }
@@ -197,6 +191,238 @@ function renderItem(item) {
     `;
 }
 
+function readRestaurantForm() {
+    return {
+        name: qs('heroNameInput').value.trim(),
+        description: qs('heroDescInput').value.trim(),
+        wifi_ssid: qs('heroWifiInput').value.trim(),
+        wifi_password: qs('heroWifiPasswordInput').value.trim(),
+        phone: qs('heroPhoneInput').value.trim(),
+        address: qs('heroAddressInput').value.trim(),
+    };
+}
+
+function renderCategoriesModal() {
+    const list = qs('categoriesList');
+    if (!list) return;
+
+    const categories = getCategories();
+    list.innerHTML = categories.map((category, index) => `
+        <div class="category-row" data-original-category="${escapeHTML(category)}">
+            <input class="category-row-input" type="text" value="${escapeHTML(category)}" spellcheck="false">
+            <div class="category-row-actions">
+                <button class="row-icon-btn" type="button" data-action="category-row-move"
+                    data-direction="-1" aria-label="Mover para cima" title="Mover para cima"
+                    ${index === 0 ? 'disabled' : ''}>
+                    <i class="fa-solid fa-arrow-up"></i>
+                </button>
+                <button class="row-icon-btn" type="button" data-action="category-row-move"
+                    data-direction="1" aria-label="Mover para baixo" title="Mover para baixo"
+                    ${index === categories.length - 1 ? 'disabled' : ''}>
+                    <i class="fa-solid fa-arrow-down"></i>
+                </button>
+                <button class="row-icon-btn row-icon-btn-danger" type="button"
+                    data-action="category-row-delete" aria-label="Apagar categoria" title="Apagar categoria">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+    updateCategoryModalControls();
+}
+
+function openHeroModal() {
+    if (!app.restaurant) return;
+    qs('heroNameInput').value = app.restaurant.name || '';
+    qs('heroDescInput').value = app.restaurant.description || '';
+    qs('heroWifiInput').value = app.restaurant.wifi_ssid || '';
+    qs('heroWifiPasswordInput').value = app.restaurant.wifi_password || '';
+    qs('heroPhoneInput').value = app.restaurant.phone || '';
+    qs('heroAddressInput').value = app.restaurant.address || '';
+    qs('heroModal').hidden = false;
+    window.setTimeout(() => qs('heroNameInput').focus(), 40);
+}
+
+function closeHeroModal() {
+    qs('heroModal').hidden = true;
+}
+
+function openCategoriesModal() {
+    renderCategoriesModal();
+    qs('categoriesModal').hidden = false;
+}
+
+function closeCategoriesModal() {
+    qs('categoriesModal').hidden = true;
+}
+
+function addCategoryRow(value = 'Nova categoria') {
+    const list = qs('categoriesList');
+    if (!list) return;
+    const row = document.createElement('div');
+    row.className = 'category-row';
+    row.dataset.originalCategory = '';
+    row.innerHTML = `
+        <input class="category-row-input" type="text" value="${escapeHTML(value)}" spellcheck="false">
+        <div class="category-row-actions">
+            <button class="row-icon-btn" type="button" data-action="category-row-move"
+                data-direction="-1" aria-label="Mover para cima" title="Mover para cima">
+                <i class="fa-solid fa-arrow-up"></i>
+            </button>
+            <button class="row-icon-btn" type="button" data-action="category-row-move"
+                data-direction="1" aria-label="Mover para baixo" title="Mover para baixo">
+                <i class="fa-solid fa-arrow-down"></i>
+            </button>
+            <button class="row-icon-btn row-icon-btn-danger" type="button"
+                data-action="category-row-delete" aria-label="Apagar categoria" title="Apagar categoria">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+    `;
+    list.appendChild(row);
+    row.querySelector('input')?.focus();
+    updateCategoryModalControls();
+}
+
+function updateCategoryModalControls() {
+    const rows = Array.from(qs('categoriesList')?.querySelectorAll('.category-row') || []);
+    rows.forEach((row, index) => {
+        const up = row.querySelector('[data-direction="-1"]');
+        const down = row.querySelector('[data-direction="1"]');
+        if (up) up.disabled = index === 0;
+        if (down) down.disabled = index === rows.length - 1;
+    });
+}
+
+function moveCategoryRow(row, direction) {
+    if (!row) return;
+    const sibling = direction < 0 ? row.previousElementSibling : row.nextElementSibling;
+    if (!sibling) return;
+    if (direction < 0) {
+        row.parentNode.insertBefore(row, sibling);
+    } else {
+        row.parentNode.insertBefore(sibling, row);
+    }
+    updateCategoryModalControls();
+}
+
+function deleteCategoryRow(row) {
+    row?.remove();
+    updateCategoryModalControls();
+}
+
+async function saveHeroModal(event) {
+    event.preventDefault();
+    if (!app.restaurant) return;
+
+    const updates = readRestaurantForm();
+    const normalized = {};
+    Object.entries(updates).forEach(([key, value]) => {
+        normalized[key] = value;
+    });
+
+    const changed = Object.entries(normalized).some(([key, value]) => String(value || '') !== String(app.restaurant[key] || ''));
+    if (!changed) {
+        closeHeroModal();
+        return;
+    }
+
+    setSaveStatus('A guardar restaurante...');
+    const { error } = await app.supabase
+        .from('restaurants')
+        .update(normalized)
+        .eq('id', app.restaurant.id);
+
+    if (error) {
+        console.error(error);
+        setSaveStatus('NÃ£o foi possÃ­vel guardar');
+        return;
+    }
+
+    Object.assign(app.restaurant, normalized);
+    renderDashboard();
+    closeHeroModal();
+    setSaveStatus('Restaurante guardado', true);
+}
+
+async function saveCategoriesModal(event) {
+    event.preventDefault();
+    if (!app.restaurant) return;
+
+    const rows = Array.from(qs('categoriesList').querySelectorAll('.category-row')).map((row) => ({
+        original: row.dataset.originalCategory || '',
+        name: row.querySelector('.category-row-input')?.value.trim() || '',
+    }));
+
+    const names = rows.map((row) => row.name).filter(Boolean);
+    if (!names.length) {
+        setSaveStatus('Adiciona pelo menos uma categoria');
+        return;
+    }
+
+    if (new Set(names).size !== names.length) {
+        setSaveStatus('Não podem existir categorias repetidas');
+        return;
+    }
+
+    const nextOrder = names;
+    const nextImages = { ...(app.restaurant.category_images || {}) };
+    const currentCategories = getCategories();
+    const activeWasRenamed = rows.find((row) => row.original === app.activeCategory && row.name);
+    const activeWasDeleted = app.activeCategory && !nextOrder.includes(app.activeCategory);
+
+    setSaveStatus('A guardar categorias...');
+
+    for (const row of rows) {
+        if (!row.original || !row.name || row.original === row.name) continue;
+        const { error } = await app.supabase
+            .from('menu_items')
+            .update({ category: row.name })
+            .eq('restaurant_id', app.restaurant.id)
+            .eq('category', row.original);
+        if (error) {
+            console.error(error);
+            setSaveStatus('Não foi possível guardar');
+            return;
+        }
+        if (nextImages[row.original]) {
+            nextImages[row.name] = nextImages[row.original];
+            delete nextImages[row.original];
+        }
+    }
+
+    const deletedCategories = currentCategories.filter((category) => !nextOrder.includes(category));
+    for (const category of deletedCategories) {
+        await app.supabase
+            .from('menu_items')
+            .delete()
+            .eq('restaurant_id', app.restaurant.id)
+            .eq('category', category);
+        delete nextImages[category];
+    }
+
+    const { error } = await app.supabase
+        .from('restaurants')
+        .update({
+            category_order: nextOrder,
+            category_images: nextImages,
+        })
+        .eq('id', app.restaurant.id);
+
+    if (error) {
+        console.error(error);
+        setSaveStatus('Não foi possível guardar');
+        return;
+    }
+
+    app.restaurant.category_order = nextOrder;
+    app.restaurant.category_images = nextImages;
+    app.activeCategory = activeWasRenamed ? activeWasRenamed.name : (activeWasDeleted ? nextOrder[0] || null : app.activeCategory);
+    closeCategoriesModal();
+    await loadDashboardData();
+    setSaveStatus('Categorias guardadas', true);
+}
+
 function renderActiveCategory(categories) {
     const editor = qs('categoryEditor');
     if (!editor) return;
@@ -205,7 +431,7 @@ function renderActiveCategory(categories) {
         editor.innerHTML = `
             <div class="empty-menu">
                 <p>O menu ainda nÃ£o tem categorias.</p>
-                <button type="button" data-action="add-category" aria-label="Adicionar categoria">
+                <button type="button" data-action="open-categories-modal" aria-label="Abrir editor de categorias">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
@@ -662,8 +888,10 @@ function handleEditorClick(event) {
     if (action === 'select-category') {
         app.activeCategory = actionElement.dataset.category;
         renderDashboard();
-    } else if (action === 'add-category') {
-        addCategory();
+    } else if (action === 'open-hero-modal') {
+        openHeroModal();
+    } else if (action === 'open-categories-modal') {
+        openCategoriesModal();
     } else if (action === 'add-item') {
         openItemModal(null, category);
     } else if (action === 'edit-item') {
@@ -672,24 +900,23 @@ function handleEditorClick(event) {
 }
 
 function bindEvents() {
-    qs('restName').addEventListener('blur', (event) => saveRestaurantField('name', event.target.innerText));
-    qs('restDesc').addEventListener('blur', (event) =>
-        saveRestaurantField('description', event.target.innerText));
-
-    [qs('restName'), qs('restDesc')].forEach((element) => {
-        element.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                element.blur();
-            }
-        });
-    });
-
+    qs('heroHeader').addEventListener('click', handleEditorClick);
     qs('categoryTabs').addEventListener('click', handleEditorClick);
     qs('categoryEditor').addEventListener('click', handleEditorClick);
-    qs('infoBadges').addEventListener('click', (event) => {
-        const badge = event.target.closest('[data-badge]');
-        if (badge) editInfoBadge(badge.dataset.badge);
+
+    qs('heroForm').addEventListener('submit', saveHeroModal);
+    qs('categoriesForm').addEventListener('submit', saveCategoriesModal);
+    qs('addCategoryRowBtn').addEventListener('click', () => addCategoryRow());
+    qs('categoriesModal').addEventListener('click', (event) => {
+        const actionElement = event.target.closest('[data-action]');
+        if (!actionElement) return;
+        const row = actionElement.closest('.category-row');
+
+        if (actionElement.dataset.action === 'category-row-move') {
+            moveCategoryRow(row, Number(actionElement.dataset.direction));
+        } else if (actionElement.dataset.action === 'category-row-delete') {
+            deleteCategoryRow(row);
+        }
     });
 
     qs('editCoverBtn').addEventListener('click', () => qs('coverInput').click());
@@ -705,9 +932,18 @@ function bindEvents() {
     qs('refreshMenuBtn').addEventListener('click', loadDashboardData);
     qs('itemForm').addEventListener('submit', saveItem);
     document.querySelectorAll('[data-close-modal]').forEach((button) =>
-        button.addEventListener('click', closeItemModal));
+        button.addEventListener('click', (event) => {
+            const modal = event.currentTarget.closest('.modal-backdrop');
+            if (modal) modal.hidden = true;
+        }));
     qs('itemModal').addEventListener('click', (event) => {
         if (event.target === qs('itemModal')) closeItemModal();
+    });
+    qs('heroModal').addEventListener('click', (event) => {
+        if (event.target === qs('heroModal')) closeHeroModal();
+    });
+    qs('categoriesModal').addEventListener('click', (event) => {
+        if (event.target === qs('categoriesModal')) closeCategoriesModal();
     });
 }
 
