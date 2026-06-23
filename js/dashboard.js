@@ -164,7 +164,8 @@ function renderDashboard() {
                                         onclick="moveCategory(${JSON.stringify(cat)}, 1)">
                                         <i class="fa-solid fa-arrow-down"></i>
                                     </button>
-                                    <button class="icon-btn" type="button" title="Apagar"
+                                    <button class="icon-btn icon-btn-danger" type="button" title="Apagar categoria"
+                                        aria-label="Apagar categoria"
                                         onclick="deleteCategory(${JSON.stringify(cat)})">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
@@ -180,7 +181,8 @@ function renderDashboard() {
                                 onclick="uploadCategoryBanner(${JSON.stringify(cat)})">
                                 <i class="fa-solid fa-image"></i>
                             </button>
-                            <button class="icon-btn" type="button" title="Remover banner"
+                            <button class="icon-btn icon-btn-danger" type="button" title="Remover banner"
+                                aria-label="Remover banner"
                                 onclick="removeCategoryBanner(${JSON.stringify(cat)})">
                                 <i class="fa-solid fa-eraser"></i>
                             </button>
@@ -222,15 +224,15 @@ function renderDashboard() {
                                         <i class="fa-solid fa-image"></i>
                                         <span>Alterar banner</span>
                                     </button>
-                                    <button class="btn btn-ghost small" type="button"
+                                    <button class="icon-btn icon-btn-danger" type="button"
+                                        title="Remover banner" aria-label="Remover banner"
                                         onclick="removeCategoryBanner(${JSON.stringify(cat)})">
                                         <i class="fa-solid fa-trash"></i>
-                                        <span>Remover banner</span>
                                     </button>
-                                    <button class="btn btn-danger-soft small" type="button"
+                                    <button class="icon-btn icon-btn-danger" type="button"
+                                        title="Apagar categoria" aria-label="Apagar categoria"
                                         onclick="deleteCategory(${JSON.stringify(cat)})">
-                                        <i class="fa-solid fa-trash"></i>
-                                        <span>Apagar categoria</span>
+                                        <i class="fa-solid fa-folder-minus"></i>
                                     </button>
                                 </div>
                             </div>
@@ -259,9 +261,9 @@ function renderItemRow(item) {
         <article class="item-row">
             <div class="item-main">
                 <div class="item-top">
-                    <input type="text" value="${escapeHTML(item.name || '')}"
+                    <input type="text" value="${escapeHTML(item.name || '')}" aria-label="Nome do prato"
                         onchange="saveItemField(${safeId}, 'name', this.value)">
-                    <input type="text" value="${Number(item.price || 0).toFixed(2)}"
+                    <input type="text" value="${Number(item.price || 0).toFixed(2)}" aria-label="Preco"
                         onchange="saveItemField(${safeId}, 'price', this.value)">
                     <label class="switch">
                         <input type="checkbox" ${item.available ? 'checked' : ''}
@@ -270,7 +272,7 @@ function renderItemRow(item) {
                     </label>
                 </div>
                 <div class="item-meta">
-                    <textarea rows="2" placeholder="Descricao"
+                    <textarea rows="2" placeholder="Descricao" aria-label="Descricao do prato"
                         onchange="saveItemField(${safeId}, 'description', this.value)">${escapeHTML(item.description || '')}</textarea>
                     <div class="item-meta-row">
                         <button class="btn btn-ghost small" type="button" onclick="pickItemImage(${safeId})">
@@ -278,9 +280,9 @@ function renderItemRow(item) {
                             <span>${item.image_url ? 'Trocar imagem' : 'Adicionar imagem'}</span>
                         </button>
                         ${item.image_url
-            ? `<button class="btn btn-danger-soft small" type="button" onclick="removeItemImage(${safeId})">
+            ? `<button class="icon-btn icon-btn-danger" type="button" title="Remover imagem"
+                                aria-label="Remover imagem" onclick="removeItemImage(${safeId})">
                                 <i class="fa-solid fa-trash"></i>
-                                <span>Remover imagem</span>
                            </button>`
             : ''}
                         <input id="itemImageInput-${item.id}" type="file" accept="image/*" hidden
@@ -289,7 +291,8 @@ function renderItemRow(item) {
                 </div>
             </div>
             <div class="item-actions">
-                <button class="icon-btn" type="button" title="Apagar prato"
+                <button class="icon-btn icon-btn-danger" type="button" title="Apagar prato"
+                    aria-label="Apagar prato"
                     onclick="deleteItem(${safeId})">
                     <i class="fa-solid fa-trash"></i>
                 </button>
