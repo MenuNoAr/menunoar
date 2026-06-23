@@ -238,62 +238,44 @@ function renderActiveCategory(categories) {
     const categoryIndex = categories.indexOf(category);
     const encodedCategory = encodeURIComponent(category);
 
-    const categoryTools = `
-        <div class="category-tools context-tools">
-            <button class="category-icon context-toggle" type="button" data-action="toggle-tools"
-                aria-label="Ações da categoria" title="Ações da categoria">
-                <i class="fa-solid fa-ellipsis"></i>
-            </button>
-            <div class="context-actions">
-                <button class="category-icon" type="button" data-action="focus-category-title"
-                    aria-label="Editar nome" title="Editar nome">
-                    <i class="fa-solid fa-pencil"></i>
-                </button>
-                <button class="category-icon" type="button" data-action="category-image"
-                    data-category="${encodedCategory}" aria-label="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}"
-                    title="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}">
-                    <i class="fa-regular fa-image"></i>
-                </button>
-                <button class="category-icon" type="button" data-action="move-category"
-                    data-direction="-1" aria-label="Mover categoria para a esquerda"
-                    title="Mover para a esquerda" ${categoryIndex === 0 ? 'disabled' : ''}>
-                    <i class="fa-solid fa-arrow-left"></i>
-                </button>
-                <button class="category-icon" type="button" data-action="move-category"
-                    data-direction="1" aria-label="Mover categoria para a direita"
-                    title="Mover para a direita" ${categoryIndex === categories.length - 1 ? 'disabled' : ''}>
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
-                ${categoryImage ? `
-                    <button class="category-icon category-icon-danger" type="button"
-                        data-action="remove-category-image" data-category="${encodedCategory}"
-                        aria-label="Apagar imagem da categoria" title="Apagar imagem da categoria">
-                        <i class="fa-solid fa-image-slash"></i>
-                    </button>` : ''}
-                <button class="category-icon category-icon-danger" type="button"
-                    data-action="delete-category" data-category="${encodedCategory}"
-                    aria-label="Apagar categoria" title="Apagar categoria">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-        </div>`;
-
-    const heading = categoryImage
-        ? `<div class="cat-banner">
-                <img src="${escapeHTML(categoryImage)}" loading="lazy" alt="${escapeHTML(category)}">
-                <div class="cat-banner-overlay">
-                    <h2 class="category-title" contenteditable="true" spellcheck="false"
-                        data-original-category="${encodedCategory}">${escapeHTML(category)}</h2>
-                </div>
-                ${categoryTools}
-            </div>`
-        : `<h2 class="slide-title category-title" contenteditable="true" spellcheck="false"
-                data-original-category="${encodedCategory}">${escapeHTML(category)}</h2>
-           ${categoryTools}`;
-
     editor.innerHTML = `
         <div class="slide-content">
-            ${heading}
+            ${categoryImage ? `
+                <div class="slide-hero">
+                    <img src="${escapeHTML(categoryImage)}" loading="lazy" alt="${escapeHTML(category)}">
+                </div>` : ''}
+            <div class="slide-header">
+                <h2 class="slide-title" contenteditable="true" spellcheck="false"
+                    data-original-category="${encodedCategory}">${escapeHTML(category)}</h2>
+                <div class="slide-actions">
+                    <button class="category-icon" type="button" data-action="category-image"
+                        data-category="${encodedCategory}" aria-label="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}"
+                        title="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}">
+                        <i class="fa-regular fa-image"></i>
+                    </button>
+                    <button class="category-icon" type="button" data-action="move-category"
+                        data-direction="-1" aria-label="Mover categoria para a esquerda"
+                        title="Mover para a esquerda" ${categoryIndex === 0 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <button class="category-icon" type="button" data-action="move-category"
+                        data-direction="1" aria-label="Mover categoria para a direita"
+                        title="Mover para a direita" ${categoryIndex === categories.length - 1 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    ${categoryImage ? `
+                        <button class="category-icon category-icon-danger" type="button"
+                            data-action="remove-category-image" data-category="${encodedCategory}"
+                            aria-label="Apagar imagem da categoria" title="Apagar imagem da categoria">
+                            <i class="fa-solid fa-image-slash"></i>
+                        </button>` : ''}
+                    <button class="category-icon category-icon-danger" type="button"
+                        data-action="delete-category" data-category="${encodedCategory}"
+                        aria-label="Apagar categoria" title="Apagar categoria">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
             <div class="items-grid">
                 ${items.map(renderItem).join('')}
             </div>
@@ -416,7 +398,7 @@ async function addCategory() {
     app.activeCategory = name;
     renderDashboard();
     window.requestAnimationFrame(() => {
-        const title = document.querySelector('.category-title');
+        const title = document.querySelector('#categoryEditor .slide-title');
         if (!title) return;
         title.focus();
         const selection = window.getSelection();
@@ -736,8 +718,6 @@ function handleEditorClick(event) {
         renderDashboard();
     } else if (action === 'add-category') {
         addCategory();
-    } else if (action === 'focus-category-title') {
-        document.querySelector('.category-title')?.focus();
     } else if (action === 'move-category') {
         moveCategory(actionElement.dataset.direction);
     } else if (action === 'delete-category') {
@@ -780,12 +760,12 @@ function bindEvents() {
         if (badge) editInfoBadge(badge.dataset.badge);
     });
     qs('categoryEditor').addEventListener('focusout', (event) => {
-        const title = event.target.closest('.category-title');
+        const title = event.target.closest('.slide-title');
         if (!title) return;
         renameCategory(decodeURIComponent(title.dataset.originalCategory), title.innerText);
     });
     qs('categoryEditor').addEventListener('keydown', (event) => {
-        if (event.target.matches('.category-title') && event.key === 'Enter') {
+        if (event.target.matches('.slide-title') && event.key === 'Enter') {
             event.preventDefault();
             event.target.blur();
         }
