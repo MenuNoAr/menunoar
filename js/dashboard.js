@@ -332,37 +332,35 @@ function renderActiveCategory(categories) {
                 <div class="slide-hero">
                     <img src="${escapeHTML(categoryImage)}" loading="lazy" alt="${escapeHTML(category)}">
                 </div>` : ''}
-            <div class="slide-header">
-                <h2 class="slide-title" contenteditable="true" spellcheck="false"
-                    data-original-category="${encodedCategory}">${escapeHTML(category)}</h2>
-                <div class="slide-actions">
-                    <button class="category-icon" type="button" data-action="category-image"
-                        data-category="${encodedCategory}" aria-label="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}"
-                        title="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}">
-                        <i class="fa-regular fa-image"></i>
-                    </button>
-                    <button class="category-icon" type="button" data-action="move-category"
-                        data-direction="-1" aria-label="Mover categoria para a esquerda"
-                        title="Mover para a esquerda" ${categoryIndex === 0 ? 'disabled' : ''}>
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </button>
-                    <button class="category-icon" type="button" data-action="move-category"
-                        data-direction="1" aria-label="Mover categoria para a direita"
-                        title="Mover para a direita" ${categoryIndex === categories.length - 1 ? 'disabled' : ''}>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                    ${categoryImage ? `
-                        <button class="category-icon category-icon-danger" type="button"
-                            data-action="remove-category-image" data-category="${encodedCategory}"
-                            aria-label="Apagar imagem da categoria" title="Apagar imagem da categoria">
-                            <i class="fa-solid fa-image-slash"></i>
-                        </button>` : ''}
+            <h2 class="slide-title" contenteditable="true" spellcheck="false"
+                data-original-category="${encodedCategory}">${escapeHTML(category)}</h2>
+            <div class="slide-actions">
+                <button class="category-icon" type="button" data-action="category-image"
+                    data-category="${encodedCategory}" aria-label="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}"
+                    title="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}">
+                    <i class="fa-regular fa-image"></i>
+                </button>
+                <button class="category-icon" type="button" data-action="move-category"
+                    data-direction="-1" aria-label="Mover categoria para a esquerda"
+                    title="Mover para a esquerda" ${categoryIndex === 0 ? 'disabled' : ''}>
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button class="category-icon" type="button" data-action="move-category"
+                    data-direction="1" aria-label="Mover categoria para a direita"
+                    title="Mover para a direita" ${categoryIndex === categories.length - 1 ? 'disabled' : ''}>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                ${categoryImage ? `
                     <button class="category-icon category-icon-danger" type="button"
-                        data-action="delete-category" data-category="${encodedCategory}"
-                        aria-label="Apagar categoria" title="Apagar categoria">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
+                        data-action="remove-category-image" data-category="${encodedCategory}"
+                        aria-label="Apagar imagem da categoria" title="Apagar imagem da categoria">
+                        <i class="fa-solid fa-image-slash"></i>
+                    </button>` : ''}
+                <button class="category-icon category-icon-danger" type="button"
+                    data-action="delete-category" data-category="${encodedCategory}"
+                    aria-label="Apagar categoria" title="Apagar categoria">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
             </div>
             <div class="items-grid">
                 ${items.map(renderItem).join('')}

@@ -391,16 +391,9 @@ a {
     white-space: nowrap;
 }
 
-.slide-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
 .slide-title {
-    margin: 0;
+    display: block;
+    margin: 0 0 12px;
     outline: none;
 }
 
@@ -412,6 +405,8 @@ a {
     display: flex;
     align-items: center;
     gap: 2px;
+    width: fit-content;
+    margin-bottom: 20px;
     padding: 2px;
     border: 1px solid var(--editor-line);
     border-radius: 8px;
