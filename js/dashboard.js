@@ -6,17 +6,19 @@ const app = {
     user: null,
     restaurant: null,
     items: [],
-    previewTimer: null,
-    previewReady: false,
+    activeCategory: null,
 };
 
 let authBootstrappedForUser = null;
-
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+function qs(id) {
+    return document.getElementById(id);
+}
 
 function escapeHTML(value) {
     if (value === null || value === undefined) return '';
-    return String(value).replace(/[&<>"']/g, (m) => ESC[m]);
+    return String(value).replace(/[&<>"']/g, (char) => ESC[char]);
 }
 
 function slugify(value) {
@@ -24,311 +26,310 @@ function slugify(value) {
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^\w\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
 }
 
-function qs(id) {
-    return document.getElementById(id);
+function setSaveStatus(text, reset = false) {
+    const status = qs('saveStatus');
+    if (!status) return;
+    status.textContent = text;
+    if (reset) {
+        window.setTimeout(() => {
+            status.textContent = 'Alterações guardadas automaticamente';
+        }, 1400);
+    }
 }
 
 function getCategories() {
-    const catSet = new Set(app.items.map((i) => i.category).filter(Boolean));
-    (app.restaurant?.category_order || []).forEach((c) => catSet.add(c));
-    const cats = Array.from(catSet);
+    const categories = new Set(app.items.map((item) => item.category).filter(Boolean));
+    (app.restaurant?.category_order || []).forEach((category) => categories.add(category));
+    const result = Array.from(categories);
+    const order = app.restaurant?.category_order || [];
 
-    if (app.restaurant?.category_order?.length) {
-        const order = app.restaurant.category_order;
-        cats.sort((a, b) => {
-            const ia = order.indexOf(a);
-            const ib = order.indexOf(b);
-            return (ia === -1 ? 9999 : ia) - (ib === -1 ? 9999 : ib);
-        });
-    }
+    result.sort((a, b) => {
+        const indexA = order.indexOf(a);
+        const indexB = order.indexOf(b);
+        return (indexA === -1 ? 9999 : indexA) - (indexB === -1 ? 9999 : indexB);
+    });
 
-    return cats;
+    return result;
 }
 
-function itemsForCategory(cat) {
+function itemsForCategory(category) {
     return app.items
-        .filter((item) => item.category === cat)
+        .filter((item) => item.category === category)
         .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'pt'));
 }
 
-function setPreviewStatus(text) {
-    const el = qs('previewStatus');
-    if (el) el.textContent = text;
+function applyRestaurantTheme() {
+    const editor = qs('menuEditor');
+    const restaurant = app.restaurant;
+    if (!editor || !restaurant) return;
+
+    const font = restaurant.font || 'Outfit';
+    let fontLink = qs('restaurantFontLink');
+    if (!fontLink) {
+        fontLink = document.createElement('link');
+        fontLink.id = 'restaurantFontLink';
+        fontLink.rel = 'stylesheet';
+        document.head.appendChild(fontLink);
+    }
+    fontLink.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font).replace(/%20/g, '+')}:wght@400;700&display=swap`;
+
+    editor.style.fontFamily = `'${font}', sans-serif`;
+    editor.style.setProperty('--font-heading', `'${font}', sans-serif`);
+    if (restaurant.color_primary) editor.style.setProperty('--primary', restaurant.color_primary);
+    if (restaurant.color_text) editor.style.setProperty('--text', restaurant.color_text);
+    if (restaurant.color_background) {
+        editor.style.setProperty('--bg-mobile', restaurant.color_background);
+        const isDark = ['#1a1a1a', '#121212', '#000000'].includes(
+            restaurant.color_background.toLowerCase());
+        editor.style.setProperty('--bg-card', isDark ? '#252525' : '#ffffff');
+        editor.style.setProperty('--bg-badge', isDark ? '#333333' : '#ebebeb');
+        editor.style.setProperty('--border', isDark ? '#333333' : '#f0f0f0');
+        editor.style.setProperty('--text-muted', isDark ? '#a0a0a0' : '#666666');
+    }
 }
 
-function schedulePreviewRefresh() {
-    clearTimeout(app.previewTimer);
-    setPreviewStatus('A sincronizar...');
-    app.previewTimer = setTimeout(() => {
-        refreshPreview();
-    }, 180);
+function renderInfoBadges() {
+    const container = qs('infoBadges');
+    const restaurant = app.restaurant;
+    if (!container || !restaurant) return;
+
+    const badges = [];
+    if (restaurant.wifi_ssid || restaurant.wifi_password) {
+        badges.push(`
+            <button class="info-badge" type="button" data-badge="wifi">
+                <i class="fa-solid fa-wifi"></i>
+                <span>${escapeHTML(restaurant.wifi_ssid || 'Wi-Fi')}</span>
+            </button>`);
+    }
+    if (restaurant.phone) {
+        badges.push(`
+            <button class="info-badge" type="button" data-badge="phone">
+                <i class="fa-solid fa-phone"></i>
+                <span>${escapeHTML(restaurant.phone)}</span>
+            </button>`);
+    }
+    if (restaurant.address) {
+        badges.push(`
+            <button class="info-badge" type="button" data-badge="address">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>${escapeHTML(restaurant.address)}</span>
+            </button>`);
+    }
+
+    badges.push(`
+        <button class="info-badge info-badge-add" type="button" data-badge="add"
+            aria-label="Editar informações" title="Editar informações">
+            <i class="fa-solid fa-plus"></i>
+        </button>`);
+
+    container.innerHTML = badges.join('');
 }
 
-function refreshPreview() {
-    const frame = qs('menuPreviewFrame');
-    const overlay = qs('previewOverlay');
-    if (!frame || !app.restaurant?.slug) return;
+function renderCover() {
+    const cover = qs('coverEditor');
+    const placeholder = qs('coverPlaceholder');
+    const removeButton = qs('removeCoverBtn');
+    if (!cover || !app.restaurant) return;
 
-    const url = `menu.html?id=${encodeURIComponent(app.restaurant.slug)}&v=${Date.now()}`;
-    app.previewReady = false;
-    if (overlay) overlay.style.display = 'grid';
-    frame.onload = () => {
-        app.previewReady = true;
-        if (overlay) overlay.style.display = 'none';
-        setPreviewStatus('Sincronizado');
-    };
-    frame.src = url;
-    const liveBtn = qs('openLiveBtn');
-    if (liveBtn) liveBtn.href = `menu.html?id=${encodeURIComponent(app.restaurant.slug)}`;
+    if (app.restaurant.cover_url) {
+        cover.style.backgroundImage = `url('${app.restaurant.cover_url}')`;
+        cover.style.backgroundSize = 'cover';
+        cover.style.backgroundPosition = 'center';
+        if (placeholder) placeholder.hidden = true;
+        if (removeButton) removeButton.hidden = false;
+    } else {
+        cover.style.backgroundImage = '';
+        if (placeholder) placeholder.hidden = false;
+        if (removeButton) removeButton.hidden = true;
+    }
 }
 
-function renderStaticState() {
-    const shell = qs('dashboardShell');
-    const loading = qs('authLoading');
-    const empty = qs('emptyState');
-    if (shell) shell.hidden = false;
-    if (loading) loading.hidden = true;
-    if (empty) empty.hidden = true;
+function renderCategoryTabs(categories) {
+    const tabs = qs('categoryTabs');
+    if (!tabs) return;
+
+    tabs.innerHTML = categories.map((category) => `
+        <button class="tab-btn ${category === app.activeCategory ? 'active' : ''}" type="button"
+            data-action="select-category" data-category="${escapeHTML(category)}">
+            ${escapeHTML(category)}
+        </button>
+    `).join('') + `
+        <button class="tab-btn tab-add" type="button" data-action="add-category"
+            aria-label="Adicionar categoria" title="Adicionar categoria">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+    `;
 }
 
-function renderEmptyState() {
-    const shell = qs('dashboardShell');
-    const empty = qs('emptyState');
-    const loading = qs('authLoading');
-    if (shell) shell.hidden = true;
-    if (empty) empty.hidden = false;
-    if (loading) loading.hidden = true;
+function renderItem(item) {
+    const image = item.image_url
+        ? `<div class="item-img"><img src="${escapeHTML(item.image_url)}" loading="lazy" alt="${escapeHTML(item.name)}"></div>`
+        : '';
+
+    return `
+        <article class="menu-item ${item.available ? '' : 'unavailable'} ${item.image_url ? 'has-image' : ''}">
+            <div class="item-text">
+                <h3>${escapeHTML(item.name)}</h3>
+                <p class="item-desc">${escapeHTML(item.description || '')}</p>
+                <div class="item-price">${Number(item.price || 0).toFixed(2)}€</div>
+            </div>
+            ${image}
+            <div class="item-actions">
+                <button class="item-icon" type="button" data-action="edit-item" data-item-id="${item.id}"
+                    aria-label="Editar prato" title="Editar prato">
+                    <i class="fa-solid fa-pencil"></i>
+                </button>
+                <button class="item-icon" type="button" data-action="item-image" data-item-id="${item.id}"
+                    aria-label="${item.image_url ? 'Alterar imagem' : 'Adicionar imagem'}"
+                    title="${item.image_url ? 'Alterar imagem' : 'Adicionar imagem'}">
+                    <i class="fa-regular fa-image"></i>
+                </button>
+                <button class="item-icon" type="button" data-action="toggle-item" data-item-id="${item.id}"
+                    aria-label="${item.available ? 'Ocultar prato' : 'Mostrar prato'}"
+                    title="${item.available ? 'Ocultar prato' : 'Mostrar prato'}">
+                    <i class="fa-solid ${item.available ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                </button>
+                <button class="item-icon item-icon-danger" type="button" data-action="delete-item"
+                    data-item-id="${item.id}" aria-label="Apagar prato" title="Apagar prato">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </article>
+    `;
+}
+
+function renderActiveCategory(categories) {
+    const editor = qs('categoryEditor');
+    if (!editor) return;
+
+    if (!categories.length || !app.activeCategory) {
+        editor.innerHTML = `
+            <div class="empty-menu">
+                <p>O menu ainda não tem categorias.</p>
+                <button type="button" data-action="add-category" aria-label="Adicionar categoria">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    const category = app.activeCategory;
+    const items = itemsForCategory(category);
+    const categoryImage = app.restaurant.category_images?.[category];
+    const categoryIndex = categories.indexOf(category);
+    const encodedCategory = encodeURIComponent(category);
+
+    const banner = categoryImage
+        ? `<div class="category-banner">
+                <img src="${escapeHTML(categoryImage)}" loading="lazy" alt="${escapeHTML(category)}">
+                <div class="media-actions">
+                    <button class="floating-icon" type="button" data-action="category-image"
+                        data-category="${encodedCategory}" aria-label="Alterar imagem da categoria"
+                        title="Alterar imagem da categoria">
+                        <i class="fa-solid fa-pencil"></i>
+                    </button>
+                    <button class="floating-icon floating-icon-danger" type="button"
+                        data-action="remove-category-image" data-category="${encodedCategory}"
+                        aria-label="Apagar imagem da categoria" title="Apagar imagem da categoria">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>`
+        : `<button class="category-banner-empty" type="button" data-action="category-image"
+                data-category="${encodedCategory}">
+                <i class="fa-regular fa-image"></i>
+                <span>Adicionar imagem à categoria</span>
+            </button>`;
+
+    editor.innerHTML = `
+        <div class="category-head">
+            <div class="category-title-row">
+                <h2 class="category-title" contenteditable="true" spellcheck="false"
+                    data-original-category="${encodedCategory}">${escapeHTML(category)}</h2>
+                <div class="category-actions">
+                    <button class="category-icon" type="button" data-action="focus-category-title"
+                        aria-label="Editar nome" title="Editar nome">
+                        <i class="fa-solid fa-pencil"></i>
+                    </button>
+                    <button class="category-icon" type="button" data-action="move-category"
+                        data-direction="-1" aria-label="Mover categoria para a esquerda"
+                        title="Mover para a esquerda" ${categoryIndex === 0 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <button class="category-icon" type="button" data-action="move-category"
+                        data-direction="1" aria-label="Mover categoria para a direita"
+                        title="Mover para a direita" ${categoryIndex === categories.length - 1 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <button class="category-icon category-icon-danger" type="button"
+                        data-action="delete-category" data-category="${encodedCategory}"
+                        aria-label="Apagar categoria" title="Apagar categoria">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            ${banner}
+        </div>
+        <div class="items-grid">
+            ${items.map(renderItem).join('')}
+        </div>
+        <button class="item-add" type="button" data-action="add-item" data-category="${encodedCategory}">
+            <i class="fa-solid fa-plus"></i>
+            <span>Adicionar prato</span>
+        </button>
+    `;
 }
 
 function renderDashboard() {
     if (!app.restaurant) return;
 
-    renderStaticState();
-
-    const rest = app.restaurant;
-    const nameInput = qs('restaurantNameInput');
-    const descInput = qs('restaurantDescInput');
-    const slugText = qs('slugText');
-    const menuTypeChip = qs('menuTypeChip');
-    const sessionPill = qs('sessionPill');
-
-    if (nameInput) nameInput.value = rest.name || '';
-    if (descInput) descInput.value = rest.description || '';
-    if (slugText) slugText.textContent = rest.slug || '-';
-    if (sessionPill) sessionPill.textContent = app.user?.email || 'Sessao autenticada';
-
-    if (menuTypeChip) {
-        menuTypeChip.textContent = rest.menu_type === 'pdf' ? 'PDF' : 'Digital';
-    }
-
-    const coverPreview = qs('coverPreview');
-    const coverEmpty = qs('coverEmpty');
-    if (coverPreview) {
-        if (rest.cover_url) {
-            coverPreview.classList.add('has-image');
-            coverPreview.style.backgroundImage = `url('${rest.cover_url}')`;
-            if (coverEmpty) coverEmpty.hidden = true;
-        } else {
-            coverPreview.classList.remove('has-image');
-            coverPreview.style.backgroundImage = '';
-            if (coverEmpty) coverEmpty.hidden = false;
-        }
-    }
-
     const categories = getCategories();
-    const categoryList = qs('categoryList');
-    const categorySections = qs('categorySections');
-
-    if (categoryList) {
-        categoryList.innerHTML = categories.length
-            ? categories.map((cat, index) => {
-                const catImg = (rest.category_images || {})[cat];
-                return `
-                    <div class="category-row">
-                        <div class="category-row-main">
-                            <div class="category-row-top">
-                                <input type="text" value="${escapeHTML(cat)}"
-                                    onchange="renameCategory(${JSON.stringify(cat)}, this.value)">
-                                <div class="category-actions">
-                                    <button class="icon-btn" type="button" title="Subir"
-                                        onclick="moveCategory(${JSON.stringify(cat)}, -1)">
-                                        <i class="fa-solid fa-arrow-up"></i>
-                                    </button>
-                                    <button class="icon-btn" type="button" title="Descer"
-                                        onclick="moveCategory(${JSON.stringify(cat)}, 1)">
-                                        <i class="fa-solid fa-arrow-down"></i>
-                                    </button>
-                                    <button class="icon-btn icon-btn-danger" type="button" title="Apagar categoria"
-                                        aria-label="Apagar categoria"
-                                        onclick="deleteCategory(${JSON.stringify(cat)})">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="category-banner-thumb ${catImg ? 'has-image' : ''}"
-                                style="${catImg ? `background-image:url('${catImg}')` : ''}">
-                                ${catImg ? '' : '<span>Sem banner</span>'}
-                            </div>
-                        </div>
-                        <div class="category-actions">
-                            <button class="icon-btn" type="button" title="Banner"
-                                onclick="uploadCategoryBanner(${JSON.stringify(cat)})">
-                                <i class="fa-solid fa-image"></i>
-                            </button>
-                            <button class="icon-btn icon-btn-danger" type="button" title="Remover banner"
-                                aria-label="Remover banner"
-                                onclick="removeCategoryBanner(${JSON.stringify(cat)})">
-                                <i class="fa-solid fa-eraser"></i>
-                            </button>
-                        </div>
-                    </div>`;
-            }).join('')
-            : '<div class="empty-note">Ainda nao ha categorias. Adiciona a primeira abaixo.</div>';
+    if (!categories.includes(app.activeCategory)) {
+        app.activeCategory = categories[0] || null;
     }
 
-    if (categorySections) {
-        if (rest.menu_type === 'pdf') {
-            categorySections.innerHTML = `
-                <div class="pdf-note">
-                    Este restaurante esta em modo PDF. A edicao de categorias e pratos fica desativada nesta vista.
-                </div>
-            `;
-        } else {
-            categorySections.innerHTML = categories.length
-                ? categories.map((cat) => {
-                    const catImg = (rest.category_images || {})[cat];
-                    const items = itemsForCategory(cat);
-                    return `
-                        <section class="category-section">
-                            <div class="category-section-head">
-                                <div class="panel-head">
-                                    <div>
-                                        <span class="panel-kicker">Categoria</span>
-                                        <h2>${escapeHTML(cat)}</h2>
-                                    </div>
-                                    <span class="panel-chip subtle">${items.length} pratos</span>
-                                </div>
-                                <div class="category-banner-thumb ${catImg ? 'has-image' : ''}"
-                                    style="${catImg ? `background-image:url('${catImg}')` : ''}">
-                                    ${catImg ? '' : '<span>Banner da categoria</span>'}
-                                </div>
-                                <div class="category-banner-controls">
-                                    <button class="btn btn-ghost small" type="button"
-                                        onclick="uploadCategoryBanner(${JSON.stringify(cat)})">
-                                        <i class="fa-solid fa-image"></i>
-                                        <span>Alterar banner</span>
-                                    </button>
-                                    <button class="icon-btn icon-btn-danger" type="button"
-                                        title="Remover banner" aria-label="Remover banner"
-                                        onclick="removeCategoryBanner(${JSON.stringify(cat)})">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                    <button class="icon-btn icon-btn-danger" type="button"
-                                        title="Apagar categoria" aria-label="Apagar categoria"
-                                        onclick="deleteCategory(${JSON.stringify(cat)})">
-                                        <i class="fa-solid fa-folder-minus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="category-items">
-                                ${items.map((item) => renderItemRow(item)).join('')}
-                                ${renderQuickAdd(cat)}
-                            </div>
-                        </section>`;
-                }).join('')
-                : '<div class="empty-note">Ainda nao ha pratos. Usa o formulario de adicao rapida em baixo.</div>';
-        }
-    }
+    qs('authLoading').hidden = true;
+    qs('authError').hidden = true;
+    qs('emptyState').hidden = true;
+    qs('dashboardShell').hidden = false;
 
-    const openLiveBtn = qs('openLiveBtn');
-    if (openLiveBtn) {
-        openLiveBtn.href = `menu.html?id=${encodeURIComponent(rest.slug)}`;
-    }
+    applyRestaurantTheme();
+    renderCover();
+    renderInfoBadges();
 
-    refreshPreview();
-    setPreviewStatus('A sincronizar...');
+    qs('restNameEditor').textContent = app.restaurant.name || '';
+    qs('restDescEditor').textContent = app.restaurant.description || '';
+    qs('openLiveBtn').href = `menu.html?id=${encodeURIComponent(app.restaurant.slug)}`;
+
+    renderCategoryTabs(categories);
+    renderActiveCategory(categories);
 }
 
-function renderItemRow(item) {
-    const safeId = JSON.stringify(item.id);
-    return `
-        <article class="item-row">
-            <div class="item-main">
-                <div class="item-top">
-                    <input type="text" value="${escapeHTML(item.name || '')}" aria-label="Nome do prato"
-                        onchange="saveItemField(${safeId}, 'name', this.value)">
-                    <input type="text" value="${Number(item.price || 0).toFixed(2)}" aria-label="Preco"
-                        onchange="saveItemField(${safeId}, 'price', this.value)">
-                    <label class="switch">
-                        <input type="checkbox" ${item.available ? 'checked' : ''}
-                            onchange="toggleAvailability(${safeId}, this.checked)">
-                        <span>${item.available ? 'Ativo' : 'Oculto'}</span>
-                    </label>
-                </div>
-                <div class="item-meta">
-                    <textarea rows="2" placeholder="Descricao" aria-label="Descricao do prato"
-                        onchange="saveItemField(${safeId}, 'description', this.value)">${escapeHTML(item.description || '')}</textarea>
-                    <div class="item-meta-row">
-                        <button class="btn btn-ghost small" type="button" onclick="pickItemImage(${safeId})">
-                            <i class="fa-solid fa-image"></i>
-                            <span>${item.image_url ? 'Trocar imagem' : 'Adicionar imagem'}</span>
-                        </button>
-                        ${item.image_url
-            ? `<button class="icon-btn icon-btn-danger" type="button" title="Remover imagem"
-                                aria-label="Remover imagem" onclick="removeItemImage(${safeId})">
-                                <i class="fa-solid fa-trash"></i>
-                           </button>`
-            : ''}
-                        <input id="itemImageInput-${item.id}" type="file" accept="image/*" hidden
-                            onchange="uploadItemImage(${safeId}, this)">
-                    </div>
-                </div>
-            </div>
-            <div class="item-actions">
-                <button class="icon-btn icon-btn-danger" type="button" title="Apagar prato"
-                    aria-label="Apagar prato"
-                    onclick="deleteItem(${safeId})">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-        </article>`;
-}
-
-function renderQuickAdd(category) {
-    const safeId = slugify(category);
-    return `
-        <form class="inline-create" onsubmit="addItem(event, ${JSON.stringify(category)})">
-            <input id="quickName-${safeId}" type="text" placeholder="Novo prato">
-            <input id="quickPrice-${safeId}" type="text" placeholder="0.00">
-            <textarea id="quickDesc-${safeId}" rows="2" placeholder="Descricao opcional"></textarea>
-            <button class="btn btn-primary" type="submit">
-                <i class="fa-solid fa-plus"></i>
-                <span>Adicionar prato</span>
-            </button>
-        </form>`;
+function renderEmptyState() {
+    qs('authLoading').hidden = true;
+    qs('dashboardShell').hidden = true;
+    qs('emptyState').hidden = false;
 }
 
 async function loadDashboardData() {
     if (!app.supabase || !app.user) return;
 
-    const { data: restaurant, error: restError } = await app.supabase
+    const { data: restaurant, error: restaurantError } = await app.supabase
         .from('restaurants')
         .select('*')
         .eq('owner_id', app.user.id)
         .maybeSingle();
 
-    if (restError) {
-        console.error('Erro ao carregar restaurante:', restError.message);
+    if (restaurantError) {
+        console.error('Erro ao carregar restaurante:', restaurantError.message);
         qs('authLoading').hidden = true;
         qs('authError').hidden = false;
         qs('dashboardShell').hidden = true;
-        qs('emptyState').hidden = true;
         return;
     }
 
@@ -344,39 +345,77 @@ async function loadDashboardData() {
         .order('category')
         .order('name');
 
-    if (itemsError) {
-        console.error('Erro ao carregar pratos:', itemsError.message);
-    }
+    if (itemsError) console.error('Erro ao carregar pratos:', itemsError.message);
 
     app.restaurant = restaurant;
     app.items = items || [];
-
     renderDashboard();
 }
 
-async function saveRestaurantPatch(patch) {
-    if (!app.restaurant) return;
+async function saveRestaurantField(field, value) {
+    const normalized = value.trim();
+    if (normalized === String(app.restaurant[field] || '')) return;
+
+    setSaveStatus('A guardar...');
     const { error } = await app.supabase
         .from('restaurants')
-        .update(patch)
+        .update({ [field]: normalized })
         .eq('id', app.restaurant.id);
 
     if (error) {
         console.error(error);
+        setSaveStatus('Não foi possível guardar');
         return;
     }
 
-    app.restaurant = { ...app.restaurant, ...patch };
-    schedulePreviewRefresh();
+    app.restaurant[field] = normalized;
+    setSaveStatus('Guardado', true);
 }
 
-async function renameCategory(oldName, rawValue) {
-    const newName = rawValue.trim();
+async function addCategory() {
+    const categories = getCategories();
+    let name = 'Nova categoria';
+    let counter = 2;
+    while (categories.includes(name)) name = `Nova categoria ${counter++}`;
+
+    const order = [...categories, name];
+    setSaveStatus('A criar categoria...');
+
+    const { error } = await app.supabase
+        .from('restaurants')
+        .update({ category_order: order })
+        .eq('id', app.restaurant.id);
+
+    if (error) {
+        console.error(error);
+        setSaveStatus('Não foi possível criar');
+        return;
+    }
+
+    app.restaurant.category_order = order;
+    app.activeCategory = name;
+    renderDashboard();
+    window.requestAnimationFrame(() => {
+        const title = document.querySelector('.category-title');
+        if (!title) return;
+        title.focus();
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(title);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    });
+    setSaveStatus('Categoria criada', true);
+}
+
+async function renameCategory(oldName, rawName) {
+    const newName = rawName.trim();
     if (!newName || newName === oldName) {
         renderDashboard();
         return;
     }
 
+    setSaveStatus('A guardar categoria...');
     const { error } = await app.supabase
         .from('menu_items')
         .update({ category: newName })
@@ -385,38 +424,40 @@ async function renameCategory(oldName, rawValue) {
 
     if (error) {
         console.error(error);
+        renderDashboard();
         return;
     }
 
     const updates = {};
+    if (app.restaurant.category_order?.includes(oldName)) {
+        updates.category_order = app.restaurant.category_order.map((category) =>
+            category === oldName ? newName : category);
+    }
     if (app.restaurant.category_images?.[oldName]) {
         const images = { ...app.restaurant.category_images };
         images[newName] = images[oldName];
         delete images[oldName];
         updates.category_images = images;
     }
-    if (app.restaurant.category_order?.includes(oldName)) {
-        updates.category_order = app.restaurant.category_order.map((c) => (c === oldName ? newName : c));
-    }
     if (Object.keys(updates).length) {
         await app.supabase.from('restaurants').update(updates).eq('id', app.restaurant.id);
     }
 
+    app.activeCategory = newName;
     await loadDashboardData();
+    setSaveStatus('Categoria guardada', true);
 }
 
-async function moveCategory(cat, direction) {
+async function moveCategory(direction) {
     const categories = getCategories();
-    const index = categories.indexOf(cat);
-    const target = index + direction;
-    if (index === -1 || target < 0 || target >= categories.length) return;
+    const index = categories.indexOf(app.activeCategory);
+    const target = index + Number(direction);
+    if (index < 0 || target < 0 || target >= categories.length) return;
 
-    const next = [...categories];
-    [next[index], next[target]] = [next[target], next[index]];
-
+    [categories[index], categories[target]] = [categories[target], categories[index]];
     const { error } = await app.supabase
         .from('restaurants')
-        .update({ category_order: next })
+        .update({ category_order: categories })
         .eq('id', app.restaurant.id);
 
     if (error) {
@@ -424,222 +465,326 @@ async function moveCategory(cat, direction) {
         return;
     }
 
-    app.restaurant.category_order = next;
+    app.restaurant.category_order = categories;
     renderDashboard();
+    setSaveStatus('Ordem guardada', true);
 }
 
-async function deleteCategory(cat) {
-    if (!confirm(`Apagar a categoria "${cat}" e todos os pratos nela?`)) return;
+async function deleteCategory(category) {
+    if (!window.confirm(`Apagar a categoria "${category}" e todos os pratos nela?`)) return;
 
     await app.supabase
         .from('menu_items')
         .delete()
         .eq('restaurant_id', app.restaurant.id)
-        .eq('category', cat);
+        .eq('category', category);
 
-    const updates = {};
-    if (app.restaurant.category_images?.[cat]) {
-        const images = { ...app.restaurant.category_images };
-        delete images[cat];
-        updates.category_images = images;
-    }
-    if (app.restaurant.category_order?.includes(cat)) {
-        updates.category_order = app.restaurant.category_order.filter((c) => c !== cat);
-    }
+    const images = { ...(app.restaurant.category_images || {}) };
+    delete images[category];
+    const order = (app.restaurant.category_order || []).filter((entry) => entry !== category);
+    await app.supabase
+        .from('restaurants')
+        .update({ category_images: images, category_order: order })
+        .eq('id', app.restaurant.id);
 
-    if (Object.keys(updates).length) {
-        await app.supabase.from('restaurants').update(updates).eq('id', app.restaurant.id);
-    }
-
+    app.activeCategory = null;
     await loadDashboardData();
+    setSaveStatus('Categoria apagada', true);
 }
 
-async function uploadCategoryBanner(cat) {
+function pickImage(onSelected) {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = async () => {
-        if (!input.files?.length) return;
-        const { data, error } = await uploadFile(input.files[0], `cat-${slugify(cat)}`);
-        if (error || !data) {
-            console.error(error);
-            return;
-        }
-
-        const images = { ...(app.restaurant.category_images || {}), [cat]: data.publicUrl };
-        await app.supabase.from('restaurants').update({ category_images: images }).eq('id', app.restaurant.id);
-        await loadDashboardData();
-    };
+    input.addEventListener('change', () => {
+        if (input.files?.[0]) onSelected(input.files[0]);
+    }, { once: true });
     input.click();
 }
 
-async function removeCategoryBanner(cat) {
-    const images = { ...(app.restaurant.category_images || {}) };
-    if (!images[cat]) return;
-    delete images[cat];
-    await app.supabase.from('restaurants').update({ category_images: images }).eq('id', app.restaurant.id);
-    await loadDashboardData();
-}
-
-async function addCategory(event) {
-    event.preventDefault();
-    const input = qs('newCategoryInput');
-    const name = input?.value.trim();
-    if (!name) return;
-
-    const order = Array.from(new Set([...(app.restaurant.category_order || []), ...getCategories(), name]));
-
-    await app.supabase
-        .from('restaurants')
-        .update({ category_order: order })
-        .eq('id', app.restaurant.id);
-
-    if (input) input.value = '';
-    await loadDashboardData();
-}
-
-async function saveItemField(id, field, rawValue) {
-    const patch = {};
-    let value = rawValue.trim();
-
-    if (field === 'price') {
-        const normalized = parseFloat(value.replace(',', '.').replace(/[^0-9.]/g, ''));
-        if (Number.isNaN(normalized)) {
-            await loadDashboardData();
+async function uploadCategoryImage(category) {
+    pickImage(async (file) => {
+        setSaveStatus('A carregar imagem...');
+        const { data, error } = await uploadFile(file, `cat-${slugify(category)}`);
+        if (error || !data) {
+            console.error(error);
+            setSaveStatus('Não foi possível carregar');
             return;
         }
-        value = normalized;
-    }
 
-    patch[field] = value;
-
-    const { error } = await app.supabase.from('menu_items').update(patch).eq('id', id);
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-    const item = app.items.find((entry) => String(entry.id) === String(id));
-    if (item) item[field] = value;
-    schedulePreviewRefresh();
+        const images = { ...(app.restaurant.category_images || {}), [category]: data.publicUrl };
+        await app.supabase.from('restaurants').update({ category_images: images }).eq('id', app.restaurant.id);
+        await loadDashboardData();
+        setSaveStatus('Imagem guardada', true);
+    });
 }
 
-async function toggleAvailability(id, checked) {
-    const { error } = await app.supabase
-        .from('menu_items')
-        .update({ available: checked })
-        .eq('id', id);
+async function editInfoBadge(type) {
+    let updates = {};
 
+    if (type === 'wifi') {
+        const ssid = window.prompt('Nome da rede Wi-Fi', app.restaurant.wifi_ssid || '');
+        if (ssid === null) return;
+        const password = window.prompt('Password da rede Wi-Fi', app.restaurant.wifi_password || '');
+        if (password === null) return;
+        updates = { wifi_ssid: ssid.trim(), wifi_password: password.trim() };
+    } else if (type === 'phone') {
+        const phone = window.prompt('Telefone', app.restaurant.phone || '');
+        if (phone === null) return;
+        updates = { phone: phone.trim() };
+    } else if (type === 'address') {
+        const address = window.prompt('Morada', app.restaurant.address || '');
+        if (address === null) return;
+        updates = { address: address.trim() };
+    } else {
+        const choice = window.prompt('O que queres editar? Escreve: wifi, telefone ou morada', 'wifi');
+        if (!choice) return;
+        const normalized = choice.trim().toLowerCase();
+        if (normalized === 'wifi') return editInfoBadge('wifi');
+        if (normalized === 'telefone') return editInfoBadge('phone');
+        if (normalized === 'morada') return editInfoBadge('address');
+        return;
+    }
+
+    setSaveStatus('A guardar informações...');
+    const { error } = await app.supabase
+        .from('restaurants')
+        .update(updates)
+        .eq('id', app.restaurant.id);
+
+    if (error) {
+        console.error(error);
+        setSaveStatus('Não foi possível guardar');
+        return;
+    }
+
+    Object.assign(app.restaurant, updates);
+    renderInfoBadges();
+    setSaveStatus('Informações guardadas', true);
+}
+
+async function removeCategoryImage(category) {
+    const images = { ...(app.restaurant.category_images || {}) };
+    delete images[category];
+    await app.supabase.from('restaurants').update({ category_images: images }).eq('id', app.restaurant.id);
+    await loadDashboardData();
+    setSaveStatus('Imagem removida', true);
+}
+
+function populateCategorySelect(selectedCategory) {
+    const select = qs('itemCategoryInput');
+    select.innerHTML = getCategories().map((category) =>
+        `<option value="${escapeHTML(category)}" ${category === selectedCategory ? 'selected' : ''}>
+            ${escapeHTML(category)}
+        </option>`
+    ).join('');
+}
+
+function openItemModal(item = null, category = app.activeCategory) {
+    qs('itemModalTitle').textContent = item ? 'Editar prato' : 'Adicionar prato';
+    qs('itemIdInput').value = item?.id || '';
+    qs('itemNameInput').value = item?.name || '';
+    qs('itemPriceInput').value = item ? Number(item.price || 0).toFixed(2) : '';
+    qs('itemDescInput').value = item?.description || '';
+    populateCategorySelect(item?.category || category);
+    qs('itemModal').hidden = false;
+    window.setTimeout(() => qs('itemNameInput').focus(), 40);
+}
+
+function closeItemModal() {
+    qs('itemModal').hidden = true;
+}
+
+async function saveItem(event) {
+    event.preventDefault();
+    const id = qs('itemIdInput').value;
+    const price = Number.parseFloat(qs('itemPriceInput').value.replace(',', '.'));
+    const payload = {
+        name: qs('itemNameInput').value.trim(),
+        description: qs('itemDescInput').value.trim(),
+        category: qs('itemCategoryInput').value,
+        price: Number.isNaN(price) ? 0 : price,
+    };
+
+    if (!payload.name) return;
+    setSaveStatus('A guardar prato...');
+
+    let error;
+    if (id) {
+        ({ error } = await app.supabase.from('menu_items').update(payload).eq('id', id));
+    } else {
+        ({ error } = await app.supabase.from('menu_items').insert([{
+            ...payload,
+            restaurant_id: app.restaurant.id,
+            available: true,
+        }]));
+    }
+
+    if (error) {
+        console.error(error);
+        setSaveStatus('Não foi possível guardar');
+        return;
+    }
+
+    app.activeCategory = payload.category;
+    closeItemModal();
+    await loadDashboardData();
+    setSaveStatus('Prato guardado', true);
+}
+
+async function toggleItem(id) {
+    const item = app.items.find((entry) => String(entry.id) === String(id));
+    if (!item) return;
+
+    const available = !item.available;
+    const { error } = await app.supabase.from('menu_items').update({ available }).eq('id', id);
     if (error) {
         console.error(error);
         return;
     }
 
-    const item = app.items.find((entry) => String(entry.id) === String(id));
-    if (item) item.available = checked;
-    schedulePreviewRefresh();
+    item.available = available;
+    renderDashboard();
+    setSaveStatus(available ? 'Prato visível' : 'Prato oculto', true);
 }
 
 async function deleteItem(id) {
-    if (!confirm('Apagar este prato?')) return;
+    if (!window.confirm('Apagar este prato?')) return;
     await app.supabase.from('menu_items').delete().eq('id', id);
     await loadDashboardData();
+    setSaveStatus('Prato apagado', true);
 }
 
-function pickItemImage(id) {
-    const input = qs(`itemImageInput-${id}`);
-    if (input) input.click();
-}
+async function uploadItemImage(id) {
+    pickImage(async (file) => {
+        setSaveStatus('A carregar imagem...');
+        const { data, error } = await uploadFile(file, `item-${id}`);
+        if (error || !data) {
+            console.error(error);
+            setSaveStatus('Não foi possível carregar');
+            return;
+        }
 
-async function uploadItemImage(id, input) {
-    if (!input.files?.length) return;
-    const { data, error } = await uploadFile(input.files[0], `item-${id}`);
-    if (error || !data) {
-        console.error(error);
-        return;
-    }
-
-    await app.supabase.from('menu_items').update({ image_url: data.publicUrl }).eq('id', id);
-    await loadDashboardData();
-}
-
-async function removeItemImage(id) {
-    await app.supabase.from('menu_items').update({ image_url: null }).eq('id', id);
-    await loadDashboardData();
-}
-
-async function addItem(event, category) {
-    event.preventDefault();
-    const key = slugify(category);
-    const name = qs(`quickName-${key}`)?.value.trim();
-    const priceRaw = qs(`quickPrice-${key}`)?.value.trim() || '0';
-    const desc = qs(`quickDesc-${key}`)?.value.trim() || '';
-
-    if (!name) return;
-
-    const price = parseFloat(priceRaw.replace(',', '.').replace(/[^0-9.]/g, '')) || 0;
-
-    const payload = {
-        restaurant_id: app.restaurant.id,
-        category,
-        name,
-        description: desc,
-        price,
-        available: true,
-    };
-
-    const { error } = await app.supabase.from('menu_items').insert([payload]);
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-    const nameInput = qs(`quickName-${key}`);
-    const priceInput = qs(`quickPrice-${key}`);
-    const descInput = qs(`quickDesc-${key}`);
-    if (nameInput) nameInput.value = '';
-    if (priceInput) priceInput.value = '';
-    if (descInput) descInput.value = '';
-
-    await loadDashboardData();
-}
-
-async function createRestaurantBannerUpload() {
-    const input = qs('coverInput');
-    if (input) input.click();
+        await app.supabase.from('menu_items').update({ image_url: data.publicUrl }).eq('id', id);
+        await loadDashboardData();
+        setSaveStatus('Imagem guardada', true);
+    });
 }
 
 async function uploadCover(input) {
-    if (!input.files?.length) return;
+    if (!input.files?.[0]) return;
+    setSaveStatus('A carregar capa...');
     const { data, error } = await uploadFile(input.files[0], 'cover');
+    input.value = '';
+
     if (error || !data) {
         console.error(error);
+        setSaveStatus('Não foi possível carregar');
         return;
     }
 
-    await saveRestaurantPatch({ cover_url: data.publicUrl });
+    await app.supabase.from('restaurants').update({ cover_url: data.publicUrl }).eq('id', app.restaurant.id);
     await loadDashboardData();
+    setSaveStatus('Capa guardada', true);
 }
 
 async function removeCover() {
-    await saveRestaurantPatch({ cover_url: null });
+    if (!app.restaurant.cover_url || !window.confirm('Remover a capa do menu?')) return;
+    await app.supabase.from('restaurants').update({ cover_url: null }).eq('id', app.restaurant.id);
     await loadDashboardData();
+    setSaveStatus('Capa removida', true);
 }
 
-async function copySlug() {
-    if (!app.restaurant?.slug) return;
-    const url = `${window.location.origin}/menu.html?id=${app.restaurant.slug}`;
-    await navigator.clipboard.writeText(url);
-    setPreviewStatus('Link copiado');
-    setTimeout(() => setPreviewStatus('Sincronizado'), 1200);
+function handleEditorClick(event) {
+    const actionElement = event.target.closest('[data-action]');
+    if (!actionElement) return;
+
+    const action = actionElement.dataset.action;
+    const category = actionElement.dataset.category
+        ? decodeURIComponent(actionElement.dataset.category)
+        : app.activeCategory;
+    const itemId = actionElement.dataset.itemId;
+
+    if (action === 'select-category') {
+        app.activeCategory = actionElement.dataset.category;
+        renderDashboard();
+    } else if (action === 'add-category') {
+        addCategory();
+    } else if (action === 'focus-category-title') {
+        document.querySelector('.category-title')?.focus();
+    } else if (action === 'move-category') {
+        moveCategory(actionElement.dataset.direction);
+    } else if (action === 'delete-category') {
+        deleteCategory(category);
+    } else if (action === 'category-image') {
+        uploadCategoryImage(category);
+    } else if (action === 'remove-category-image') {
+        removeCategoryImage(category);
+    } else if (action === 'add-item') {
+        openItemModal(null, category);
+    } else if (action === 'edit-item') {
+        openItemModal(app.items.find((item) => String(item.id) === String(itemId)));
+    } else if (action === 'toggle-item') {
+        toggleItem(itemId);
+    } else if (action === 'delete-item') {
+        deleteItem(itemId);
+    } else if (action === 'item-image') {
+        uploadItemImage(itemId);
+    }
+}
+
+function bindEvents() {
+    qs('restNameEditor').addEventListener('blur', (event) => saveRestaurantField('name', event.target.innerText));
+    qs('restDescEditor').addEventListener('blur', (event) =>
+        saveRestaurantField('description', event.target.innerText));
+
+    [qs('restNameEditor'), qs('restDescEditor')].forEach((element) => {
+        element.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                element.blur();
+            }
+        });
+    });
+
+    qs('categoryTabs').addEventListener('click', handleEditorClick);
+    qs('categoryEditor').addEventListener('click', handleEditorClick);
+    qs('infoBadges').addEventListener('click', (event) => {
+        const badge = event.target.closest('[data-badge]');
+        if (badge) editInfoBadge(badge.dataset.badge);
+    });
+    qs('categoryEditor').addEventListener('focusout', (event) => {
+        const title = event.target.closest('.category-title');
+        if (!title) return;
+        renameCategory(decodeURIComponent(title.dataset.originalCategory), title.innerText);
+    });
+    qs('categoryEditor').addEventListener('keydown', (event) => {
+        if (event.target.matches('.category-title') && event.key === 'Enter') {
+            event.preventDefault();
+            event.target.blur();
+        }
+    });
+
+    qs('editCoverBtn').addEventListener('click', () => qs('coverInput').click());
+    qs('coverPlaceholder').addEventListener('click', () => qs('coverInput').click());
+    qs('coverInput').addEventListener('change', (event) => uploadCover(event.target));
+    qs('removeCoverBtn').addEventListener('click', removeCover);
+    qs('refreshMenuBtn').addEventListener('click', loadDashboardData);
+    qs('itemForm').addEventListener('submit', saveItem);
+    document.querySelectorAll('[data-close-modal]').forEach((button) =>
+        button.addEventListener('click', closeItemModal));
+    qs('itemModal').addEventListener('click', (event) => {
+        if (event.target === qs('itemModal')) closeItemModal();
+    });
 }
 
 async function init() {
     try {
+        bindEvents();
         const supabase = await getSupabase();
         if (!supabase) {
-            qs('authError').hidden = false;
             qs('authLoading').hidden = true;
+            qs('authError').hidden = false;
             return;
         }
 
@@ -650,39 +795,10 @@ async function init() {
             if (authBootstrappedForUser === user.id) return;
             authBootstrappedForUser = user.id;
             app.user = user;
-            const loading = qs('authLoading');
-            const error = qs('authError');
-            const shell = qs('dashboardShell');
-            if (loading) loading.hidden = true;
-            if (error) error.hidden = true;
-            if (shell) shell.hidden = false;
             await loadDashboardData();
         }, () => {
             window.location.href = 'login.html';
         });
-
-        qs('refreshPreviewBtn')?.addEventListener('click', () => refreshPreview());
-        qs('copySlugBtn')?.addEventListener('click', copySlug);
-        qs('uploadCoverBtn')?.addEventListener('click', createRestaurantBannerUpload);
-        qs('removeCoverBtn')?.addEventListener('click', removeCover);
-        qs('coverInput')?.addEventListener('change', (e) => uploadCover(e.target));
-        qs('newCategoryForm')?.addEventListener('submit', addCategory);
-        qs('restaurantNameInput')?.addEventListener('blur', (e) => saveRestaurantPatch({ name: e.target.value.trim() }));
-        qs('restaurantDescInput')?.addEventListener('blur', (e) => saveRestaurantPatch({ description: e.target.value.trim() }));
-
-        window.renameCategory = renameCategory;
-        window.moveCategory = moveCategory;
-        window.deleteCategory = deleteCategory;
-        window.uploadCategoryBanner = uploadCategoryBanner;
-        window.removeCategoryBanner = removeCategoryBanner;
-        window.saveItemField = saveItemField;
-        window.toggleAvailability = toggleAvailability;
-        window.deleteItem = deleteItem;
-        window.pickItemImage = pickItemImage;
-        window.uploadItemImage = uploadItemImage;
-        window.removeItemImage = removeItemImage;
-        window.addItem = addItem;
-        window.signOut = () => signOut();
     } catch (error) {
         console.error('Dashboard init error:', error);
         qs('authLoading').hidden = true;
@@ -691,5 +807,4 @@ async function init() {
 }
 
 window.signOut = () => signOut();
-
 init();

@@ -4,17 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Menu no Ar</title>
-    <meta name="description" content="Dashboard premium do Menu no Ar.">
+    <title>Editar menu - Menu no Ar</title>
+    <meta name="description" content="Editor direto do Menu no Ar.">
     <link rel="icon" type="image/svg+xml" href="assets/images/logominimal.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=3.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/menu.css?v=2.0">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=4.0">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 
@@ -22,8 +21,8 @@
     <div id="authLoading" class="state-screen">
         <div class="state-card">
             <span class="state-kicker">Acesso protegido</span>
-            <h1>A validar a tua sessao</h1>
-            <p>Estamos a preparar o dashboard premium.</p>
+            <h1>A validar a tua sessão</h1>
+            <p>Estamos a preparar o editor.</p>
         </div>
     </div>
 
@@ -40,163 +39,125 @@
         <div class="state-card">
             <span class="state-kicker">Sem menu</span>
             <h1>Não há restaurante ligado a esta conta.</h1>
-            <p>Cria o teu menu para começares a editar no dashboard.</p>
-            <div class="state-actions">
-                <a class="btn btn-primary" href="create_admin.html">Criar menu</a>
-                <a class="btn btn-ghost" href="index.html">Voltar ao site</a>
-            </div>
+            <p>Cria o teu menu para começares a editar.</p>
+            <a class="state-link state-link-primary" href="create_admin.html">Criar menu</a>
         </div>
     </div>
 
     <main id="dashboardShell" class="dashboard-shell" hidden>
-        <header class="topbar">
+        <header class="dashboard-navbar">
             <a class="brand" href="index.html" aria-label="Menu no Ar">
-                <img src="assets/images/logominimal.svg" alt="Menu no Ar">
+                <img src="assets/images/logominimal.svg" alt="">
                 <span>Menu no Ar</span>
             </a>
 
-            <div class="topbar-actions">
-                <span class="session-pill" id="sessionPill">Sessao autenticada</span>
-                <a class="nav-action" id="openLiveBtn" href="#" target="_blank" rel="noreferrer"
+            <div class="navbar-copy">
+                <strong>Editar menu</strong>
+                <span id="saveStatus">Alterações guardadas automaticamente</span>
+            </div>
+
+            <div class="navbar-actions">
+                <a class="nav-icon" id="openLiveBtn" href="#" target="_blank" rel="noreferrer"
                     aria-label="Abrir menu real" title="Abrir menu real">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    <span>Menu real</span>
                 </a>
-                <button class="nav-action" id="refreshPreviewBtn" type="button"
-                    aria-label="Atualizar preview" title="Atualizar preview">
+                <button class="nav-icon" id="refreshMenuBtn" type="button" aria-label="Atualizar menu"
+                    title="Atualizar menu">
                     <i class="fa-solid fa-rotate"></i>
-                    <span>Atualizar preview</span>
                 </button>
-                <button class="nav-action nav-action-danger" type="button" onclick="signOut()"
-                    aria-label="Terminar sessao" title="Terminar sessao">
+                <button class="nav-icon nav-icon-danger" type="button" onclick="signOut()"
+                    aria-label="Terminar sessão" title="Terminar sessão">
                     <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Sair</span>
                 </button>
             </div>
         </header>
 
-        <section class="dashboard-layout">
-            <aside class="editor-column">
-                <div class="editor-stack">
-                    <section class="panel">
-                        <div class="panel-head">
-                            <div>
-                                <span class="panel-kicker">Base</span>
-                                <h2>Editar menu</h2>
-                            </div>
-                            <span class="panel-chip" id="menuTypeChip">Digital</span>
-                        </div>
-
-                        <div class="field-grid">
-                            <label class="field">
-                                <span>Nome do restaurante</span>
-                                <input id="restaurantNameInput" type="text" placeholder="Nome do restaurante">
-                            </label>
-
-                            <label class="field">
-                                <span>Descrição</span>
-                                <textarea id="restaurantDescInput" rows="3"
-                                    placeholder="Uma descrição curta para o menu"></textarea>
-                            </label>
-
-                            <div class="meta-row">
-                                <div>
-                                    <span class="meta-label">Link publico</span>
-                                    <strong id="slugText">-</strong>
-                                </div>
-                                <button class="btn btn-ghost small" type="button" id="copySlugBtn">
-                                    <i class="fa-solid fa-copy"></i>
-                                    <span>Copiar</span>
-                                </button>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section class="panel">
-                        <div class="panel-head">
-                            <div>
-                                <span class="panel-kicker">Banner</span>
-                                <h2>Capa do menu</h2>
-                            </div>
-                            <span class="panel-chip subtle">Tempo real</span>
-                        </div>
-
-                        <div class="cover-preview" id="coverPreview">
-                            <div class="cover-empty" id="coverEmpty">
-                                <i class="fa-regular fa-image"></i>
-                                <span>Sem capa definida</span>
-                            </div>
-                        </div>
-
-                        <div class="panel-actions">
-                            <input id="coverInput" type="file" accept="image/*" hidden>
-                            <button class="btn btn-primary" type="button" id="uploadCoverBtn">
-                                <i class="fa-solid fa-upload"></i>
-                                <span>Alterar banner</span>
+        <div class="editor-stage">
+            <div id="menuEditor" class="menu-editor">
+                <header id="heroEditor" class="menu-header">
+                    <div id="coverEditor" class="cover-image editable-media">
+                        <div class="media-actions">
+                            <button class="floating-icon" id="editCoverBtn" type="button" aria-label="Alterar capa"
+                                title="Alterar capa">
+                                <i class="fa-solid fa-pencil"></i>
                             </button>
-                            <button class="icon-btn icon-btn-danger" type="button" id="removeCoverBtn"
-                                aria-label="Remover banner" title="Remover banner">
+                            <button class="floating-icon floating-icon-danger" id="removeCoverBtn" type="button"
+                                aria-label="Apagar capa" title="Apagar capa">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
-                    </section>
-
-                    <section class="panel">
-                        <div class="panel-head">
-                            <div>
-                                <span class="panel-kicker">Categorias</span>
-                                <h2>Ordem e nomes</h2>
-                            </div>
+                        <div id="coverPlaceholder" class="cover-placeholder">
+                            <i class="fa-regular fa-image"></i>
+                            <span>Adicionar capa</span>
                         </div>
-
-                        <form id="newCategoryForm" class="inline-create">
-                            <input id="newCategoryInput" type="text" placeholder="Nova categoria">
-                            <button class="btn btn-primary" type="submit">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Adicionar</span>
-                            </button>
-                        </form>
-
-                        <div id="categoryList" class="category-list"></div>
-                    </section>
-
-                    <section class="panel">
-                        <div class="panel-head">
-                            <div>
-                                <span class="panel-kicker">Pratos</span>
-                                <h2>Editar, apagar e imagens</h2>
-                            </div>
-                            <span class="panel-chip subtle">Auto-save</span>
-                        </div>
-
-                        <div id="categorySections" class="category-sections"></div>
-                    </section>
-                </div>
-            </aside>
-
-            <section class="preview-column">
-                <div class="preview-shell">
-                    <div class="preview-head">
-                        <div>
-                            <span class="panel-kicker">Preview</span>
-                            <h2>Menu em tempo real</h2>
-                        </div>
-                        <span class="preview-status" id="previewStatus">A sincronizar...</span>
+                        <input id="coverInput" type="file" accept="image/*" hidden>
                     </div>
 
-                    <div class="preview-frame-wrap">
-                        <div class="preview-overlay" id="previewOverlay">
-                            <i class="fa-solid fa-spinner fa-spin"></i>
-                            <span>A carregar preview...</span>
+                    <div class="header-content">
+                        <div class="editable-line editable-title">
+                            <h1 id="restNameEditor" contenteditable="true" spellcheck="false"></h1>
+                            <i class="fa-solid fa-pencil" aria-hidden="true"></i>
                         </div>
-                        <iframe id="menuPreviewFrame" title="Preview do menu"></iframe>
+                        <div class="editable-line editable-description">
+                            <p id="restDescEditor" class="description" contenteditable="true" spellcheck="false"></p>
+                            <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+                        </div>
+                        <div id="infoBadges" class="info-badges editor-info-badges"></div>
                     </div>
-                </div>
-            </section>
-        </section>
+                </header>
+
+                <nav id="categoryTabs" class="category-tabs" aria-label="Categorias"></nav>
+
+                <section id="categoryEditor" class="category-editor"></section>
+
+                <footer class="menu-footer">
+                    <p>Menu digital por <b>Menu no Ar</b></p>
+                </footer>
+            </div>
+        </div>
     </main>
 
-    <script type="module" src="js/dashboard.js?v=5.0"></script>
+    <div id="itemModal" class="modal-backdrop" hidden>
+        <section class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="itemModalTitle">
+            <div class="modal-head">
+                <div>
+                    <span class="state-kicker">Prato</span>
+                    <h2 id="itemModalTitle">Editar prato</h2>
+                </div>
+                <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="itemForm" class="modal-form">
+                <input id="itemIdInput" type="hidden">
+                <label class="form-field">
+                    <span>Nome</span>
+                    <input id="itemNameInput" type="text" required>
+                </label>
+                <div class="form-row">
+                    <label class="form-field">
+                        <span>Preço</span>
+                        <input id="itemPriceInput" type="text" inputmode="decimal" required>
+                    </label>
+                    <label class="form-field">
+                        <span>Categoria</span>
+                        <select id="itemCategoryInput" required></select>
+                    </label>
+                </div>
+                <label class="form-field">
+                    <span>Descrição</span>
+                    <textarea id="itemDescInput" rows="4"></textarea>
+                </label>
+                <div class="modal-actions">
+                    <button class="button-secondary" type="button" data-close-modal>Cancelar</button>
+                    <button class="button-primary" type="submit">Guardar</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script type="module" src="js/dashboard.js?v=6.0"></script>
 </body>
 
 </html>
