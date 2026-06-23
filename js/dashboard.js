@@ -215,46 +215,10 @@ function renderActiveCategory(categories) {
 
     const category = app.activeCategory;
     const items = itemsForCategory(category);
-    const categoryImage = app.restaurant.category_images?.[category];
-    const categoryIndex = categories.indexOf(category);
     const encodedCategory = encodeURIComponent(category);
 
     editor.innerHTML = `
         <div class="slide-content">
-            ${categoryImage ? `
-                <div class="slide-hero">
-                    <img src="${escapeHTML(categoryImage)}" loading="lazy" alt="${escapeHTML(category)}">
-                </div>` : ''}
-            <h2 class="slide-title" contenteditable="true" spellcheck="false"
-                data-original-category="${encodedCategory}">${escapeHTML(category)}</h2>
-            <div class="slide-actions">
-                <button class="category-icon" type="button" data-action="category-image"
-                    data-category="${encodedCategory}" aria-label="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}"
-                    title="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}">
-                    <i class="fa-regular fa-image"></i>
-                </button>
-                <button class="category-icon" type="button" data-action="move-category"
-                    data-direction="-1" aria-label="Mover categoria para a esquerda"
-                    title="Mover para a esquerda" ${categoryIndex === 0 ? 'disabled' : ''}>
-                    <i class="fa-solid fa-arrow-left"></i>
-                </button>
-                <button class="category-icon" type="button" data-action="move-category"
-                    data-direction="1" aria-label="Mover categoria para a direita"
-                    title="Mover para a direita" ${categoryIndex === categories.length - 1 ? 'disabled' : ''}>
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
-                ${categoryImage ? `
-                    <button class="category-icon category-icon-danger" type="button"
-                        data-action="remove-category-image" data-category="${encodedCategory}"
-                        aria-label="Apagar imagem da categoria" title="Apagar imagem da categoria">
-                        <i class="fa-solid fa-image-slash"></i>
-                    </button>` : ''}
-                <button class="category-icon category-icon-danger" type="button"
-                    data-action="delete-category" data-category="${encodedCategory}"
-                    aria-label="Apagar categoria" title="Apagar categoria">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
             <div class="items-grid">
                 ${items.map(renderItem).join('')}
             </div>
@@ -376,16 +340,6 @@ async function addCategory() {
     app.restaurant.category_order = order;
     app.activeCategory = name;
     renderDashboard();
-    window.requestAnimationFrame(() => {
-        const title = document.querySelector('#categoryEditor .slide-title');
-        if (!title) return;
-        title.focus();
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.selectNodeContents(title);
-        selection.removeAllRanges();
-        selection.addRange(range);
-    });
     setSaveStatus('Categoria criada', true);
 }
 
@@ -710,14 +664,6 @@ function handleEditorClick(event) {
         renderDashboard();
     } else if (action === 'add-category') {
         addCategory();
-    } else if (action === 'move-category') {
-        moveCategory(actionElement.dataset.direction);
-    } else if (action === 'delete-category') {
-        deleteCategory(category);
-    } else if (action === 'category-image') {
-        uploadCategoryImage(category);
-    } else if (action === 'remove-category-image') {
-        removeCategoryImage(category);
     } else if (action === 'add-item') {
         openItemModal(null, category);
     } else if (action === 'edit-item') {
@@ -744,17 +690,6 @@ function bindEvents() {
     qs('infoBadges').addEventListener('click', (event) => {
         const badge = event.target.closest('[data-badge]');
         if (badge) editInfoBadge(badge.dataset.badge);
-    });
-    qs('categoryEditor').addEventListener('focusout', (event) => {
-        const title = event.target.closest('.slide-title');
-        if (!title) return;
-        renameCategory(decodeURIComponent(title.dataset.originalCategory), title.innerText);
-    });
-    qs('categoryEditor').addEventListener('keydown', (event) => {
-        if (event.target.matches('.slide-title') && event.key === 'Enter') {
-            event.preventDefault();
-            event.target.blur();
-        }
     });
 
     qs('editCoverBtn').addEventListener('click', () => qs('coverInput').click());
