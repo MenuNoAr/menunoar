@@ -10,7 +10,7 @@ const app = {
 };
 
 let authBootstrappedForUser = null;
-const ITEM_PLACEHOLDER_IMAGE = 'assets/images/menu_design.png';
+const ITEM_PLACEHOLDER_IMAGE = 'assets/images/item-placeholder.png';
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
 function qs(id) {
@@ -61,16 +61,6 @@ function itemsForCategory(category) {
     return app.items
         .filter((item) => item.category === category)
         .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'pt'));
-}
-
-function normalizeEditableText(value) {
-    return String(value || '').replace(/\s+/g, ' ').trim();
-}
-
-function normalizeEditablePrice(value) {
-    const numeric = Number.parseFloat(String(value || '').replace(',', '.').replace(/[^\d.-]/g, ''));
-    if (Number.isNaN(numeric)) return null;
-    return Number(numeric.toFixed(2));
 }
 
 function applyRestaurantTheme() {
@@ -193,115 +183,18 @@ function renderItem(item) {
 
     return `
         <article class="menu-item ${item.available ? '' : 'unavailable'}" data-item-id="${item.id}">
+            <button class="item-edit-btn" type="button" data-action="edit-item" data-item-id="${item.id}"
+                aria-label="Editar prato" title="Editar prato">
+                <i class="fa-solid fa-pencil"></i>
+            </button>
             <div class="item-text">
-                <h3 class="item-editable" contenteditable="true" spellcheck="false"
-                    data-item-id="${item.id}" data-item-field="name"
-                    data-placeholder="Novo prato">${escapeHTML(item.name)}</h3>
-                <p class="item-desc item-editable" contenteditable="true" spellcheck="false"
-                    data-item-id="${item.id}" data-item-field="description"
-                    data-placeholder="Breve descriÃ§Ã£o...">${escapeHTML(item.description || '')}</p>
-                <div class="item-price item-editable" contenteditable="true" spellcheck="false" data-item-id="${item.id}" data-item-field="price" data-placeholder="0.00€">${Number(item.price || 0).toFixed(2)}â‚¬</div>
+                <h3>${escapeHTML(item.name)}</h3>
+                <p class="item-desc">${escapeHTML(item.description || '')}</p>
+                <div class="item-price">${Number(item.price || 0).toFixed(2)}€</div>
             </div>
             ${image}
-            <div class="item-actions context-tools">
-                <button class="item-icon context-toggle" type="button" data-action="toggle-tools"
-                    aria-label="AÃ§Ãµes do prato" title="AÃ§Ãµes do prato">
-                    <i class="fa-solid fa-ellipsis"></i>
-                </button>
-                <div class="context-actions">
-                    <button class="item-icon" type="button" data-action="edit-item" data-item-id="${item.id}"
-                        aria-label="Editar prato" title="Editar prato">
-                        <i class="fa-solid fa-pencil"></i>
-                    </button>
-                    <button class="item-icon" type="button" data-action="item-image" data-item-id="${item.id}"
-                        aria-label="${item.image_url ? 'Alterar imagem' : 'Adicionar imagem'}"
-                        title="${item.image_url ? 'Alterar imagem' : 'Adicionar imagem'}">
-                        <i class="fa-regular fa-image"></i>
-                    </button>
-                    <button class="item-icon" type="button" data-action="toggle-item" data-item-id="${item.id}"
-                        aria-label="${item.available ? 'Ocultar prato' : 'Mostrar prato'}"
-                        title="${item.available ? 'Ocultar prato' : 'Mostrar prato'}">
-                        <i class="fa-solid ${item.available ? 'fa-eye' : 'fa-eye-slash'}"></i>
-                    </button>
-                    <button class="item-icon item-icon-danger" type="button" data-action="delete-item"
-                        data-item-id="${item.id}" aria-label="Apagar prato" title="Apagar prato">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            </div>
         </article>
     `;
-}
-
-function focusItemText(itemText) {
-    const name = itemText?.querySelector('[data-item-field="name"]');
-    if (!name) return;
-    name.focus();
-    const selection = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(name);
-    selection.removeAllRanges();
-    selection.addRange(range);
-}
-
-function updateItemInState(id, field, value) {
-    const item = app.items.find((entry) => String(entry.id) === String(id));
-    if (!item) return null;
-    item[field] = value;
-    return item;
-}
-
-async function saveInlineItemField(element) {
-    const itemId = element.dataset.itemId;
-    const field = element.dataset.itemField;
-    const item = app.items.find((entry) => String(entry.id) === String(itemId));
-    if (!item) return;
-
-    const previousValue = item[field] ?? '';
-    const normalizedValue = field === 'price'
-        ? normalizeEditablePrice(element.innerText)
-        : normalizeEditableText(element.innerText);
-
-    if (field === 'name' && !normalizedValue) {
-        element.innerText = previousValue;
-        return;
-    }
-
-    if (field === 'price' && normalizedValue === null) {
-        element.innerText = `${Number(previousValue || 0).toFixed(2)}€`;
-        return;
-    }
-
-    if (String(normalizedValue) === String(previousValue)) {
-        if (field === 'price') {
-            element.innerText = `${Number(previousValue || 0).toFixed(2)}€`;
-        }
-        return;
-    }
-
-    setSaveStatus('A guardar prato...');
-    const { error } = await app.supabase
-        .from('menu_items')
-        .update({ [field]: normalizedValue })
-        .eq('id', itemId);
-
-    if (error) {
-        console.error(error);
-        element.innerText = field === 'price'
-            ? `${Number(previousValue || 0).toFixed(2)}€`
-            : String(previousValue || '');
-        setSaveStatus('Não foi possível guardar');
-        return;
-    }
-
-    updateItemInState(itemId, field, normalizedValue);
-    if (field === 'price') {
-        element.innerText = `${Number(normalizedValue).toFixed(2)}€`;
-    }
-    if (field === 'name') {
-        renderDashboard();
-    }
-    setSaveStatus('Prato guardado', true);
 }
 
 function renderActiveCategory(categories) {
@@ -668,6 +561,21 @@ function populateCategorySelect(selectedCategory) {
     ).join('');
 }
 
+function setModalItemImage(item) {
+    const preview = qs('itemModalImagePreview');
+    const button = qs('itemModalImageBtn');
+    if (!preview || !button) return;
+
+    const hasItem = Boolean(item?.id);
+    preview.src = item?.image_url || ITEM_PLACEHOLDER_IMAGE;
+    button.dataset.itemId = item?.id || '';
+    button.disabled = !hasItem;
+    button.title = hasItem
+        ? 'Editar imagem do prato'
+        : 'Guarda o prato para poder editar a imagem';
+    button.setAttribute('aria-label', button.title);
+}
+
 function openItemModal(item = null, category = app.activeCategory) {
     qs('itemModalTitle').textContent = item ? 'Editar prato' : 'Adicionar prato';
     qs('itemIdInput').value = item?.id || '';
@@ -675,6 +583,7 @@ function openItemModal(item = null, category = app.activeCategory) {
     qs('itemPriceInput').value = item ? Number(item.price || 0).toFixed(2) : '';
     qs('itemDescInput').value = item?.description || '';
     populateCategorySelect(item?.category || category);
+    setModalItemImage(item);
     qs('itemModal').hidden = false;
     window.setTimeout(() => qs('itemNameInput').focus(), 40);
 }
@@ -755,6 +664,9 @@ async function uploadItemImage(id) {
 
         await app.supabase.from('menu_items').update({ image_url: data.publicUrl }).eq('id', id);
         await loadDashboardData();
+        if (!qs('itemModal').hidden) {
+            setModalItemImage(app.items.find((item) => String(item.id) === String(id)));
+        }
         setSaveStatus('Imagem guardada', true);
     });
 }
@@ -784,12 +696,6 @@ async function removeCover() {
 }
 
 function handleEditorClick(event) {
-    const itemText = event.target.closest('.item-text');
-    if (itemText && !event.target.closest('[data-item-field]')) {
-        focusItemText(itemText);
-        return;
-    }
-
     const actionElement = event.target.closest('[data-action]');
     if (!actionElement) return;
 
@@ -799,13 +705,7 @@ function handleEditorClick(event) {
         : app.activeCategory;
     const itemId = actionElement.dataset.itemId;
 
-    if (action === 'toggle-tools') {
-        const tools = actionElement.closest('.context-tools');
-        document.querySelectorAll('.context-tools.is-open').forEach((entry) => {
-            if (entry !== tools) entry.classList.remove('is-open');
-        });
-        tools?.classList.toggle('is-open');
-    } else if (action === 'select-category') {
+    if (action === 'select-category') {
         app.activeCategory = actionElement.dataset.category;
         renderDashboard();
     } else if (action === 'add-category') {
@@ -822,12 +722,6 @@ function handleEditorClick(event) {
         openItemModal(null, category);
     } else if (action === 'edit-item') {
         openItemModal(app.items.find((item) => String(item.id) === String(itemId)));
-    } else if (action === 'toggle-item') {
-        toggleItem(itemId);
-    } else if (action === 'delete-item') {
-        deleteItem(itemId);
-    } else if (action === 'item-image') {
-        uploadItemImage(itemId);
     }
 }
 
@@ -856,16 +750,8 @@ function bindEvents() {
         if (!title) return;
         renameCategory(decodeURIComponent(title.dataset.originalCategory), title.innerText);
     });
-    qs('categoryEditor').addEventListener('focusout', (event) => {
-        const field = event.target.closest('[data-item-field]');
-        if (!field) return;
-        saveInlineItemField(field);
-    });
     qs('categoryEditor').addEventListener('keydown', (event) => {
         if (event.target.matches('.slide-title') && event.key === 'Enter') {
-            event.preventDefault();
-            event.target.blur();
-        } else if (event.target.matches('[data-item-field]') && event.key === 'Enter') {
             event.preventDefault();
             event.target.blur();
         }
@@ -876,6 +762,11 @@ function bindEvents() {
     qs('coverPlaceholder').addEventListener('click', () => qs('coverInput').click());
     qs('coverInput').addEventListener('change', (event) => uploadCover(event.target));
     qs('removeCoverBtn').addEventListener('click', removeCover);
+    qs('itemModalImageBtn').addEventListener('click', () => {
+        const itemId = qs('itemIdInput').value;
+        if (!itemId) return;
+        uploadItemImage(itemId);
+    });
     qs('refreshMenuBtn').addEventListener('click', loadDashboardData);
     qs('itemForm').addEventListener('submit', saveItem);
     document.querySelectorAll('[data-close-modal]').forEach((button) =>

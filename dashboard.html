@@ -13,7 +13,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/menu.css?v=2.0">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.1">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.2">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 
@@ -124,7 +124,14 @@
     <div id="itemModal" class="modal-backdrop" hidden>
         <section class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="itemModalTitle">
             <div class="modal-head">
-                <div>
+                <button id="itemModalImageBtn" class="modal-item-media" type="button"
+                    aria-label="Editar imagem do prato" title="Editar imagem do prato">
+                    <img id="itemModalImagePreview" src="assets/images/item-placeholder.png" alt="">
+                    <span class="modal-item-media-badge">
+                        <i class="fa-solid fa-image"></i>
+                    </span>
+                </button>
+                <div class="modal-head-copy">
                     <span class="state-kicker">Prato</span>
                     <h2 id="itemModalTitle">Editar prato</h2>
                 </div>
@@ -161,7 +168,7 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=7.1"></script>
+    <script type="module" src="js/dashboard.js?v=7.4"></script>
 </body>
 
 </html>
