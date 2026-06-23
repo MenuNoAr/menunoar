@@ -63,7 +63,7 @@ function itemsForCategory(category) {
 }
 
 function applyRestaurantTheme() {
-    const editor = qs('menuEditor');
+    const editor = qs('mobile-view');
     const restaurant = app.restaurant;
     if (!editor || !restaurant) return;
 
@@ -100,28 +100,28 @@ function renderInfoBadges() {
     const badges = [];
     if (restaurant.wifi_ssid || restaurant.wifi_password) {
         badges.push(`
-            <button class="info-badge" type="button" data-badge="wifi">
+            <span class="info-badge" data-badge="wifi">
                 <i class="fa-solid fa-wifi"></i>
                 <span>${escapeHTML(restaurant.wifi_ssid || 'Wi-Fi')}</span>
-            </button>`);
+            </span>`);
     }
     if (restaurant.phone) {
         badges.push(`
-            <button class="info-badge" type="button" data-badge="phone">
+            <span class="info-badge" data-badge="phone">
                 <i class="fa-solid fa-phone"></i>
                 <span>${escapeHTML(restaurant.phone)}</span>
-            </button>`);
+            </span>`);
     }
     if (restaurant.address) {
         badges.push(`
-            <button class="info-badge" type="button" data-badge="address">
+            <span class="info-badge" data-badge="address">
                 <i class="fa-solid fa-location-dot"></i>
                 <span>${escapeHTML(restaurant.address)}</span>
-            </button>`);
+            </span>`);
     }
 
     badges.push(`
-        <button class="info-badge info-badge-add" type="button" data-badge="add"
+        <button class="badge-editor-action" type="button" data-badge="add"
             aria-label="Editar informações" title="Editar informações">
             <i class="fa-solid fa-plus"></i>
         </button>`);
@@ -133,18 +133,26 @@ function renderCover() {
     const cover = qs('coverEditor');
     const placeholder = qs('coverPlaceholder');
     const removeButton = qs('removeCoverBtn');
+    const addButton = qs('addCoverBtn');
+    const hero = qs('heroHeader');
     if (!cover || !app.restaurant) return;
 
     if (app.restaurant.cover_url) {
+        cover.style.display = 'block';
         cover.style.backgroundImage = `url('${app.restaurant.cover_url}')`;
         cover.style.backgroundSize = 'cover';
         cover.style.backgroundPosition = 'center';
+        if (hero) hero.style.paddingTop = '';
         if (placeholder) placeholder.hidden = true;
         if (removeButton) removeButton.hidden = false;
+        if (addButton) addButton.hidden = true;
     } else {
         cover.style.backgroundImage = '';
+        cover.style.display = 'none';
+        if (hero) hero.style.paddingTop = '100px';
         if (placeholder) placeholder.hidden = false;
         if (removeButton) removeButton.hidden = true;
+        if (addButton) addButton.hidden = false;
     }
 }
 
@@ -171,32 +179,38 @@ function renderItem(item) {
         : '';
 
     return `
-        <article class="menu-item ${item.available ? '' : 'unavailable'} ${item.image_url ? 'has-image' : ''}">
+        <article class="menu-item ${item.available ? '' : 'unavailable'}">
             <div class="item-text">
                 <h3>${escapeHTML(item.name)}</h3>
                 <p class="item-desc">${escapeHTML(item.description || '')}</p>
                 <div class="item-price">${Number(item.price || 0).toFixed(2)}€</div>
             </div>
             ${image}
-            <div class="item-actions">
-                <button class="item-icon" type="button" data-action="edit-item" data-item-id="${item.id}"
-                    aria-label="Editar prato" title="Editar prato">
-                    <i class="fa-solid fa-pencil"></i>
+            <div class="item-actions context-tools">
+                <button class="item-icon context-toggle" type="button" data-action="toggle-tools"
+                    aria-label="Ações do prato" title="Ações do prato">
+                    <i class="fa-solid fa-ellipsis"></i>
                 </button>
-                <button class="item-icon" type="button" data-action="item-image" data-item-id="${item.id}"
-                    aria-label="${item.image_url ? 'Alterar imagem' : 'Adicionar imagem'}"
-                    title="${item.image_url ? 'Alterar imagem' : 'Adicionar imagem'}">
-                    <i class="fa-regular fa-image"></i>
-                </button>
-                <button class="item-icon" type="button" data-action="toggle-item" data-item-id="${item.id}"
-                    aria-label="${item.available ? 'Ocultar prato' : 'Mostrar prato'}"
-                    title="${item.available ? 'Ocultar prato' : 'Mostrar prato'}">
-                    <i class="fa-solid ${item.available ? 'fa-eye' : 'fa-eye-slash'}"></i>
-                </button>
-                <button class="item-icon item-icon-danger" type="button" data-action="delete-item"
-                    data-item-id="${item.id}" aria-label="Apagar prato" title="Apagar prato">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+                <div class="context-actions">
+                    <button class="item-icon" type="button" data-action="edit-item" data-item-id="${item.id}"
+                        aria-label="Editar prato" title="Editar prato">
+                        <i class="fa-solid fa-pencil"></i>
+                    </button>
+                    <button class="item-icon" type="button" data-action="item-image" data-item-id="${item.id}"
+                        aria-label="${item.image_url ? 'Alterar imagem' : 'Adicionar imagem'}"
+                        title="${item.image_url ? 'Alterar imagem' : 'Adicionar imagem'}">
+                        <i class="fa-regular fa-image"></i>
+                    </button>
+                    <button class="item-icon" type="button" data-action="toggle-item" data-item-id="${item.id}"
+                        aria-label="${item.available ? 'Ocultar prato' : 'Mostrar prato'}"
+                        title="${item.available ? 'Ocultar prato' : 'Mostrar prato'}">
+                        <i class="fa-solid ${item.available ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                    </button>
+                    <button class="item-icon item-icon-danger" type="button" data-action="delete-item"
+                        data-item-id="${item.id}" aria-label="Apagar prato" title="Apagar prato">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
             </div>
         </article>
     `;
@@ -224,64 +238,70 @@ function renderActiveCategory(categories) {
     const categoryIndex = categories.indexOf(category);
     const encodedCategory = encodeURIComponent(category);
 
-    const banner = categoryImage
-        ? `<div class="category-banner">
-                <img src="${escapeHTML(categoryImage)}" loading="lazy" alt="${escapeHTML(category)}">
-                <div class="media-actions">
-                    <button class="floating-icon" type="button" data-action="category-image"
-                        data-category="${encodedCategory}" aria-label="Alterar imagem da categoria"
-                        title="Alterar imagem da categoria">
-                        <i class="fa-solid fa-pencil"></i>
-                    </button>
-                    <button class="floating-icon floating-icon-danger" type="button"
+    const categoryTools = `
+        <div class="category-tools context-tools">
+            <button class="category-icon context-toggle" type="button" data-action="toggle-tools"
+                aria-label="Ações da categoria" title="Ações da categoria">
+                <i class="fa-solid fa-ellipsis"></i>
+            </button>
+            <div class="context-actions">
+                <button class="category-icon" type="button" data-action="focus-category-title"
+                    aria-label="Editar nome" title="Editar nome">
+                    <i class="fa-solid fa-pencil"></i>
+                </button>
+                <button class="category-icon" type="button" data-action="category-image"
+                    data-category="${encodedCategory}" aria-label="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}"
+                    title="${categoryImage ? 'Alterar imagem' : 'Adicionar imagem'}">
+                    <i class="fa-regular fa-image"></i>
+                </button>
+                <button class="category-icon" type="button" data-action="move-category"
+                    data-direction="-1" aria-label="Mover categoria para a esquerda"
+                    title="Mover para a esquerda" ${categoryIndex === 0 ? 'disabled' : ''}>
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button class="category-icon" type="button" data-action="move-category"
+                    data-direction="1" aria-label="Mover categoria para a direita"
+                    title="Mover para a direita" ${categoryIndex === categories.length - 1 ? 'disabled' : ''}>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                ${categoryImage ? `
+                    <button class="category-icon category-icon-danger" type="button"
                         data-action="remove-category-image" data-category="${encodedCategory}"
                         aria-label="Apagar imagem da categoria" title="Apagar imagem da categoria">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+                        <i class="fa-solid fa-image-slash"></i>
+                    </button>` : ''}
+                <button class="category-icon category-icon-danger" type="button"
+                    data-action="delete-category" data-category="${encodedCategory}"
+                    aria-label="Apagar categoria" title="Apagar categoria">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </div>`;
+
+    const heading = categoryImage
+        ? `<div class="cat-banner">
+                <img src="${escapeHTML(categoryImage)}" loading="lazy" alt="${escapeHTML(category)}">
+                <div class="cat-banner-overlay">
+                    <h2 class="category-title" contenteditable="true" spellcheck="false"
+                        data-original-category="${encodedCategory}">${escapeHTML(category)}</h2>
                 </div>
+                ${categoryTools}
             </div>`
-        : `<button class="category-banner-empty" type="button" data-action="category-image"
-                data-category="${encodedCategory}">
-                <i class="fa-regular fa-image"></i>
-                <span>Adicionar imagem à categoria</span>
-            </button>`;
+        : `<h2 class="slide-title category-title" contenteditable="true" spellcheck="false"
+                data-original-category="${encodedCategory}">${escapeHTML(category)}</h2>
+           ${categoryTools}`;
 
     editor.innerHTML = `
-        <div class="category-head">
-            <div class="category-title-row">
-                <h2 class="category-title" contenteditable="true" spellcheck="false"
-                    data-original-category="${encodedCategory}">${escapeHTML(category)}</h2>
-                <div class="category-actions">
-                    <button class="category-icon" type="button" data-action="focus-category-title"
-                        aria-label="Editar nome" title="Editar nome">
-                        <i class="fa-solid fa-pencil"></i>
-                    </button>
-                    <button class="category-icon" type="button" data-action="move-category"
-                        data-direction="-1" aria-label="Mover categoria para a esquerda"
-                        title="Mover para a esquerda" ${categoryIndex === 0 ? 'disabled' : ''}>
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </button>
-                    <button class="category-icon" type="button" data-action="move-category"
-                        data-direction="1" aria-label="Mover categoria para a direita"
-                        title="Mover para a direita" ${categoryIndex === categories.length - 1 ? 'disabled' : ''}>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                    <button class="category-icon category-icon-danger" type="button"
-                        data-action="delete-category" data-category="${encodedCategory}"
-                        aria-label="Apagar categoria" title="Apagar categoria">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
+        <div class="slide-content">
+            ${heading}
+            <div class="items-grid">
+                ${items.map(renderItem).join('')}
             </div>
-            ${banner}
+            <button class="item-add" type="button" data-action="add-item" data-category="${encodedCategory}"
+                aria-label="Adicionar prato" title="Adicionar prato">
+                <i class="fa-solid fa-plus"></i>
+            </button>
         </div>
-        <div class="items-grid">
-            ${items.map(renderItem).join('')}
-        </div>
-        <button class="item-add" type="button" data-action="add-item" data-category="${encodedCategory}">
-            <i class="fa-solid fa-plus"></i>
-            <span>Adicionar prato</span>
-        </button>
     `;
 }
 
@@ -302,8 +322,8 @@ function renderDashboard() {
     renderCover();
     renderInfoBadges();
 
-    qs('restNameEditor').textContent = app.restaurant.name || '';
-    qs('restDescEditor').textContent = app.restaurant.description || '';
+    qs('restName').textContent = app.restaurant.name || '';
+    qs('restDesc').textContent = app.restaurant.description || '';
     qs('openLiveBtn').href = `menu.html?id=${encodeURIComponent(app.restaurant.slug)}`;
 
     renderCategoryTabs(categories);
@@ -705,7 +725,13 @@ function handleEditorClick(event) {
         : app.activeCategory;
     const itemId = actionElement.dataset.itemId;
 
-    if (action === 'select-category') {
+    if (action === 'toggle-tools') {
+        const tools = actionElement.closest('.context-tools');
+        document.querySelectorAll('.context-tools.is-open').forEach((entry) => {
+            if (entry !== tools) entry.classList.remove('is-open');
+        });
+        tools?.classList.toggle('is-open');
+    } else if (action === 'select-category') {
         app.activeCategory = actionElement.dataset.category;
         renderDashboard();
     } else if (action === 'add-category') {
@@ -734,11 +760,11 @@ function handleEditorClick(event) {
 }
 
 function bindEvents() {
-    qs('restNameEditor').addEventListener('blur', (event) => saveRestaurantField('name', event.target.innerText));
-    qs('restDescEditor').addEventListener('blur', (event) =>
+    qs('restName').addEventListener('blur', (event) => saveRestaurantField('name', event.target.innerText));
+    qs('restDesc').addEventListener('blur', (event) =>
         saveRestaurantField('description', event.target.innerText));
 
-    [qs('restNameEditor'), qs('restDescEditor')].forEach((element) => {
+    [qs('restName'), qs('restDesc')].forEach((element) => {
         element.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
@@ -766,6 +792,7 @@ function bindEvents() {
     });
 
     qs('editCoverBtn').addEventListener('click', () => qs('coverInput').click());
+    qs('addCoverBtn').addEventListener('click', () => qs('coverInput').click());
     qs('coverPlaceholder').addEventListener('click', () => qs('coverInput').click());
     qs('coverInput').addEventListener('change', (event) => uploadCover(event.target));
     qs('removeCoverBtn').addEventListener('click', removeCover);
