@@ -1,4 +1,4 @@
-import { getSupabase, initAuthListener, signOut } from './auth-service.js';
+﻿import { getSupabase, initAuthListener, signOut } from './auth-service.js';
 import { initUploadService, uploadFile } from './upload-service.js';
 
 const app = {
@@ -10,6 +10,7 @@ const app = {
 };
 
 let authBootstrappedForUser = null;
+const ITEM_PLACEHOLDER_IMAGE = 'assets/images/menu_design.png';
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
 function qs(id) {
@@ -36,7 +37,7 @@ function setSaveStatus(text, reset = false) {
     status.textContent = text;
     if (reset) {
         window.setTimeout(() => {
-            status.textContent = 'Alterações guardadas automaticamente';
+            status.textContent = 'AlteraÃ§Ãµes guardadas automaticamente';
         }, 1400);
     }
 }
@@ -60,6 +61,16 @@ function itemsForCategory(category) {
     return app.items
         .filter((item) => item.category === category)
         .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'pt'));
+}
+
+function normalizeEditableText(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeEditablePrice(value) {
+    const numeric = Number.parseFloat(String(value || '').replace(',', '.').replace(/[^\d.-]/g, ''));
+    if (Number.isNaN(numeric)) return null;
+    return Number(numeric.toFixed(2));
 }
 
 function applyRestaurantTheme() {
@@ -122,7 +133,7 @@ function renderInfoBadges() {
 
     badges.push(`
         <button class="badge-editor-action" type="button" data-badge="add"
-            aria-label="Editar informações" title="Editar informações">
+            aria-label="Editar informaÃ§Ãµes" title="Editar informaÃ§Ãµes">
             <i class="fa-solid fa-plus"></i>
         </button>`);
 
@@ -176,19 +187,25 @@ function renderCategoryTabs(categories) {
 function renderItem(item) {
     const image = item.image_url
         ? `<div class="item-img"><img src="${escapeHTML(item.image_url)}" loading="lazy" alt="${escapeHTML(item.name)}"></div>`
-        : '';
+        : `<div class="item-img item-img-placeholder">
+                <img src="${ITEM_PLACEHOLDER_IMAGE}" loading="lazy" alt="Imagem de exemplo">
+           </div>`;
 
     return `
-        <article class="menu-item ${item.available ? '' : 'unavailable'}">
+        <article class="menu-item ${item.available ? '' : 'unavailable'}" data-item-id="${item.id}">
             <div class="item-text">
-                <h3>${escapeHTML(item.name)}</h3>
-                <p class="item-desc">${escapeHTML(item.description || '')}</p>
-                <div class="item-price">${Number(item.price || 0).toFixed(2)}€</div>
+                <h3 class="item-editable" contenteditable="true" spellcheck="false"
+                    data-item-id="${item.id}" data-item-field="name"
+                    data-placeholder="Novo prato">${escapeHTML(item.name)}</h3>
+                <p class="item-desc item-editable" contenteditable="true" spellcheck="false"
+                    data-item-id="${item.id}" data-item-field="description"
+                    data-placeholder="Breve descriÃ§Ã£o...">${escapeHTML(item.description || '')}</p>
+                <div class="item-price item-editable" contenteditable="true" spellcheck="false" data-item-id="${item.id}" data-item-field="price" data-placeholder="0.00€">${Number(item.price || 0).toFixed(2)}â‚¬</div>
             </div>
             ${image}
             <div class="item-actions context-tools">
                 <button class="item-icon context-toggle" type="button" data-action="toggle-tools"
-                    aria-label="Ações do prato" title="Ações do prato">
+                    aria-label="AÃ§Ãµes do prato" title="AÃ§Ãµes do prato">
                     <i class="fa-solid fa-ellipsis"></i>
                 </button>
                 <div class="context-actions">
@@ -216,6 +233,77 @@ function renderItem(item) {
     `;
 }
 
+function focusItemText(itemText) {
+    const name = itemText?.querySelector('[data-item-field="name"]');
+    if (!name) return;
+    name.focus();
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(name);
+    selection.removeAllRanges();
+    selection.addRange(range);
+}
+
+function updateItemInState(id, field, value) {
+    const item = app.items.find((entry) => String(entry.id) === String(id));
+    if (!item) return null;
+    item[field] = value;
+    return item;
+}
+
+async function saveInlineItemField(element) {
+    const itemId = element.dataset.itemId;
+    const field = element.dataset.itemField;
+    const item = app.items.find((entry) => String(entry.id) === String(itemId));
+    if (!item) return;
+
+    const previousValue = item[field] ?? '';
+    const normalizedValue = field === 'price'
+        ? normalizeEditablePrice(element.innerText)
+        : normalizeEditableText(element.innerText);
+
+    if (field === 'name' && !normalizedValue) {
+        element.innerText = previousValue;
+        return;
+    }
+
+    if (field === 'price' && normalizedValue === null) {
+        element.innerText = `${Number(previousValue || 0).toFixed(2)}€`;
+        return;
+    }
+
+    if (String(normalizedValue) === String(previousValue)) {
+        if (field === 'price') {
+            element.innerText = `${Number(previousValue || 0).toFixed(2)}€`;
+        }
+        return;
+    }
+
+    setSaveStatus('A guardar prato...');
+    const { error } = await app.supabase
+        .from('menu_items')
+        .update({ [field]: normalizedValue })
+        .eq('id', itemId);
+
+    if (error) {
+        console.error(error);
+        element.innerText = field === 'price'
+            ? `${Number(previousValue || 0).toFixed(2)}€`
+            : String(previousValue || '');
+        setSaveStatus('Não foi possível guardar');
+        return;
+    }
+
+    updateItemInState(itemId, field, normalizedValue);
+    if (field === 'price') {
+        element.innerText = `${Number(normalizedValue).toFixed(2)}€`;
+    }
+    if (field === 'name') {
+        renderDashboard();
+    }
+    setSaveStatus('Prato guardado', true);
+}
+
 function renderActiveCategory(categories) {
     const editor = qs('categoryEditor');
     if (!editor) return;
@@ -223,7 +311,7 @@ function renderActiveCategory(categories) {
     if (!categories.length || !app.activeCategory) {
         editor.innerHTML = `
             <div class="empty-menu">
-                <p>O menu ainda não tem categorias.</p>
+                <p>O menu ainda nÃ£o tem categorias.</p>
                 <button type="button" data-action="add-category" aria-label="Adicionar categoria">
                     <i class="fa-solid fa-plus"></i>
                 </button>
@@ -366,7 +454,7 @@ async function saveRestaurantField(field, value) {
 
     if (error) {
         console.error(error);
-        setSaveStatus('Não foi possível guardar');
+        setSaveStatus('NÃ£o foi possÃ­vel guardar');
         return;
     }
 
@@ -390,7 +478,7 @@ async function addCategory() {
 
     if (error) {
         console.error(error);
-        setSaveStatus('Não foi possível criar');
+        setSaveStatus('NÃ£o foi possÃ­vel criar');
         return;
     }
 
@@ -510,7 +598,7 @@ async function uploadCategoryImage(category) {
         const { data, error } = await uploadFile(file, `cat-${slugify(category)}`);
         if (error || !data) {
             console.error(error);
-            setSaveStatus('Não foi possível carregar');
+            setSaveStatus('NÃ£o foi possÃ­vel carregar');
             return;
         }
 
@@ -548,7 +636,7 @@ async function editInfoBadge(type) {
         return;
     }
 
-    setSaveStatus('A guardar informações...');
+    setSaveStatus('A guardar informaÃ§Ãµes...');
     const { error } = await app.supabase
         .from('restaurants')
         .update(updates)
@@ -556,13 +644,13 @@ async function editInfoBadge(type) {
 
     if (error) {
         console.error(error);
-        setSaveStatus('Não foi possível guardar');
+        setSaveStatus('NÃ£o foi possÃ­vel guardar');
         return;
     }
 
     Object.assign(app.restaurant, updates);
     renderInfoBadges();
-    setSaveStatus('Informações guardadas', true);
+    setSaveStatus('InformaÃ§Ãµes guardadas', true);
 }
 
 async function removeCategoryImage(category) {
@@ -624,7 +712,7 @@ async function saveItem(event) {
 
     if (error) {
         console.error(error);
-        setSaveStatus('Não foi possível guardar');
+        setSaveStatus('NÃ£o foi possÃ­vel guardar');
         return;
     }
 
@@ -647,7 +735,7 @@ async function toggleItem(id) {
 
     item.available = available;
     renderDashboard();
-    setSaveStatus(available ? 'Prato visível' : 'Prato oculto', true);
+    setSaveStatus(available ? 'Prato visÃ­vel' : 'Prato oculto', true);
 }
 
 async function deleteItem(id) {
@@ -663,7 +751,7 @@ async function uploadItemImage(id) {
         const { data, error } = await uploadFile(file, `item-${id}`);
         if (error || !data) {
             console.error(error);
-            setSaveStatus('Não foi possível carregar');
+            setSaveStatus('NÃ£o foi possÃ­vel carregar');
             return;
         }
 
@@ -681,7 +769,7 @@ async function uploadCover(input) {
 
     if (error || !data) {
         console.error(error);
-        setSaveStatus('Não foi possível carregar');
+        setSaveStatus('NÃ£o foi possÃ­vel carregar');
         return;
     }
 
@@ -698,6 +786,12 @@ async function removeCover() {
 }
 
 function handleEditorClick(event) {
+    const itemText = event.target.closest('.item-text');
+    if (itemText && !event.target.closest('[data-item-field]')) {
+        focusItemText(itemText);
+        return;
+    }
+
     const actionElement = event.target.closest('[data-action]');
     if (!actionElement) return;
 
@@ -764,8 +858,16 @@ function bindEvents() {
         if (!title) return;
         renameCategory(decodeURIComponent(title.dataset.originalCategory), title.innerText);
     });
+    qs('categoryEditor').addEventListener('focusout', (event) => {
+        const field = event.target.closest('[data-item-field]');
+        if (!field) return;
+        saveInlineItemField(field);
+    });
     qs('categoryEditor').addEventListener('keydown', (event) => {
         if (event.target.matches('.slide-title') && event.key === 'Enter') {
+            event.preventDefault();
+            event.target.blur();
+        } else if (event.target.matches('[data-item-field]') && event.key === 'Enter') {
             event.preventDefault();
             event.target.blur();
         }
