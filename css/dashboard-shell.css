@@ -373,6 +373,16 @@ a {
     position: relative;
 }
 
+.menu-item + .menu-item::before {
+    content: '';
+    display: block;
+    width: 80%;
+    height: 1px;
+    margin: 16px auto 18px;
+    background: var(--editor-line-strong);
+    opacity: 0.9;
+}
+
 .item-edit-btn {
     position: absolute;
     top: 8px;
@@ -492,21 +502,6 @@ a {
     height: 100%;
     object-fit: cover;
     display: block;
-}
-
-.modal-item-media-badge {
-    position: absolute;
-    right: 5px;
-    bottom: 5px;
-    width: 22px;
-    height: 22px;
-    display: inline-grid;
-    place-items: center;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.92);
-    color: var(--editor-ink);
-    font-size: 0.65rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .modal-head h2 {
