@@ -92,11 +92,6 @@
                         </div>
                         <input id="coverInput" type="file" accept="image/*" hidden>
                     </div>
-                    <button class="cover-add-button" id="addCoverBtn" type="button" aria-label="Adicionar capa"
-                        title="Adicionar capa">
-                        <i class="fa-regular fa-image"></i>
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
 
                     <div class="header-content">
                         <button class="item-edit-btn" type="button" data-action="open-hero-modal"
@@ -213,6 +208,18 @@
                         <input id="heroAddressInput" type="text">
                     </label>
                 </div>
+                <label class="form-field hero-form-span-2 hero-cover-field">
+                    <span>Capa</span>
+                    <div class="hero-cover-picker">
+                        <button id="heroCoverBtn" class="hero-cover-preview" type="button"
+                            aria-label="Alterar capa" title="Alterar capa">
+                            <img id="heroCoverPreview" src="assets/images/item-placeholder.png" alt="">
+                            <span id="heroCoverLabel">Selecionar capa</span>
+                        </button>
+                        <button id="heroCoverRemoveBtn" class="button-secondary" type="button">Remover capa</button>
+                    </div>
+                    <input id="heroCoverInput" type="file" accept="image/*" hidden>
+                </label>
                 <div class="modal-actions">
                     <button class="button-secondary" type="button" data-close-modal>Cancelar</button>
                     <button class="button-primary" type="submit">Guardar</button>

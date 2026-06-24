@@ -128,7 +128,6 @@ function renderCover() {
     const cover = qs('coverEditor');
     const placeholder = qs('coverPlaceholder');
     const removeButton = qs('removeCoverBtn');
-    const addButton = qs('addCoverBtn');
     const hero = qs('heroHeader');
     if (!cover || !app.restaurant) return;
 
@@ -140,14 +139,12 @@ function renderCover() {
         if (hero) hero.style.paddingTop = '';
         if (placeholder) placeholder.hidden = true;
         if (removeButton) removeButton.hidden = false;
-        if (addButton) addButton.hidden = true;
     } else {
         cover.style.backgroundImage = '';
         cover.style.display = 'none';
         if (hero) hero.style.paddingTop = '100px';
         if (placeholder) placeholder.hidden = false;
         if (removeButton) removeButton.hidden = true;
-        if (addButton) addButton.hidden = false;
     }
 }
 
@@ -239,12 +236,26 @@ function openHeroModal() {
     qs('heroWifiPasswordInput').value = app.restaurant.wifi_password || '';
     qs('heroPhoneInput').value = app.restaurant.phone || '';
     qs('heroAddressInput').value = app.restaurant.address || '';
+    setHeroModalCoverPreview();
     qs('heroModal').hidden = false;
     window.setTimeout(() => qs('heroNameInput').focus(), 40);
 }
 
 function closeHeroModal() {
     qs('heroModal').hidden = true;
+}
+
+function setHeroModalCoverPreview() {
+    const preview = qs('heroCoverPreview');
+    const label = qs('heroCoverLabel');
+    const remove = qs('heroCoverRemoveBtn');
+    if (!preview) return;
+
+    const coverUrl = app.restaurant?.cover_url || ITEM_PLACEHOLDER_IMAGE;
+    preview.src = coverUrl;
+    preview.alt = app.restaurant?.cover_url ? 'Capa atual do restaurante' : 'Sem capa definida';
+    if (label) label.textContent = app.restaurant?.cover_url ? 'Trocar capa' : 'Selecionar capa';
+    if (remove) remove.disabled = !app.restaurant?.cover_url;
 }
 
 function openCategoriesModal() {
@@ -865,6 +876,7 @@ async function uploadCover(input) {
 
     await app.supabase.from('restaurants').update({ cover_url: data.publicUrl }).eq('id', app.restaurant.id);
     await loadDashboardData();
+    if (!qs('heroModal').hidden) setHeroModalCoverPreview();
     setSaveStatus('Capa guardada', true);
 }
 
@@ -872,6 +884,7 @@ async function removeCover() {
     if (!app.restaurant.cover_url || !window.confirm('Remover a capa do menu?')) return;
     await app.supabase.from('restaurants').update({ cover_url: null }).eq('id', app.restaurant.id);
     await loadDashboardData();
+    if (!qs('heroModal').hidden) setHeroModalCoverPreview();
     setSaveStatus('Capa removida', true);
 }
 
@@ -907,6 +920,9 @@ function bindEvents() {
     qs('heroForm').addEventListener('submit', saveHeroModal);
     qs('categoriesForm').addEventListener('submit', saveCategoriesModal);
     qs('addCategoryRowBtn').addEventListener('click', () => addCategoryRow());
+    qs('heroCoverBtn').addEventListener('click', () => qs('heroCoverInput').click());
+    qs('heroCoverRemoveBtn').addEventListener('click', removeCover);
+    qs('heroCoverInput').addEventListener('change', (event) => uploadCover(event.target));
     qs('categoriesModal').addEventListener('click', (event) => {
         const actionElement = event.target.closest('[data-action]');
         if (!actionElement) return;
@@ -920,7 +936,6 @@ function bindEvents() {
     });
 
     qs('editCoverBtn').addEventListener('click', () => qs('coverInput').click());
-    qs('addCoverBtn').addEventListener('click', () => qs('coverInput').click());
     qs('coverPlaceholder').addEventListener('click', () => qs('coverInput').click());
     qs('coverInput').addEventListener('change', (event) => uploadCover(event.target));
     qs('removeCoverBtn').addEventListener('click', removeCover);
