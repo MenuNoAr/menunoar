@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menu Digital</title>
     <link rel="icon" type="image/svg+xml" href="assets/images/logominimal.svg">
-    <link rel="stylesheet" href="css/menu.css"> <!-- New dedicated CSS -->
+    <link rel="stylesheet" href="css/menu.css?v=2.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="css/style.css">
@@ -115,12 +115,14 @@
                         document.documentElement.style.setProperty('--bg-card', '#252525');
                         document.documentElement.style.setProperty('--bg-badge', '#333333');
                         document.documentElement.style.setProperty('--border', '#333333');
+                        document.documentElement.style.setProperty('--item-divider', '#3a3a3c');
                         document.documentElement.style.setProperty('--text-muted', '#a0a0a0');
                         document.documentElement.style.setProperty('--bg-page', '#121212');
                     } else {
                         document.documentElement.style.setProperty('--bg-card', '#FFFFFF');
                         document.documentElement.style.setProperty('--bg-badge', '#F5F7FA');
                         document.documentElement.style.setProperty('--border', '#F0F0F0');
+                        document.documentElement.style.setProperty('--item-divider', '#D2D2D7');
                         document.documentElement.style.setProperty('--text-muted', '#666666');
                         document.documentElement.style.setProperty('--bg-page', '#F0F2F5');
                     }
@@ -252,12 +254,14 @@
                     document.documentElement.style.setProperty('--bg-card', '#252525');
                     document.documentElement.style.setProperty('--bg-badge', '#333333');
                     document.documentElement.style.setProperty('--border', '#333333');
+                    document.documentElement.style.setProperty('--item-divider', '#3a3a3c');
                     document.documentElement.style.setProperty('--text-muted', '#a0a0a0');
                     document.documentElement.style.setProperty('--bg-page', '#121212');
                 } else {
                     document.documentElement.style.setProperty('--bg-card', '#FFFFFF');
                     document.documentElement.style.setProperty('--bg-badge', '#F5F7FA');
                     document.documentElement.style.setProperty('--border', '#F0F0F0');
+                    document.documentElement.style.setProperty('--item-divider', '#D2D2D7');
                     document.documentElement.style.setProperty('--text-muted', '#666666');
                     document.documentElement.style.setProperty('--bg-page', '#F0F2F5');
                 }
@@ -330,7 +334,9 @@
             if (!items) items = [];
 
             // Group Items
-            let uniqueCats = [...new Set(items.map(i => i.category))];
+            const categorySet = new Set(items.map(i => i.category).filter(Boolean));
+            (restaurant.category_order || []).forEach(category => categorySet.add(category));
+            let uniqueCats = [...categorySet];
 
             // Apply Custom Order
             if (restaurant.category_order && Array.isArray(restaurant.category_order)) {
@@ -350,8 +356,6 @@
             // RENDER TABS & SECTIONS
             const tabsContainer = document.getElementById('categoryTabs');
             const track = document.getElementById('menuSliderTrack');
-            const catImages = restaurant.category_images || {};
-
             uniqueCats.forEach((cat, index) => {
                 // 1. Create Tab
                 const btn = document.createElement('button');
@@ -365,19 +369,6 @@
                 const slide = document.createElement('div');
                 slide.className = 'menu-slide';
                 slide.id = `slide-${index}`;
-
-                // Header (Banner or Title)
-                let headerHTML = `<h2 class="slide-title">${cat}</h2>`;
-                if (catImages[cat]) {
-                    headerHTML = `
-                        <div class="cat-banner">
-                            <img src="${catImages[cat]}" loading="lazy">
-                            <div class="cat-banner-overlay">
-                                <h2>${cat}</h2>
-                            </div>
-                        </div>
-                    `;
-                }
 
                 // Items
                 let itemsHTML = groups[cat].map(item => `
@@ -394,7 +385,7 @@
                     </div>
                 `).join('');
 
-                slide.innerHTML = `<div class="slide-content">${headerHTML}<div class="items-grid">${itemsHTML}</div></div>`;
+                slide.innerHTML = `<div class="slide-content"><div class="items-grid">${itemsHTML}</div></div>`;
                 track.appendChild(slide);
             });
 

@@ -213,21 +213,11 @@ a {
     border: 0;
     background: var(--bg-mobile);
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
-    line-height: 1.6;
 }
 
 #mobile-view.menu-editor::-webkit-scrollbar {
     width: 0;
     height: 0;
-}
-
-#mobile-view h1,
-#mobile-view h2,
-#mobile-view h3,
-#mobile-view h4 {
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
 }
 
 .cover-image {
@@ -296,7 +286,6 @@ a {
 
 .header-content {
     position: relative;
-    padding-right: 52px;
 }
 
 .editor-info-badges > span {
@@ -306,8 +295,6 @@ a {
 .category-tabs {
     position: relative;
     z-index: 30;
-    padding-right: 52px;
-    min-height: 48px;
 }
 
 .item-img-placeholder img {
@@ -316,27 +303,6 @@ a {
 
 .slide-content {
     position: relative;
-}
-
-.menu-item {
-    position: relative;
-}
-
-.menu-item + .menu-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 10%;
-    width: 80%;
-    height: 1px;
-    background: var(--editor-line-strong);
-    opacity: 0.9;
-    pointer-events: none;
-}
-
-.menu-item + .menu-item {
-    margin-top: 6px;
-    padding-top: 22px;
 }
 
 .item-edit-btn {

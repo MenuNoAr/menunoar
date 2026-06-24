@@ -16,6 +16,7 @@
     /* Badges */
     --border: #F0F0F0;
     /* Separators */
+    --item-divider: #D2D2D7;
     --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 
     --font: 'Outfit', sans-serif;
@@ -30,6 +31,7 @@
     --bg-card: #161616;
     --bg-badge: #2a2a2a;
     --border: #2a2a2a;
+    --item-divider: #333333;
     --shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
 }
 
@@ -328,12 +330,29 @@ h1#restName {
 .menu-item {
     display: flex;
     justify-content: space-between;
+    position: relative;
     background: var(--bg-card);
     border-radius: 16px;
     padding: 15px;
     gap: 15px;
     /* Optional: Card look or Clean look */
     /* border: 1px solid var(--border); */
+}
+
+.menu-item + .menu-item {
+    margin-top: 6px;
+    padding-top: 22px;
+}
+
+.menu-item + .menu-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+    background: var(--item-divider);
+    pointer-events: none;
 }
 
 .item-text {

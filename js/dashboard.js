@@ -90,6 +90,7 @@ function applyRestaurantTheme() {
         editor.style.setProperty('--bg-card', isDark ? '#252525' : '#ffffff');
         editor.style.setProperty('--bg-badge', isDark ? '#333333' : '#ebebeb');
         editor.style.setProperty('--border', isDark ? '#333333' : '#f0f0f0');
+        editor.style.setProperty('--item-divider', isDark ? '#3a3a3c' : '#d2d2d7');
         editor.style.setProperty('--text-muted', isDark ? '#a0a0a0' : '#666666');
     }
 }
