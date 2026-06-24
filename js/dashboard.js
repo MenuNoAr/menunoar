@@ -195,7 +195,6 @@ function readRestaurantForm() {
         wifi_ssid: qs('heroWifiInput').value.trim(),
         wifi_password: qs('heroWifiPasswordInput').value.trim(),
         phone: qs('heroPhoneInput').value.trim(),
-        address: qs('heroAddressInput').value.trim(),
     };
 }
 
@@ -235,7 +234,6 @@ function openHeroModal() {
     qs('heroWifiInput').value = app.restaurant.wifi_ssid || '';
     qs('heroWifiPasswordInput').value = app.restaurant.wifi_password || '';
     qs('heroPhoneInput').value = app.restaurant.phone || '';
-    qs('heroAddressInput').value = app.restaurant.address || '';
     setHeroModalCoverPreview();
     qs('heroModal').hidden = false;
     window.setTimeout(() => qs('heroNameInput').focus(), 40);
@@ -710,17 +708,12 @@ async function editInfoBadge(type) {
         const phone = window.prompt('Telefone', app.restaurant.phone || '');
         if (phone === null) return;
         updates = { phone: phone.trim() };
-    } else if (type === 'address') {
-        const address = window.prompt('Morada', app.restaurant.address || '');
-        if (address === null) return;
-        updates = { address: address.trim() };
     } else {
-        const choice = window.prompt('O que queres editar? Escreve: wifi, telefone ou morada', 'wifi');
+        const choice = window.prompt('O que queres editar? Escreve: wifi ou telefone', 'wifi');
         if (!choice) return;
         const normalized = choice.trim().toLowerCase();
         if (normalized === 'wifi') return editInfoBadge('wifi');
         if (normalized === 'telefone') return editInfoBadge('phone');
-        if (normalized === 'morada') return editInfoBadge('address');
         return;
     }
 
