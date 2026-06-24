@@ -246,7 +246,7 @@ function closeHeroModal() {
 }
 
 function setHeroModalCoverPreview() {
-    const preview = qs('heroCoverPreview');
+    const preview = qs('heroCoverPreviewImage');
     const label = qs('heroCoverLabel');
     const remove = qs('heroCoverRemoveBtn');
     if (!preview) return;
@@ -920,7 +920,7 @@ function bindEvents() {
     qs('heroForm').addEventListener('submit', saveHeroModal);
     qs('categoriesForm').addEventListener('submit', saveCategoriesModal);
     qs('addCategoryRowBtn').addEventListener('click', () => addCategoryRow());
-    qs('heroCoverBtn').addEventListener('click', () => qs('heroCoverInput').click());
+    qs('heroCoverPreview').addEventListener('click', () => qs('heroCoverInput').click());
     qs('heroCoverRemoveBtn').addEventListener('click', removeCover);
     qs('heroCoverInput').addEventListener('change', (event) => uploadCover(event.target));
     qs('categoriesModal').addEventListener('click', (event) => {

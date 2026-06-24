@@ -13,7 +13,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/menu.css?v=2.0">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.5">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.6">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 
@@ -182,6 +182,19 @@
             </div>
 
             <form id="heroForm" class="modal-form">
+                <div class="form-field hero-cover-field hero-form-span-2">
+                    <span>Capa</span>
+                    <button id="heroCoverPreview" class="hero-cover-preview" type="button"
+                        aria-label="Alterar capa" title="Alterar capa">
+                        <img id="heroCoverPreviewImage" src="assets/images/item-placeholder.png" alt="">
+                        <span id="heroCoverLabel">Selecionar capa</span>
+                    </button>
+                    <div class="hero-cover-actions">
+                        <button id="heroCoverRemoveBtn" class="button-secondary" type="button">Remover capa</button>
+                    </div>
+                    <input id="heroCoverInput" type="file" accept="image/*" hidden>
+                </div>
+
                 <div class="hero-form-grid">
                     <label class="form-field">
                         <span>Nome</span>
@@ -208,18 +221,6 @@
                         <input id="heroAddressInput" type="text">
                     </label>
                 </div>
-                <label class="form-field hero-form-span-2 hero-cover-field">
-                    <span>Capa</span>
-                    <div class="hero-cover-picker">
-                        <button id="heroCoverBtn" class="hero-cover-preview" type="button"
-                            aria-label="Alterar capa" title="Alterar capa">
-                            <img id="heroCoverPreview" src="assets/images/item-placeholder.png" alt="">
-                            <span id="heroCoverLabel">Selecionar capa</span>
-                        </button>
-                        <button id="heroCoverRemoveBtn" class="button-secondary" type="button">Remover capa</button>
-                    </div>
-                    <input id="heroCoverInput" type="file" accept="image/*" hidden>
-                </label>
                 <div class="modal-actions">
                     <button class="button-secondary" type="button" data-close-modal>Cancelar</button>
                     <button class="button-primary" type="submit">Guardar</button>
@@ -252,7 +253,7 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=7.7"></script>
+    <script type="module" src="js/dashboard.js?v=7.8"></script>
 </body>
 
 </html>
