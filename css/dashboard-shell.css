@@ -132,9 +132,6 @@ a {
     width: fit-content;
     display: inline-flex;
     align-items: center;
-    gap: 9px;
-    flex-direction: column;
-    text-align: center;
     color: var(--editor-ink);
     font-weight: 700;
     text-decoration: none;
@@ -143,35 +140,6 @@ a {
 .brand img {
     width: 30px;
     height: 30px;
-}
-
-.brand span {
-    max-width: 72px;
-    font-size: 0.74rem;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-}
-
-.navbar-copy {
-    width: 100%;
-    display: grid;
-    gap: 5px;
-    justify-items: center;
-    line-height: 1.15;
-    text-align: center;
-}
-
-.navbar-copy strong {
-    max-width: 76px;
-    font-size: 0.76rem;
-    letter-spacing: -0.01em;
-}
-
-.navbar-copy span {
-    max-width: 80px;
-    color: var(--editor-muted);
-    font-size: 0.68rem;
-    line-height: 1.25;
 }
 
 .navbar-actions {
@@ -674,16 +642,8 @@ a {
         border-bottom: 1px solid var(--editor-line);
     }
 
-    .navbar-copy {
-        display: none;
-    }
-
     .brand {
         flex-direction: row;
-    }
-
-    .brand span {
-        max-width: none;
     }
 
     .navbar-actions {
