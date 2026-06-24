@@ -324,12 +324,19 @@ a {
 
 .menu-item + .menu-item::before {
     content: '';
-    display: block;
+    position: absolute;
+    top: 0;
+    left: 10%;
     width: 80%;
     height: 1px;
-    margin: 16px auto 18px;
     background: var(--editor-line-strong);
     opacity: 0.9;
+    pointer-events: none;
+}
+
+.menu-item + .menu-item {
+    margin-top: 6px;
+    padding-top: 22px;
 }
 
 .item-edit-btn {
