@@ -247,15 +247,21 @@ function closeHeroModal() {
 
 function setHeroModalCoverPreview() {
     const preview = qs('heroCoverPreviewImage');
-    const label = qs('heroCoverLabel');
-    const remove = qs('heroCoverRemoveBtn');
+    const previewContainer = qs('heroCoverPreview');
+    const actionBtn = qs('heroCoverActionBtn');
     if (!preview) return;
 
     const coverUrl = app.restaurant?.cover_url || ITEM_PLACEHOLDER_IMAGE;
     preview.src = coverUrl;
     preview.alt = app.restaurant?.cover_url ? 'Capa atual do restaurante' : 'Sem capa definida';
-    if (label) label.textContent = app.restaurant?.cover_url ? 'Trocar capa' : 'Selecionar capa';
-    if (remove) remove.disabled = !app.restaurant?.cover_url;
+    if (previewContainer) previewContainer.dataset.hasCover = app.restaurant?.cover_url ? 'true' : 'false';
+    if (actionBtn) {
+        actionBtn.innerHTML = app.restaurant?.cover_url
+            ? '<i class="fa-solid fa-trash"></i>'
+            : '<i class="fa-solid fa-pencil"></i>';
+        actionBtn.setAttribute('aria-label', app.restaurant?.cover_url ? 'Remover capa' : 'Alterar capa');
+        actionBtn.title = app.restaurant?.cover_url ? 'Remover capa' : 'Alterar capa';
+    }
 }
 
 function openCategoriesModal() {
@@ -921,7 +927,20 @@ function bindEvents() {
     qs('categoriesForm').addEventListener('submit', saveCategoriesModal);
     qs('addCategoryRowBtn').addEventListener('click', () => addCategoryRow());
     qs('heroCoverPreview').addEventListener('click', () => qs('heroCoverInput').click());
-    qs('heroCoverRemoveBtn').addEventListener('click', removeCover);
+    qs('heroCoverPreview').addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            qs('heroCoverInput').click();
+        }
+    });
+    qs('heroCoverActionBtn').addEventListener('click', (event) => {
+        event.stopPropagation();
+        if (app.restaurant?.cover_url) {
+            removeCover();
+        } else {
+            qs('heroCoverInput').click();
+        }
+    });
     qs('heroCoverInput').addEventListener('change', (event) => uploadCover(event.target));
     qs('categoriesModal').addEventListener('click', (event) => {
         const actionElement = event.target.closest('[data-action]');

@@ -475,8 +475,7 @@ a {
 .hero-cover-preview {
     width: 100%;
     aspect-ratio: 12 / 5;
-    display: grid;
-    place-items: end start;
+    display: block;
     overflow: hidden;
     padding: 0;
     border: 1px solid var(--editor-line-strong);
@@ -496,22 +495,29 @@ a {
     background: #f4f4f5;
 }
 
-.hero-cover-preview span {
-    position: relative;
-    z-index: 1;
-    margin: 12px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.88);
+.hero-cover-action-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    width: 38px;
+    height: 38px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.9);
     color: var(--editor-ink);
-    font-size: 0.82rem;
-    font-weight: 600;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
-.hero-cover-actions {
-    display: flex;
-    justify-content: flex-end;
+.hero-cover-action-btn:hover {
+    background: #fff;
+}
+
+.hero-cover-preview[data-has-cover="true"] .hero-cover-action-btn {
+    color: var(--editor-danger);
 }
 
 .categories-list {
