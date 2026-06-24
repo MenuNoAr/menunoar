@@ -387,7 +387,10 @@
                             <p class="item-desc">${item.description || ''}</p>
                             <div class="item-price">${item.price.toFixed(2)}€</div>
                         </div>
-                        ${item.image_url ? `<div class="item-img"><img src="${item.image_url}" loading="lazy"></div>` : ''}
+                        <div class="item-img${item.image_url ? '' : ' item-img-placeholder'}">
+                            <img src="${item.image_url || 'assets/images/item-placeholder.svg'}" loading="lazy"
+                                alt="${item.image_url ? item.name : 'Imagem indisponivel'}">
+                        </div>
                     </div>
                 `).join('');
 

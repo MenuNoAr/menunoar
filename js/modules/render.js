@@ -463,12 +463,9 @@ export function createItemCard(item) {
                 </div>
             </div>
             <div class="item-img editable-trigger" onclick="openImageModal('${id}')" style="position:relative; background:var(--bg-page);">
-                ${image_url
-            ? `<img src="${image_url}" loading="lazy" alt="${escapeHTML(name)}" style="width:100%; height:100%; object-fit:cover; display:block;">`
-            : `<div class="edit-overlay" style="opacity:1; font-size:0.75rem; flex-direction:column; gap:4px; text-align:center;">
-                   <i class="fa-solid fa-camera" style="font-size:1.2rem;"></i>Adicionar<br>Foto
-               </div>`
-        }
+                <img src="${image_url || 'assets/images/item-placeholder.svg'}" loading="lazy"
+                    alt="${image_url ? escapeHTML(name) : 'Imagem indisponivel'}"
+                    style="width:100%; height:100%; object-fit:cover; display:block;">
             </div>
         </div>
     `;

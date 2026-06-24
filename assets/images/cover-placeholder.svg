@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" role="img" aria-labelledby="title desc">
+  <title id="title">Capa indisponivel</title>
+  <desc id="desc">Ilustracao panoramica abstrata de montanhas e sol em tons de cinzento.</desc>
+  <defs>
+    <clipPath id="frame">
+      <rect x="48" y="48" width="1104" height="404" rx="48"/>
+    </clipPath>
+  </defs>
+  <rect width="1200" height="500" fill="#f4f6f8"/>
+  <g clip-path="url(#frame)">
+    <rect x="48" y="48" width="1104" height="404" fill="#eef1f4"/>
+    <circle cx="956" cy="155" r="66" fill="#b8bec5"/>
+    <path d="M24 454 342 120c14-15 38-13 50 4l218 292 148-174c13-16 38-15 50 1l174 211Z" fill="#afb6bd"/>
+    <path d="M18 474 342 120c14-15 38-13 50 4l262 350Z" fill="#929aa2"/>
+  </g>
+  <rect x="48" y="48" width="1104" height="404" rx="48" fill="none" stroke="#929aa2" stroke-width="16"/>
+</svg>

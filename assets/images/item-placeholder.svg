@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="title desc">
+  <title id="title">Imagem indisponivel</title>
+  <desc id="desc">Ilustracao abstrata de montanhas e sol em tons de cinzento.</desc>
+  <defs>
+    <clipPath id="frame">
+      <rect x="42" y="42" width="316" height="316" rx="34"/>
+    </clipPath>
+  </defs>
+  <rect width="400" height="400" fill="#f4f6f8"/>
+  <g clip-path="url(#frame)">
+    <rect x="42" y="42" width="316" height="316" fill="#eef1f4"/>
+    <circle cx="289" cy="116" r="38" fill="#b8bec5"/>
+    <path d="M36 342 142 174c8-13 27-13 35 0l52 82 35-46c8-11 25-11 33 0l76 104v52H36Z" fill="#afb6bd"/>
+    <path d="M25 373 142 174c8-13 27-13 35 0l126 199Z" fill="#929aa2"/>
+  </g>
+  <rect x="42" y="42" width="316" height="316" rx="34" fill="none" stroke="#929aa2" stroke-width="12"/>
+</svg>

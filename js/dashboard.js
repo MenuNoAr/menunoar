@@ -10,7 +10,8 @@ const app = {
 };
 
 let authBootstrappedForUser = null;
-const ITEM_PLACEHOLDER_IMAGE = 'assets/images/item-placeholder.png';
+const ITEM_PLACEHOLDER_IMAGE = 'assets/images/item-placeholder.svg';
+const COVER_PLACEHOLDER_IMAGE = 'assets/images/cover-placeholder.svg';
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
 function qs(id) {
@@ -249,7 +250,7 @@ function setHeroModalCoverPreview() {
     const actionBtn = qs('heroCoverActionBtn');
     if (!preview) return;
 
-    const coverUrl = app.restaurant?.cover_url || ITEM_PLACEHOLDER_IMAGE;
+    const coverUrl = app.restaurant?.cover_url || COVER_PLACEHOLDER_IMAGE;
     preview.src = coverUrl;
     preview.alt = app.restaurant?.cover_url ? 'Capa atual do restaurante' : 'Sem capa definida';
     if (previewContainer) previewContainer.dataset.hasCover = app.restaurant?.cover_url ? 'true' : 'false';
