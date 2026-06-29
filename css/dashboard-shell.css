@@ -701,17 +701,25 @@ a {
     color: #fff;
 }
 
-.icon-action-btn {
-    width: 42px;
-    padding: 0;
-    display: inline-grid;
-    place-items: center;
+.button-with-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
 }
 
-.icon-action-btn img {
+.button-with-icon img {
     width: 18px;
     height: 18px;
     display: block;
+}
+
+.button-primary.button-with-icon img {
+    filter: invert(1);
+}
+
+.qr-modal-actions {
+    justify-content: center;
 }
 
 #heroHeader .item-edit-btn {

@@ -28,6 +28,7 @@ const FONT_OPTIONS = [
 const APPEARANCE_FIELDS = ['color_background', 'color_text', 'color_primary'];
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 let qrCode = null;
+let qrColor = '#111111';
 
 function qs(id) {
     return document.getElementById(id);
@@ -264,6 +265,7 @@ async function saveFontModal(event) {
 
 function openQrModal() {
     if (!app.restaurant) return;
+    qrColor = normalizeHex(qs('qrColorInput')?.value, '#111111');
     qs('qrModal').hidden = false;
     renderQrCode();
 }
@@ -283,15 +285,15 @@ function getQrOptions() {
             errorCorrectionLevel: 'H',
         },
         dotsOptions: {
-            color: '#111111',
+            color: qrColor,
             type: 'rounded',
         },
         cornersSquareOptions: {
-            color: '#111111',
+            color: qrColor,
             type: 'extra-rounded',
         },
         cornersDotOptions: {
-            color: '#111111',
+            color: qrColor,
         },
         backgroundOptions: {
             color: 'rgba(255,255,255,0)',
@@ -320,6 +322,12 @@ function getQrFileName() {
 function downloadQrPng() {
     if (!qrCode) renderQrCode();
     qrCode?.download({ name: getQrFileName(), extension: 'png' });
+}
+
+function updateQrColor(value) {
+    qrColor = normalizeHex(value, '#111111');
+    if (qs('qrColorInput')) qs('qrColorInput').value = qrColor;
+    renderQrCode();
 }
 
 async function downloadQrPdf() {
@@ -1172,6 +1180,8 @@ function bindEvents() {
     qs('openFontBtn').addEventListener('click', openFontModal);
     qs('openQrBtn').addEventListener('click', openQrModal);
     qs('fontSelect').addEventListener('change', updateFontPreview);
+    qs('qrColorBtn').addEventListener('click', () => qs('qrColorInput').click());
+    qs('qrColorInput').addEventListener('input', (event) => updateQrColor(event.target.value));
     qs('downloadQrPngBtn').addEventListener('click', downloadQrPng);
     qs('downloadQrPdfBtn').addEventListener('click', downloadQrPdf);
     qs('heroCoverPreview').addEventListener('click', () => qs('heroCoverInput').click());

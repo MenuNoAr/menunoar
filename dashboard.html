@@ -335,18 +335,28 @@
 
             <div class="modal-form">
                 <div id="qrCodeBox" class="qr-code-box" aria-label="QR Code do menu"></div>
-                <div class="modal-actions">
-                    <button id="downloadQrPngBtn" class="button-secondary icon-action-btn" type="button"
+                <div class="modal-actions qr-modal-actions">
+                    <button id="qrColorBtn" class="button-secondary button-with-icon" type="button"
+                        aria-label="Alterar cor do QR Code" title="Alterar cor do QR Code">
+                        <img src="assets/images/icon-color-palette.svg" alt="">
+                        <span>Cor</span>
+                    </button>
+                    <input id="qrColorInput" type="color" value="#111111" hidden>
+                    <button id="downloadQrPngBtn" class="button-secondary button-with-icon" type="button"
                         aria-label="Descarregar PNG" title="Descarregar PNG">
                         <img src="assets/images/icon-download.svg" alt="">
+                        <span>PNG</span>
                     </button>
-                    <button id="downloadQrPdfBtn" class="button-primary" type="button">PDF</button>
+                    <button id="downloadQrPdfBtn" class="button-primary button-with-icon" type="button">
+                        <img src="assets/images/icon-download.svg" alt="">
+                        <span>PDF</span>
+                    </button>
                 </div>
             </div>
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=8.5"></script>
+    <script type="module" src="js/dashboard.js?v=8.6"></script>
 </body>
 
 </html>
