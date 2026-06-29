@@ -611,6 +611,17 @@ a {
     box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.13);
 }
 
+.form-note {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid #ffd2d7;
+    border-radius: 8px;
+    background: #fff1f2;
+    color: var(--editor-danger);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
 .color-field {
     min-height: 54px;
     display: grid;
@@ -688,6 +699,19 @@ a {
     border-color: var(--editor-ink);
     background: var(--editor-ink);
     color: #fff;
+}
+
+.icon-action-btn {
+    width: 42px;
+    padding: 0;
+    display: inline-grid;
+    place-items: center;
+}
+
+.icon-action-btn img {
+    width: 18px;
+    height: 18px;
+    display: block;
 }
 
 #heroHeader .item-edit-btn {

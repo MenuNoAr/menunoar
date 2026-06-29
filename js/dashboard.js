@@ -25,6 +25,7 @@ const FONT_OPTIONS = [
     'Oswald',
     'Dancing Script',
 ];
+const APPEARANCE_FIELDS = ['color_background', 'color_text', 'color_primary'];
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 let qrCode = null;
 
@@ -138,6 +139,8 @@ function applyRestaurantTheme() {
 
 function openAppearanceModal() {
     if (!app.restaurant) return;
+    const errorEl = qs('appearanceError');
+    if (errorEl) errorEl.hidden = true;
     qs('colorBackgroundInput').value = normalizeHex(app.restaurant.color_background, '#ffffff');
     qs('colorTextInput').value = normalizeHex(app.restaurant.color_text, '#1d1d1f');
     qs('colorPrimaryInput').value = normalizeHex(app.restaurant.color_primary, '#0a84ff');
@@ -151,6 +154,17 @@ function closeAppearanceModal() {
 async function saveAppearanceModal(event) {
     event.preventDefault();
     if (!app.restaurant) return;
+
+    const availableFields = APPEARANCE_FIELDS.filter((field) =>
+        Object.prototype.hasOwnProperty.call(app.restaurant, field));
+    if (availableFields.length !== APPEARANCE_FIELDS.length) {
+        const errorEl = qs('appearanceError');
+        if (errorEl) {
+            errorEl.textContent = 'As colunas de cores ainda nao existem no Supabase.';
+            errorEl.hidden = false;
+        }
+        return;
+    }
 
     const updates = {
         color_background: qs('colorBackgroundInput').value,
@@ -172,8 +186,11 @@ async function saveAppearanceModal(event) {
         .eq('id', app.restaurant.id);
 
     if (error) {
-        console.error(error);
-        setSaveStatus('Nao foi possivel guardar');
+        const errorEl = qs('appearanceError');
+        if (errorEl) {
+            errorEl.textContent = error.message || 'Nao foi possivel guardar as cores.';
+            errorEl.hidden = false;
+        }
         return;
     }
 
