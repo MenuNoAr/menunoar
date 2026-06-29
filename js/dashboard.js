@@ -25,7 +25,7 @@ const FONT_OPTIONS = [
     'Oswald',
     'Dancing Script',
 ];
-const APPEARANCE_FIELDS = ['color_background', 'color_text', 'color_primary'];
+const APPEARANCE_FIELDS = ['color_background', 'color_text', 'color_text_secondary', 'color_primary'];
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 let qrCode = null;
 let qrColor = '#111111';
@@ -137,6 +137,7 @@ function applyRestaurantTheme() {
         editor.style.setProperty('--item-divider', isDark ? '#3a3a3c' : '#d2d2d7');
         editor.style.setProperty('--text-muted', isDark ? '#a0a0a0' : '#666666');
     }
+    if (restaurant.color_text_secondary) editor.style.setProperty('--text-muted', restaurant.color_text_secondary);
 }
 
 function openAppearanceModal() {
@@ -145,6 +146,7 @@ function openAppearanceModal() {
     if (errorEl) errorEl.hidden = true;
     qs('colorBackgroundInput').value = normalizeHex(app.restaurant.color_background, '#ffffff');
     qs('colorTextInput').value = normalizeHex(app.restaurant.color_text, '#1d1d1f');
+    qs('colorTextSecondaryInput').value = normalizeHex(app.restaurant.color_text_secondary, '#666666');
     qs('colorPrimaryInput').value = normalizeHex(app.restaurant.color_primary, '#0a84ff');
     qs('appearanceModal').hidden = false;
 }
@@ -171,6 +173,7 @@ async function saveAppearanceModal(event) {
     const updates = {
         color_background: qs('colorBackgroundInput').value,
         color_text: qs('colorTextInput').value,
+        color_text_secondary: qs('colorTextSecondaryInput').value,
         color_primary: qs('colorPrimaryInput').value,
     };
     const changed = Object.entries(updates).some(([key, value]) =>
