@@ -495,6 +495,8 @@ function renderCategoriesModal() {
 
 function openHeroModal() {
     if (!app.restaurant) return;
+    const errorEl = qs('heroError');
+    if (errorEl) errorEl.hidden = true;
     qs('heroNameInput').value = app.restaurant.name || '';
     qs('heroDescInput').value = app.restaurant.description || '';
     qs('heroWifiInput').value = app.restaurant.wifi_ssid || '';
@@ -615,8 +617,12 @@ async function saveHeroModal(event) {
         .eq('id', app.restaurant.id);
 
     if (error) {
-        console.error(error);
-        setSaveStatus('NÃ£o foi possÃ­vel guardar');
+        const errorEl = qs('heroError');
+        if (errorEl) {
+            errorEl.textContent = error.message || 'Nao foi possivel guardar o restaurante.';
+            errorEl.hidden = false;
+        }
+        setSaveStatus('Nao foi possivel guardar');
         return;
     }
 
