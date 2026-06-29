@@ -12,7 +12,21 @@ const app = {
 let authBootstrappedForUser = null;
 const ITEM_PLACEHOLDER_IMAGE = 'assets/images/item-placeholder.svg';
 const COVER_PLACEHOLDER_IMAGE = 'assets/images/cover-placeholder.svg';
+const QR_ICON_SIZE = 260;
+const FONT_OPTIONS = [
+    'Outfit',
+    'Inter',
+    'Poppins',
+    'Montserrat',
+    'Lora',
+    'Playfair Display',
+    'Merriweather',
+    'Roboto Slab',
+    'Oswald',
+    'Dancing Script',
+];
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+let qrCode = null;
 
 function qs(id) {
     return document.getElementById(id);
@@ -30,6 +44,33 @@ function slugify(value) {
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');
+}
+
+function normalizeHex(value, fallback) {
+    return /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : fallback;
+}
+
+function getLiveMenuUrl() {
+    const slug = app.restaurant?.slug || '';
+    return `${window.location.origin}/menu.html?id=${encodeURIComponent(slug)}`;
+}
+
+function getGoogleFontHref(fonts) {
+    const families = fonts
+        .map((font) => `family=${encodeURIComponent(font).replace(/%20/g, '+')}:wght@400;700`)
+        .join('&');
+    return `https://fonts.googleapis.com/css2?${families}&display=swap`;
+}
+
+function loadFontOptions() {
+    let fontLink = qs('dashboardFontOptionsLink');
+    if (!fontLink) {
+        fontLink = document.createElement('link');
+        fontLink.id = 'dashboardFontOptionsLink';
+        fontLink.rel = 'stylesheet';
+        document.head.appendChild(fontLink);
+    }
+    fontLink.href = getGoogleFontHref(FONT_OPTIONS);
 }
 
 function setSaveStatus(text, reset = false) {
@@ -93,6 +134,192 @@ function applyRestaurantTheme() {
         editor.style.setProperty('--item-divider', isDark ? '#3a3a3c' : '#d2d2d7');
         editor.style.setProperty('--text-muted', isDark ? '#a0a0a0' : '#666666');
     }
+}
+
+function openAppearanceModal() {
+    if (!app.restaurant) return;
+    qs('colorBackgroundInput').value = normalizeHex(app.restaurant.color_background, '#ffffff');
+    qs('colorTextInput').value = normalizeHex(app.restaurant.color_text, '#1d1d1f');
+    qs('colorPrimaryInput').value = normalizeHex(app.restaurant.color_primary, '#0a84ff');
+    qs('appearanceModal').hidden = false;
+}
+
+function closeAppearanceModal() {
+    qs('appearanceModal').hidden = true;
+}
+
+async function saveAppearanceModal(event) {
+    event.preventDefault();
+    if (!app.restaurant) return;
+
+    const updates = {
+        color_background: qs('colorBackgroundInput').value,
+        color_text: qs('colorTextInput').value,
+        color_primary: qs('colorPrimaryInput').value,
+    };
+    const changed = Object.entries(updates).some(([key, value]) =>
+        String(value || '') !== String(app.restaurant[key] || ''));
+
+    if (!changed) {
+        closeAppearanceModal();
+        return;
+    }
+
+    setSaveStatus('A guardar cores...');
+    const { error } = await app.supabase
+        .from('restaurants')
+        .update(updates)
+        .eq('id', app.restaurant.id);
+
+    if (error) {
+        console.error(error);
+        setSaveStatus('Nao foi possivel guardar');
+        return;
+    }
+
+    Object.assign(app.restaurant, updates);
+    renderDashboard();
+    closeAppearanceModal();
+    setSaveStatus('Cores guardadas', true);
+}
+
+function renderFontOptions() {
+    const select = qs('fontSelect');
+    if (!select) return;
+    const currentFont = app.restaurant?.font || 'Outfit';
+    const options = FONT_OPTIONS.includes(currentFont) ? FONT_OPTIONS : [currentFont, ...FONT_OPTIONS];
+    select.innerHTML = options.map((font) => `
+        <option value="${escapeHTML(font)}" style="font-family:'${escapeHTML(font)}', sans-serif">
+            ${escapeHTML(font)}
+        </option>
+    `).join('');
+    select.value = currentFont;
+    updateFontPreview();
+}
+
+function updateFontPreview() {
+    const font = qs('fontSelect')?.value || 'Outfit';
+    const preview = qs('fontPreview');
+    if (preview) preview.style.fontFamily = `'${font}', sans-serif`;
+    const select = qs('fontSelect');
+    if (select) select.style.fontFamily = `'${font}', sans-serif`;
+}
+
+function openFontModal() {
+    if (!app.restaurant) return;
+    loadFontOptions();
+    renderFontOptions();
+    qs('fontModal').hidden = false;
+}
+
+function closeFontModal() {
+    qs('fontModal').hidden = true;
+}
+
+async function saveFontModal(event) {
+    event.preventDefault();
+    if (!app.restaurant) return;
+
+    const font = qs('fontSelect').value || 'Outfit';
+    if (font === (app.restaurant.font || 'Outfit')) {
+        closeFontModal();
+        return;
+    }
+
+    setSaveStatus('A guardar fonte...');
+    const { error } = await app.supabase
+        .from('restaurants')
+        .update({ font })
+        .eq('id', app.restaurant.id);
+
+    if (error) {
+        console.error(error);
+        setSaveStatus('Nao foi possivel guardar');
+        return;
+    }
+
+    app.restaurant.font = font;
+    renderDashboard();
+    closeFontModal();
+    setSaveStatus('Fonte guardada', true);
+}
+
+function openQrModal() {
+    if (!app.restaurant) return;
+    qs('qrModal').hidden = false;
+    renderQrCode();
+}
+
+function closeQrModal() {
+    qs('qrModal').hidden = true;
+}
+
+function getQrOptions() {
+    return {
+        width: QR_ICON_SIZE,
+        height: QR_ICON_SIZE,
+        type: 'canvas',
+        data: getLiveMenuUrl(),
+        margin: 0,
+        qrOptions: {
+            errorCorrectionLevel: 'H',
+        },
+        dotsOptions: {
+            color: '#111111',
+            type: 'rounded',
+        },
+        cornersSquareOptions: {
+            color: '#111111',
+            type: 'extra-rounded',
+        },
+        cornersDotOptions: {
+            color: '#111111',
+        },
+        backgroundOptions: {
+            color: 'rgba(255,255,255,0)',
+        },
+    };
+}
+
+function renderQrCode() {
+    const box = qs('qrCodeBox');
+    if (!box) return;
+    box.innerHTML = '';
+
+    if (typeof window.QRCodeStyling === 'undefined') {
+        box.textContent = 'QR indisponivel';
+        return;
+    }
+
+    qrCode = new window.QRCodeStyling(getQrOptions());
+    qrCode.append(box);
+}
+
+function getQrFileName() {
+    return `menu-${slugify(app.restaurant?.slug || app.restaurant?.name || 'qrcode')}-qr`;
+}
+
+function downloadQrPng() {
+    if (!qrCode) renderQrCode();
+    qrCode?.download({ name: getQrFileName(), extension: 'png' });
+}
+
+async function downloadQrPdf() {
+    if (!qrCode) renderQrCode();
+    if (!qrCode || !window.jspdf?.jsPDF) return;
+    const blob = await qrCode.getRawData('png');
+    const dataUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+    });
+    const pdf = new window.jspdf.jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [90, 90],
+    });
+    pdf.addImage(dataUrl, 'PNG', 12, 12, 66, 66);
+    pdf.save(`${getQrFileName()}.pdf`);
 }
 
 function renderInfoBadges() {
@@ -492,7 +719,7 @@ function renderDashboard() {
 
     qs('restName').textContent = app.restaurant.name || '';
     qs('restDesc').textContent = app.restaurant.description || '';
-    qs('openLiveBtn').href = `menu.html?id=${encodeURIComponent(app.restaurant.slug)}`;
+    qs('openLiveBtn').href = getLiveMenuUrl();
 
     renderCategoryTabs(categories);
     renderActiveCategory(categories);
@@ -919,8 +1146,16 @@ function bindEvents() {
     qs('categoryEditor').addEventListener('click', handleEditorClick);
 
     qs('heroForm').addEventListener('submit', saveHeroModal);
+    qs('appearanceForm').addEventListener('submit', saveAppearanceModal);
+    qs('fontForm').addEventListener('submit', saveFontModal);
     qs('categoriesForm').addEventListener('submit', saveCategoriesModal);
     qs('addCategoryRowBtn').addEventListener('click', () => addCategoryRow());
+    qs('openAppearanceBtn').addEventListener('click', openAppearanceModal);
+    qs('openFontBtn').addEventListener('click', openFontModal);
+    qs('openQrBtn').addEventListener('click', openQrModal);
+    qs('fontSelect').addEventListener('change', updateFontPreview);
+    qs('downloadQrPngBtn').addEventListener('click', downloadQrPng);
+    qs('downloadQrPdfBtn').addEventListener('click', downloadQrPdf);
     qs('heroCoverPreview').addEventListener('click', () => qs('heroCoverInput').click());
     qs('heroCoverPreview').addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
@@ -973,6 +1208,15 @@ function bindEvents() {
     });
     qs('categoriesModal').addEventListener('click', (event) => {
         if (event.target === qs('categoriesModal')) closeCategoriesModal();
+    });
+    qs('appearanceModal').addEventListener('click', (event) => {
+        if (event.target === qs('appearanceModal')) closeAppearanceModal();
+    });
+    qs('fontModal').addEventListener('click', (event) => {
+        if (event.target === qs('fontModal')) closeFontModal();
+    });
+    qs('qrModal').addEventListener('click', (event) => {
+        if (event.target === qs('qrModal')) closeQrModal();
     });
 }
 

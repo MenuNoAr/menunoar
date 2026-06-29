@@ -13,8 +13,10 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/menu.css?v=2.1">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.10">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.11">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
 </head>
 
 <body>
@@ -49,8 +51,24 @@
             <a class="brand" href="index.html" aria-label="Menu no Ar">
                 <img src="assets/images/logominimal.svg" alt="">
             </a>
+            <span class="rail-divider" aria-hidden="true"></span>
 
-            <div class="navbar-actions">
+            <div class="navbar-actions navbar-actions-primary">
+                <button class="nav-icon nav-icon-svg" id="openAppearanceBtn" type="button"
+                    aria-label="Editar cores" title="Editar cores">
+                    <img src="assets/images/icon-palette.svg" alt="">
+                </button>
+                <button class="nav-icon nav-icon-svg" id="openFontBtn" type="button"
+                    aria-label="Editar fonte" title="Editar fonte">
+                    <img src="assets/images/icon-font.svg" alt="">
+                </button>
+                <button class="nav-icon nav-icon-svg" id="openQrBtn" type="button"
+                    aria-label="Abrir QR Code" title="Abrir QR Code">
+                    <img src="assets/images/icon-qr.svg" alt="">
+                </button>
+            </div>
+
+            <div class="navbar-actions navbar-actions-system">
                 <a class="nav-icon" id="openLiveBtn" href="#" target="_blank" rel="noreferrer"
                     aria-label="Abrir menu real" title="Abrir menu real">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i>
@@ -243,7 +261,88 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=8.2"></script>
+    <div id="appearanceModal" class="modal-backdrop" hidden>
+        <section class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="appearanceModalTitle">
+            <div class="modal-head">
+                <div class="modal-head-copy">
+                    <span class="state-kicker">Aparencia</span>
+                    <h2 id="appearanceModalTitle">Editar cores</h2>
+                </div>
+                <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="appearanceForm" class="modal-form">
+                <label class="color-field">
+                    <span>Fundo</span>
+                    <input id="colorBackgroundInput" type="color">
+                </label>
+                <label class="color-field">
+                    <span>Texto</span>
+                    <input id="colorTextInput" type="color">
+                </label>
+                <label class="color-field">
+                    <span>Destaques</span>
+                    <input id="colorPrimaryInput" type="color">
+                </label>
+                <div class="modal-actions">
+                    <button class="button-secondary" type="button" data-close-modal>Cancelar</button>
+                    <button class="button-primary" type="submit">Guardar</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <div id="fontModal" class="modal-backdrop" hidden>
+        <section class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="fontModalTitle">
+            <div class="modal-head">
+                <div class="modal-head-copy">
+                    <span class="state-kicker">Fonte</span>
+                    <h2 id="fontModalTitle">Editar fonte</h2>
+                </div>
+                <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="fontForm" class="modal-form">
+                <label class="form-field">
+                    <span>Fonte global</span>
+                    <select id="fontSelect"></select>
+                </label>
+                <div id="fontPreview" class="font-preview">Menu no Ar</div>
+                <div class="modal-actions">
+                    <button class="button-secondary" type="button" data-close-modal>Cancelar</button>
+                    <button class="button-primary" type="submit">Guardar</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <div id="qrModal" class="modal-backdrop" hidden>
+        <section class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
+            <div class="modal-head">
+                <div class="modal-head-copy">
+                    <span class="state-kicker">QR Code</span>
+                    <h2 id="qrModalTitle">Menu publico</h2>
+                </div>
+                <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="modal-form">
+                <div id="qrCodeBox" class="qr-code-box" aria-label="QR Code do menu"></div>
+                <div class="modal-actions">
+                    <button id="downloadQrPngBtn" class="button-secondary" type="button">PNG</button>
+                    <button id="downloadQrPdfBtn" class="button-primary" type="button">PDF</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script type="module" src="js/dashboard.js?v=8.3"></script>
 </body>
 
 </html>
