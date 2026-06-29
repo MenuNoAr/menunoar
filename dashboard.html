@@ -12,8 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/menu.css?v=2.3">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.12">
+    <link rel="stylesheet" href="css/menu.css?v=2.4">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.13">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
@@ -173,6 +173,10 @@
                     <textarea id="itemDescInput" rows="4"></textarea>
                 </label>
                 <div class="modal-actions">
+                    <button id="itemDeleteBtn" class="modal-delete-btn" type="button"
+                        aria-label="Apagar prato" title="Apagar prato">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                     <button class="button-secondary" type="button" data-close-modal>Cancelar</button>
                     <button class="button-primary" type="submit">Guardar</button>
                 </div>
@@ -353,7 +357,7 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=8.9"></script>
+    <script type="module" src="js/dashboard.js?v=9.0"></script>
 </body>
 
 </html>

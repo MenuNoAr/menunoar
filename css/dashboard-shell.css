@@ -217,8 +217,10 @@ a {
     min-height: 0;
     max-height: 100%;
     margin: 0;
+    display: flex;
+    flex-direction: column;
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: hidden;
     overscroll-behavior: contain;
     scrollbar-width: none;
     border: 0;
@@ -304,8 +306,35 @@ a {
 }
 
 .category-tabs {
+    flex: 0 0 auto;
     position: relative;
     z-index: 30;
+}
+
+#heroHeader {
+    flex: 0 0 auto;
+}
+
+#menuSliderWindow {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+}
+
+#menuSliderWindow::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+#menuSliderTrack {
+    min-height: 100%;
+}
+
+.menu-footer {
+    flex: 0 0 auto;
 }
 
 .item-img-placeholder img {
@@ -337,6 +366,47 @@ a {
 .item-edit-btn:hover {
     border-color: var(--editor-ink);
     background: #fff;
+}
+
+.item-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+    display: flex;
+    gap: 4px;
+}
+
+.item-actions .item-edit-btn,
+.item-delete-btn {
+    position: static;
+    width: 32px;
+    height: 32px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid var(--editor-line);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.94);
+    color: var(--editor-ink);
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.item-actions .item-edit-btn:hover {
+    border-color: var(--editor-ink);
+    background: #fff;
+}
+
+.item-delete-btn {
+    border-color: transparent;
+    color: var(--editor-muted);
+    box-shadow: none;
+}
+
+.item-delete-btn:hover {
+    background: #fff1f2;
+    color: var(--editor-danger);
 }
 
 .item-add {
@@ -716,6 +786,24 @@ a {
 
 .button-primary.button-with-icon img {
     filter: invert(1);
+}
+
+.modal-delete-btn {
+    width: 40px;
+    height: 40px;
+    display: inline-grid;
+    place-items: center;
+    margin-right: auto;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--editor-muted);
+    cursor: pointer;
+}
+
+.modal-delete-btn:hover {
+    background: #fff1f2;
+    color: var(--editor-danger);
 }
 
 .qr-modal-actions {

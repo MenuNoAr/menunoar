@@ -440,10 +440,16 @@ function renderItem(item) {
 
     return `
         <article class="menu-item ${item.available ? '' : 'unavailable'}" data-item-id="${item.id}">
-            <button class="item-edit-btn" type="button" data-action="edit-item" data-item-id="${item.id}"
-                aria-label="Editar prato" title="Editar prato">
-                <i class="fa-solid fa-pencil"></i>
-            </button>
+            <div class="item-actions">
+                <button class="item-edit-btn" type="button" data-action="edit-item" data-item-id="${item.id}"
+                    aria-label="Editar prato" title="Editar prato">
+                    <i class="fa-solid fa-pencil"></i>
+                </button>
+                <button class="item-delete-btn" type="button" data-action="delete-item" data-item-id="${item.id}"
+                    aria-label="Apagar prato" title="Apagar prato">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
             <div class="item-text">
                 <h3>${escapeHTML(item.name)}</h3>
                 <p class="item-desc">${escapeHTML(item.description || '')}</p>
@@ -1041,6 +1047,7 @@ function setModalItemImage(item) {
 function openItemModal(item = null, category = app.activeCategory) {
     qs('itemModalTitle').textContent = item ? 'Editar prato' : 'Adicionar prato';
     qs('itemIdInput').value = item?.id || '';
+    qs('itemDeleteBtn').hidden = !item?.id;
     qs('itemNameInput').value = item?.name || '';
     qs('itemPriceInput').value = item ? Number(item.price || 0).toFixed(2) : '';
     qs('itemDescInput').value = item?.description || '';
@@ -1110,6 +1117,7 @@ async function toggleItem(id) {
 async function deleteItem(id) {
     if (!window.confirm('Apagar este prato?')) return;
     await app.supabase.from('menu_items').delete().eq('id', id);
+    if (!qs('itemModal').hidden) closeItemModal();
     await loadDashboardData();
     setSaveStatus('Prato apagado', true);
 }
@@ -1180,6 +1188,8 @@ function handleEditorClick(event) {
         openItemModal(null, category);
     } else if (action === 'edit-item') {
         openItemModal(app.items.find((item) => String(item.id) === String(itemId)));
+    } else if (action === 'delete-item') {
+        deleteItem(itemId);
     }
 }
 
@@ -1238,6 +1248,10 @@ function bindEvents() {
         const itemId = qs('itemIdInput').value;
         if (!itemId) return;
         uploadItemImage(itemId);
+    });
+    qs('itemDeleteBtn').addEventListener('click', () => {
+        const itemId = qs('itemIdInput').value;
+        if (itemId) deleteItem(itemId);
     });
     qs('refreshMenuBtn').addEventListener('click', loadDashboardData);
     qs('itemForm').addEventListener('submit', saveItem);
