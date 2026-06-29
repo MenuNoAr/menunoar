@@ -29,6 +29,8 @@ const APPEARANCE_FIELDS = ['color_background', 'color_text', 'color_text_seconda
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 let qrCode = null;
 let qrColor = '#111111';
+let appearanceSaveTimer = null;
+let fontSaveTimer = null;
 
 function qs(id) {
     return document.getElementById(id);
@@ -155,10 +157,7 @@ function closeAppearanceModal() {
     qs('appearanceModal').hidden = true;
 }
 
-async function saveAppearanceModal(event) {
-    event.preventDefault();
-    if (!app.restaurant) return;
-
+function canSaveAppearance() {
     const availableFields = APPEARANCE_FIELDS.filter((field) =>
         Object.prototype.hasOwnProperty.call(app.restaurant, field));
     if (availableFields.length !== APPEARANCE_FIELDS.length) {
@@ -167,24 +166,36 @@ async function saveAppearanceModal(event) {
             errorEl.textContent = 'As colunas de cores ainda nao existem no Supabase.';
             errorEl.hidden = false;
         }
-        return;
+        return false;
     }
+    return true;
+}
 
-    const updates = {
+function readAppearanceValues() {
+    return {
         color_background: qs('colorBackgroundInput').value,
         color_text: qs('colorTextInput').value,
         color_text_secondary: qs('colorTextSecondaryInput').value,
         color_primary: qs('colorPrimaryInput').value,
     };
-    const changed = Object.entries(updates).some(([key, value]) =>
-        String(value || '') !== String(app.restaurant[key] || ''));
+}
 
-    if (!changed) {
-        closeAppearanceModal();
-        return;
-    }
+function scheduleAppearanceSave() {
+    if (!app.restaurant || !canSaveAppearance()) return;
 
+    const errorEl = qs('appearanceError');
+    if (errorEl) errorEl.hidden = true;
+
+    const updates = readAppearanceValues();
+    Object.assign(app.restaurant, updates);
+    applyRestaurantTheme();
+
+    window.clearTimeout(appearanceSaveTimer);
     setSaveStatus('A guardar cores...');
+    appearanceSaveTimer = window.setTimeout(() => saveAppearanceValues(updates), 450);
+}
+
+async function saveAppearanceValues(updates) {
     const { error } = await app.supabase
         .from('restaurants')
         .update(updates)
@@ -199,9 +210,6 @@ async function saveAppearanceModal(event) {
         return;
     }
 
-    Object.assign(app.restaurant, updates);
-    renderDashboard();
-    closeAppearanceModal();
     setSaveStatus('Cores guardadas', true);
 }
 
@@ -227,6 +235,19 @@ function updateFontPreview() {
     if (select) select.style.fontFamily = `'${font}', sans-serif`;
 }
 
+function scheduleFontSave() {
+    if (!app.restaurant) return;
+
+    const font = qs('fontSelect').value || 'Outfit';
+    updateFontPreview();
+    app.restaurant.font = font;
+    applyRestaurantTheme();
+
+    window.clearTimeout(fontSaveTimer);
+    setSaveStatus('A guardar fonte...');
+    fontSaveTimer = window.setTimeout(() => saveFontValue(font), 350);
+}
+
 function openFontModal() {
     if (!app.restaurant) return;
     loadFontOptions();
@@ -238,17 +259,7 @@ function closeFontModal() {
     qs('fontModal').hidden = true;
 }
 
-async function saveFontModal(event) {
-    event.preventDefault();
-    if (!app.restaurant) return;
-
-    const font = qs('fontSelect').value || 'Outfit';
-    if (font === (app.restaurant.font || 'Outfit')) {
-        closeFontModal();
-        return;
-    }
-
-    setSaveStatus('A guardar fonte...');
+async function saveFontValue(font) {
     const { error } = await app.supabase
         .from('restaurants')
         .update({ font })
@@ -260,9 +271,6 @@ async function saveFontModal(event) {
         return;
     }
 
-    app.restaurant.font = font;
-    renderDashboard();
-    closeFontModal();
     setSaveStatus('Fonte guardada', true);
 }
 
@@ -1175,14 +1183,15 @@ function bindEvents() {
     qs('categoryEditor').addEventListener('click', handleEditorClick);
 
     qs('heroForm').addEventListener('submit', saveHeroModal);
-    qs('appearanceForm').addEventListener('submit', saveAppearanceModal);
-    qs('fontForm').addEventListener('submit', saveFontModal);
     qs('categoriesForm').addEventListener('submit', saveCategoriesModal);
     qs('addCategoryRowBtn').addEventListener('click', () => addCategoryRow());
     qs('openAppearanceBtn').addEventListener('click', openAppearanceModal);
     qs('openFontBtn').addEventListener('click', openFontModal);
     qs('openQrBtn').addEventListener('click', openQrModal);
-    qs('fontSelect').addEventListener('change', updateFontPreview);
+    ['colorBackgroundInput', 'colorTextInput', 'colorTextSecondaryInput', 'colorPrimaryInput'].forEach((id) => {
+        qs(id).addEventListener('input', scheduleAppearanceSave);
+    });
+    qs('fontSelect').addEventListener('change', scheduleFontSave);
     qs('qrColorBtn').addEventListener('click', () => qs('qrColorInput').click());
     qs('qrColorInput').addEventListener('input', (event) => updateQrColor(event.target.value));
     qs('downloadQrPngBtn').addEventListener('click', downloadQrPng);
