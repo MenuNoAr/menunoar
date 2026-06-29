@@ -122,6 +122,7 @@ function applyRestaurantTheme() {
     fontLink.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font).replace(/%20/g, '+')}:wght@400;700&display=swap`;
 
     editor.style.fontFamily = `'${font}', sans-serif`;
+    editor.style.setProperty('--font', `'${font}', sans-serif`);
     editor.style.setProperty('--font-heading', `'${font}', sans-serif`);
     if (restaurant.color_primary) editor.style.setProperty('--primary', restaurant.color_primary);
     if (restaurant.color_text) editor.style.setProperty('--text', restaurant.color_text);

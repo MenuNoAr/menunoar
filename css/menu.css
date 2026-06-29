@@ -222,6 +222,7 @@ h1#restName {
     text-align: center;
     border: none;
     background: transparent;
+    font-family: inherit;
     padding: 10px 8px;
     margin: 0;
     white-space: nowrap;
