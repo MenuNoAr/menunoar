@@ -41,6 +41,11 @@
     padding: 0;
 }
 
+html,
+body {
+    min-height: 100%;
+}
+
 body {
     background-color: var(--bg-page);
     font-family: var(--font);
@@ -50,6 +55,11 @@ body {
     line-height: 1.5;
 }
 
+body.menu-page {
+    min-height: 100dvh;
+    overflow: hidden;
+}
+
 /* === MOBILE VIEW CONTAINER === */
 #mobile-view {
     max-width: 600px;
@@ -57,8 +67,11 @@ body {
     margin: 0 auto;
     /* Center horizontally */
     background: var(--bg-mobile);
-    min-height: 100vh;
+    height: 100dvh;
+    min-height: 0;
     position: relative;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
     /* Subtle shadow */
     border-radius: 0;
@@ -71,7 +84,8 @@ body {
     #mobile-view {
         margin: 0;
         border-radius: 0;
-        min-height: 100vh;
+        height: 100dvh;
+        min-height: 0;
         max-width: 100%;
         box-shadow: none;
     }
@@ -79,6 +93,7 @@ body {
 
 /* === HERO / HEADER === */
 header#heroHeader {
+    flex: 0 0 auto;
     position: relative;
     background: var(--bg-mobile);
     margin-bottom: 0;
@@ -196,6 +211,7 @@ h1#restName {
 
 /* === TABS & SLIDER === */
 .category-tabs {
+    flex: 0 0 auto;
     display: flex;
     overflow-x: auto;
     flex-wrap: nowrap;
@@ -259,14 +275,22 @@ h1#restName {
 }
 
 .slider-window {
+    flex: 1 1 auto;
+    min-height: 0;
     width: 100%;
-    overflow: hidden;
-    /* Ensure content fits */
-    transition: height 0.3s ease;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
 }
 
+.slider-window::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
 .slider-track {
     display: flex;
+    min-height: 100%;
     transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     width: 100%;
     align-items: flex-start;

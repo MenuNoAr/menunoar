@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menu Digital</title>
     <link rel="icon" type="image/svg+xml" href="assets/images/logominimal.svg">
-    <link rel="stylesheet" href="css/menu.css?v=2.7">
+    <link rel="stylesheet" href="css/menu.css?v=2.8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/cursor.js" defer></script>
 </head>
 
-<body>
+<body class="menu-page">
     <div id="loading" class="loading-screen">
         <div class="spinner"></div>
         <p>A carregar ementa...</p>
@@ -464,20 +464,20 @@
                     }
                 });
 
-                // --- Dynamic Height Logic ---
+                // Keep the visible phone fixed and let only the active category content scroll.
                 const container = document.getElementById('menuSliderWindow');
                 const currentSlide = track.children[index];
 
                 if (currentSlide) {
-                    // 1. Immediate set
-                    container.style.height = currentSlide.offsetHeight + 'px';
+                    container.style.height = '';
+                    container.scrollTop = 0;
+                    track.style.height = currentSlide.offsetHeight + 'px';
 
-                    // 2. Continuous watch (for images loading, etc)
                     if (slideObserver) slideObserver.disconnect();
 
                     slideObserver = new ResizeObserver(entries => {
                         for (let entry of entries) {
-                            container.style.height = entry.target.offsetHeight + 'px';
+                            track.style.height = entry.target.offsetHeight + 'px';
                         }
                     });
 
