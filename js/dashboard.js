@@ -112,6 +112,8 @@ let tutorialOpen = false;
 let tutorialStepIndex = 0;
 let cropState = null;
 let categoryTabsDragBound = false;
+let pendingItemImageFile = null;
+let pendingItemImagePreviewUrl = null;
 
 function qs(id) {
     return document.getElementById(id);
@@ -248,6 +250,14 @@ function closeImageCropper(result = null) {
     if (state.url) URL.revokeObjectURL(state.url);
     cropState = null;
     state.resolve(result);
+}
+
+function clearPendingItemImage() {
+    pendingItemImageFile = null;
+    if (pendingItemImagePreviewUrl) {
+        URL.revokeObjectURL(pendingItemImagePreviewUrl);
+        pendingItemImagePreviewUrl = null;
+    }
 }
 
 function openImageCropper(file, mode) {
@@ -1572,16 +1582,16 @@ function setModalItemImage(item) {
     if (!preview || !button) return;
 
     const hasItem = Boolean(item?.id);
-    preview.src = item?.image_url || ITEM_PLACEHOLDER_IMAGE;
+    preview.src = pendingItemImagePreviewUrl || item?.image_url || ITEM_PLACEHOLDER_IMAGE;
     button.dataset.itemId = item?.id || '';
-    button.disabled = !hasItem;
     button.title = hasItem
         ? 'Editar imagem do prato'
-        : 'Guarda o prato para poder editar a imagem';
+        : 'Adicionar imagem ao prato';
     button.setAttribute('aria-label', button.title);
 }
 
 function openItemModal(item = null, category = app.activeCategory) {
+    clearPendingItemImage();
     qs('itemModalTitle').textContent = item ? 'Editar prato' : 'Adicionar prato';
     qs('itemIdInput').value = item?.id || '';
     qs('itemDeleteBtn').hidden = !item?.id;
@@ -1595,6 +1605,7 @@ function openItemModal(item = null, category = app.activeCategory) {
 }
 
 function closeItemModal() {
+    clearPendingItemImage();
     qs('itemModal').hidden = true;
 }
 
