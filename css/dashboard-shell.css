@@ -295,6 +295,7 @@ a {
 
 .editor-info-badges {
     position: relative;
+    margin: 10px 0 4px;
 }
 
 .header-content {
@@ -309,6 +310,10 @@ a {
     flex: 0 0 auto;
     position: relative;
     z-index: 30;
+    min-height: 46px;
+    margin-bottom: 0;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 #heroHeader {
@@ -645,13 +650,7 @@ a {
 }
 
 .crop-workspace {
-    gap: 16px;
-}
-
-.crop-workspace .form-note {
-    border-color: var(--editor-line);
-    background: #f7f7f8;
-    color: var(--editor-muted);
+    gap: 14px;
 }
 
 .crop-frame {

@@ -288,7 +288,6 @@ function openImageCropper(file, mode) {
 
         qs('cropModalKicker').textContent = config.kicker;
         qs('cropModalTitle').textContent = config.title;
-        qs('cropModalHelp').textContent = config.help;
         frame.dataset.mode = mode;
         zoomInput.value = '1';
 
