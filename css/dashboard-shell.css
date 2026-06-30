@@ -380,6 +380,12 @@ a {
     z-index: 10;
     display: flex;
     gap: 4px;
+    padding: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(12px);
 }
 
 .item-actions .item-edit-btn,
@@ -389,24 +395,21 @@ a {
     height: 32px;
     display: inline-grid;
     place-items: center;
-    border: 1px solid var(--editor-line);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.94);
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
     color: var(--editor-ink);
     cursor: pointer;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
-    transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+    box-shadow: none;
+    transition: background 150ms ease, color 150ms ease;
 }
 
 .item-actions .item-edit-btn:hover {
-    border-color: var(--editor-ink);
-    background: #fff;
+    background: #f0f0f2;
 }
 
 .item-delete-btn {
-    border-color: transparent;
     color: var(--editor-muted);
-    box-shadow: none;
 }
 
 .item-delete-btn:hover {
