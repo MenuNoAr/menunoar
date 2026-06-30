@@ -239,7 +239,14 @@ h1#restName {
 }
 
 .tab-btn.active::after {
-    content: none;
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 0;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--primary);
 }
 
 .slider-window {
