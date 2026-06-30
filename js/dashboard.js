@@ -456,7 +456,6 @@ function bindHorizontalTabDrag() {
         pointerId = event.pointerId;
         startX = event.clientX;
         startScrollLeft = tabs.scrollLeft;
-        tabs.setPointerCapture?.(event.pointerId);
     });
 
     tabs.addEventListener('pointermove', (event) => {
@@ -465,6 +464,9 @@ function bindHorizontalTabDrag() {
         if (Math.abs(deltaX) < 4 && !isDragging) return;
         isDragging = true;
         tabs.classList.add('is-dragging');
+        if (!tabs.hasPointerCapture?.(event.pointerId)) {
+            tabs.setPointerCapture?.(event.pointerId);
+        }
         tabs.scrollLeft = startScrollLeft + deltaX;
         event.preventDefault();
     });
@@ -478,6 +480,12 @@ function bindHorizontalTabDrag() {
     }, true);
 
     categoryTabsDragBound = true;
+}
+
+function selectCategoryTab(tab) {
+    if (!tab?.dataset?.category) return;
+    app.activeCategory = tab.dataset.category;
+    renderDashboard();
 }
 
 function getTutorialTargets() {
@@ -1781,7 +1789,14 @@ function handleEditorClick(event) {
 function bindEvents() {
     bindHorizontalTabDrag();
     qs('heroHeader').addEventListener('click', handleEditorClick);
-    qs('categoryTabs').addEventListener('click', handleEditorClick);
+    qs('categoryTabs').addEventListener('click', (event) => {
+        const tab = event.target.closest('.tab-btn');
+        if (tab) {
+            selectCategoryTab(tab);
+            return;
+        }
+        handleEditorClick(event);
+    });
     qs('categoryEditor').addEventListener('click', handleEditorClick);
 
     qs('heroForm').addEventListener('submit', saveHeroModal);
