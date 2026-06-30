@@ -52,10 +52,6 @@
             </div>
         </div>
 
-        <!-- Float Footer (Branding) -->
-        <footer class="menu-footer">
-            <p>Menu digital por <b>Menu no Ar</b></p>
-        </footer>
     </div>
 
     <script type="module">
@@ -388,7 +384,8 @@
                     </div>
                 `).join('');
 
-                slide.innerHTML = `<div class="slide-content"><div class="items-grid">${itemsHTML}</div></div>`;
+                const footerHTML = '<footer class="menu-footer"><p>Menu digital por <b>Menu no Ar</b></p></footer>';
+                slide.innerHTML = `<div class="slide-content"><div class="items-grid">${itemsHTML}${footerHTML}</div></div>`;
                 track.appendChild(slide);
             });
 

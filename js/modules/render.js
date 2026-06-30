@@ -339,8 +339,9 @@ export function renderMenu(items) {
                     <span>${escapeHTML(cat)}</span>
                 </div>
             </div>`;
+        const footerHTML = '<footer class="menu-footer"><p>Menu digital por <b>Menu no Ar</b></p></footer>';
 
-        section.innerHTML = headerHTML + `<div class="items-grid">${itemsHTML}</div>` + addItemBtn;
+        section.innerHTML = headerHTML + `<div class="items-grid">${itemsHTML}${addItemBtn}${footerHTML}</div>`;
         track.appendChild(section);
     });
 

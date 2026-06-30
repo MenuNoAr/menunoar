@@ -953,11 +953,14 @@ function renderActiveCategory(categories) {
         <div class="slide-content">
             <div class="items-grid">
                 ${items.map(renderItem).join('')}
+                <button class="item-add" type="button" data-action="add-item" data-category="${encodedCategory}"
+                    aria-label="Adicionar prato" title="Adicionar prato">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+                <footer class="menu-footer">
+                    <p>Menu digital por <b>Menu no Ar</b></p>
+                </footer>
             </div>
-            <button class="item-add" type="button" data-action="add-item" data-category="${encodedCategory}"
-                aria-label="Adicionar prato" title="Adicionar prato">
-                <i class="fa-solid fa-plus"></i>
-            </button>
         </div>
     `;
 }
