@@ -28,34 +28,54 @@ const FONT_OPTIONS = [
 const APPEARANCE_FIELDS = ['color_background', 'color_text', 'color_text_secondary', 'color_primary'];
 const TUTORIAL_STEPS = [
     {
+        targets: ['[data-action="open-hero-modal"]'],
+        title: 'Editar restaurante',
+        text: 'Usa este lapis para alterar nome, descricao, Wi-Fi e telefone do menu.',
+    },
+    {
+        targets: ['#editCoverBtn', '[data-action="open-hero-modal"]'],
+        title: 'Adicionar capa',
+        text: 'Carrega no lapis da capa para trocar o banner. Se ainda nao existir capa, podes adiciona-la no modal do restaurante.',
+    },
+    {
+        targets: ['[data-action="open-categories-modal"]', '.empty-menu [data-action="open-categories-modal"]'],
+        title: 'Criar categorias',
+        text: 'Este lapis abre a organizacao das categorias, onde podes criar, editar, apagar e ordenar seccoes.',
+    },
+    {
+        targets: ['[data-action="add-item"]', '[data-action="open-categories-modal"]'],
+        title: 'Criar pratos',
+        text: 'O botao mais adiciona um prato dentro da categoria ativa. Se ainda nao aparecer, cria primeiro uma categoria.',
+    },
+    {
+        targets: ['[data-action="edit-item"]', '[data-action="add-item"]'],
+        title: 'Editar pratos',
+        text: 'O lapis em cada prato abre o modal para alterar nome, descricao, preco, imagem e disponibilidade.',
+    },
+    {
+        targets: ['[data-action="delete-item"]', '[data-action="edit-item"]'],
+        title: 'Apagar pratos',
+        text: 'O caixote remove pratos que ja nao queres mostrar, sempre com confirmacao antes de apagar.',
+    },
+    {
         target: '#openAppearanceBtn',
-        title: 'Cores',
-        text: 'Ajusta fundo, textos e destaques do menu em tempo real.',
+        title: 'Cores do menu',
+        text: 'Aqui ajustas fundo, texto principal, texto secundario e destaque do menu em tempo real.',
     },
     {
         target: '#openFontBtn',
-        title: 'Fonte',
-        text: 'Escolhe a fonte global usada no menu publico e no preview.',
+        title: 'Fonte global',
+        text: 'Escolhe a fonte aplicada ao menu publico e ao preview do dashboard.',
     },
     {
         target: '#openQrBtn',
         title: 'QR Code',
-        text: 'Gera o QR do menu e descarrega em PNG ou PDF.',
+        text: 'Gera o QR do menu, escolhe a cor e descarrega em PNG ou PDF.',
     },
     {
         target: '#openLiveBtn',
         title: 'Menu real',
-        text: 'Abre o URL publico para confirmares a versao final.',
-    },
-    {
-        target: '#refreshMenuBtn',
-        title: 'Atualizar',
-        text: 'Recarrega os dados quando quiseres confirmar o ultimo estado.',
-    },
-    {
-        target: '#openTutorialBtn',
-        title: 'Tutorial',
-        text: 'Mostra este guia rapido sempre que precisares.',
+        text: 'Abre o URL publico para confirmares a versao final como o cliente ve.',
     },
     {
         target: '#logoutBtn',
@@ -133,7 +153,18 @@ function setSaveStatus(text, reset = false) {
 
 function getTutorialTargets() {
     return TUTORIAL_STEPS
-        .map((step) => ({ ...step, element: document.querySelector(step.target) }))
+        .map((step) => {
+            const selectors = step.targets || [step.target];
+            const element = selectors
+                .map((selector) => document.querySelector(selector))
+                .find((candidate) => {
+                    if (!candidate) return false;
+                    const rect = candidate.getBoundingClientRect();
+                    return rect.width > 0 && rect.height > 0;
+                });
+            const target = selectors.find((selector) => document.querySelector(selector) === element);
+            return { ...step, target, element };
+        })
         .filter((step) => step.element);
 }
 
@@ -233,7 +264,11 @@ function renderTutorialStep(index = tutorialStepIndex) {
     step.element.setAttribute('aria-describedby', 'tutorialActiveCard');
     overlay.hidden = false;
     tutorialOpen = true;
-    window.requestAnimationFrame(positionTutorialCard);
+    step.element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
+    window.requestAnimationFrame(() => {
+        positionTutorialCard();
+        window.setTimeout(positionTutorialCard, 260);
+    });
 }
 
 function openTutorial() {
