@@ -64,7 +64,7 @@ body {
     border-radius: 0;
     /* Keep rectangular as requested */
     overflow: hidden;
-    padding-bottom: 80px;
+    padding-bottom: 0;
 }
 
 @media (max-width: 500px) {
