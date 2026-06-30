@@ -20,7 +20,6 @@ const IMAGE_CROP_CONFIG = {
         height: 900,
         kicker: 'Capa',
         title: 'Recortar capa',
-        help: 'Arrasta a imagem e ajusta o zoom. A capa sera guardada em proporcao 16:9.',
         fileName: 'cover-crop.jpg',
     },
     item: {
@@ -29,7 +28,6 @@ const IMAGE_CROP_CONFIG = {
         height: 1200,
         kicker: 'Prato',
         title: 'Recortar imagem do prato',
-        help: 'Arrasta a imagem e ajusta o zoom. Os pratos usam obrigatoriamente proporcao 1:1.',
         fileName: 'item-crop.jpg',
     },
 };
@@ -1584,6 +1582,7 @@ function setModalItemImage(item) {
     const hasItem = Boolean(item?.id);
     preview.src = pendingItemImagePreviewUrl || item?.image_url || ITEM_PLACEHOLDER_IMAGE;
     button.dataset.itemId = item?.id || '';
+    button.disabled = false;
     button.title = hasItem
         ? 'Editar imagem do prato'
         : 'Adicionar imagem ao prato';
@@ -1624,20 +1623,34 @@ async function saveItem(event) {
     setSaveStatus('A guardar prato...');
 
     let error;
+    let savedItemId = id;
     if (id) {
         ({ error } = await app.supabase.from('menu_items').update(payload).eq('id', id));
     } else {
-        ({ error } = await app.supabase.from('menu_items').insert([{
+        const result = await app.supabase.from('menu_items').insert([{
             ...payload,
             restaurant_id: app.restaurant.id,
             available: true,
-        }]));
+        }]).select('id').single();
+        error = result.error;
+        savedItemId = result.data?.id;
     }
 
     if (error) {
         console.error(error);
         setSaveStatus('NÃ£o foi possÃ­vel guardar');
         return;
+    }
+
+    if (pendingItemImageFile && savedItemId) {
+        setSaveStatus('A carregar imagem...');
+        const { data, error: uploadError } = await uploadFile(pendingItemImageFile, `item-${savedItemId}`);
+        if (uploadError || !data) {
+            console.error(uploadError);
+            setSaveStatus('Prato guardado, imagem nÃ£o carregada');
+        } else {
+            await app.supabase.from('menu_items').update({ image_url: data.publicUrl }).eq('id', savedItemId);
+        }
     }
 
     app.activeCategory = payload.category;
@@ -1688,6 +1701,26 @@ async function uploadItemImage(id) {
         setModalItemImage(app.items.find((item) => String(item.id) === String(id)));
     }
     setSaveStatus('Imagem guardada', true);
+}
+
+async function prepareNewItemImage() {
+    const file = await pickCroppedImage('item');
+    if (!file) return;
+
+    clearPendingItemImage();
+    pendingItemImageFile = file;
+    pendingItemImagePreviewUrl = URL.createObjectURL(file);
+    qs('itemModalImagePreview').src = pendingItemImagePreviewUrl;
+    setSaveStatus('Imagem pronta para guardar', true);
+}
+
+async function handleItemModalImageClick() {
+    const itemId = qs('itemIdInput').value;
+    if (itemId) {
+        await uploadItemImage(itemId);
+    } else {
+        await prepareNewItemImage();
+    }
 }
 
 async function uploadCover(input) {
@@ -1815,11 +1848,7 @@ function bindEvents() {
     qs('coverPlaceholder').addEventListener('click', () => qs('coverInput').click());
     qs('coverInput').addEventListener('change', (event) => uploadCover(event.target));
     qs('removeCoverBtn').addEventListener('click', removeCover);
-    qs('itemModalImageBtn').addEventListener('click', () => {
-        const itemId = qs('itemIdInput').value;
-        if (!itemId) return;
-        uploadItemImage(itemId);
-    });
+    qs('itemModalImageBtn').addEventListener('click', handleItemModalImageClick);
     qs('itemDeleteBtn').addEventListener('click', () => {
         const itemId = qs('itemIdInput').value;
         if (itemId) deleteItem(itemId);
@@ -1828,7 +1857,11 @@ function bindEvents() {
     document.querySelectorAll('[data-close-modal]').forEach((button) =>
         button.addEventListener('click', (event) => {
             const modal = event.currentTarget.closest('.modal-backdrop');
-            if (modal) modal.hidden = true;
+            if (modal?.id === 'itemModal') {
+                closeItemModal();
+            } else if (modal) {
+                modal.hidden = true;
+            }
         }));
     qs('itemModal').addEventListener('click', (event) => {
         if (event.target === qs('itemModal')) closeItemModal();

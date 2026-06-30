@@ -520,6 +520,25 @@ a {
     display: block;
 }
 
+.modal-item-media::after {
+    content: '\f040';
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    width: 24px;
+    height: 24px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.94);
+    color: var(--editor-ink);
+    font-family: 'Font Awesome 6 Free';
+    font-size: 0.72rem;
+    font-weight: 900;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
 .hero-form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -872,7 +891,6 @@ a {
     height: 40px;
     display: inline-grid;
     place-items: center;
-    margin-right: auto;
     border: 0;
     border-radius: 8px;
     background: transparent;
@@ -883,6 +901,12 @@ a {
 .modal-delete-btn:hover {
     background: #fff1f2;
     color: var(--editor-danger);
+}
+
+.modal-head-delete-btn {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
 }
 
 .qr-modal-actions {
