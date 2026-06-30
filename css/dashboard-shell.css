@@ -895,8 +895,13 @@ a {
 }
 
 #categoryTabs .item-edit-btn {
-    top: 6px;
+    position: sticky;
+    top: 0;
     right: 6px;
+    flex: 0 0 32px;
+    align-self: flex-start;
+    margin-left: auto;
+    transform: translateY(-2px);
 }
 
 .tutorial-overlay {
