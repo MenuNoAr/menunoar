@@ -470,6 +470,9 @@ a {
 
 .editor-modal {
     width: min(100%, 480px);
+    max-height: calc(100dvh - 40px);
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     border: 1px solid var(--editor-line);
     border-radius: 12px;
@@ -482,6 +485,7 @@ a {
 }
 
 .modal-head {
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     gap: 16px;
@@ -663,9 +667,34 @@ a {
 }
 
 .modal-form {
+    flex: 1 1 auto;
+    min-height: 0;
     display: grid;
     gap: 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 22px;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(110, 110, 115, 0.36) transparent;
+}
+
+.modal-form::-webkit-scrollbar {
+    width: 7px;
+}
+
+.modal-form::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-form::-webkit-scrollbar-thumb {
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: rgba(110, 110, 115, 0.34);
+}
+
+.modal-form::-webkit-scrollbar-thumb:hover {
+    background: rgba(110, 110, 115, 0.52);
 }
 
 .crop-modal {
@@ -921,7 +950,7 @@ a {
 #categoryTabs .item-edit-btn {
     position: sticky;
     top: 0;
-    right: 6px;
+    right: 10px;
     flex: 0 0 32px;
     align-self: flex-start;
     margin-left: auto;
@@ -1208,6 +1237,14 @@ a {
 
     .editor-stage {
         padding: 0;
+    }
+
+    .modal-backdrop {
+        padding: 10px;
+    }
+
+    .editor-modal {
+        max-height: calc(100dvh - 20px);
     }
 
     #mobile-view.menu-editor {
