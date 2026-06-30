@@ -111,6 +111,7 @@ let fontSaveTimer = null;
 let tutorialOpen = false;
 let tutorialStepIndex = 0;
 let cropState = null;
+let categoryTabsDragBound = false;
 
 function qs(id) {
     return document.getElementById(id);
@@ -409,6 +410,66 @@ function pickCroppedImage(mode) {
         }, { once: true });
         input.click();
     });
+}
+
+function bindHorizontalTabDrag() {
+    const tabs = qs('categoryTabs');
+    if (!tabs || categoryTabsDragBound) return;
+
+    let isPointerDown = false;
+    let isDragging = false;
+    let suppressClick = false;
+    let pointerId = null;
+    let startX = 0;
+    let startScrollLeft = 0;
+
+    const stopDrag = (event) => {
+        if (!isPointerDown || event.pointerId !== pointerId) return;
+        isPointerDown = false;
+        pointerId = null;
+        if (isDragging) {
+            suppressClick = true;
+            window.setTimeout(() => {
+                suppressClick = false;
+            }, 0);
+        }
+        isDragging = false;
+        tabs.classList.remove('is-dragging');
+        if (tabs.hasPointerCapture?.(event.pointerId)) {
+            tabs.releasePointerCapture(event.pointerId);
+        }
+    };
+
+    tabs.addEventListener('pointerdown', (event) => {
+        if (event.button !== undefined && event.button !== 0) return;
+        if (event.target.closest('.item-edit-btn')) return;
+        isPointerDown = true;
+        isDragging = false;
+        pointerId = event.pointerId;
+        startX = event.clientX;
+        startScrollLeft = tabs.scrollLeft;
+        tabs.setPointerCapture?.(event.pointerId);
+    });
+
+    tabs.addEventListener('pointermove', (event) => {
+        if (!isPointerDown || event.pointerId !== pointerId) return;
+        const deltaX = startX - event.clientX;
+        if (Math.abs(deltaX) < 4 && !isDragging) return;
+        isDragging = true;
+        tabs.classList.add('is-dragging');
+        tabs.scrollLeft = startScrollLeft + deltaX;
+        event.preventDefault();
+    });
+
+    tabs.addEventListener('pointerup', stopDrag);
+    tabs.addEventListener('pointercancel', stopDrag);
+    tabs.addEventListener('click', (event) => {
+        if (!suppressClick) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }, true);
+
+    categoryTabsDragBound = true;
 }
 
 function getTutorialTargets() {
@@ -1674,6 +1735,7 @@ function handleEditorClick(event) {
 }
 
 function bindEvents() {
+    bindHorizontalTabDrag();
     qs('heroHeader').addEventListener('click', handleEditorClick);
     qs('categoryTabs').addEventListener('click', handleEditorClick);
     qs('categoryEditor').addEventListener('click', handleEditorClick);

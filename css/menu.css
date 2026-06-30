@@ -209,20 +209,29 @@ h1#restName {
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+    scroll-padding: 20px;
+    cursor: grab;
+    user-select: none;
+    -webkit-overflow-scrolling: touch;
 }
 
 .category-tabs::-webkit-scrollbar {
     display: none;
 }
 
+.category-tabs.is-dragging {
+    cursor: grabbing;
+    scroll-behavior: auto;
+}
+
 .tab-btn {
-    flex: 1;
+    flex: 0 0 auto;
     min-width: fit-content;
     text-align: center;
     border: none;
     background: transparent;
     font-family: inherit;
-    padding: 10px 8px;
+    padding: 10px 16px;
     margin: 0;
     white-space: nowrap;
     font-size: 0.95rem;

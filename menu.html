@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Menu Digital</title>
     <link rel="icon" type="image/svg+xml" href="assets/images/logominimal.svg">
-    <link rel="stylesheet" href="css/menu.css?v=2.6">
+    <link rel="stylesheet" href="css/menu.css?v=2.7">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="css/style.css">
@@ -56,6 +56,63 @@
 
     <script type="module">
         let currentCategoryIndex = 0;
+
+        function bindHorizontalTabDrag(tabs) {
+            if (!tabs || tabs.dataset.dragBound === 'true') return;
+
+            let isPointerDown = false;
+            let isDragging = false;
+            let suppressClick = false;
+            let pointerId = null;
+            let startX = 0;
+            let startScrollLeft = 0;
+
+            const stopDrag = (event) => {
+                if (!isPointerDown || event.pointerId !== pointerId) return;
+                isPointerDown = false;
+                pointerId = null;
+                if (isDragging) {
+                    suppressClick = true;
+                    window.setTimeout(() => {
+                        suppressClick = false;
+                    }, 0);
+                }
+                isDragging = false;
+                tabs.classList.remove('is-dragging');
+                if (tabs.hasPointerCapture?.(event.pointerId)) {
+                    tabs.releasePointerCapture(event.pointerId);
+                }
+            };
+
+            tabs.addEventListener('pointerdown', (event) => {
+                if (event.button !== undefined && event.button !== 0) return;
+                isPointerDown = true;
+                isDragging = false;
+                pointerId = event.pointerId;
+                startX = event.clientX;
+                startScrollLeft = tabs.scrollLeft;
+                tabs.setPointerCapture?.(event.pointerId);
+            });
+
+            tabs.addEventListener('pointermove', (event) => {
+                if (!isPointerDown || event.pointerId !== pointerId) return;
+                const deltaX = startX - event.clientX;
+                if (Math.abs(deltaX) < 4 && !isDragging) return;
+                isDragging = true;
+                tabs.classList.add('is-dragging');
+                tabs.scrollLeft = startScrollLeft + deltaX;
+                event.preventDefault();
+            });
+
+            tabs.addEventListener('pointerup', stopDrag);
+            tabs.addEventListener('pointercancel', stopDrag);
+            tabs.addEventListener('click', (event) => {
+                if (!suppressClick) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }, true);
+            tabs.dataset.dragBound = 'true';
+        }
 
         // --- PREVIEW LISTENER ---
         window.addEventListener('message', (event) => {
@@ -355,6 +412,7 @@
             // RENDER TABS & SECTIONS
             const tabsContainer = document.getElementById('categoryTabs');
             const track = document.getElementById('menuSliderTrack');
+            bindHorizontalTabDrag(tabsContainer);
             uniqueCats.forEach((cat, index) => {
                 // 1. Create Tab
                 const btn = document.createElement('button');
