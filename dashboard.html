@@ -13,7 +13,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/menu.css?v=2.4">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.13">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.14">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
@@ -77,7 +77,11 @@
                     title="Atualizar menu">
                     <i class="fa-solid fa-rotate"></i>
                 </button>
-                <button class="nav-icon nav-icon-danger" type="button" onclick="signOut()"
+                <button class="nav-icon" id="openTutorialBtn" type="button" aria-label="Abrir tutorial"
+                    title="Abrir tutorial">
+                    <i class="fa-solid fa-circle-question"></i>
+                </button>
+                <button class="nav-icon nav-icon-danger" id="logoutBtn" type="button" onclick="signOut()"
                     aria-label="Terminar sessão" title="Terminar sessão">
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
@@ -135,6 +139,13 @@
             </div>
         </div>
     </main>
+
+    <div id="tutorialOverlay" class="tutorial-overlay" hidden>
+        <div id="tutorialCards" class="tutorial-cards" aria-label="Guia rapido do dashboard"></div>
+        <button id="closeTutorialBtn" class="tutorial-close" type="button" aria-label="Fechar tutorial">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
 
     <div id="itemModal" class="modal-backdrop" hidden>
         <section class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="itemModalTitle">
@@ -357,7 +368,7 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=9.0"></script>
+    <script type="module" src="js/dashboard.js?v=9.1"></script>
 </body>
 
 </html>

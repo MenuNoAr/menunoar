@@ -26,11 +26,49 @@ const FONT_OPTIONS = [
     'Dancing Script',
 ];
 const APPEARANCE_FIELDS = ['color_background', 'color_text', 'color_text_secondary', 'color_primary'];
+const TUTORIAL_STEPS = [
+    {
+        target: '#openAppearanceBtn',
+        title: 'Cores',
+        text: 'Ajusta fundo, textos e destaques do menu em tempo real.',
+    },
+    {
+        target: '#openFontBtn',
+        title: 'Fonte',
+        text: 'Escolhe a fonte global usada no menu publico e no preview.',
+    },
+    {
+        target: '#openQrBtn',
+        title: 'QR Code',
+        text: 'Gera o QR do menu e descarrega em PNG ou PDF.',
+    },
+    {
+        target: '#openLiveBtn',
+        title: 'Menu real',
+        text: 'Abre o URL publico para confirmares a versao final.',
+    },
+    {
+        target: '#refreshMenuBtn',
+        title: 'Atualizar',
+        text: 'Recarrega os dados quando quiseres confirmar o ultimo estado.',
+    },
+    {
+        target: '#openTutorialBtn',
+        title: 'Tutorial',
+        text: 'Mostra este guia rapido sempre que precisares.',
+    },
+    {
+        target: '#logoutBtn',
+        title: 'Sair',
+        text: 'Termina a sessao desta conta com seguranca.',
+    },
+];
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 let qrCode = null;
 let qrColor = '#111111';
 let appearanceSaveTimer = null;
 let fontSaveTimer = null;
+let tutorialOpen = false;
 
 function qs(id) {
     return document.getElementById(id);
@@ -85,6 +123,77 @@ function setSaveStatus(text, reset = false) {
         window.setTimeout(() => {
             status.textContent = 'AlteraÃ§Ãµes guardadas automaticamente';
         }, 1400);
+    }
+}
+
+function getTutorialTargets() {
+    return TUTORIAL_STEPS
+        .map((step) => ({ ...step, element: document.querySelector(step.target) }))
+        .filter((step) => step.element);
+}
+
+function clearTutorialHighlights() {
+    document.querySelectorAll('.tutorial-highlight').forEach((element) =>
+        element.classList.remove('tutorial-highlight'));
+}
+
+function positionTutorialCards() {
+    const cards = Array.from(qs('tutorialCards')?.querySelectorAll('.tutorial-card') || []);
+    if (!cards.length) return;
+
+    const gap = 8;
+    let previousBottom = 16;
+    const positioned = cards.map((card) => {
+        const target = document.querySelector(card.dataset.target);
+        if (!target) return null;
+        const rect = target.getBoundingClientRect();
+        const height = card.offsetHeight;
+        const top = Math.max(16, rect.top + (rect.height / 2) - (height / 2), previousBottom + gap);
+        previousBottom = top + height;
+        return { card, rect, top, height };
+    }).filter(Boolean);
+
+    const overflow = previousBottom - (window.innerHeight - 16);
+    const shift = overflow > 0 ? overflow : 0;
+
+    positioned.forEach(({ card, rect, top }) => {
+        card.style.left = `${Math.min(rect.right + 16, window.innerWidth - card.offsetWidth - 16)}px`;
+        card.style.top = `${Math.max(16, top - shift)}px`;
+    });
+}
+
+function openTutorial() {
+    const overlay = qs('tutorialOverlay');
+    const cards = qs('tutorialCards');
+    if (!overlay || !cards) return;
+
+    clearTutorialHighlights();
+    const steps = getTutorialTargets();
+    cards.innerHTML = steps.map((step) => `
+        <article class="tutorial-card" data-target="${escapeHTML(step.target)}">
+            <strong>${escapeHTML(step.title)}</strong>
+            <p>${escapeHTML(step.text)}</p>
+        </article>
+    `).join('');
+
+    steps.forEach((step) => step.element.classList.add('tutorial-highlight'));
+    overlay.hidden = false;
+    tutorialOpen = true;
+    window.requestAnimationFrame(positionTutorialCards);
+}
+
+function closeTutorial() {
+    const overlay = qs('tutorialOverlay');
+    if (overlay) overlay.hidden = true;
+    tutorialOpen = false;
+    clearTutorialHighlights();
+}
+
+function toggleTutorial() {
+    if (tutorialOpen) {
+        closeTutorial();
+    } else {
+        openTutorial();
     }
 }
 
@@ -1204,6 +1313,11 @@ function bindEvents() {
     qs('openAppearanceBtn').addEventListener('click', openAppearanceModal);
     qs('openFontBtn').addEventListener('click', openFontModal);
     qs('openQrBtn').addEventListener('click', openQrModal);
+    qs('openTutorialBtn').addEventListener('click', toggleTutorial);
+    qs('closeTutorialBtn').addEventListener('click', closeTutorial);
+    qs('tutorialOverlay').addEventListener('click', (event) => {
+        if (event.target === qs('tutorialOverlay')) closeTutorial();
+    });
     ['colorBackgroundInput', 'colorTextInput', 'colorTextSecondaryInput', 'colorPrimaryInput'].forEach((id) => {
         qs(id).addEventListener('input', scheduleAppearanceSave);
     });
@@ -1277,6 +1391,12 @@ function bindEvents() {
     });
     qs('qrModal').addEventListener('click', (event) => {
         if (event.target === qs('qrModal')) closeQrModal();
+    });
+    window.addEventListener('resize', () => {
+        if (tutorialOpen) positionTutorialCards();
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && tutorialOpen) closeTutorial();
     });
 }
 
