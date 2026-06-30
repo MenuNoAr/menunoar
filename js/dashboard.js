@@ -69,6 +69,7 @@ let qrColor = '#111111';
 let appearanceSaveTimer = null;
 let fontSaveTimer = null;
 let tutorialOpen = false;
+let tutorialStepIndex = 0;
 
 function qs(id) {
     return document.getElementById(id);
@@ -77,6 +78,10 @@ function qs(id) {
 function escapeHTML(value) {
     if (value === null || value === undefined) return '';
     return String(value).replace(/[&<>"']/g, (char) => ESC[char]);
+}
+
+function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), Math.max(min, max));
 }
 
 function slugify(value) {
@@ -133,59 +138,113 @@ function getTutorialTargets() {
 }
 
 function clearTutorialHighlights() {
-    document.querySelectorAll('.tutorial-highlight').forEach((element) =>
-        element.classList.remove('tutorial-highlight'));
-}
-
-function positionTutorialCards() {
-    const cards = Array.from(qs('tutorialCards')?.querySelectorAll('.tutorial-card') || []);
-    if (!cards.length) return;
-
-    const gap = 8;
-    let previousBottom = 16;
-    const positioned = cards.map((card) => {
-        const target = document.querySelector(card.dataset.target);
-        if (!target) return null;
-        const rect = target.getBoundingClientRect();
-        const height = card.offsetHeight;
-        const top = Math.max(16, rect.top + (rect.height / 2) - (height / 2), previousBottom + gap);
-        previousBottom = top + height;
-        return { card, rect, top, height };
-    }).filter(Boolean);
-
-    const overflow = previousBottom - (window.innerHeight - 16);
-    const shift = overflow > 0 ? overflow : 0;
-
-    positioned.forEach(({ card, rect, top }) => {
-        card.style.left = `${Math.min(rect.right + 16, window.innerWidth - card.offsetWidth - 16)}px`;
-        card.style.top = `${Math.max(16, top - shift)}px`;
+    document.querySelectorAll('.tutorial-highlight').forEach((element) => {
+        element.classList.remove('tutorial-highlight');
+        element.removeAttribute('aria-describedby');
     });
 }
 
-function openTutorial() {
+function getTutorialDots(total) {
+    return Array.from({ length: total }, (_, index) => `
+        <span class="tutorial-dot${index === tutorialStepIndex ? ' is-active' : ''}" aria-hidden="true"></span>
+    `).join('');
+}
+
+function positionTutorialCard() {
+    const card = qs('tutorialCards')?.querySelector('.tutorial-card');
+    if (!card) return;
+
+    const target = document.querySelector(card.dataset.target);
+    if (!target) return;
+
+    const rect = target.getBoundingClientRect();
+    const margin = 14;
+    const edge = 14;
+    const cardWidth = card.offsetWidth;
+    const cardHeight = card.offsetHeight;
+    const isMobile = window.matchMedia('(max-width: 680px)').matches;
+    let placement = 'right';
+    let left = rect.right + margin;
+    let top = rect.top + (rect.height / 2) - (cardHeight / 2);
+
+    if (isMobile) {
+        placement = 'below';
+        left = rect.left + (rect.width / 2) - (cardWidth / 2);
+        top = rect.bottom + margin;
+        if (top + cardHeight > window.innerHeight - edge) {
+            placement = 'above';
+            top = rect.top - cardHeight - margin;
+        }
+    } else if (left + cardWidth > window.innerWidth - edge) {
+        placement = 'left';
+        left = rect.left - cardWidth - margin;
+        if (left < edge) {
+            placement = 'below';
+            left = rect.left + (rect.width / 2) - (cardWidth / 2);
+            top = rect.bottom + margin;
+        }
+    }
+
+    const finalLeft = clamp(left, edge, window.innerWidth - cardWidth - edge);
+    const finalTop = clamp(top, edge, window.innerHeight - cardHeight - edge);
+    const arrowTop = clamp(rect.top + (rect.height / 2) - finalTop, 18, cardHeight - 18);
+    const arrowLeft = clamp(rect.left + (rect.width / 2) - finalLeft, 18, cardWidth - 18);
+
+    card.dataset.placement = placement;
+    card.style.left = `${finalLeft}px`;
+    card.style.top = `${finalTop}px`;
+    card.style.setProperty('--tutorial-arrow-top', `${arrowTop}px`);
+    card.style.setProperty('--tutorial-arrow-left', `${arrowLeft}px`);
+}
+
+function renderTutorialStep(index = tutorialStepIndex) {
     const overlay = qs('tutorialOverlay');
     const cards = qs('tutorialCards');
     if (!overlay || !cards) return;
 
     clearTutorialHighlights();
     const steps = getTutorialTargets();
-    cards.innerHTML = steps.map((step) => `
-        <article class="tutorial-card" data-target="${escapeHTML(step.target)}">
+    if (!steps.length) return;
+
+    tutorialStepIndex = clamp(index, 0, steps.length - 1);
+    const step = steps[tutorialStepIndex];
+    const isLastStep = tutorialStepIndex === steps.length - 1;
+
+    cards.innerHTML = `
+        <article id="tutorialActiveCard" class="tutorial-card" data-target="${escapeHTML(step.target)}"
+            data-placement="right">
+            <div class="tutorial-step-meta">
+                <span>Passo ${tutorialStepIndex + 1} de ${steps.length}</span>
+                <div class="tutorial-dots" aria-hidden="true">${getTutorialDots(steps.length)}</div>
+            </div>
             <strong>${escapeHTML(step.title)}</strong>
             <p>${escapeHTML(step.text)}</p>
+            <div class="tutorial-actions">
+                <button class="tutorial-btn tutorial-btn-ghost" type="button" data-tutorial-action="prev"
+                    ${tutorialStepIndex === 0 ? 'disabled' : ''}>Anterior</button>
+                <button class="tutorial-btn tutorial-btn-primary" type="button" data-tutorial-action="next">
+                    ${isLastStep ? 'Terminar' : 'Seguinte'}
+                </button>
+            </div>
         </article>
-    `).join('');
+    `;
 
-    steps.forEach((step) => step.element.classList.add('tutorial-highlight'));
+    step.element.classList.add('tutorial-highlight');
+    step.element.setAttribute('aria-describedby', 'tutorialActiveCard');
     overlay.hidden = false;
     tutorialOpen = true;
-    window.requestAnimationFrame(positionTutorialCards);
+    window.requestAnimationFrame(positionTutorialCard);
+}
+
+function openTutorial() {
+    renderTutorialStep(0);
 }
 
 function closeTutorial() {
     const overlay = qs('tutorialOverlay');
     if (overlay) overlay.hidden = true;
     tutorialOpen = false;
+    tutorialStepIndex = 0;
     clearTutorialHighlights();
 }
 
@@ -195,6 +254,16 @@ function toggleTutorial() {
     } else {
         openTutorial();
     }
+}
+
+function moveTutorialStep(direction) {
+    const steps = getTutorialTargets();
+    const nextIndex = tutorialStepIndex + direction;
+    if (direction > 0 && nextIndex >= steps.length) {
+        closeTutorial();
+        return;
+    }
+    renderTutorialStep(nextIndex);
 }
 
 function getCategories() {
@@ -1315,6 +1384,11 @@ function bindEvents() {
     qs('openQrBtn').addEventListener('click', openQrModal);
     qs('openTutorialBtn').addEventListener('click', toggleTutorial);
     qs('closeTutorialBtn').addEventListener('click', closeTutorial);
+    qs('tutorialCards').addEventListener('click', (event) => {
+        const actionElement = event.target.closest('[data-tutorial-action]');
+        if (!actionElement) return;
+        moveTutorialStep(actionElement.dataset.tutorialAction === 'prev' ? -1 : 1);
+    });
     qs('tutorialOverlay').addEventListener('click', (event) => {
         if (event.target === qs('tutorialOverlay')) closeTutorial();
     });
@@ -1393,7 +1467,7 @@ function bindEvents() {
         if (event.target === qs('qrModal')) closeQrModal();
     });
     window.addEventListener('resize', () => {
-        if (tutorialOpen) positionTutorialCards();
+        if (tutorialOpen) positionTutorialCard();
     });
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && tutorialOpen) closeTutorial();
