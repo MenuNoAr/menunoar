@@ -62,7 +62,8 @@ body.menu-page {
 
 /* === MOBILE VIEW CONTAINER === */
 #mobile-view {
-    max-width: 600px;
+    width: min(100%, 430px);
+    max-width: 430px;
     /* Limit content width */
     margin: 0 auto;
     /* Center horizontally */
@@ -82,6 +83,7 @@ body.menu-page {
 
 @media (max-width: 500px) {
     #mobile-view {
+        width: 100%;
         margin: 0;
         border-radius: 0;
         height: 100dvh;
