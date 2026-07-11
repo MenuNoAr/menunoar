@@ -3,235 +3,358 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Menu no Ar | Ementas Digitais Premium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Cria, personaliza e partilha a ementa digital do teu restaurante. Um editor visual, um link e um QR Code sempre atualizados.">
+    <meta name="theme-color" content="#f7fbff">
+    <title>Menu no Ar | O teu menu digital, sempre atualizado</title>
 
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/logominimal.svg">
-
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-
-    <!-- Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/index.css">
-    <script src="js/cursor.js" defer></script>
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <link rel="stylesheet" href="css/index.css?v=3.0">
+    <script src="js/script.js?v=3.0" defer></script>
 </head>
 
 <body>
-
-    <!-- NAVIGATION -->
-    <header class="nav-header">
-        <div class="container flex items-center justify-between" style="height: 100%;">
-            <a href="/" class="flex items-center" style="text-decoration: none;">
-                <img src="assets/images/Ilogo.svg" alt="Menu no Ar" style="height: 48px;">
+    <header class="site-header" data-site-header>
+        <div class="site-container header-inner">
+            <a class="brand-link" href="index.html" aria-label="Menu no Ar - Página inicial">
+                <img src="assets/images/logo.svg" alt="Menu no Ar">
             </a>
 
-            <nav class="flex items-center gap-6">
-                <a href="login.html" class="btn btn-ghost nav-btn-ghost">Entrar</a>
-                <a href="signup.html" class="btn btn-primary nav-btn-primary">Criar Menu</a>
+            <nav class="desktop-nav" aria-label="Navegação principal">
+                <a href="#como-funciona">Como funciona</a>
+                <a href="#vantagens">Vantagens</a>
+                <a href="#precos">Preços</a>
             </nav>
+
+            <div class="header-actions">
+                <a class="text-link" href="login.html">Entrar</a>
+                <a class="button button-primary button-small" href="signup.html">Criar menu</a>
+                <button class="menu-toggle" type="button" data-menu-toggle aria-label="Abrir menu"
+                    aria-expanded="false">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
         </div>
+
+        <nav class="mobile-nav" data-mobile-nav aria-label="Navegação móvel" hidden>
+            <a href="#como-funciona">Como funciona</a>
+            <a href="#vantagens">Vantagens</a>
+            <a href="#precos">Preços</a>
+            <a href="login.html">Entrar</a>
+        </nav>
     </header>
 
-    <main style="position: relative;">
-        <!-- CURVED SCROLL PROGRESS -->
-        <div class="curved-scroll-container">
-            <!-- 
-               ViewBox 0 0 100 400 maps directly to our 400vh space.
-               The path curves beautifully between left and right as it descends.
-               Points map to vertical percentage: 
-               - Y=0: Hero center
-               - Y=100: Mockup center
-               - Y=200: Features center
-               - Y=300: Pricing center
-               - Y=400: CTA center
-            -->
-            <svg id="scrollSvg" preserveAspectRatio="none" viewBox="0 0 100 500">
-                <path class="path-bg"
-                    d="M 50,0 C 90,40 90,60 90,100 C 90,140 10,160 10,200 C 10,240 90,260 90,300 C 90,340 10,360 10,400 C 10,440 50,460 50,500" />
-                <path id="pathLineFg" class="path-line"
-                    d="M 50,0 C 90,40 90,60 90,100 C 90,140 10,160 10,200 C 10,240 90,260 90,300 C 90,340 10,360 10,400 C 10,440 50,460 50,500" />
-            </svg>
-            <div id="scrollArrow" class="scroll-arrow"><i class="ph ph-arrow-down"></i></div>
-        </div>
+    <main>
+        <section class="hero-section">
+            <div class="hero-orbit hero-orbit-one" aria-hidden="true"></div>
+            <div class="hero-orbit hero-orbit-two" aria-hidden="true"></div>
 
-        <!-- HERO -->
-        <section class="hero">
-            <div class="container">
-                <h1 class="reveal delay-1">Ementas digitais<br>feitas para design.</h1>
-                <p class="reveal delay-2">O sistema de gestão de menus ágil e limpo. Digitalize a
-                    operação do seu restaurante.</p>
+            <div class="site-container hero-grid">
+                <div class="hero-copy reveal is-visible">
+                    <div class="eyebrow"><span></span> Menu digital, sem complicações</div>
+                    <h1>O teu menu no ar.<br><em>E nas mãos de quem escolhe.</em></h1>
+                    <p class="hero-lead">Cria e atualiza a ementa do teu restaurante num editor que mostra exatamente
+                        o que o cliente vai ver. Partilha por link ou QR Code, sem voltar a imprimir.</p>
 
-                <div class="flex items-center justify-center gap-4 reveal delay-3">
-                    <a href="signup.html" class="btn btn-primary btn-hero">Começar Agora</a>
-                    <a href="#funciona" class="btn btn-hero-secondary">Oque oferecemos</a>
+                    <div class="hero-actions">
+                        <a class="button button-primary" href="signup.html">Criar menu grátis <i
+                                class="ph ph-arrow-up-right"></i></a>
+                        <a class="button button-secondary" href="#como-funciona">Ver como funciona</a>
+                    </div>
+
+                    <div class="hero-notes" aria-label="Vantagens da conta gratuita">
+                        <span><i class="ph-fill ph-check-circle"></i> Sem cartão</span>
+                        <span><i class="ph-fill ph-check-circle"></i> QR incluído</span>
+                        <span><i class="ph-fill ph-check-circle"></i> Publicação imediata</span>
+                    </div>
+                </div>
+
+                <div class="hero-product reveal delay-1" aria-label="Exemplo do editor Menu no Ar">
+                    <div class="product-halo" aria-hidden="true"></div>
+                    <div class="floating-note note-live">
+                        <span class="live-dot"></span>
+                        Alterações online
+                    </div>
+                    <div class="floating-note note-edit">
+                        <i class="ph ph-pencil-simple"></i>
+                        Toca. Edita. Publica.
+                    </div>
+
+                    <div class="phone-shell">
+                        <div class="phone-top" aria-hidden="true">
+                            <span></span>
+                        </div>
+                        <!-- Este conteúdo pode ser trocado mais tarde por uma imagem dentro de .phone-screen. -->
+                        <div class="phone-screen" data-dashboard-screenshot-slot>
+                            <div class="demo-cover">
+                                <div class="demo-cover-pattern" aria-hidden="true"></div>
+                                <button type="button" aria-label="Editar capa"><i
+                                        class="ph-fill ph-pencil-simple"></i></button>
+                            </div>
+                            <div class="demo-identity">
+                                <button type="button" aria-label="Editar restaurante"><i
+                                        class="ph-fill ph-pencil-simple"></i></button>
+                                <strong>Casa Aurora</strong>
+                                <span>Sabores honestos, todos os dias.</span>
+                                <div class="demo-details">
+                                    <span><i class="ph ph-wifi-high"></i> Aurora Guest</span>
+                                    <span><i class="ph ph-phone"></i> 21 000 00 00</span>
+                                </div>
+                            </div>
+                            <div class="demo-tabs">
+                                <span class="active">Favoritos</span>
+                                <span>Entradas</span>
+                                <span>Pratos</span>
+                            </div>
+                            <div class="demo-items">
+                                <article class="demo-item">
+                                    <div>
+                                        <strong>Polvo à Aurora</strong>
+                                        <p>Batata doce, grelos e azeite fumado.</p>
+                                        <b>16,50€</b>
+                                    </div>
+                                    <span class="demo-food demo-food-one" aria-hidden="true"></span>
+                                    <button type="button" aria-label="Editar prato"><i
+                                            class="ph-fill ph-pencil-simple"></i></button>
+                                </article>
+                                <article class="demo-item">
+                                    <div>
+                                        <strong>Arroz do mar</strong>
+                                        <p>Peixe fresco, tomate e coentros.</p>
+                                        <b>14,00€</b>
+                                    </div>
+                                    <span class="demo-food demo-food-two" aria-hidden="true"></span>
+                                    <button type="button" aria-label="Editar prato"><i
+                                            class="ph-fill ph-pencil-simple"></i></button>
+                                </article>
+                                <div class="demo-add"><i class="ph ph-plus"></i></div>
+                                <small>Menu digital por <b>Menu no Ar</b></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="qr-float" aria-hidden="true">
+                        <div class="mini-qr">
+                            <span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <div><strong>Um QR.</strong><small>Sempre o mesmo.</small></div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- CREATION OPTIONS -->
-        <section class="creation-options" style="z-index: 10;">
-            <div class="container drop-shadow-lg">
-                <div class="options-grid">
-                    <div class="option-card">
-                        <div class="option-icon"><i class="ph ph-magic-wand"></i></div>
-                        <h3>Comece do Zero</h3>
-                        <p>Utilize os nossos modelos desenhados à medida e o editor Pure Canvas para construir um menu
-                            perfeito à sua imagem.</p>
-                        <a href="signup.html" class="btn option-btn">Criar Menu <i class="ph ph-arrow-right"></i></a>
-                    </div>
-                    <div class="option-card">
-                        <div class="option-icon" style="background: rgba(0,0,0,0.05); color: #000;"><i
-                                class="ph ph-file-pdf"></i></div>
-                        <h3>Importe o seu PDF</h3>
-                        <p>Já tem o design feito? Importe o ficheiro PDF de alta resolução da sua ementa atual em apenas
-                            2 cliques.</p>
-                        <a href="signup.html" class="btn option-btn option-btn-secondary">Importar <i
-                                class="ph ph-arrow-right"></i></a>
-                    </div>
+        <section class="signal-strip" aria-label="Resumo do produto">
+            <div class="site-container signal-grid">
+                <div><strong>01</strong><span>Um editor visual</span></div>
+                <div><strong>01</strong><span>Um link para partilhar</span></div>
+                <div><strong>00</strong><span>Reimpressões necessárias</span></div>
+            </div>
+        </section>
+
+        <section id="como-funciona" class="process-section section-space">
+            <div class="site-container">
+                <div class="section-intro reveal">
+                    <div class="eyebrow"><span></span> Simples desde o primeiro prato</div>
+                    <h2>Do restaurante para o telemóvel em três passos.</h2>
+                    <p>Sem configurações técnicas, ficheiros perdidos ou páginas difíceis de manter.</p>
+                </div>
+
+                <div class="process-grid">
+                    <article class="process-step reveal">
+                        <span class="step-number">01</span>
+                        <div class="step-icon"><i class="ph ph-storefront"></i></div>
+                        <h3>Cria a tua casa</h3>
+                        <p>Adiciona o nome, a capa e os contactos do restaurante. A base fica pronta em minutos.</p>
+                    </article>
+                    <article class="process-step reveal delay-1">
+                        <span class="step-number">02</span>
+                        <div class="step-icon"><i class="ph ph-cursor-click"></i></div>
+                        <h3>Edita sobre o menu</h3>
+                        <p>Organiza categorias e pratos no mesmo ecrã que replica a experiência final do cliente.</p>
+                    </article>
+                    <article class="process-step reveal delay-2">
+                        <span class="step-number">03</span>
+                        <div class="step-icon"><i class="ph ph-qr-code"></i></div>
+                        <h3>Coloca no ar</h3>
+                        <p>Descarrega o QR, partilha o link e altera preços ou pratos sem substituir o código.</p>
+                    </article>
                 </div>
             </div>
         </section>
 
-        <!-- EXPERIENCE THE FUTURE -->
-        <section class="experience-section">
-            <div class="container grid-2">
-                <div class="experience-content reveal">
-                    <span class="label">O FUTURO É AGORA</span>
-                    <h2>A primeira impressão <br>nunca foi tão rápida.</h2>
-                    <p>O seu menu não é apenas uma lista de preços, é uma extensão da sua marca. Com o Menu no Ar, a
-                        transição do físico para o digital é instantânea e luxuosa.</p>
-                    <ul class="check-list">
-                        <li><i class="ph ph-fast-forward"></i> Carregamento ultra-rápido</li>
-                        <li><i class="ph ph-device-mobile"></i> Mobile-first design</li>
-                        <li><i class="ph ph-lightning"></i> Edição em tempo real</li>
+        <section id="vantagens" class="product-section section-space">
+            <div class="site-container product-grid">
+                <div class="editor-window reveal" aria-hidden="true">
+                    <div class="editor-rail">
+                        <img src="assets/images/logominimal.svg" alt="">
+                        <span class="active"><i class="ph ph-palette"></i></span>
+                        <span><i class="ph ph-text-aa"></i></span>
+                        <span><i class="ph ph-qr-code"></i></span>
+                    </div>
+                    <div class="editor-canvas-demo">
+                        <div class="canvas-bar"><span></span><span></span><span></span></div>
+                        <div class="canvas-cover"></div>
+                        <strong>O teu restaurante</strong>
+                        <p>O menu muda enquanto editas.</p>
+                        <div class="canvas-tabs"><span></span><span></span><span></span></div>
+                        <div class="canvas-row"><span></span><i></i></div>
+                        <div class="canvas-row"><span></span><i></i></div>
+                    </div>
+                    <div class="editor-caption"><i class="ph-fill ph-eye"></i> Preview 1:1 em tempo real</div>
+                </div>
+
+                <div class="product-copy reveal delay-1">
+                    <div class="eyebrow eyebrow-light"><span></span> O editor é o próprio menu</div>
+                    <h2>Se está certo aqui, está certo para o cliente.</h2>
+                    <p>Em vez de preencher formulários sem contexto, trabalhas diretamente sobre uma réplica do menu
+                        publicado. Os botões de edição aparecem apenas para ti.</p>
+                    <ul class="product-list">
+                        <li><i class="ph-fill ph-check-circle"></i><span><strong>Preview fiel.</strong> Mesmas fontes,
+                                cores, proporções e conteúdo.</span></li>
+                        <li><i class="ph-fill ph-check-circle"></i><span><strong>Feito para mudar.</strong> Atualiza um
+                                preço ou esconde um prato em segundos.</span></li>
+                        <li><i class="ph-fill ph-check-circle"></i><span><strong>Marca tua.</strong> Escolhe capa, fonte,
+                                cores e destaques.</span></li>
                     </ul>
                 </div>
-                <div class="experience-image reveal delay-2">
-                    <img src="assets/images/qr_scan.png" alt="QR Scan Experience" class="premium-img">
+            </div>
+        </section>
+
+        <section class="benefits-section section-space">
+            <div class="site-container">
+                <div class="section-intro section-intro-row reveal">
+                    <div>
+                        <div class="eyebrow"><span></span> Menos gestão. Mais clareza.</div>
+                        <h2>Tudo o que o menu precisa.<br>Nada que atrapalhe.</h2>
+                    </div>
+                    <p>Uma ferramenta pensada para negócios de restauração que precisam de autonomia, não de mais um
+                        sistema complicado.</p>
+                </div>
+
+                <div class="benefits-grid">
+                    <article class="benefit-card benefit-wide reveal">
+                        <div class="benefit-icon"><i class="ph ph-arrows-clockwise"></i></div>
+                        <h3>O QR fica. O menu evolui.</h3>
+                        <p>Imprime uma vez e altera pratos, categorias ou preços sempre que for preciso.</p>
+                        <div class="qr-rings" aria-hidden="true"><span></span><span></span><i
+                                class="ph ph-qr-code"></i></div>
+                    </article>
+                    <article class="benefit-card reveal delay-1">
+                        <div class="benefit-icon"><i class="ph ph-device-mobile"></i></div>
+                        <h3>Mobile desde a origem</h3>
+                        <p>Leitura rápida, navegação por categorias e sem PDFs difíceis de ampliar.</p>
+                    </article>
+                    <article class="benefit-card reveal delay-2">
+                        <div class="benefit-icon"><i class="ph ph-image-square"></i></div>
+                        <h3>Imagens bem enquadradas</h3>
+                        <p>Recorta capas e fotografias dos pratos nas proporções certas antes de publicar.</p>
+                    </article>
                 </div>
             </div>
         </section>
 
-        <!-- BENTO FEATURES -->
-        <section id="funciona">
-            <div class="container">
-                <div class="section-header reveal">
-                    <h2>Engenharia visual aplicada.</h2>
-                    <p>Tudo o que precisa para gerir o seu menu digital com máxima performance.</p>
+        <section id="precos" class="pricing-minimal section-space">
+            <div class="site-container">
+                <div class="section-intro pricing-intro reveal">
+                    <div class="eyebrow"><span></span> Começa pequeno. Cresce quando fizer sentido.</div>
+                    <h2>Dois planos, sem letras pequenas.</h2>
+                    <p>O plano grátis serve para criar e validar o menu. O Pro retira limites quando o restaurante está
+                        pronto para o usar todos os dias.</p>
                 </div>
 
-                <div class="bento-grid">
-                    <div class="bento-card reveal delay-1">
-                        <div class="bento-img-container">
-                            <img src="assets/images/qr_scan.png" alt="QR Code">
+                <div class="pricing-grid">
+                    <article class="pricing-card reveal">
+                        <div class="plan-topline">
+                            <span class="plan-name">Grátis</span>
+                            <span class="plan-purpose">Para começar</span>
                         </div>
-                        <div class="bento-text">
-                            <i class="ph ph-qr-code"></i>
-                            <h3>QR Code Dinâmico</h3>
-                            <p>Altere o seu menu em tempo real sem nunca trocar o código impresso. Atualizações
-                                instantâneas.</p>
-                        </div>
-                    </div>
-                    <div class="bento-card reveal delay-2">
-                        <div class="bento-img-container">
-                            <img src="assets/images/editor_ui.png" alt="Editor">
-                        </div>
-                        <div class="bento-text">
-                            <i class="ph ph-layout"></i>
-                            <h3>Editor Pure Canvas</h3>
-                            <p>Interface direta. Sem abas escondidas. O que vê no editor é exatamente o que o cliente
-                                recebe.</p>
-                        </div>
-                    </div>
-                    <div class="bento-card reveal delay-3">
-                        <div class="bento-img-container">
-                            <img src="assets/images/menu_design.png" alt="Design">
-                        </div>
-                        <div class="bento-text">
-                            <i class="ph ph-sparkle"></i>
-                            <h3>Design Minimal</h3>
-                            <p>Focado na leitura e conversão. Menus que não apenas informam, mas elevam a marca.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PRICING SECTION -->
-        <section class="pricing-minimal">
-            <div class="container reveal">
-                <div class="pricing-card-refined">
-                    <div class="pricing-info">
-                        <div class="plan-label">PLANO PRO</div>
-                        <div class="price-value">15€<span>/mês</span></div>
-                        <p class="plan-description">Acesso total a todas as ferramentas de gestão e personalização.</p>
-                        <a href="signup.html" class="btn btn-primary btn-pricing">Subscrever Agora</a>
-                    </div>
-                    <div class="pricing-features">
+                        <div class="price-value"><strong>0€</strong><span>/mês</span></div>
+                        <p class="plan-description">Cria um menu funcional, testa a experiência e começa a partilhar.</p>
+                        <a class="button button-secondary button-full" href="signup.html">Criar menu grátis</a>
                         <ul class="feature-list">
-                            <li><i class="ph ph-check-circle"></i> Categorias e itens ilimitados</li>
-                            <li><i class="ph ph-check-circle"></i> QR Code dinâmico personalizável</li>
-                            <li><i class="ph ph-check-circle"></i> Editor 'Pure Canvas' em tempo real</li>
-                            <li><i class="ph ph-check-circle"></i> Modo 'Smart PDF' incluído</li>
-                            <li><i class="ph ph-check-circle"></i> Suporte prioritário 24/7</li>
-                            <li><i class="ph ph-check-circle"></i> Sem fidelização, cancele quando quiser</li>
+                            <li><i class="ph-fill ph-check-circle"></i> 1 menu digital</li>
+                            <li><i class="ph-fill ph-check-circle"></i> Até 3 categorias e 15 pratos</li>
+                            <li><i class="ph-fill ph-check-circle"></i> Link público e QR Code base</li>
+                            <li><i class="ph-fill ph-check-circle"></i> Capa, contactos e imagens</li>
+                            <li class="muted"><i class="ph ph-minus-circle"></i> Personalização avançada</li>
                         </ul>
-                    </div>
+                    </article>
+
+                    <article class="pricing-card pricing-card-featured reveal delay-1">
+                        <div class="popular-label"><i class="ph-fill ph-sparkle"></i> Escolha profissional</div>
+                        <div class="plan-topline">
+                            <span class="plan-name">Pro</span>
+                            <span class="plan-purpose">Para servir clientes</span>
+                        </div>
+                        <div class="price-value"><strong>15€</strong><span>/mês</span></div>
+                        <p class="plan-description">Liberdade total para gerir um menu completo e alinhado com a tua
+                            marca.</p>
+                        <a class="button button-primary button-full" href="signup.html">Começar com o Pro <i
+                                class="ph ph-arrow-right"></i></a>
+                        <ul class="feature-list">
+                            <li><i class="ph-fill ph-check-circle"></i> Categorias e pratos ilimitados</li>
+                            <li><i class="ph-fill ph-check-circle"></i> Cores e fontes personalizadas</li>
+                            <li><i class="ph-fill ph-check-circle"></i> QR personalizado em PNG e PDF</li>
+                            <li><i class="ph-fill ph-check-circle"></i> Gestão completa de imagens e ordem</li>
+                            <li><i class="ph-fill ph-check-circle"></i> Suporte prioritário</li>
+                        </ul>
+                        <small>Sem fidelização. Cancela quando quiseres.</small>
+                    </article>
                 </div>
             </div>
         </section>
 
-        <!-- FINAL CTA + FOOTER SECTION -->
         <section class="final-cta">
-            <div class="container reveal">
-                <div class="cta-content">
-                    <h2 class="cta-heading">Pronto para elevar o seu restaurante?</h2>
-                    <a href="signup.html" class="btn btn-primary btn-cta">Criar Conta Gratuita</a>
+            <div class="site-container final-cta-inner reveal">
+                <div>
+                    <span class="cta-kicker">A próxima atualização demora segundos.</span>
+                    <h2>Hoje crias o menu.<br>Amanhã só tens de o editar.</h2>
                 </div>
-
-                <div class="footer-minimal">
-                    <div class="footer-grid">
-                        <div class="footer-col">
-                            <div class="footer-logo">MENU NO AR</div>
-                            <p class="footer-tagline">Design em Portugal.<br>Performance Global.</p>
-                        </div>
-                        <div class="footer-col">
-                            <h4 class="footer-title">Recursos</h4>
-                            <a href="#">Preços</a>
-                            <a href="#">Blog</a>
-                        </div>
-                        <div class="footer-col">
-                            <h4 class="footer-title">Legal</h4>
-                            <a href="#">Privacidade</a>
-                            <a href="#">Termos</a>
-                        </div>
-                        <div class="footer-col">
-                            <h4 class="footer-title">Social</h4>
-                            <a href="#">Instagram</a>
-                            <a href="#">LinkedIn</a>
-                        </div>
-                    </div>
-                    <div class="footer-bottom">
-                        &copy; 2026 Menu no Ar. Todos os direitos reservados.
-                    </div>
-                </div>
+                <a class="button button-light" href="signup.html">Colocar o meu menu no ar <i
+                        class="ph ph-arrow-up-right"></i></a>
             </div>
         </section>
     </main>
 
-    <!-- Scripts -->
-    <script type="module" src="js/script.js"></script>
+    <footer class="site-footer">
+        <div class="site-container">
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <img src="assets/images/logo.svg" alt="Menu no Ar">
+                    <p>Menus digitais que se editam<br>com a mesma facilidade com que se usam.</p>
+                </div>
+                <div class="footer-links">
+                    <div>
+                        <strong>Produto</strong>
+                        <a href="#como-funciona">Como funciona</a>
+                        <a href="#vantagens">Vantagens</a>
+                        <a href="#precos">Planos</a>
+                    </div>
+                    <div>
+                        <strong>Conta</strong>
+                        <a href="signup.html">Criar menu</a>
+                        <a href="login.html">Entrar</a>
+                    </div>
+                    <div>
+                        <strong>Falar connosco</strong>
+                        <a href="mailto:ola@menunoar.pt">ola@menunoar.pt</a>
+                        <span>Portugal</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© <span data-current-year>2026</span> Menu no Ar</span>
+                <span>Feito para restaurantes que mudam todos os dias.</span>
+            </div>
+        </div>
+    </footer>
 </body>
 
 </html>

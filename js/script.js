@@ -1,297 +1,69 @@
-// Initialize Supabase
-// IMPORTANTE: Para sites puramente estáticos (HTML/JS) no Vercel, as variáveis de ambiente normais (process.env) NÃO estão disponíveis no browser.
-// Tens duas opções:
-// 1. Colar as chaves diretamente aqui (A chave 'anon' é pública, por isso é seguro para este tipo de site).
-// 2. Se quiseres mesmo usar Env Vars do Vercel, terias de usar uma Vercel Serverless Function para injetar estas chaves, o que é mais complexo.
-// RECOMENDAÇÃO: Cola as chaves aqui. É seguro para a chave ANON.
+const header = document.querySelector('[data-site-header]');
+const menuToggle = document.querySelector('[data-menu-toggle]');
+const mobileNav = document.querySelector('[data-mobile-nav]');
 
-let supabaseClient;
-
-// Função para iniciar o Supabase buscando as keys ao servidor (Vercel)
-async function initSupabase() {
-    try {
-        const response = await fetch('/api/config');
-        if (!response.ok) throw new Error('Falha ao carregar configuração');
-
-        const config = await response.json();
-
-        if (!config.supabaseUrl || !config.supabaseAnonKey) {
-            console.warn('Supabase keys em falta nas Environment Variables do Vercel.');
-            return;
-        }
-
-        supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
-        console.log('Supabase initialized via Vercel Env Vars');
-    } catch (error) {
-        console.error('Erro a inicializar:', error);
-    }
+function syncHeader() {
+    header?.classList.toggle('is-scrolled', window.scrollY > 12);
 }
 
-// Inicializar
-initSupabase();
+function closeMobileMenu() {
+    if (!menuToggle || !mobileNav) return;
 
-// Scroll Handling for Navbar Animation
-// Scroll Handling for Navbar Animation (Desktop Only)
-window.addEventListener('scroll', () => {
-    // Only run on desktop
-    if (!window.matchMedia("(min-width: 769px)").matches) return;
-
-    // Se passarmos dos 50px de scroll, ativa o modo "scrolled" (encolhe)
-    if (window.scrollY > 50) {
-        document.body.classList.add('scrolled');
-    } else {
-        // Se voltarmos ao topo, volta ao normal
-        document.body.classList.remove('scrolled');
-    }
-
-    // Curved Scroll Path Tracking
-    updateScrollPath();
-});
-
-function updateScrollPath() {
-    // Only run on desktop where the SVG tracker is visible
-    if (!window.matchMedia("(min-width: 769px)").matches) return;
-
-    const path = document.getElementById('pathLineFg');
-    const arrow = document.getElementById('scrollArrow');
-    if (!path || !arrow) return;
-
-    const length = path.getTotalLength();
-    if (!length || length === 0) return; // Guard for zero length
-
-    path.style.strokeDasharray = length;
-
-    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-
-    // Safety check for scrollPercentage
-    let scrollPercentage = (maxScroll > 0) ? (scrollY / maxScroll) : 0;
-    scrollPercentage = Math.max(0, Math.min(1, scrollPercentage));
-
-    if (!isFinite(scrollPercentage)) scrollPercentage = 0;
-
-    path.style.strokeDashoffset = length * (1 - scrollPercentage);
-
-    // Position arrow
-    const point = path.getPointAtLength(length * scrollPercentage);
-
-    // Scale points (0-100 x 0-500) to actual container pixels
-    const svgRect = path.parentElement.getBoundingClientRect();
-    const svgWidth = svgRect.width;
-    const svgHeight = svgRect.height;
-
-    const x = (point.x / 100) * svgWidth;
-    const y = (point.y / 500) * svgHeight;
-
-    arrow.style.left = `${x}px`;
-    arrow.style.top = `${y}px`;
-
-    // Angle/Rotation calculation
-    // Use a small segment for direction. If at the very end, look backwards.
-    let dx, dy;
-    if (scrollPercentage < 0.99) {
-        const nextPoint = path.getPointAtLength(Math.min(length, length * scrollPercentage + 2));
-        dx = (nextPoint.x - point.x) * (svgWidth / 100);
-        dy = (nextPoint.y - point.y) * (svgHeight / 500);
-    } else {
-        const prevPoint = path.getPointAtLength(Math.max(0, length * scrollPercentage - 2));
-        dx = (point.x - prevPoint.x) * (svgWidth / 100);
-        dy = (point.y - prevPoint.y) * (svgHeight / 500);
-    }
-
-    const angle = Math.atan2(dy, dx);
-    // Subtract 90 degrees because ph-arrow-down points downwards by default
-    arrow.style.transform = `translate(-50%, -50%) rotate(${angle * 180 / Math.PI - 90}deg)`;
+    mobileNav.hidden = true;
+    menuToggle.setAttribute('aria-expanded', 'false');
+    menuToggle.setAttribute('aria-label', 'Abrir menu');
+    menuToggle.innerHTML = '<i class="ph ph-list"></i>';
+    header?.classList.remove('menu-visible');
+    document.body.classList.remove('menu-open');
 }
 
-// Initial call
-window.addEventListener('DOMContentLoaded', () => {
-    updateScrollPath();
-    initRevealObserver();
-});
-window.addEventListener('resize', updateScrollPath);
+function toggleMobileMenu() {
+    if (!menuToggle || !mobileNav) return;
 
-function initRevealObserver() {
+    const shouldOpen = mobileNav.hidden;
+    mobileNav.hidden = !shouldOpen;
+    menuToggle.setAttribute('aria-expanded', String(shouldOpen));
+    menuToggle.setAttribute('aria-label', shouldOpen ? 'Fechar menu' : 'Abrir menu');
+    menuToggle.innerHTML = shouldOpen
+        ? '<i class="ph ph-x"></i>'
+        : '<i class="ph ph-list"></i>';
+    header?.classList.toggle('menu-visible', shouldOpen);
+    document.body.classList.toggle('menu-open', shouldOpen);
+}
+
+function initReveals() {
+    const elements = document.querySelectorAll('.reveal:not(.is-visible)');
+
+    if (!('IntersectionObserver' in window)) {
+        elements.forEach((element) => element.classList.add('is-visible'));
+        return;
+    }
+
     const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
-            }
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
         });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-}
-
-// Scroll Handling for Links
-function scrollToSection(id) {
-    const element = document.getElementById(id);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-    }
-}
-
-// Intercept clicks on links to use the centered scroll
-document.addEventListener('DOMContentLoaded', () => {
-    // Mobile Hamburger Menu
-    const hamburger = document.querySelector('.hamburger');
-    const navLinks = document.querySelector('.nav-links');
-
-    if (hamburger && navLinks) {
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navLinks.classList.toggle('active');
-        });
-
-        // Close menu when clicking a link
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('active');
-            });
-        });
-    }
-
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const id = this.getAttribute('href').substring(1);
-            scrollToSection(id);
-        });
+    }, {
+        rootMargin: '0px 0px -8% 0px',
+        threshold: 0.12,
     });
+
+    elements.forEach((element) => observer.observe(element));
+}
+
+menuToggle?.addEventListener('click', toggleMobileMenu);
+mobileNav?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMobileMenu));
+
+window.addEventListener('scroll', syncHeader, { passive: true });
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 860) closeMobileMenu();
 });
 
-// Form Handling
-const contactForm = document.getElementById('contactForm');
-const formStatus = document.getElementById('formStatus');
-
-if (contactForm) {
-    contactForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        if (!supabaseClient) {
-            formStatus.textContent = 'Erro: Supabase ainda não carregou ou chaves em falta.';
-            formStatus.style.color = 'red';
-            // Tenta iniciar novamente caso tenha falhado
-            await initSupabase();
-            if (!supabaseClient) return;
-        }
-
-        const formData = new FormData(contactForm);
-        const data = {
-            name: formData.get('name'),
-            email: formData.get('email'),
-            service: formData.get('service'),
-            created_at: new Date().toISOString()
-        };
-
-        formStatus.textContent = 'A enviar... Aguenta aí.';
-        formStatus.style.color = 'orange';
-
-        try {
-            const { error } = await supabaseClient
-                .from('contacts')
-                .insert([data]);
-
-            if (error) throw error;
-
-            formStatus.textContent = 'Boa! Recebemos a tua mensagem. Vamos responder rápido!';
-            formStatus.style.color = 'green';
-            contactForm.reset();
-
-        } catch (error) {
-            console.error('Error submitting form:', error);
-            formStatus.textContent = 'Ops! Algo correu mal. Tenta outra vez.';
-            formStatus.style.color = 'red';
-        }
-    });
-}
-// --- INTELLIGENT ALL-DEVICE REELS SCROLL ---
-let isAnimating = false;
-let targetIdx = 0;
-const snapSections = document.querySelectorAll('main > section');
-let scrollCooldown = false;
-
-function performSmoothSnap(index, duration = 650) {
-    if (!window.matchMedia("(min-width: 769px)").matches) return;
-
-    if (index < 0) index = 0;
-    if (index >= snapSections.length) index = snapSections.length - 1;
-
-    targetIdx = index;
-    if (isAnimating) return;
-
-    isAnimating = true;
-
-    function animate() {
-        const windowHeight = window.innerHeight;
-        const startY = window.pageYOffset || document.documentElement.scrollTop;
-        const currentTargetY = targetIdx * windowHeight;
-        const diff = currentTargetY - startY;
-        let start = null;
-
-        const distanceMultiplier = Math.min(2, Math.max(1, Math.abs(diff) / windowHeight));
-        const adjustedDuration = duration * (distanceMultiplier > 1 ? 1.2 : 1);
-
-        function step(timestamp) {
-            if (!start) start = timestamp;
-            const progress = timestamp - start;
-            const percent = Math.min(progress / adjustedDuration, 1);
-
-            const easing = 1 - Math.pow(1 - percent, 4);
-            window.scrollTo(0, startY + diff * easing);
-
-            if (progress < adjustedDuration) {
-                if (currentTargetY !== targetIdx * windowHeight) {
-                    start = null;
-                    window.requestAnimationFrame(animate);
-                    return;
-                }
-                window.requestAnimationFrame(step);
-            } else {
-                const finalY = targetIdx * windowHeight;
-                if (Math.abs(window.pageYOffset - finalY) > 2) {
-                    window.requestAnimationFrame(animate);
-                } else {
-                    isAnimating = false;
-                }
-            }
-        }
-        window.requestAnimationFrame(step);
-    }
-    animate();
-}
-
-// Wheel Listener (Desktop Only)
-window.addEventListener('wheel', (e) => {
-    if (!window.matchMedia("(min-width: 769px)").matches) return;
-
-    if (e.cancelable) e.preventDefault();
-    if (scrollCooldown || isAnimating && Math.abs(e.deltaY) < 50) return;
-    if (Math.abs(e.deltaY) < 30) return;
-
-    let jumpCount = 1;
-    if (Math.abs(e.deltaY) > 300) jumpCount = 2;
-    if (Math.abs(e.deltaY) > 800) jumpCount = 3;
-
-    const direction = e.deltaY > 0 ? 1 : -1;
-    performSmoothSnap(targetIdx + (direction * jumpCount));
-
-    scrollCooldown = true;
-    setTimeout(() => { scrollCooldown = false; }, 150);
-}, { passive: false });
-
-// Mobile Touch events are handled by native CSS scroll-snap from index.css
-
-// Keyboard
-window.addEventListener('keydown', (e) => {
-    if (!window.matchMedia("(min-width: 769px)").matches) return;
-
-    if (e.key === 'ArrowDown' || e.key === ' ') {
-        e.preventDefault();
-        performSmoothSnap(targetIdx + 1);
-    } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        performSmoothSnap(targetIdx - 1);
-    }
+document.querySelectorAll('[data-current-year]').forEach((element) => {
+    element.textContent = String(new Date().getFullYear());
 });
+
+syncHeader();
+initReveals();
