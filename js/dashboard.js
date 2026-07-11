@@ -140,6 +140,11 @@ const TUTORIAL_STEPS = [
         text: 'Abre o URL publico para confirmares a versao final como o cliente ve.',
     },
     {
+        target: '#deleteRestaurantBtn',
+        title: 'Eliminar restaurante',
+        text: 'O caixote apaga o menu completo. Para evitar acidentes, tens de escrever o nome do restaurante antes de confirmar.',
+    },
+    {
         target: '#logoutBtn',
         title: 'Sair',
         text: 'Termina a sessao desta conta com seguranca.',
@@ -1042,6 +1047,94 @@ function closeCategoriesModal() {
     qs('categoriesModal').hidden = true;
 }
 
+function syncDeleteRestaurantButton() {
+    const confirmationInput = qs('deleteRestaurantConfirmInput');
+    const confirmButton = qs('confirmDeleteRestaurantBtn');
+    if (!confirmationInput || !confirmButton) return;
+    confirmButton.disabled = confirmationInput.value.trim() !== app.restaurant?.name;
+}
+
+function openDeleteRestaurantModal() {
+    if (!app.restaurant) return;
+    const modal = qs('deleteRestaurantModal');
+    const confirmationInput = qs('deleteRestaurantConfirmInput');
+    const errorElement = qs('deleteRestaurantError');
+    qs('deleteRestaurantName').textContent = app.restaurant.name;
+    confirmationInput.value = '';
+    errorElement.hidden = true;
+    syncDeleteRestaurantButton();
+    modal.hidden = false;
+    window.setTimeout(() => confirmationInput.focus(), 40);
+}
+
+async function removeRestaurantAssets() {
+    const ownerFolder = app.user?.id;
+    if (!ownerFolder) return null;
+
+    const { data: files, error: listError } = await app.supabase.storage
+        .from('menu-assets')
+        .list(ownerFolder, { limit: 1000 });
+    if (listError) return listError;
+
+    const assetPaths = (files || [])
+        .filter((file) => file.name && file.name !== '.emptyFolderPlaceholder')
+        .map((file) => `${ownerFolder}/${file.name}`);
+    if (!assetPaths.length) return null;
+
+    const { error: removeError } = await app.supabase.storage
+        .from('menu-assets')
+        .remove(assetPaths);
+    return removeError || null;
+}
+
+async function deleteRestaurant(event) {
+    event.preventDefault();
+    if (!app.supabase || !app.restaurant) return;
+
+    const confirmationInput = qs('deleteRestaurantConfirmInput');
+    const confirmButton = qs('confirmDeleteRestaurantBtn');
+    const errorElement = qs('deleteRestaurantError');
+    const restaurantName = app.restaurant.name;
+    if (confirmationInput.value.trim() !== restaurantName) {
+        errorElement.textContent = 'Escreve o nome do restaurante exatamente para confirmar.';
+        errorElement.hidden = false;
+        syncDeleteRestaurantButton();
+        return;
+    }
+
+    confirmButton.disabled = true;
+    errorElement.hidden = true;
+    setSaveStatus('A eliminar restaurante...');
+
+    const assetsError = await removeRestaurantAssets();
+    if (assetsError) {
+        console.error(assetsError);
+        errorElement.textContent = 'Não foi possível eliminar as imagens do restaurante.';
+        errorElement.hidden = false;
+        syncDeleteRestaurantButton();
+        return;
+    }
+
+    const { error } = await app.supabase
+        .from('restaurants')
+        .delete()
+        .eq('id', app.restaurant.id);
+    if (error) {
+        console.error(error);
+        errorElement.textContent = error.message || 'Não foi possível eliminar o restaurante.';
+        errorElement.hidden = false;
+        syncDeleteRestaurantButton();
+        return;
+    }
+
+    app.restaurant = null;
+    app.items = [];
+    app.activeCategory = null;
+    qs('deleteRestaurantModal').hidden = true;
+    renderEmptyState();
+    setSaveStatus('Restaurante eliminado', true);
+}
+
 function addCategoryRow(value = 'Nova categoria') {
     const list = qs('categoriesList');
     if (!list) return;
@@ -1628,6 +1721,9 @@ function bindEvents() {
         handleEditorClick(event);
     });
     qs('editCategoriesBtn').addEventListener('click', openCategoriesModal);
+    qs('deleteRestaurantBtn').addEventListener('click', openDeleteRestaurantModal);
+    qs('deleteRestaurantConfirmInput').addEventListener('input', syncDeleteRestaurantButton);
+    qs('deleteRestaurantForm').addEventListener('submit', deleteRestaurant);
     qs('categoryEditor').addEventListener('click', handleEditorClick);
     qs('createRestaurantForm').addEventListener('submit', createRestaurant);
 

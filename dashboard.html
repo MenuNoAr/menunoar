@@ -13,7 +13,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/menu.css?v=3.0">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.31">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.32">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
@@ -94,6 +94,10 @@
                 <button class="nav-icon" id="openTutorialBtn" type="button" aria-label="Abrir tutorial"
                     title="Abrir tutorial">
                     <i class="fa-solid fa-circle-question"></i>
+                </button>
+                <button class="nav-icon nav-icon-danger" id="deleteRestaurantBtn" type="button"
+                    aria-label="Eliminar restaurante" title="Eliminar restaurante">
+                    <i class="fa-solid fa-trash"></i>
                 </button>
                 <button class="nav-icon nav-icon-danger" id="logoutBtn" type="button" onclick="signOut()"
                     aria-label="Terminar sessão" title="Terminar sessão">
@@ -300,6 +304,38 @@
         </section>
     </div>
 
+    <div id="deleteRestaurantModal" class="modal-backdrop" hidden>
+        <section class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="deleteRestaurantTitle">
+            <div class="modal-head">
+                <div class="modal-head-copy">
+                    <span class="state-kicker">Ação irreversível</span>
+                    <h2 id="deleteRestaurantTitle">Eliminar restaurante</h2>
+                </div>
+                <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="deleteRestaurantForm" class="modal-form">
+                <p class="delete-restaurant-copy">
+                    Esta ação elimina o menu, categorias, pratos e imagens carregadas. Para confirmar, escreve
+                    <strong id="deleteRestaurantName"></strong> exatamente como aparece acima.
+                </p>
+                <label class="form-field">
+                    <span>Nome do restaurante</span>
+                    <input id="deleteRestaurantConfirmInput" type="text" autocomplete="off" spellcheck="false">
+                </label>
+                <p id="deleteRestaurantError" class="form-note" hidden></p>
+                <div class="modal-actions">
+                    <button class="button-secondary" type="button" data-close-modal>Cancelar</button>
+                    <button id="confirmDeleteRestaurantBtn" class="button-primary button-danger" type="submit" disabled>
+                        Eliminar tudo
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+
     <div id="imageCropModal" class="modal-backdrop" hidden>
         <section class="editor-modal editor-modal-wide crop-modal" role="dialog" aria-modal="true"
             aria-labelledby="cropModalTitle">
@@ -420,7 +456,7 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=10.1"></script>
+    <script type="module" src="js/dashboard.js?v=10.2"></script>
 </body>
 
 </html>

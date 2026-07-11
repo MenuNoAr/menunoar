@@ -1031,6 +1031,29 @@ a {
     color: #fff;
 }
 
+.button-danger {
+    border-color: var(--editor-danger);
+    background: var(--editor-danger);
+}
+
+.button-primary:disabled,
+.button-secondary:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+}
+
+.delete-restaurant-copy {
+    margin: 0;
+    color: var(--editor-muted);
+    font-size: 0.88rem;
+    line-height: 1.55;
+}
+
+.delete-restaurant-copy strong {
+    color: var(--editor-ink);
+    overflow-wrap: anywhere;
+}
+
 .button-with-icon {
     display: inline-flex;
     align-items: center;
