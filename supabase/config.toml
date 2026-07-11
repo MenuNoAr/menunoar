@@ -1,0 +1,14 @@
+project_id = "menunoar"
+
+[auth]
+site_url = "https://menunoar.pt"
+additional_redirect_urls = [
+  "https://menunoar.pt/dashboard.html",
+  "https://menunoar-three.vercel.app/dashboard.html",
+]
+
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET)"
+skip_nonce_check = false

@@ -47,7 +47,12 @@ export async function uploadFile(file, namePrefix, bucket = 'menu-assets') {
         }
     }
 
-    const fileName = `${namePrefix}-${Date.now()}.${fileExt}`;
+    const { data: userData, error: userError } = await supabaseInstance.auth.getUser();
+    if (userError || !userData.user) {
+        return { error: userError || { message: 'Authentication required' } };
+    }
+
+    const fileName = `${userData.user.id}/${namePrefix}-${Date.now()}.${fileExt}`;
 
     const { data, error } = await supabaseInstance.storage
         .from(bucket)

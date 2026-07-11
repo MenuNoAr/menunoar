@@ -223,10 +223,20 @@ async function init() {
         if (!response.ok) throw new Error('Configuração indisponível');
         const config = await response.json();
 
-        const supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+        const supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+            auth: {
+                persistSession: false,
+                autoRefreshToken: false,
+                detectSessionInUrl: false,
+            },
+        });
         const { data: restaurant, error: restaurantError } = await supabase
             .from('restaurants')
-            .select('*')
+            .select(`
+                id, name, slug, description, phone, wifi_ssid, wifi_password,
+                cover_url, menu_type, pdf_url, font, color_primary, color_text,
+                color_text_secondary, color_background, category_order, category_images
+            `)
             .eq('slug', slug)
             .maybeSingle();
 

@@ -123,11 +123,17 @@ function renderActiveState(btn, textElement) {
         btn.disabled = true;
 
         try {
+            const supabase = await getSupabase();
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) throw new Error('Sessao expirada');
+
             const res = await fetch('/api/create_portal', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.access_token}`,
+                },
                 body: JSON.stringify({
-                    userId: currentUser.id,
                     returnUrl: window.location.href
                 })
             });

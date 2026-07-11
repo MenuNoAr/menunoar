@@ -1,16 +1,16 @@
 
-import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { authenticateRequest, createSupabaseAdmin } from '../lib/server-auth.js';
 
 export default async function handler(req, res) {
     // Definir cabeçalho JSON logo no início
     res.setHeader('Content-Type', 'application/json');
+    if (req.method !== 'POST') {
+        res.setHeader('Allow', 'POST');
+        return res.status(405).json({ success: false, error: 'Method Not Allowed' });
+    }
 
     try {
-        const { email, userId } = req.body || {};
-
-        // Log básico para debug (Vercel logs)
-        console.log("Request Body:", req.body);
 
         // Check Env Vars
         const config = {
@@ -28,7 +28,11 @@ export default async function handler(req, res) {
         }
 
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-        const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+        const supabase = createSupabaseAdmin();
+        const { user, error: authError } = await authenticateRequest(req, supabase);
+        if (authError) return res.status(401).json({ success: false, error: authError });
+        const userId = user.id;
+        const email = user.email;
 
         // 1. Procurar restaurante
         const { data: rest, error: restError } = await supabase

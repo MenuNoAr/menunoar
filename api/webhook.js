@@ -1,7 +1,7 @@
 
-import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import { buffer } from 'micro';
+import { createSupabaseAdmin } from '../lib/server-auth.js';
 
 // Disable default body parser for this route so we can get raw body for signature verification
 export const config = {
@@ -14,10 +14,7 @@ export const config = {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Initialize Supabase Admin (Service Role) to bypass RLS
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabase = createSupabaseAdmin();
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {

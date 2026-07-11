@@ -1,19 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { authenticateRequest, createSupabaseAdmin } from '../lib/server-auth.js';
+
+const DEFAULT_RETURN_URL = 'https://menunoar.pt/dashboard.html';
+const ALLOWED_RETURN_HOSTS = new Set(['menunoar.pt', 'www.menunoar.pt', 'menunoar-three.vercel.app']);
+
+function getReturnUrl(value) {
+    try {
+        const url = new URL(value || DEFAULT_RETURN_URL);
+        return url.protocol === 'https:' && ALLOWED_RETURN_HOSTS.has(url.hostname)
+            ? url.toString()
+            : DEFAULT_RETURN_URL;
+    } catch {
+        return DEFAULT_RETURN_URL;
+    }
+}
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
     try {
-        const { userId, returnUrl } = req.body;
-        if (!userId) return res.status(400).json({ error: 'Missing userId' });
-
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-        const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+        const supabase = createSupabaseAdmin();
+        const { user, error: authError } = await authenticateRequest(req, supabase);
+        if (authError) return res.status(401).json({ error: authError });
 
         const { data: rest, error } = await supabase
             .from('restaurants')
             .select('stripe_customer_id')
-            .eq('owner_id', userId)
+            .eq('owner_id', user.id)
             .maybeSingle();
 
         if (error || !rest || !rest.stripe_customer_id) {
@@ -22,7 +35,7 @@ export default async function handler(req, res) {
 
         const session = await stripe.billingPortal.sessions.create({
             customer: rest.stripe_customer_id,
-            return_url: returnUrl || 'https://menunoar.pt/dashboard.html',
+            return_url: getReturnUrl(req.body?.returnUrl),
         });
 
         res.status(200).json({ url: session.url });
