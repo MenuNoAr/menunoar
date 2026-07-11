@@ -95,7 +95,9 @@ a {
     border-radius: 8px;
     color: var(--editor-ink);
     font-weight: 600;
+    font-family: inherit;
     text-decoration: none;
+    cursor: pointer;
 }
 
 .state-link-primary {
@@ -104,11 +106,53 @@ a {
     color: #fff;
 }
 
+.state-create-form {
+    display: grid;
+    gap: 14px;
+    margin-top: 4px;
+}
+
+.state-create-form .state-link {
+    width: 100%;
+    justify-content: center;
+}
+
+.save-status {
+    position: fixed;
+    z-index: 1100;
+    bottom: 18px;
+    left: 50%;
+    max-width: min(360px, calc(100vw - 28px));
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    background: rgba(29, 29, 31, 0.94);
+    color: #fff;
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    transform: translate(-50%, 8px);
+    backdrop-filter: blur(14px);
+    font-size: 0.76rem;
+    font-weight: 600;
+    text-align: center;
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.save-status.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.save-status.is-error {
+    border-color: #ffd2d7;
+    background: rgba(126, 8, 22, 0.96);
+}
+
 .dashboard-shell {
     width: 100%;
     height: 100dvh;
     display: grid;
-    grid-template-columns: var(--rail-width) minmax(0, 620px);
+    grid-template-columns: var(--rail-width) minmax(0, var(--menu-canvas-width));
     grid-template-rows: minmax(0, 1fr);
     justify-content: center;
 }
@@ -212,10 +256,11 @@ a {
 
 #mobile-view.menu-editor {
     position: relative;
-    width: min(100%, 620px);
+    width: 100%;
     height: 100%;
     min-height: 0;
     max-height: 100%;
+    max-width: var(--menu-canvas-width);
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -274,28 +319,8 @@ a {
     font-size: 1.35rem;
 }
 
-.editable-copy {
-    outline: none;
-    border-radius: 4px;
-}
-
-.editable-copy:hover {
-    background: rgba(0, 0, 0, 0.035);
-}
-
-.editable-copy:focus {
-    box-shadow: inset 0 -2px var(--primary);
-}
-
-.editable-copy:empty::before {
-    content: 'Adicionar descrição';
-    color: var(--text-muted);
-    opacity: 0.65;
-}
-
 .editor-info-badges {
     position: relative;
-    margin: 10px 0 4px;
 }
 
 .header-content {
@@ -306,15 +331,14 @@ a {
     cursor: default;
 }
 
-.category-tabs {
+.category-tabs-editor {
     flex: 0 0 auto;
     position: relative;
     z-index: 30;
-    min-height: 46px;
-    margin-bottom: 0;
-    padding-top: 4px;
-    padding-right: 58px;
-    padding-bottom: 4px;
+}
+
+.category-tabs-editor .category-tabs {
+    margin-bottom: 10px;
 }
 
 #heroHeader {
@@ -341,10 +365,6 @@ a {
 
 .menu-footer {
     flex: 0 0 auto;
-}
-
-.item-img-placeholder img {
-    opacity: 0.96;
 }
 
 .slide-content {
@@ -808,6 +828,73 @@ a {
     box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.13);
 }
 
+.availability-field {
+    display: flex;
+    min-height: 58px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 10px 12px;
+    border: 1px solid var(--editor-line);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.availability-field > span {
+    display: grid;
+    gap: 2px;
+}
+
+.availability-field strong {
+    color: var(--editor-ink);
+    font-size: 0.78rem;
+}
+
+.availability-field small {
+    color: var(--editor-muted);
+    font-size: 0.7rem;
+}
+
+.availability-field input {
+    position: relative;
+    width: 42px;
+    height: 24px;
+    flex: 0 0 auto;
+    appearance: none;
+    border: 1px solid var(--editor-line-strong);
+    border-radius: 999px;
+    outline: none;
+    background: #d8d8dc;
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease;
+}
+
+.availability-field input::before {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    content: '';
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+    transition: transform 160ms ease;
+}
+
+.availability-field input:checked {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+
+.availability-field input:checked::before {
+    transform: translateX(18px);
+}
+
+.availability-field input:focus-visible {
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.14);
+}
+
 .form-note {
     margin: 0;
     padding: 10px 12px;
@@ -947,14 +1034,11 @@ a {
     right: 10px;
 }
 
-#categoryTabs .item-edit-btn {
-    position: sticky;
-    top: 0;
+#editCategoriesBtn {
+    position: absolute;
+    top: 11px;
     right: 10px;
-    flex: 0 0 32px;
-    align-self: flex-start;
-    margin-left: auto;
-    transform: translateY(-2px);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
 }
 
 .tutorial-overlay {

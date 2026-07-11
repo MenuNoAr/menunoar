@@ -12,8 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/menu.css?v=2.9">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.22">
+    <link rel="stylesheet" href="css/menu.css?v=3.0">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.30">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
@@ -41,8 +41,18 @@
         <div class="state-card">
             <span class="state-kicker">Sem menu</span>
             <h1>Não há restaurante ligado a esta conta.</h1>
-            <p>Cria o teu menu para começares a editar.</p>
-            <a class="state-link state-link-primary" href="create_admin.html">Criar menu</a>
+            <p>Dá um nome ao restaurante para criares a primeira versão do menu.</p>
+            <form id="createRestaurantForm" class="state-create-form">
+                <label class="form-field">
+                    <span>Nome do restaurante</span>
+                    <input id="createRestaurantName" type="text" maxlength="80" required
+                        placeholder="Ex.: Casa Aurora" autocomplete="organization">
+                </label>
+                <p id="createRestaurantError" class="form-note" hidden></p>
+                <button id="createRestaurantBtn" class="state-link state-link-primary" type="submit">
+                    Criar menu
+                </button>
+            </form>
         </div>
     </div>
 
@@ -110,18 +120,20 @@
                             aria-label="Editar restaurante" title="Editar restaurante">
                             <i class="fa-solid fa-pencil"></i>
                         </button>
-                        <h1 id="restName" class="editable-copy"></h1>
-                        <p id="restDesc" class="description editable-copy"></p>
+                        <h1 id="restName"></h1>
+                        <p id="restDesc" class="description"></p>
                         <div id="infoBadges" class="info-badges editor-info-badges"></div>
                     </div>
                 </header>
 
-                <nav id="categoryTabs" class="category-tabs" aria-label="Categorias">
-                    <button class="item-edit-btn" type="button" data-action="open-categories-modal"
+                <div class="category-tabs-editor">
+                    <nav id="categoryTabs" class="category-tabs" aria-label="Categorias"></nav>
+                    <button id="editCategoriesBtn" class="item-edit-btn" type="button"
+                        data-action="open-categories-modal"
                         aria-label="Editar categorias" title="Editar categorias">
                         <i class="fa-solid fa-pencil"></i>
                     </button>
-                </nav>
+                </div>
 
                 <div id="menuSliderWindow" class="slider-window">
                     <div id="menuSliderTrack" class="slider-track">
@@ -132,6 +144,8 @@
             </div>
         </div>
     </main>
+
+    <div id="saveStatus" class="save-status" role="status" aria-live="polite" hidden></div>
 
     <div id="tutorialOverlay" class="tutorial-overlay" hidden>
         <div id="tutorialCards" class="tutorial-cards" aria-label="Tutorial passo a passo do dashboard"
@@ -180,6 +194,13 @@
                 <label class="form-field">
                     <span>Descrição</span>
                     <textarea id="itemDescInput" rows="4"></textarea>
+                </label>
+                <label class="availability-field">
+                    <span>
+                        <strong>Disponível no menu</strong>
+                        <small>Desativa para ocultar o prato sem o apagar.</small>
+                    </span>
+                    <input id="itemAvailableInput" type="checkbox" checked>
                 </label>
                 <div class="modal-actions">
                     <button class="button-secondary" type="button" data-close-modal>Cancelar</button>
@@ -391,7 +412,7 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=9.9"></script>
+    <script type="module" src="js/dashboard.js?v=10.0"></script>
 </body>
 
 </html>

@@ -1,5 +1,16 @@
 ﻿import { getSupabase, initAuthListener, signOut } from './auth-service.js';
 import { initUploadService, uploadFile } from './upload-service.js';
+import {
+    applyMenuTheme,
+    bindHorizontalTabDrag,
+    escapeHTML,
+    getItemsForCategory,
+    getOrderedCategories,
+    ITEM_PLACEHOLDER_IMAGE,
+    normalizeHex,
+    renderInfoBadgesMarkup,
+    renderItemsGrid,
+} from './menu-view.js';
 
 const app = {
     supabase: null,
@@ -10,7 +21,6 @@ const app = {
 };
 
 let authBootstrappedForUser = null;
-const ITEM_PLACEHOLDER_IMAGE = 'assets/images/item-placeholder.svg';
 const COVER_PLACEHOLDER_IMAGE = 'assets/images/cover-placeholder.svg';
 const QR_ICON_SIZE = 260;
 const IMAGE_CROP_CONFIG = {
@@ -101,25 +111,19 @@ const TUTORIAL_STEPS = [
         text: 'Termina a sessao desta conta com seguranca.',
     },
 ];
-const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 let qrCode = null;
 let qrColor = '#111111';
 let appearanceSaveTimer = null;
 let fontSaveTimer = null;
+let saveStatusTimer = null;
 let tutorialOpen = false;
 let tutorialStepIndex = 0;
 let cropState = null;
-let categoryTabsDragBound = false;
 let pendingItemImageFile = null;
 let pendingItemImagePreviewUrl = null;
 
 function qs(id) {
     return document.getElementById(id);
-}
-
-function escapeHTML(value) {
-    if (value === null || value === undefined) return '';
-    return String(value).replace(/[&<>"']/g, (char) => ESC[char]);
 }
 
 function clamp(value, min, max) {
@@ -135,13 +139,29 @@ function slugify(value) {
         .replace(/^-|-$/g, '');
 }
 
-function normalizeHex(value, fallback) {
-    return /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : fallback;
-}
-
 function getLiveMenuUrl() {
     const slug = app.restaurant?.slug || '';
     return `${window.location.origin}/menu.html?id=${encodeURIComponent(slug)}`;
+}
+
+async function updateRestaurant(updates) {
+    const columns = Object.keys(updates);
+    if (!app.supabase || !app.restaurant || !columns.length) {
+        return { data: null, error: new Error('Restaurante indisponível.') };
+    }
+
+    const { data, error } = await app.supabase
+        .from('restaurants')
+        .update(updates)
+        .eq('id', app.restaurant.id)
+        .select(columns.join(','))
+        .maybeSingle();
+
+    if (error) return { data: null, error };
+    if (!data) return { data: null, error: new Error('A alteração não foi aplicada.') };
+
+    Object.assign(app.restaurant, data);
+    return { data, error: null };
 }
 
 function getGoogleFontHref(fonts) {
@@ -165,11 +185,20 @@ function loadFontOptions() {
 function setSaveStatus(text, reset = false) {
     const status = qs('saveStatus');
     if (!status) return;
+
+    window.clearTimeout(saveStatusTimer);
     status.textContent = text;
+    status.hidden = false;
+    status.classList.toggle('is-error', /não|nao|erro|falhou/i.test(text));
+    requestAnimationFrame(() => status.classList.add('is-visible'));
+
     if (reset) {
-        window.setTimeout(() => {
-            status.textContent = 'AlteraÃ§Ãµes guardadas automaticamente';
-        }, 1400);
+        saveStatusTimer = window.setTimeout(() => {
+            status.classList.remove('is-visible');
+            window.setTimeout(() => {
+                status.hidden = true;
+            }, 180);
+        }, 1700);
     }
 }
 
@@ -420,68 +449,6 @@ function pickCroppedImage(mode) {
     });
 }
 
-function bindHorizontalTabDrag() {
-    const tabs = qs('categoryTabs');
-    if (!tabs || categoryTabsDragBound) return;
-
-    let isPointerDown = false;
-    let isDragging = false;
-    let suppressClick = false;
-    let pointerId = null;
-    let startX = 0;
-    let startScrollLeft = 0;
-
-    const stopDrag = (event) => {
-        if (!isPointerDown || event.pointerId !== pointerId) return;
-        isPointerDown = false;
-        pointerId = null;
-        if (isDragging) {
-            suppressClick = true;
-            window.setTimeout(() => {
-                suppressClick = false;
-            }, 0);
-        }
-        isDragging = false;
-        tabs.classList.remove('is-dragging');
-        if (tabs.hasPointerCapture?.(event.pointerId)) {
-            tabs.releasePointerCapture(event.pointerId);
-        }
-    };
-
-    tabs.addEventListener('pointerdown', (event) => {
-        if (event.button !== undefined && event.button !== 0) return;
-        if (event.target.closest('.item-edit-btn')) return;
-        isPointerDown = true;
-        isDragging = false;
-        pointerId = event.pointerId;
-        startX = event.clientX;
-        startScrollLeft = tabs.scrollLeft;
-    });
-
-    tabs.addEventListener('pointermove', (event) => {
-        if (!isPointerDown || event.pointerId !== pointerId) return;
-        const deltaX = startX - event.clientX;
-        if (Math.abs(deltaX) < 4 && !isDragging) return;
-        isDragging = true;
-        tabs.classList.add('is-dragging');
-        if (!tabs.hasPointerCapture?.(event.pointerId)) {
-            tabs.setPointerCapture?.(event.pointerId);
-        }
-        tabs.scrollLeft = startScrollLeft + deltaX;
-        event.preventDefault();
-    });
-
-    tabs.addEventListener('pointerup', stopDrag);
-    tabs.addEventListener('pointercancel', stopDrag);
-    tabs.addEventListener('click', (event) => {
-        if (!suppressClick) return;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-    }, true);
-
-    categoryTabsDragBound = true;
-}
-
 function selectCategoryTab(tab) {
     if (!tab?.dataset?.category) return;
     app.activeCategory = tab.dataset.category;
@@ -639,57 +606,18 @@ function moveTutorialStep(direction) {
 }
 
 function getCategories() {
-    const categories = new Set(app.items.map((item) => item.category).filter(Boolean));
-    (app.restaurant?.category_order || []).forEach((category) => categories.add(category));
-    const result = Array.from(categories);
-    const order = app.restaurant?.category_order || [];
-
-    result.sort((a, b) => {
-        const indexA = order.indexOf(a);
-        const indexB = order.indexOf(b);
-        return (indexA === -1 ? 9999 : indexA) - (indexB === -1 ? 9999 : indexB);
-    });
-
-    return result;
+    return getOrderedCategories(app.restaurant, app.items);
 }
 
 function itemsForCategory(category) {
-    return app.items
-        .filter((item) => item.category === category)
-        .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'pt'));
+    return getItemsForCategory(app.items, category);
 }
 
 function applyRestaurantTheme() {
     const editor = qs('mobile-view');
     const restaurant = app.restaurant;
     if (!editor || !restaurant) return;
-
-    const font = restaurant.font || 'Outfit';
-    let fontLink = qs('restaurantFontLink');
-    if (!fontLink) {
-        fontLink = document.createElement('link');
-        fontLink.id = 'restaurantFontLink';
-        fontLink.rel = 'stylesheet';
-        document.head.appendChild(fontLink);
-    }
-    fontLink.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font).replace(/%20/g, '+')}:wght@400;700&display=swap`;
-
-    editor.style.fontFamily = `'${font}', sans-serif`;
-    editor.style.setProperty('--font', `'${font}', sans-serif`);
-    editor.style.setProperty('--font-heading', `'${font}', sans-serif`);
-    if (restaurant.color_primary) editor.style.setProperty('--primary', restaurant.color_primary);
-    if (restaurant.color_text) editor.style.setProperty('--text', restaurant.color_text);
-    if (restaurant.color_background) {
-        editor.style.setProperty('--bg-mobile', restaurant.color_background);
-        const isDark = ['#1a1a1a', '#121212', '#000000'].includes(
-            restaurant.color_background.toLowerCase());
-        editor.style.setProperty('--bg-card', isDark ? '#252525' : '#ffffff');
-        editor.style.setProperty('--bg-badge', isDark ? '#333333' : '#ebebeb');
-        editor.style.setProperty('--border', isDark ? '#333333' : '#f0f0f0');
-        editor.style.setProperty('--item-divider', isDark ? '#3a3a3c' : '#d2d2d7');
-        editor.style.setProperty('--text-muted', isDark ? '#a0a0a0' : '#666666');
-    }
-    if (restaurant.color_text_secondary) editor.style.setProperty('--text-muted', restaurant.color_text_secondary);
+    applyMenuTheme(editor, restaurant, { fontLinkId: 'restaurantFontLink' });
 }
 
 function openAppearanceModal() {
@@ -746,10 +674,7 @@ function scheduleAppearanceSave() {
 }
 
 async function saveAppearanceValues(updates) {
-    const { error } = await app.supabase
-        .from('restaurants')
-        .update(updates)
-        .eq('id', app.restaurant.id);
+    const { error } = await updateRestaurant(updates);
 
     if (error) {
         const errorEl = qs('appearanceError');
@@ -810,10 +735,7 @@ function closeFontModal() {
 }
 
 async function saveFontValue(font) {
-    const { error } = await app.supabase
-        .from('restaurants')
-        .update({ font })
-        .eq('id', app.restaurant.id);
+    const { error } = await updateRestaurant({ font });
 
     if (error) {
         console.error(error);
@@ -913,31 +835,7 @@ function renderInfoBadges() {
     const container = qs('infoBadges');
     const restaurant = app.restaurant;
     if (!container || !restaurant) return;
-
-    const badges = [];
-    if (restaurant.wifi_ssid || restaurant.wifi_password) {
-        badges.push(`
-            <span class="info-badge" data-badge="wifi">
-                <i class="fa-solid fa-wifi"></i>
-                <span>${escapeHTML(restaurant.wifi_ssid || 'Wi-Fi')}</span>
-            </span>`);
-    }
-    if (restaurant.phone) {
-        badges.push(`
-            <span class="info-badge" data-badge="phone">
-                <i class="fa-solid fa-phone"></i>
-                <span>${escapeHTML(restaurant.phone)}</span>
-            </span>`);
-    }
-    if (restaurant.address) {
-        badges.push(`
-            <span class="info-badge" data-badge="address">
-                <i class="fa-solid fa-location-dot"></i>
-                <span>${escapeHTML(restaurant.address)}</span>
-            </span>`);
-    }
-
-    container.innerHTML = badges.join('');
+    container.innerHTML = renderInfoBadgesMarkup(restaurant);
 }
 
 function renderCover() {
@@ -973,41 +871,21 @@ function renderCategoryTabs(categories) {
             data-action="select-category" data-category="${escapeHTML(category)}">
             ${escapeHTML(category)}
         </button>
-    `).join('') + `
-        <button class="item-edit-btn" type="button" data-action="open-categories-modal"
-            aria-label="Editar categorias" title="Editar categorias">
-            <i class="fa-solid fa-pencil"></i>
-        </button>
-    `;
+    `).join('');
 }
 
-function renderItem(item) {
-    const image = item.image_url
-        ? `<div class="item-img"><img src="${escapeHTML(item.image_url)}" loading="lazy" alt="${escapeHTML(item.name)}"></div>`
-        : `<div class="item-img item-img-placeholder">
-                <img src="${ITEM_PLACEHOLDER_IMAGE}" loading="lazy" alt="Imagem de exemplo">
-           </div>`;
-
+function renderItemActions(item) {
     return `
-        <article class="menu-item ${item.available ? '' : 'unavailable'}" data-item-id="${item.id}">
-            <div class="item-actions">
-                <button class="item-edit-btn" type="button" data-action="edit-item" data-item-id="${item.id}"
-                    aria-label="Editar prato" title="Editar prato">
-                    <i class="fa-solid fa-pencil"></i>
-                </button>
-                <button class="item-delete-btn" type="button" data-action="delete-item" data-item-id="${item.id}"
-                    aria-label="Apagar prato" title="Apagar prato">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-            <div class="item-text">
-                <h3>${escapeHTML(item.name)}</h3>
-                <p class="item-desc">${escapeHTML(item.description || '')}</p>
-                <div class="item-price">${Number(item.price || 0).toFixed(2)}€</div>
-            </div>
-            ${image}
-        </article>
-    `;
+        <div class="item-actions">
+            <button class="item-edit-btn" type="button" data-action="edit-item" data-item-id="${escapeHTML(item.id)}"
+                aria-label="Editar prato" title="Editar prato">
+                <i class="fa-solid fa-pencil"></i>
+            </button>
+            <button class="item-delete-btn" type="button" data-action="delete-item" data-item-id="${escapeHTML(item.id)}"
+                aria-label="Apagar prato" title="Apagar prato">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>`;
 }
 
 function readRestaurantForm() {
@@ -1167,10 +1045,7 @@ async function saveHeroModal(event) {
     }
 
     setSaveStatus('A guardar restaurante...');
-    const { error } = await app.supabase
-        .from('restaurants')
-        .update(normalized)
-        .eq('id', app.restaurant.id);
+    const { error } = await updateRestaurant(normalized);
 
     if (error) {
         const errorEl = qs('heroError');
@@ -1182,7 +1057,6 @@ async function saveHeroModal(event) {
         return;
     }
 
-    Object.assign(app.restaurant, normalized);
     renderDashboard();
     closeHeroModal();
     setSaveStatus('Restaurante guardado', true);
@@ -1236,21 +1110,23 @@ async function saveCategoriesModal(event) {
 
     const deletedCategories = currentCategories.filter((category) => !nextOrder.includes(category));
     for (const category of deletedCategories) {
-        await app.supabase
+        const { error: deleteError } = await app.supabase
             .from('menu_items')
             .delete()
             .eq('restaurant_id', app.restaurant.id)
             .eq('category', category);
+        if (deleteError) {
+            console.error(deleteError);
+            setSaveStatus('Não foi possível apagar a categoria');
+            return;
+        }
         delete nextImages[category];
     }
 
-    const { error } = await app.supabase
-        .from('restaurants')
-        .update({
-            category_order: nextOrder,
-            category_images: nextImages,
-        })
-        .eq('id', app.restaurant.id);
+    const { error } = await updateRestaurant({
+        category_order: nextOrder,
+        category_images: nextImages,
+    });
 
     if (error) {
         console.error(error);
@@ -1258,8 +1134,6 @@ async function saveCategoriesModal(event) {
         return;
     }
 
-    app.restaurant.category_order = nextOrder;
-    app.restaurant.category_images = nextImages;
     app.activeCategory = activeWasRenamed ? activeWasRenamed.name : (activeWasDeleted ? nextOrder[0] || null : app.activeCategory);
     closeCategoriesModal();
     await loadDashboardData();
@@ -1273,7 +1147,7 @@ function renderActiveCategory(categories) {
     if (!categories.length || !app.activeCategory) {
         editor.innerHTML = `
             <div class="empty-menu">
-                <p>O menu ainda nÃ£o tem categorias.</p>
+                <p>O menu ainda não tem categorias.</p>
                 <button type="button" data-action="open-categories-modal" aria-label="Abrir editor de categorias">
                     <i class="fa-solid fa-plus"></i>
                 </button>
@@ -1285,19 +1159,18 @@ function renderActiveCategory(categories) {
     const category = app.activeCategory;
     const items = itemsForCategory(category);
     const encodedCategory = encodeURIComponent(category);
+    const addItemButton = `
+        <button class="item-add" type="button" data-action="add-item" data-category="${encodedCategory}"
+            aria-label="Adicionar prato" title="Adicionar prato">
+            <i class="fa-solid fa-plus"></i>
+        </button>`;
 
     editor.innerHTML = `
         <div class="slide-content">
-            <div class="items-grid">
-                ${items.map(renderItem).join('')}
-                <button class="item-add" type="button" data-action="add-item" data-category="${encodedCategory}"
-                    aria-label="Adicionar prato" title="Adicionar prato">
-                    <i class="fa-solid fa-plus"></i>
-                </button>
-                <footer class="menu-footer">
-                    <p>Menu digital por <b>Menu no Ar</b></p>
-                </footer>
-            </div>
+            ${renderItemsGrid(items, {
+                actions: renderItemActions,
+                afterItems: addItemButton,
+            })}
         </div>
     `;
 }
@@ -1331,6 +1204,51 @@ function renderEmptyState() {
     qs('authLoading').hidden = true;
     qs('dashboardShell').hidden = true;
     qs('emptyState').hidden = false;
+}
+
+async function createRestaurant(event) {
+    event.preventDefault();
+    if (!app.supabase || !app.user) return;
+
+    const name = qs('createRestaurantName').value.trim();
+    const errorElement = qs('createRestaurantError');
+    const submitButton = qs('createRestaurantBtn');
+    if (!name) return;
+
+    errorElement.hidden = true;
+    submitButton.disabled = true;
+    submitButton.textContent = 'A criar...';
+
+    const randomSuffix = window.crypto?.randomUUID?.().slice(0, 8)
+        || Date.now().toString(36);
+    const { data, error } = await app.supabase
+        .from('restaurants')
+        .insert([{
+            owner_id: app.user.id,
+            name,
+            slug: `${slugify(name) || 'menu'}-${randomSuffix}`,
+            description: '',
+            category_order: ['Menu'],
+        }])
+        .select('*')
+        .single();
+
+    submitButton.disabled = false;
+    submitButton.textContent = 'Criar menu';
+
+    if (error || !data) {
+        console.error(error);
+        errorElement.textContent = error?.message || 'Não foi possível criar o menu.';
+        errorElement.hidden = false;
+        return;
+    }
+
+    app.restaurant = data;
+    app.items = [];
+    app.activeCategory = 'Menu';
+    qs('emptyState').hidden = true;
+    renderDashboard();
+    setSaveStatus('Menu criado', true);
 }
 
 async function loadDashboardData() {
@@ -1369,210 +1287,6 @@ async function loadDashboardData() {
     renderDashboard();
 }
 
-async function saveRestaurantField(field, value) {
-    const normalized = value.trim();
-    if (normalized === String(app.restaurant[field] || '')) return;
-
-    setSaveStatus('A guardar...');
-    const { error } = await app.supabase
-        .from('restaurants')
-        .update({ [field]: normalized })
-        .eq('id', app.restaurant.id);
-
-    if (error) {
-        console.error(error);
-        setSaveStatus('NÃ£o foi possÃ­vel guardar');
-        return;
-    }
-
-    app.restaurant[field] = normalized;
-    setSaveStatus('Guardado', true);
-}
-
-async function addCategory() {
-    const categories = getCategories();
-    let name = 'Nova categoria';
-    let counter = 2;
-    while (categories.includes(name)) name = `Nova categoria ${counter++}`;
-
-    const order = [...categories, name];
-    setSaveStatus('A criar categoria...');
-
-    const { error } = await app.supabase
-        .from('restaurants')
-        .update({ category_order: order })
-        .eq('id', app.restaurant.id);
-
-    if (error) {
-        console.error(error);
-        setSaveStatus('NÃ£o foi possÃ­vel criar');
-        return;
-    }
-
-    app.restaurant.category_order = order;
-    app.activeCategory = name;
-    renderDashboard();
-    setSaveStatus('Categoria criada', true);
-}
-
-async function renameCategory(oldName, rawName) {
-    const newName = rawName.trim();
-    if (!newName || newName === oldName) {
-        renderDashboard();
-        return;
-    }
-
-    setSaveStatus('A guardar categoria...');
-    const { error } = await app.supabase
-        .from('menu_items')
-        .update({ category: newName })
-        .eq('restaurant_id', app.restaurant.id)
-        .eq('category', oldName);
-
-    if (error) {
-        console.error(error);
-        renderDashboard();
-        return;
-    }
-
-    const updates = {};
-    if (app.restaurant.category_order?.includes(oldName)) {
-        updates.category_order = app.restaurant.category_order.map((category) =>
-            category === oldName ? newName : category);
-    }
-    if (app.restaurant.category_images?.[oldName]) {
-        const images = { ...app.restaurant.category_images };
-        images[newName] = images[oldName];
-        delete images[oldName];
-        updates.category_images = images;
-    }
-    if (Object.keys(updates).length) {
-        await app.supabase.from('restaurants').update(updates).eq('id', app.restaurant.id);
-    }
-
-    app.activeCategory = newName;
-    await loadDashboardData();
-    setSaveStatus('Categoria guardada', true);
-}
-
-async function moveCategory(direction) {
-    const categories = getCategories();
-    const index = categories.indexOf(app.activeCategory);
-    const target = index + Number(direction);
-    if (index < 0 || target < 0 || target >= categories.length) return;
-
-    [categories[index], categories[target]] = [categories[target], categories[index]];
-    const { error } = await app.supabase
-        .from('restaurants')
-        .update({ category_order: categories })
-        .eq('id', app.restaurant.id);
-
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-    app.restaurant.category_order = categories;
-    renderDashboard();
-    setSaveStatus('Ordem guardada', true);
-}
-
-async function deleteCategory(category) {
-    if (!window.confirm(`Apagar a categoria "${category}" e todos os pratos nela?`)) return;
-
-    await app.supabase
-        .from('menu_items')
-        .delete()
-        .eq('restaurant_id', app.restaurant.id)
-        .eq('category', category);
-
-    const images = { ...(app.restaurant.category_images || {}) };
-    delete images[category];
-    const order = (app.restaurant.category_order || []).filter((entry) => entry !== category);
-    await app.supabase
-        .from('restaurants')
-        .update({ category_images: images, category_order: order })
-        .eq('id', app.restaurant.id);
-
-    app.activeCategory = null;
-    await loadDashboardData();
-    setSaveStatus('Categoria apagada', true);
-}
-
-function pickImage(onSelected) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.addEventListener('change', () => {
-        if (input.files?.[0]) onSelected(input.files[0]);
-    }, { once: true });
-    input.click();
-}
-
-async function uploadCategoryImage(category) {
-    pickImage(async (file) => {
-        setSaveStatus('A carregar imagem...');
-        const { data, error } = await uploadFile(file, `cat-${slugify(category)}`);
-        if (error || !data) {
-            console.error(error);
-            setSaveStatus('NÃ£o foi possÃ­vel carregar');
-            return;
-        }
-
-        const images = { ...(app.restaurant.category_images || {}), [category]: data.publicUrl };
-        await app.supabase.from('restaurants').update({ category_images: images }).eq('id', app.restaurant.id);
-        await loadDashboardData();
-        setSaveStatus('Imagem guardada', true);
-    });
-}
-
-async function editInfoBadge(type) {
-    let updates = {};
-
-    if (type === 'wifi') {
-        const ssid = window.prompt('Nome da rede Wi-Fi', app.restaurant.wifi_ssid || '');
-        if (ssid === null) return;
-        const password = window.prompt('Password da rede Wi-Fi', app.restaurant.wifi_password || '');
-        if (password === null) return;
-        updates = { wifi_ssid: ssid.trim(), wifi_password: password.trim() };
-    } else if (type === 'phone') {
-        const phone = window.prompt('Telefone', app.restaurant.phone || '');
-        if (phone === null) return;
-        updates = { phone: phone.trim() };
-    } else {
-        const choice = window.prompt('O que queres editar? Escreve: wifi ou telefone', 'wifi');
-        if (!choice) return;
-        const normalized = choice.trim().toLowerCase();
-        if (normalized === 'wifi') return editInfoBadge('wifi');
-        if (normalized === 'telefone') return editInfoBadge('phone');
-        return;
-    }
-
-    setSaveStatus('A guardar informaÃ§Ãµes...');
-    const { error } = await app.supabase
-        .from('restaurants')
-        .update(updates)
-        .eq('id', app.restaurant.id);
-
-    if (error) {
-        console.error(error);
-        setSaveStatus('NÃ£o foi possÃ­vel guardar');
-        return;
-    }
-
-    Object.assign(app.restaurant, updates);
-    renderInfoBadges();
-    setSaveStatus('InformaÃ§Ãµes guardadas', true);
-}
-
-async function removeCategoryImage(category) {
-    const images = { ...(app.restaurant.category_images || {}) };
-    delete images[category];
-    await app.supabase.from('restaurants').update({ category_images: images }).eq('id', app.restaurant.id);
-    await loadDashboardData();
-    setSaveStatus('Imagem removida', true);
-}
-
 function populateCategorySelect(selectedCategory) {
     const select = qs('itemCategoryInput');
     select.innerHTML = getCategories().map((category) =>
@@ -1605,6 +1319,7 @@ function openItemModal(item = null, category = app.activeCategory) {
     qs('itemNameInput').value = item?.name || '';
     qs('itemPriceInput').value = item ? Number(item.price || 0).toFixed(2) : '';
     qs('itemDescInput').value = item?.description || '';
+    qs('itemAvailableInput').checked = item?.available !== false;
     populateCategorySelect(item?.category || category);
     setModalItemImage(item);
     qs('itemModal').hidden = false;
@@ -1625,6 +1340,7 @@ async function saveItem(event) {
         description: qs('itemDescInput').value.trim(),
         category: qs('itemCategoryInput').value,
         price: Number.isNaN(price) ? 0 : price,
+        available: qs('itemAvailableInput').checked,
     };
 
     if (!payload.name) return;
@@ -1632,13 +1348,19 @@ async function saveItem(event) {
 
     let error;
     let savedItemId = id;
+    let finalStatus = 'Prato guardado';
     if (id) {
-        ({ error } = await app.supabase.from('menu_items').update(payload).eq('id', id));
+        const result = await app.supabase
+            .from('menu_items')
+            .update(payload)
+            .eq('id', id)
+            .select('id')
+            .maybeSingle();
+        error = result.error || (result.data ? null : new Error('O prato não foi atualizado.'));
     } else {
         const result = await app.supabase.from('menu_items').insert([{
             ...payload,
             restaurant_id: app.restaurant.id,
-            available: true,
         }]).select('id').single();
         error = result.error;
         savedItemId = result.data?.id;
@@ -1646,7 +1368,7 @@ async function saveItem(event) {
 
     if (error) {
         console.error(error);
-        setSaveStatus('NÃ£o foi possÃ­vel guardar');
+        setSaveStatus('Não foi possível guardar');
         return;
     }
 
@@ -1655,37 +1377,33 @@ async function saveItem(event) {
         const { data, error: uploadError } = await uploadFile(pendingItemImageFile, `item-${savedItemId}`);
         if (uploadError || !data) {
             console.error(uploadError);
-            setSaveStatus('Prato guardado, imagem nÃ£o carregada');
+            finalStatus = 'Prato guardado, imagem não carregada';
         } else {
-            await app.supabase.from('menu_items').update({ image_url: data.publicUrl }).eq('id', savedItemId);
+            const { error: imageUpdateError } = await app.supabase
+                .from('menu_items')
+                .update({ image_url: data.publicUrl })
+                .eq('id', savedItemId);
+            if (imageUpdateError) {
+                console.error(imageUpdateError);
+                finalStatus = 'Prato guardado, imagem não carregada';
+            }
         }
     }
 
     app.activeCategory = payload.category;
     closeItemModal();
     await loadDashboardData();
-    setSaveStatus('Prato guardado', true);
-}
-
-async function toggleItem(id) {
-    const item = app.items.find((entry) => String(entry.id) === String(id));
-    if (!item) return;
-
-    const available = !item.available;
-    const { error } = await app.supabase.from('menu_items').update({ available }).eq('id', id);
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-    item.available = available;
-    renderDashboard();
-    setSaveStatus(available ? 'Prato visÃ­vel' : 'Prato oculto', true);
+    setSaveStatus(finalStatus, true);
 }
 
 async function deleteItem(id) {
     if (!window.confirm('Apagar este prato?')) return;
-    await app.supabase.from('menu_items').delete().eq('id', id);
+    const { error } = await app.supabase.from('menu_items').delete().eq('id', id);
+    if (error) {
+        console.error(error);
+        setSaveStatus('Não foi possível apagar o prato');
+        return;
+    }
     if (!qs('itemModal').hidden) closeItemModal();
     await loadDashboardData();
     setSaveStatus('Prato apagado', true);
@@ -1699,11 +1417,19 @@ async function uploadItemImage(id) {
     const { data, error } = await uploadFile(file, `item-${id}`);
     if (error || !data) {
         console.error(error);
-        setSaveStatus('NÃ£o foi possÃ­vel carregar');
+        setSaveStatus('Não foi possível carregar');
         return;
     }
 
-    await app.supabase.from('menu_items').update({ image_url: data.publicUrl }).eq('id', id);
+    const { error: updateError } = await app.supabase
+        .from('menu_items')
+        .update({ image_url: data.publicUrl })
+        .eq('id', id);
+    if (updateError) {
+        console.error(updateError);
+        setSaveStatus('Não foi possível guardar a imagem');
+        return;
+    }
     await loadDashboardData();
     if (!qs('itemModal').hidden) {
         setModalItemImage(app.items.find((item) => String(item.id) === String(id)));
@@ -1742,11 +1468,16 @@ async function uploadCover(input) {
 
     if (error || !data) {
         console.error(error);
-        setSaveStatus('NÃ£o foi possÃ­vel carregar');
+        setSaveStatus('Não foi possível carregar');
         return;
     }
 
-    await app.supabase.from('restaurants').update({ cover_url: data.publicUrl }).eq('id', app.restaurant.id);
+    const { error: updateError } = await updateRestaurant({ cover_url: data.publicUrl });
+    if (updateError) {
+        console.error(updateError);
+        setSaveStatus('Não foi possível guardar a capa');
+        return;
+    }
     await loadDashboardData();
     if (!qs('heroModal').hidden) setHeroModalCoverPreview();
     setSaveStatus('Capa guardada', true);
@@ -1754,7 +1485,12 @@ async function uploadCover(input) {
 
 async function removeCover() {
     if (!app.restaurant.cover_url || !window.confirm('Remover a capa do menu?')) return;
-    await app.supabase.from('restaurants').update({ cover_url: null }).eq('id', app.restaurant.id);
+    const { error } = await updateRestaurant({ cover_url: null });
+    if (error) {
+        console.error(error);
+        setSaveStatus('Não foi possível remover a capa');
+        return;
+    }
     await loadDashboardData();
     if (!qs('heroModal').hidden) setHeroModalCoverPreview();
     setSaveStatus('Capa removida', true);
@@ -1787,7 +1523,7 @@ function handleEditorClick(event) {
 }
 
 function bindEvents() {
-    bindHorizontalTabDrag();
+    bindHorizontalTabDrag(qs('categoryTabs'));
     qs('heroHeader').addEventListener('click', handleEditorClick);
     qs('categoryTabs').addEventListener('click', (event) => {
         const tab = event.target.closest('.tab-btn');
@@ -1797,7 +1533,9 @@ function bindEvents() {
         }
         handleEditorClick(event);
     });
+    qs('editCategoriesBtn').addEventListener('click', openCategoriesModal);
     qs('categoryEditor').addEventListener('click', handleEditorClick);
+    qs('createRestaurantForm').addEventListener('submit', createRestaurant);
 
     qs('heroForm').addEventListener('submit', saveHeroModal);
     qs('categoriesForm').addEventListener('submit', saveCategoriesModal);
