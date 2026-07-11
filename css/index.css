@@ -341,9 +341,10 @@ p {
 
 .hero-copy h1 em {
     color: var(--blue-deep);
-    font-family: "DM Serif Display", serif;
-    font-weight: 400;
-    letter-spacing: -0.035em;
+    font-family: inherit;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: -0.055em;
 }
 
 .hero-lead {
@@ -825,9 +826,9 @@ p {
 
 .signal-grid strong {
     color: var(--blue);
-    font-family: "DM Serif Display", serif;
+    font-family: inherit;
     font-size: 2.15rem;
-    font-weight: 400;
+    font-weight: 800;
 }
 
 .signal-grid span {
@@ -845,9 +846,9 @@ p {
 .product-copy h2,
 .final-cta h2 {
     margin-bottom: 22px;
-    font-family: "DM Serif Display", serif;
+    font-family: inherit;
     font-size: clamp(2.75rem, 5vw, 4.65rem);
-    font-weight: 400;
+    font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 1.02;
 }
@@ -1304,9 +1305,9 @@ p {
 }
 
 .price-value strong {
-    font-family: "DM Serif Display", serif;
+    font-family: inherit;
     font-size: 4rem;
-    font-weight: 400;
+    font-weight: 800;
     letter-spacing: -0.05em;
     line-height: 1;
 }
