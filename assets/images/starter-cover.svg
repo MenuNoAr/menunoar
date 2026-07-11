@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Capa inicial do menu</title>
+  <desc id="desc">Fundo suave em tons de azul e verde para o primeiro menu.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e5f1ee"/>
+      <stop offset="1" stop-color="#dceaf4"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7caea4"/>
+      <stop offset="1" stop-color="#8fb6d0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#background)"/>
+  <circle cx="1310" cy="180" r="290" fill="#ffffff" fill-opacity=".45"/>
+  <circle cx="180" cy="810" r="260" fill="#ffffff" fill-opacity=".38"/>
+  <path d="M0 690C260 570 450 590 650 710c190 114 398 126 606 19 128-66 236-92 344-80v251H0Z" fill="url(#accent)" fill-opacity=".82"/>
+  <path d="M0 776c258-83 466-52 652 95h-652Z" fill="#5f9489" fill-opacity=".52"/>
+  <path d="M985 0c180 102 330 150 615 96v-96Z" fill="#ffffff" fill-opacity=".42"/>
+</svg>

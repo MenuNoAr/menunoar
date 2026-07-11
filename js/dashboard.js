@@ -54,6 +54,40 @@ const FONT_OPTIONS = [
     'Dancing Script',
 ];
 const APPEARANCE_FIELDS = ['color_background', 'color_text', 'color_text_secondary', 'color_primary'];
+const STARTER_COVER_IMAGE = 'assets/images/starter-cover.svg';
+const STARTER_CATEGORIES = ['Pratos', 'Sobremesas'];
+const STARTER_ITEMS = [
+    {
+        category: 'Pratos',
+        name: 'Prato do dia',
+        description: 'Uma sugestão preparada com ingredientes da época.',
+        price: 12.5,
+    },
+    {
+        category: 'Pratos',
+        name: 'Opção vegetariana',
+        description: 'Uma alternativa leve, fresca e cheia de sabor.',
+        price: 10.5,
+    },
+    {
+        category: 'Sobremesas',
+        name: 'Mousse de chocolate',
+        description: 'Cremosa, intensa e feita na casa.',
+        price: 4.5,
+    },
+    {
+        category: 'Sobremesas',
+        name: 'Cheesecake da casa',
+        description: 'Base crocante, creme suave e fruta da estação.',
+        price: 5,
+    },
+];
+const CREATION_LOADING_MESSAGES = [
+    'A preparar o template',
+    'A criar as categorias',
+    'A adicionar os primeiros pratos',
+    'A finalizar os detalhes',
+];
 const TUTORIAL_STEPS = [
     {
         targets: ['[data-action="open-hero-modal"]'],
@@ -121,9 +155,44 @@ let tutorialStepIndex = 0;
 let cropState = null;
 let pendingItemImageFile = null;
 let pendingItemImagePreviewUrl = null;
+let creationLoadingTimer = null;
+let creationLoadingStartedAt = 0;
 
 function qs(id) {
     return document.getElementById(id);
+}
+
+function setCreationLoadingMessage(index) {
+    const message = qs('creationLoadingMessage');
+    if (!message) return;
+    message.textContent = CREATION_LOADING_MESSAGES[index % CREATION_LOADING_MESSAGES.length];
+}
+
+function showCreationLoading() {
+    const loading = qs('creationLoading');
+    if (!loading) return;
+    window.clearInterval(creationLoadingTimer);
+    creationLoadingStartedAt = Date.now();
+    setCreationLoadingMessage(0);
+    loading.hidden = false;
+
+    let messageIndex = 1;
+    creationLoadingTimer = window.setInterval(() => {
+        setCreationLoadingMessage(messageIndex);
+        messageIndex += 1;
+    }, 1150);
+}
+
+async function hideCreationLoading() {
+    const loading = qs('creationLoading');
+    const elapsed = Date.now() - creationLoadingStartedAt;
+    const remaining = Math.max(0, 850 - elapsed);
+    if (remaining) {
+        await new Promise((resolve) => window.setTimeout(resolve, remaining));
+    }
+    window.clearInterval(creationLoadingTimer);
+    creationLoadingTimer = null;
+    if (loading) loading.hidden = true;
 }
 
 function clamp(value, min, max) {
@@ -1218,37 +1287,62 @@ async function createRestaurant(event) {
     errorElement.hidden = true;
     submitButton.disabled = true;
     submitButton.textContent = 'A criar...';
+    showCreationLoading();
 
     const randomSuffix = window.crypto?.randomUUID?.().slice(0, 8)
         || Date.now().toString(36);
-    const { data, error } = await app.supabase
+    const { data: restaurant, error: restaurantError } = await app.supabase
         .from('restaurants')
         .insert([{
             owner_id: app.user.id,
             name,
             slug: `${slugify(name) || 'menu'}-${randomSuffix}`,
-            description: '',
-            category_order: ['Menu'],
+            description: 'Bem-vindo ao nosso menu.',
+            cover_url: STARTER_COVER_IMAGE,
+            category_order: STARTER_CATEGORIES,
         }])
         .select('*')
         .single();
 
-    submitButton.disabled = false;
-    submitButton.textContent = 'Criar menu';
-
-    if (error || !data) {
-        console.error(error);
-        errorElement.textContent = error?.message || 'Não foi possível criar o menu.';
+    if (restaurantError || !restaurant) {
+        console.error(restaurantError);
+        await hideCreationLoading();
+        qs('emptyState').hidden = false;
+        submitButton.disabled = false;
+        submitButton.textContent = 'Criar menu';
+        errorElement.textContent = restaurantError?.message || 'Não foi possível criar o menu.';
         errorElement.hidden = false;
         return;
     }
 
-    app.restaurant = data;
-    app.items = [];
-    app.activeCategory = 'Menu';
+    const { data: items, error: itemsError } = await app.supabase
+        .from('menu_items')
+        .insert(STARTER_ITEMS.map((item) => ({
+            ...item,
+            restaurant_id: restaurant.id,
+            available: true,
+        })))
+        .select('*');
+
+    if (itemsError || !items) {
+        console.error(itemsError);
+        await app.supabase.from('restaurants').delete().eq('id', restaurant.id);
+        await hideCreationLoading();
+        qs('emptyState').hidden = false;
+        submitButton.disabled = false;
+        submitButton.textContent = 'Criar menu';
+        errorElement.textContent = itemsError?.message || 'Não foi possível preparar os pratos iniciais.';
+        errorElement.hidden = false;
+        return;
+    }
+
+    app.restaurant = restaurant;
+    app.items = items;
+    app.activeCategory = STARTER_CATEGORIES[0];
     qs('emptyState').hidden = true;
+    await hideCreationLoading();
     renderDashboard();
-    setSaveStatus('Menu criado', true);
+    setSaveStatus('Menu criado e pronto a editar', true);
 }
 
 async function loadDashboardData() {

@@ -117,6 +117,52 @@ a {
     justify-content: center;
 }
 
+.creation-loading-screen {
+    position: fixed;
+    z-index: 2200;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+}
+
+.creation-loading-content {
+    display: grid;
+    justify-items: center;
+    gap: 13px;
+    width: min(100%, 330px);
+    text-align: center;
+}
+
+.creation-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid #e8e8ed;
+    border-top-color: var(--editor-ink);
+    border-radius: 50%;
+    animation: creation-spin 820ms linear infinite;
+}
+
+.creation-loading-content .state-kicker {
+    margin-top: 7px;
+}
+
+.creation-loading-content p {
+    margin: 0;
+    color: var(--editor-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+@keyframes creation-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .save-status {
     position: fixed;
     z-index: 1100;

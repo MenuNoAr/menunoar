@@ -13,7 +13,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/menu.css?v=3.0">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.30">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.31">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
@@ -53,6 +53,14 @@
                     Criar menu
                 </button>
             </form>
+        </div>
+    </div>
+
+    <div id="creationLoading" class="creation-loading-screen" role="status" aria-live="polite" hidden>
+        <div class="creation-loading-content">
+            <div class="creation-spinner" aria-hidden="true"></div>
+            <span class="state-kicker">A criar o teu menu</span>
+            <p id="creationLoadingMessage">A preparar o template</p>
         </div>
     </div>
 
@@ -412,7 +420,7 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=10.0"></script>
+    <script type="module" src="js/dashboard.js?v=10.1"></script>
 </body>
 
 </html>
