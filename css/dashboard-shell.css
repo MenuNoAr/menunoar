@@ -77,6 +77,8 @@ a {
 
 .state-card p {
     color: var(--editor-muted);
+    text-align: justify;
+    text-wrap: pretty;
 }
 
 .state-kicker {
@@ -952,6 +954,8 @@ a {
     color: var(--editor-danger);
     font-size: 0.82rem;
     font-weight: 600;
+    text-align: justify;
+    text-wrap: pretty;
 }
 
 .color-field {
@@ -1049,6 +1053,8 @@ a {
     color: var(--editor-muted);
     font-size: 0.88rem;
     line-height: 1.55;
+    text-align: justify;
+    text-wrap: pretty;
 }
 
 .delete-restaurant-copy strong {
@@ -1215,6 +1221,8 @@ a {
     color: var(--editor-muted);
     font-size: 0.8rem;
     line-height: 1.45;
+    text-align: justify;
+    text-wrap: pretty;
 }
 
 .tutorial-actions {

@@ -150,6 +150,8 @@ h1#restName {
     padding: 0 10px;
     white-space: pre-line;
     overflow-wrap: anywhere;
+    text-align: justify;
+    text-wrap: pretty;
 }
 
 /* --- SIMPLE INFO BADGES (Clean Look) --- */
@@ -432,6 +434,8 @@ h1#restName {
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-align: justify;
+    text-wrap: pretty;
 }
 
 .item-price {
