@@ -1,0 +1,496 @@
+@media (max-width: 620px) {
+    html {
+        scroll-padding-top: 72px;
+    }
+
+    .site-container {
+        width: min(100% - 28px, var(--container));
+    }
+
+    .section-space {
+        padding: 50px 0;
+    }
+
+    .header-inner {
+        min-height: 64px;
+    }
+
+    .brand-link img {
+        width: 72px;
+        height: 44px;
+    }
+
+    .header-actions {
+        gap: 7px;
+    }
+
+    .header-actions .button-small {
+        min-height: 36px;
+        padding-inline: 11px;
+        font-size: 0.72rem;
+    }
+
+    .menu-toggle {
+        width: 38px;
+        height: 38px;
+    }
+
+    .mobile-nav {
+        top: 64px;
+        right: 14px;
+        left: 14px;
+    }
+
+    .hero-section {
+        padding: 92px 0 28px;
+    }
+
+    .hero-section::before {
+        opacity: 0.28;
+        background-size: 36px 36px;
+        mask-image: linear-gradient(to bottom, black, transparent 68%);
+    }
+
+    .hero-orbit {
+        display: none;
+    }
+
+    .hero-grid {
+        min-height: 0;
+        gap: 0;
+    }
+
+    .hero-copy .eyebrow,
+    .section-intro .eyebrow,
+    .product-copy .eyebrow {
+        margin-bottom: 14px;
+        font-size: 0.62rem;
+    }
+
+    .hero-copy h1 {
+        margin-bottom: 18px;
+        font-size: clamp(2.35rem, 11.5vw, 3.15rem);
+        line-height: 1;
+    }
+
+    .hero-lead {
+        max-width: 36rem;
+        margin-bottom: 20px;
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .hero-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+
+    .hero-actions .button {
+        width: 100%;
+        min-height: 44px;
+        padding-inline: 9px;
+        font-size: 0.73rem;
+    }
+
+    .hero-notes {
+        justify-content: center;
+        gap: 8px 12px;
+        font-size: 0.64rem;
+    }
+
+    .hero-product {
+        height: 430px;
+        min-height: 0;
+        margin-top: 2px;
+        transform: none;
+    }
+
+    .product-halo {
+        width: 360px;
+        height: 360px;
+    }
+
+    .phone-shell {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 340px;
+        transform: translate(-50%, -50%) rotate(2deg) scale(0.62);
+        transform-origin: center;
+    }
+
+    .floating-note {
+        padding: 9px 11px;
+        font-size: 0.61rem;
+    }
+
+    .note-live {
+        top: 48px;
+        right: 1px;
+    }
+
+    .note-edit {
+        top: 174px;
+        left: 0;
+    }
+
+    .qr-float {
+        right: 0;
+        bottom: 28px;
+        transform: scale(0.78);
+        transform-origin: right bottom;
+    }
+
+    .signal-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .signal-grid > div,
+    .signal-grid > div:first-child,
+    .signal-grid > div:last-child {
+        min-height: 72px;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 2px;
+        padding: 10px 4px;
+        border-right: 1px solid #e3e9ed;
+        border-bottom: 0;
+        text-align: center;
+    }
+
+    .signal-grid > div:last-child {
+        border-right: 0;
+    }
+
+    .signal-grid strong {
+        font-size: 1.35rem;
+        line-height: 1;
+    }
+
+    .signal-grid span {
+        max-width: 90px;
+        font-size: 0.59rem;
+        line-height: 1.25;
+    }
+
+    .section-intro {
+        margin-bottom: 24px;
+    }
+
+    .section-intro h2,
+    .product-copy h2,
+    .final-cta h2 {
+        margin-bottom: 12px;
+        font-size: clamp(1.9rem, 9vw, 2.4rem);
+        line-height: 1.04;
+    }
+
+    .section-intro p {
+        font-size: 0.86rem;
+        line-height: 1.55;
+    }
+
+    .process-step,
+    .process-step + .process-step,
+    .process-step:last-child {
+        min-height: 0;
+        padding: 17px 24px 17px 54px;
+    }
+
+    .process-step:last-child {
+        border-bottom: 0;
+    }
+
+    .step-icon {
+        position: absolute;
+        top: 17px;
+        left: 0;
+        width: 36px;
+        height: 36px;
+        margin: 0;
+        border-radius: 12px;
+    }
+
+    .step-number {
+        top: 18px;
+        right: 2px;
+    }
+
+    .process-step h3,
+    .benefit-card h3 {
+        margin-bottom: 7px;
+        font-size: 1.02rem;
+    }
+
+    .process-step p,
+    .benefit-card p {
+        max-width: none;
+        font-size: 0.78rem;
+        line-height: 1.5;
+    }
+
+    .product-grid {
+        gap: 26px;
+    }
+
+    .editor-window {
+        min-height: 330px;
+        grid-template-columns: 46px 1fr;
+        border-radius: 16px;
+    }
+
+    .editor-rail {
+        gap: 8px;
+        padding: 12px 5px;
+    }
+
+    .editor-rail img,
+    .editor-rail span {
+        width: 32px;
+        height: 32px;
+    }
+
+    .editor-rail img {
+        margin-bottom: 12px;
+    }
+
+    .editor-canvas-demo {
+        width: 82%;
+        min-height: 296px;
+        margin-block: 16px;
+    }
+
+    .canvas-cover {
+        height: 78px;
+    }
+
+    .editor-canvas-demo > strong {
+        margin-top: 12px;
+        font-size: 0.9rem;
+    }
+
+    .editor-canvas-demo > p {
+        margin: 2px 0 14px;
+    }
+
+    .canvas-tabs {
+        gap: 12px;
+        padding-bottom: 8px;
+    }
+
+    .canvas-tabs span {
+        width: 34px;
+        height: 5px;
+    }
+
+    .canvas-row {
+        padding: 13px 18px 2px;
+    }
+
+    .canvas-row span {
+        height: 30px;
+    }
+
+    .canvas-row i {
+        width: 44px;
+        height: 44px;
+    }
+
+    .editor-caption {
+        right: 8px;
+        bottom: 8px;
+        padding: 7px 9px;
+        font-size: 0.58rem;
+    }
+
+    .product-copy > p {
+        margin-bottom: 22px;
+        font-size: 0.84rem;
+        line-height: 1.55;
+    }
+
+    .product-list {
+        gap: 12px;
+    }
+
+    .product-list li {
+        font-size: 0.77rem;
+        line-height: 1.45;
+    }
+
+    .section-intro-row {
+        gap: 12px;
+    }
+
+    .benefits-section,
+    .pricing-minimal {
+        overflow: hidden;
+    }
+
+    .benefits-grid,
+    .pricing-grid {
+        display: flex;
+        max-width: none;
+        gap: 12px;
+        margin-right: -14px;
+        overflow-x: auto;
+        overscroll-behavior-inline: contain;
+        padding-right: 14px;
+        scroll-padding-inline: 0 14px;
+        scroll-snap-type: inline mandatory;
+        scrollbar-width: none;
+    }
+
+    .benefits-grid::-webkit-scrollbar,
+    .pricing-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .benefit-card,
+    .benefit-card:last-child {
+        min-height: 225px;
+        flex: 0 0 min(78vw, 290px);
+        grid-column: auto;
+        padding: 20px;
+        scroll-snap-align: start;
+    }
+
+    .benefit-card .benefit-icon,
+    .benefit-card:last-child .benefit-icon {
+        width: 42px;
+        height: 42px;
+        margin-bottom: 24px;
+    }
+
+    .qr-rings {
+        right: -35px;
+        bottom: -48px;
+        width: 150px;
+        height: 150px;
+    }
+
+    .qr-rings span {
+        width: 104px;
+        height: 104px;
+    }
+
+    .qr-rings span:nth-child(2) {
+        width: 62px;
+        height: 62px;
+    }
+
+    .pricing-card {
+        flex: 0 0 min(84vw, 340px);
+        padding: 20px 18px;
+        border-radius: 18px;
+        scroll-snap-align: start;
+    }
+
+    .popular-label {
+        position: static;
+        width: fit-content;
+        margin-bottom: 10px;
+    }
+
+    .plan-topline {
+        margin: 2px 0 14px;
+    }
+
+    .price-value strong {
+        font-size: 2.8rem;
+    }
+
+    .plan-description {
+        min-height: 0;
+        margin-bottom: 14px;
+    }
+
+    .feature-list {
+        gap: 8px;
+        margin-top: 16px;
+        padding-top: 16px;
+    }
+
+    .pricing-card > small {
+        margin-top: 14px;
+    }
+
+    .final-cta {
+        padding: 44px 0;
+    }
+
+    .final-cta-inner {
+        gap: 20px;
+    }
+
+    .final-cta .button {
+        width: 100%;
+    }
+
+    .site-footer {
+        padding: 38px 0 18px;
+    }
+
+    .footer-main {
+        gap: 22px;
+        padding-bottom: 26px;
+    }
+
+    .footer-brand img {
+        width: 88px;
+        height: 56px;
+        margin-bottom: 8px;
+    }
+
+    .footer-links {
+        grid-template-columns: 0.9fr 0.75fr 1.35fr;
+        gap: 12px;
+    }
+
+    .footer-links > div:last-child {
+        grid-column: auto;
+    }
+
+    .footer-links strong {
+        font-size: 0.68rem;
+    }
+
+    .footer-links a,
+    .footer-links span {
+        font-size: 0.66rem;
+    }
+
+    .footer-bottom {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+        padding-top: 14px;
+    }
+}
+
+@media (max-width: 390px) {
+    .hero-copy h1 {
+        font-size: 2.3rem;
+    }
+
+    .hero-product {
+        height: 400px;
+    }
+
+    .phone-shell {
+        transform: translate(-50%, -50%) rotate(2deg) scale(0.57);
+    }
+
+    .hero-notes {
+        gap-inline: 9px;
+    }
+
+    .benefit-card,
+    .benefit-card:last-child,
+    .pricing-card {
+        flex-basis: calc(100vw - 44px);
+    }
+}
