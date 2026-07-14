@@ -175,9 +175,127 @@ let pendingItemImageFile = null;
 let pendingItemImagePreviewUrl = null;
 let creationLoadingTimer = null;
 let creationLoadingStartedAt = 0;
+const MODAL_EXIT_DURATION = 180;
+const modalCloseStates = new WeakMap();
 
 function qs(id) {
     return document.getElementById(id);
+}
+
+function getElement(target) {
+    return typeof target === 'string' ? qs(target) : target;
+}
+
+function prefersReducedMotion() {
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+}
+
+function showModal(target) {
+    const modal = getElement(target);
+    if (!modal) return;
+
+    const closingState = modalCloseStates.get(modal);
+    if (closingState) closingState.cancel();
+    modal.classList.remove('is-closing');
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function hideModal(target) {
+    const modal = getElement(target);
+    if (!modal || modal.hidden) return Promise.resolve();
+
+    const currentState = modalCloseStates.get(modal);
+    if (currentState) return currentState.promise;
+
+    if (prefersReducedMotion()) {
+        modal.hidden = true;
+        modal.setAttribute('aria-hidden', 'true');
+        return Promise.resolve();
+    }
+
+    let timer = null;
+    let settled = false;
+    let resolvePromise;
+    const promise = new Promise((resolve) => {
+        resolvePromise = resolve;
+    });
+    const settle = (shouldHide) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        modal.classList.remove('is-closing');
+        if (shouldHide) {
+            modal.hidden = true;
+            modal.setAttribute('aria-hidden', 'true');
+        }
+        modalCloseStates.delete(modal);
+        resolvePromise();
+    };
+    const state = {
+        promise,
+        cancel: () => settle(false),
+    };
+
+    modalCloseStates.set(modal, state);
+    modal.classList.add('is-closing');
+    timer = window.setTimeout(() => settle(true), MODAL_EXIT_DURATION);
+    return promise;
+}
+
+function isModalOpen(target) {
+    const modal = getElement(target);
+    return Boolean(modal && !modal.hidden && !modal.classList.contains('is-closing'));
+}
+
+function replayMotion(element, className) {
+    if (!element || prefersReducedMotion()) return;
+    element.classList.remove(className);
+    void element.offsetWidth;
+    element.classList.add(className);
+    const removeClass = (event) => {
+        if (event.target !== element || event.pseudoElement) return;
+        element.classList.remove(className);
+        element.removeEventListener('animationend', removeClass);
+    };
+    element.addEventListener('animationend', removeClass);
+}
+
+function waitForMotion(duration = MODAL_EXIT_DURATION) {
+    if (prefersReducedMotion()) return Promise.resolve();
+    return new Promise((resolve) => window.setTimeout(resolve, duration));
+}
+
+function getMenuItemElement(itemId) {
+    return Array.from(qs('categoryEditor')?.querySelectorAll('.menu-item') || [])
+        .find((item) => String(item.dataset.itemId) === String(itemId));
+}
+
+function animateMenuItemChange(itemId, mode = 'updated') {
+    const item = getMenuItemElement(itemId);
+    if (!item) return;
+    replayMotion(item, mode === 'added' ? 'is-item-entering' : 'is-item-updated');
+    item.scrollIntoView({
+        block: 'nearest',
+        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    });
+}
+
+async function animateMenuItemExit(itemId) {
+    const item = getMenuItemElement(itemId);
+    if (!item || prefersReducedMotion()) return;
+    item.classList.add('is-item-leaving');
+    await waitForMotion(170);
+}
+
+function animateCategoryTabs(categoryNames = []) {
+    const names = new Set(categoryNames);
+    const buttons = Array.from(qs('categoryTabs')?.querySelectorAll('.tab-btn') || []);
+    const targets = names.size ? buttons.filter((button) => names.has(button.dataset.category)) : buttons;
+    targets.forEach((button, index) => {
+        button.style.setProperty('--motion-delay', `${Math.min(index * 24, 96)}ms`);
+        replayMotion(button, 'is-tab-entering');
+    });
 }
 
 function setCreationLoadingMessage(index) {
@@ -347,12 +465,13 @@ function initCropGeometry(preserveCenter = false) {
     applyCropTransform();
 }
 
-function closeImageCropper(result = null) {
+async function closeImageCropper(result = null) {
     if (!cropState) return;
     const state = cropState;
     const image = qs('cropImage');
+    cropState = null;
 
-    qs('imageCropModal').hidden = true;
+    await hideModal('imageCropModal');
     if (image) {
         image.onload = null;
         image.onerror = null;
@@ -362,7 +481,6 @@ function closeImageCropper(result = null) {
         image.style.height = '';
     }
     if (state.url) URL.revokeObjectURL(state.url);
-    cropState = null;
     state.resolve(result);
 }
 
@@ -420,7 +538,7 @@ function openImageCropper(file, mode) {
             if (!cropState) return;
             cropState.naturalWidth = image.naturalWidth;
             cropState.naturalHeight = image.naturalHeight;
-            modal.hidden = false;
+            showModal(modal);
             window.requestAnimationFrame(initCropGeometry);
         };
         image.onerror = () => {
@@ -538,8 +656,22 @@ function pickCroppedImage(mode) {
 
 function selectCategoryTab(tab) {
     if (!tab?.dataset?.category) return;
+    const categories = getCategories();
+    const previousIndex = categories.indexOf(app.activeCategory);
+    const nextIndex = categories.indexOf(tab.dataset.category);
+    if (app.activeCategory === tab.dataset.category) return;
     app.activeCategory = tab.dataset.category;
     renderDashboard();
+    const content = qs('categoryEditor')?.querySelector('.slide-content');
+    if (content) {
+        content.style.setProperty('--category-shift', nextIndex < previousIndex ? '-12px' : '12px');
+        replayMotion(content, 'is-category-switching');
+    }
+    qs('categoryTabs')?.querySelector('.tab-btn.active')?.scrollIntoView({
+        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+        block: 'nearest',
+        inline: 'center',
+    });
 }
 
 function getTutorialTargets() {
@@ -702,7 +834,7 @@ function openLogoutModal() {
     if (!modal || !confirmButton) return;
     confirmButton.disabled = false;
     confirmButton.textContent = 'Sair';
-    modal.hidden = false;
+    showModal(modal);
     window.setTimeout(() => confirmButton.focus(), 40);
 }
 
@@ -713,11 +845,13 @@ async function confirmLogout() {
     confirmButton.textContent = 'A sair...';
 
     try {
+        await hideModal('logoutModal');
         await signOut();
     } catch (error) {
         console.error('Logout error:', error);
         confirmButton.disabled = false;
         confirmButton.textContent = 'Sair';
+        showModal('logoutModal');
         setSaveStatus('Não foi possível terminar a sessão');
     }
 }
@@ -755,11 +889,11 @@ function openAppearanceModal() {
     qs('colorTextInput').value = normalizeHex(app.restaurant.color_text, '#1d1d1f');
     qs('colorTextSecondaryInput').value = normalizeHex(app.restaurant.color_text_secondary, '#666666');
     qs('colorPrimaryInput').value = normalizeHex(app.restaurant.color_primary, getBrandPrimary());
-    qs('appearanceModal').hidden = false;
+    showModal('appearanceModal');
 }
 
 function closeAppearanceModal() {
-    qs('appearanceModal').hidden = true;
+    return hideModal('appearanceModal');
 }
 
 function canSaveAppearance() {
@@ -844,6 +978,7 @@ function scheduleFontSave() {
     updateFontPreview();
     app.restaurant.font = font;
     applyRestaurantTheme();
+    replayMotion(qs('mobile-view'), 'is-font-changing');
 
     window.clearTimeout(fontSaveTimer);
     setSaveStatus('A guardar fonte...');
@@ -854,11 +989,11 @@ function openFontModal() {
     if (!app.restaurant) return;
     loadFontOptions();
     renderFontOptions();
-    qs('fontModal').hidden = false;
+    showModal('fontModal');
 }
 
 function closeFontModal() {
-    qs('fontModal').hidden = true;
+    return hideModal('fontModal');
 }
 
 async function saveFontValue(font) {
@@ -876,12 +1011,12 @@ async function saveFontValue(font) {
 function openQrModal() {
     if (!app.restaurant) return;
     qrColor = normalizeHex(qs('qrColorInput')?.value, '#111111');
-    qs('qrModal').hidden = false;
+    showModal('qrModal');
     renderQrCode();
 }
 
 function closeQrModal() {
-    qs('qrModal').hidden = true;
+    return hideModal('qrModal');
 }
 
 function getQrOptions() {
@@ -1096,6 +1231,12 @@ function renderCover() {
     const hero = qs('heroHeader');
     if (!cover || !app.restaurant) return;
 
+    const motionKey = [
+        app.restaurant.cover_url || '',
+        app.restaurant.logo_url || '',
+        app.restaurant.logo_visible !== false,
+    ].join('|');
+    const previousMotionKey = cover.dataset.motionKey || '';
     const hasVisibleLogo = renderRestaurantLogo(cover, app.restaurant);
     if (app.restaurant.cover_url || hasVisibleLogo) {
         cover.style.display = 'block';
@@ -1111,6 +1252,10 @@ function renderCover() {
         if (hero) hero.style.paddingTop = '100px';
         if (placeholder) placeholder.hidden = false;
         if (removeButton) removeButton.hidden = true;
+    }
+    cover.dataset.motionKey = motionKey;
+    if (previousMotionKey && previousMotionKey !== motionKey) {
+        replayMotion((app.restaurant.cover_url || hasVisibleLogo) ? cover : hero, 'is-media-updated');
     }
 }
 
@@ -1191,12 +1336,12 @@ function openHeroModal() {
     qs('heroPhoneInput').value = app.restaurant.phone || '';
     setHeroModalCoverPreview();
     setHeroModalLogoPreview();
-    qs('heroModal').hidden = false;
+    showModal('heroModal');
     window.setTimeout(() => qs('heroNameInput').focus(), 40);
 }
 
 function closeHeroModal() {
-    qs('heroModal').hidden = true;
+    return hideModal('heroModal');
 }
 
 function setHeroModalCoverPreview() {
@@ -1206,6 +1351,7 @@ function setHeroModalCoverPreview() {
     if (!preview) return;
 
     const coverUrl = app.restaurant?.cover_url || COVER_PLACEHOLDER_IMAGE;
+    const previousUrl = preview.getAttribute('src') || '';
     preview.src = coverUrl;
     preview.alt = app.restaurant?.cover_url ? 'Capa atual do restaurante' : 'Sem capa definida';
     if (previewContainer) previewContainer.dataset.hasCover = app.restaurant?.cover_url ? 'true' : 'false';
@@ -1216,6 +1362,7 @@ function setHeroModalCoverPreview() {
         actionBtn.setAttribute('aria-label', app.restaurant?.cover_url ? 'Remover capa' : 'Alterar capa');
         actionBtn.title = app.restaurant?.cover_url ? 'Remover capa' : 'Alterar capa';
     }
+    if (previousUrl && previousUrl !== coverUrl) replayMotion(previewContainer, 'is-media-updated');
 }
 
 function setHeroModalLogoPreview() {
@@ -1227,6 +1374,7 @@ function setHeroModalLogoPreview() {
     if (!previewButton || !previewImage || !placeholder || !visibleInput || !removeButton) return;
 
     const logoUrl = String(app.restaurant?.logo_url || '').trim();
+    const previousLogoUrl = previewImage.getAttribute('src') || '';
     const hasLogo = Boolean(logoUrl);
     previewButton.dataset.hasLogo = hasLogo ? 'true' : 'false';
     previewButton.setAttribute('aria-label', hasLogo ? 'Alterar logótipo' : 'Adicionar logótipo');
@@ -1244,15 +1392,16 @@ function setHeroModalLogoPreview() {
         previewImage.removeAttribute('src');
         previewImage.alt = '';
     }
+    if (previousLogoUrl !== logoUrl) replayMotion(previewButton, 'is-media-updated');
 }
 
 function openCategoriesModal() {
     renderCategoriesModal();
-    qs('categoriesModal').hidden = false;
+    showModal('categoriesModal');
 }
 
 function closeCategoriesModal() {
-    qs('categoriesModal').hidden = true;
+    return hideModal('categoriesModal');
 }
 
 function syncDeleteRestaurantButton() {
@@ -1271,7 +1420,7 @@ function openDeleteRestaurantModal() {
     confirmationInput.value = '';
     errorElement.hidden = true;
     syncDeleteRestaurantButton();
-    modal.hidden = false;
+    showModal(modal);
     window.setTimeout(() => confirmationInput.focus(), 40);
 }
 
@@ -1338,7 +1487,7 @@ async function deleteRestaurant(event) {
     app.restaurant = null;
     app.items = [];
     app.activeCategory = null;
-    qs('deleteRestaurantModal').hidden = true;
+    await hideModal('deleteRestaurantModal');
     renderEmptyState();
     setSaveStatus('Restaurante eliminado', true);
 }
@@ -1347,7 +1496,7 @@ function addCategoryRow(value = 'Nova categoria') {
     const list = qs('categoriesList');
     if (!list) return;
     const row = document.createElement('div');
-    row.className = 'category-row';
+    row.className = 'category-row is-entering';
     row.dataset.originalCategory = '';
     row.innerHTML = `
         <input class="category-row-input" type="text" value="${escapeHTML(value)}" spellcheck="false">
@@ -1367,6 +1516,7 @@ function addCategoryRow(value = 'Nova categoria') {
         </div>
     `;
     list.appendChild(row);
+    row.addEventListener('animationend', () => row.classList.remove('is-entering'), { once: true });
     row.querySelector('input')?.focus();
     updateCategoryModalControls();
 }
@@ -1385,16 +1535,30 @@ function moveCategoryRow(row, direction) {
     if (!row) return;
     const sibling = direction < 0 ? row.previousElementSibling : row.nextElementSibling;
     if (!sibling) return;
+    const rows = Array.from(row.parentNode.children);
+    const previousPositions = new Map(rows.map((element) => [element, element.getBoundingClientRect().top]));
     if (direction < 0) {
         row.parentNode.insertBefore(row, sibling);
     } else {
         row.parentNode.insertBefore(sibling, row);
     }
     updateCategoryModalControls();
+    if (prefersReducedMotion()) return;
+    rows.forEach((element) => {
+        const offset = previousPositions.get(element) - element.getBoundingClientRect().top;
+        if (!offset || typeof element.animate !== 'function') return;
+        element.animate(
+            [{ transform: `translateY(${offset}px)` }, { transform: 'translateY(0)' }],
+            { duration: 190, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' },
+        );
+    });
 }
 
-function deleteCategoryRow(row) {
-    row?.remove();
+async function deleteCategoryRow(row) {
+    if (!row || row.classList.contains('is-leaving')) return;
+    row.classList.add('is-leaving');
+    await waitForMotion(160);
+    row.remove();
     updateCategoryModalControls();
 }
 
@@ -1428,6 +1592,7 @@ async function saveHeroModal(event) {
     }
 
     renderDashboard();
+    replayMotion(qs('heroHeader'), 'is-content-updated');
     closeHeroModal();
     setSaveStatus('Restaurante guardado', true);
 }
@@ -1436,7 +1601,7 @@ async function saveCategoriesModal(event) {
     event.preventDefault();
     if (!app.restaurant) return;
 
-    const rows = Array.from(qs('categoriesList').querySelectorAll('.category-row')).map((row) => ({
+    const rows = Array.from(qs('categoriesList').querySelectorAll('.category-row:not(.is-leaving)')).map((row) => ({
         original: row.dataset.originalCategory || '',
         name: row.querySelector('.category-row-input')?.value.trim() || '',
     }));
@@ -1453,6 +1618,9 @@ async function saveCategoriesModal(event) {
     }
 
     const nextOrder = names;
+    const changedCategories = rows
+        .filter((row) => !row.original || row.original !== row.name)
+        .map((row) => row.name);
     const nextImages = { ...(app.restaurant.category_images || {}) };
     const currentCategories = getCategories();
     const activeWasRenamed = rows.find((row) => row.original === app.activeCategory && row.name);
@@ -1507,6 +1675,7 @@ async function saveCategoriesModal(event) {
     app.activeCategory = activeWasRenamed ? activeWasRenamed.name : (activeWasDeleted ? nextOrder[0] || null : app.activeCategory);
     closeCategoriesModal();
     await loadDashboardData();
+    animateCategoryTabs(changedCategories);
     setSaveStatus('Categorias guardadas', true);
 }
 
@@ -1698,13 +1867,16 @@ function setModalItemImage(item) {
     if (!preview || !button) return;
 
     const hasItem = Boolean(item?.id);
-    preview.src = pendingItemImagePreviewUrl || item?.image_url || ITEM_PLACEHOLDER_IMAGE;
+    const imageUrl = pendingItemImagePreviewUrl || item?.image_url || ITEM_PLACEHOLDER_IMAGE;
+    const previousUrl = preview.getAttribute('src') || '';
+    preview.src = imageUrl;
     button.dataset.itemId = item?.id || '';
     button.disabled = false;
     button.title = hasItem
         ? 'Editar imagem do prato'
         : 'Adicionar imagem ao prato';
     button.setAttribute('aria-label', button.title);
+    if (previousUrl && previousUrl !== imageUrl) replayMotion(button, 'is-media-updated');
 }
 
 function openItemModal(item = null, category = app.activeCategory) {
@@ -1718,18 +1890,19 @@ function openItemModal(item = null, category = app.activeCategory) {
     qs('itemAvailableInput').checked = item?.available !== false;
     populateCategorySelect(item?.category || category);
     setModalItemImage(item);
-    qs('itemModal').hidden = false;
+    showModal('itemModal');
     window.setTimeout(() => qs('itemNameInput').focus(), 40);
 }
 
 function closeItemModal() {
     clearPendingItemImage();
-    qs('itemModal').hidden = true;
+    return hideModal('itemModal');
 }
 
 async function saveItem(event) {
     event.preventDefault();
     const id = qs('itemIdInput').value;
+    const itemMotion = id ? 'updated' : 'added';
     const price = Number.parseFloat(qs('itemPriceInput').value.replace(',', '.'));
     const payload = {
         name: qs('itemNameInput').value.trim(),
@@ -1789,6 +1962,7 @@ async function saveItem(event) {
     app.activeCategory = payload.category;
     closeItemModal();
     await loadDashboardData();
+    animateMenuItemChange(savedItemId, itemMotion);
     setSaveStatus(finalStatus, true);
 }
 
@@ -1800,7 +1974,11 @@ async function deleteItem(id) {
         setSaveStatus('Não foi possível apagar o prato');
         return;
     }
-    if (!qs('itemModal').hidden) closeItemModal();
+    if (isModalOpen('itemModal')) {
+        await closeItemModal();
+    } else {
+        await animateMenuItemExit(id);
+    }
     await loadDashboardData();
     setSaveStatus('Prato apagado', true);
 }
@@ -1827,7 +2005,7 @@ async function uploadItemImage(id) {
         return;
     }
     await loadDashboardData();
-    if (!qs('itemModal').hidden) {
+    if (isModalOpen('itemModal')) {
         setModalItemImage(app.items.find((item) => String(item.id) === String(id)));
     }
     setSaveStatus('Imagem guardada', true);
@@ -1840,7 +2018,7 @@ async function prepareNewItemImage() {
     clearPendingItemImage();
     pendingItemImageFile = file;
     pendingItemImagePreviewUrl = URL.createObjectURL(file);
-    qs('itemModalImagePreview').src = pendingItemImagePreviewUrl;
+    setModalItemImage(null);
     setSaveStatus('Imagem pronta para guardar', true);
 }
 
@@ -1875,7 +2053,7 @@ async function uploadCover(input) {
         return;
     }
     await loadDashboardData();
-    if (!qs('heroModal').hidden) setHeroModalCoverPreview();
+    if (isModalOpen('heroModal')) setHeroModalCoverPreview();
     setSaveStatus('Capa guardada', true);
 }
 
@@ -1904,7 +2082,7 @@ async function uploadLogo(input) {
     }
 
     await loadDashboardData();
-    if (!qs('heroModal').hidden) setHeroModalLogoPreview();
+    if (isModalOpen('heroModal')) setHeroModalLogoPreview();
     setSaveStatus('Logótipo guardado', true);
 }
 
@@ -1918,7 +2096,7 @@ async function removeLogo() {
     }
 
     await loadDashboardData();
-    if (!qs('heroModal').hidden) setHeroModalLogoPreview();
+    if (isModalOpen('heroModal')) setHeroModalLogoPreview();
     setSaveStatus('Logótipo removido', true);
 }
 
@@ -1931,7 +2109,7 @@ async function removeCover() {
         return;
     }
     await loadDashboardData();
-    if (!qs('heroModal').hidden) setHeroModalCoverPreview();
+    if (isModalOpen('heroModal')) setHeroModalCoverPreview();
     setSaveStatus('Capa removida', true);
 }
 
@@ -1946,8 +2124,7 @@ function handleEditorClick(event) {
     const itemId = actionElement.dataset.itemId;
 
     if (action === 'select-category') {
-        app.activeCategory = actionElement.dataset.category;
-        renderDashboard();
+        selectCategoryTab(actionElement);
     } else if (action === 'open-hero-modal') {
         openHeroModal();
     } else if (action === 'open-categories-modal') {
@@ -2061,7 +2238,7 @@ function bindEvents() {
             if (modal?.id === 'itemModal') {
                 closeItemModal();
             } else if (modal) {
-                modal.hidden = true;
+                hideModal(modal);
             }
         }));
     qs('itemModal').addEventListener('click', (event) => {
@@ -2086,23 +2263,32 @@ function bindEvents() {
         if (event.target === qs('imageCropModal')) closeImageCropper(null);
     });
     qs('logoutModal').addEventListener('click', (event) => {
-        if (event.target === qs('logoutModal')) qs('logoutModal').hidden = true;
+        if (event.target === qs('logoutModal')) hideModal('logoutModal');
     });
     window.addEventListener('resize', () => {
         if (tutorialOpen) positionTutorialCard();
-        if (!qs('imageCropModal').hidden) initCropGeometry(true);
+        if (isModalOpen('imageCropModal')) initCropGeometry(true);
     });
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !qs('imageCropModal').hidden) {
+        if (event.key !== 'Escape') return;
+        if (isModalOpen('imageCropModal')) {
             closeImageCropper(null);
             return;
         }
-        if (event.key === 'Escape' && !qs('logoutModal').hidden) {
-            qs('logoutModal').hidden = true;
-            qs('logoutBtn').focus();
+        if (isModalOpen('itemModal')) {
+            closeItemModal();
             return;
         }
-        if (event.key === 'Escape' && tutorialOpen) closeTutorial();
+        const openModal = Array.from(document.querySelectorAll('.modal-backdrop:not([hidden])'))
+            .reverse()
+            .find((modal) => !modal.classList.contains('is-closing'));
+        if (openModal) {
+            hideModal(openModal).then(() => {
+                if (openModal.id === 'logoutModal') qs('logoutBtn')?.focus();
+            });
+            return;
+        }
+        if (tutorialOpen) closeTutorial();
     });
 }
 

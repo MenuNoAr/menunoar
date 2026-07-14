@@ -9,6 +9,10 @@
     --editor-accent: var(--brand-primary);
     --editor-accent-soft: var(--brand-primary-soft);
     --rail-width: 58px;
+    --motion-fast: 130ms;
+    --motion-base: 180ms;
+    --motion-slow: 240ms;
+    --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -44,6 +48,12 @@ select {
 button,
 a {
     -webkit-tap-highlight-color: transparent;
+}
+
+button:active:not(:disabled),
+a:active {
+    transform: scale(0.97);
+    transition: transform var(--motion-fast) var(--motion-ease);
 }
 
 [hidden] {
@@ -328,6 +338,28 @@ a {
     height: 0;
 }
 
+#mobile-view.menu-editor,
+#mobile-view #heroHeader,
+#mobile-view .header-content,
+#mobile-view .info-badges,
+#mobile-view .info-badges *,
+#mobile-view .category-tabs-editor,
+#mobile-view .category-tabs,
+#mobile-view .tab-btn,
+#mobile-view .tab-btn::after,
+#mobile-view .menu-item,
+#mobile-view .item-text h3,
+#mobile-view .item-desc,
+#mobile-view .item-price,
+#mobile-view .item-img,
+#mobile-view .menu-footer {
+    transition:
+        color var(--motion-base) ease,
+        background-color var(--motion-base) ease,
+        border-color var(--motion-base) ease,
+        box-shadow var(--motion-base) ease;
+}
+
 .cover-image {
     height: 250px;
     background-color: #f1f1f3;
@@ -538,6 +570,23 @@ a {
     backdrop-filter: blur(8px);
 }
 
+.modal-backdrop:not([hidden]) {
+    animation: modal-backdrop-in var(--motion-base) ease both;
+}
+
+.modal-backdrop:not([hidden]) .editor-modal {
+    animation: modal-panel-in var(--motion-base) var(--motion-ease) both;
+}
+
+.modal-backdrop.is-closing {
+    pointer-events: none;
+    animation: modal-backdrop-out var(--motion-base) ease both;
+}
+
+.modal-backdrop.is-closing .editor-modal {
+    animation: modal-panel-out var(--motion-base) ease both;
+}
+
 .editor-modal {
     width: min(100%, 480px);
     max-height: calc(100dvh - 40px);
@@ -548,6 +597,8 @@ a {
     border-radius: 12px;
     background: #fff;
     box-shadow: 0 30px 90px rgba(0, 0, 0, 0.18);
+    transform-origin: center;
+    will-change: transform, opacity;
 }
 
 .editor-modal-wide {
@@ -580,6 +631,10 @@ a {
     background: #f6f6f7;
     cursor: pointer;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    transition:
+        transform var(--motion-base) var(--motion-ease),
+        border-color var(--motion-fast) ease,
+        box-shadow var(--motion-fast) ease;
 }
 
 .modal-item-media:disabled {
@@ -640,6 +695,7 @@ a {
     cursor: pointer;
     text-align: left;
     position: relative;
+    transition: transform var(--motion-base) var(--motion-ease), border-color var(--motion-fast) ease;
 }
 
 .hero-cover-preview img {
@@ -700,6 +756,10 @@ a {
     background: #f4f4f5;
     color: var(--editor-muted);
     cursor: pointer;
+    transition:
+        transform var(--motion-base) var(--motion-ease),
+        border-color var(--motion-fast) ease,
+        box-shadow var(--motion-fast) ease;
 }
 
 .hero-logo-preview:hover,
@@ -761,6 +821,25 @@ a {
     border: 1px solid var(--editor-line);
     border-radius: 10px;
     background: #fff;
+    transform-origin: center top;
+    transition:
+        border-color var(--motion-fast) ease,
+        box-shadow var(--motion-fast) ease;
+}
+
+.category-row:focus-within {
+    border-color: var(--editor-accent);
+    box-shadow: 0 0 0 3px var(--editor-accent-soft);
+}
+
+.category-row.is-entering {
+    animation: category-row-in var(--motion-base) var(--motion-ease) both;
+}
+
+.category-row.is-leaving {
+    pointer-events: none;
+    overflow: hidden;
+    animation: category-row-out 160ms ease both;
 }
 
 .category-row-input {
@@ -945,6 +1024,10 @@ a {
     outline: none;
     background: #fff;
     color: var(--editor-ink);
+    transition:
+        border-color var(--motion-fast) ease,
+        box-shadow var(--motion-fast) ease,
+        background-color var(--motion-fast) ease;
 }
 
 .form-field textarea {
@@ -1038,6 +1121,10 @@ a {
     text-wrap: pretty;
 }
 
+.form-note:not([hidden]) {
+    animation: content-update var(--motion-base) var(--motion-ease) both;
+}
+
 .color-field {
     min-height: 54px;
     display: grid;
@@ -1048,6 +1135,12 @@ a {
     border: 1px solid var(--editor-line);
     border-radius: 8px;
     background: #fff;
+    transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+
+.color-field:focus-within {
+    border-color: var(--editor-accent);
+    box-shadow: 0 0 0 3px var(--editor-accent-soft);
 }
 
 .color-field span {
@@ -1120,6 +1213,12 @@ a {
     font: inherit;
     font-weight: 600;
     cursor: pointer;
+    transition:
+        transform var(--motion-fast) var(--motion-ease),
+        background-color var(--motion-fast) ease,
+        border-color var(--motion-fast) ease,
+        color var(--motion-fast) ease,
+        opacity var(--motion-fast) ease;
 }
 
 .button-primary {
@@ -1390,6 +1489,192 @@ a {
     background: #fff;
 }
 
+#mobile-view.is-font-changing,
+#heroHeader.is-content-updated {
+    animation: content-update var(--motion-base) var(--motion-ease) both;
+}
+
+.is-media-updated {
+    animation: media-update var(--motion-slow) var(--motion-ease) both;
+}
+
+.slide-content.is-category-switching {
+    animation: category-content-in var(--motion-base) var(--motion-ease) both;
+}
+
+#mobile-view .tab-btn.is-tab-entering {
+    animation: category-tab-in var(--motion-base) var(--motion-ease) both;
+    animation-delay: var(--motion-delay, 0ms);
+}
+
+#mobile-view .tab-btn.active::after {
+    transform-origin: center;
+    animation: active-tab-line-in var(--motion-base) var(--motion-ease) both;
+}
+
+#mobile-view .menu-item {
+    --menu-item-opacity: 1;
+}
+
+#mobile-view .menu-item.unavailable {
+    --menu-item-opacity: 0.6;
+}
+
+#mobile-view .menu-item.is-item-entering {
+    animation: menu-item-in var(--motion-slow) var(--motion-ease) both;
+}
+
+#mobile-view .menu-item.is-item-updated {
+    animation: menu-item-update var(--motion-slow) var(--motion-ease) both;
+}
+
+#mobile-view .menu-item.is-item-leaving {
+    pointer-events: none;
+    animation: menu-item-out 170ms ease both;
+}
+
+@keyframes modal-backdrop-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modal-backdrop-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes modal-panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.975);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes modal-panel-out {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(5px) scale(0.985);
+    }
+}
+
+@keyframes category-row-in {
+    from {
+        opacity: 0;
+        transform: translateY(7px) scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes category-row-out {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-8px) scale(0.98);
+    }
+}
+
+@keyframes category-content-in {
+    from {
+        opacity: 0;
+        transform: translateX(var(--category-shift, 12px));
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes category-tab-in {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes active-tab-line-in {
+    from {
+        opacity: 0;
+        transform: scaleX(0.35);
+    }
+    to {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+}
+
+@keyframes menu-item-in {
+    from {
+        opacity: 0;
+        transform: translateY(9px) scale(0.985);
+    }
+    to {
+        opacity: var(--menu-item-opacity);
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes menu-item-update {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 transparent;
+    }
+    45% {
+        transform: scale(1.008);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary), transparent 82%);
+    }
+}
+
+@keyframes menu-item-out {
+    from {
+        opacity: var(--menu-item-opacity);
+        transform: translateX(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(9px) scale(0.985);
+    }
+}
+
+@keyframes content-update {
+    from {
+        opacity: 0.72;
+        transform: translateY(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes media-update {
+    0% {
+        opacity: 0.55;
+        transform: scale(0.985);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 @keyframes tutorial-card-in {
     from {
         opacity: 0;
@@ -1501,5 +1786,16 @@ a {
     .tutorial-close {
         top: 18px;
         right: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
     }
 }
