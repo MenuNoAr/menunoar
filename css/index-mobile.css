@@ -126,21 +126,9 @@
         font-size: 0.61rem;
     }
 
-    .note-live {
-        top: 48px;
-        right: 1px;
-    }
-
     .note-edit {
         top: 174px;
         left: 0;
-    }
-
-    .qr-float {
-        right: 0;
-        bottom: 28px;
-        transform: scale(0.78);
-        transform-origin: right bottom;
     }
 
     .signal-grid {

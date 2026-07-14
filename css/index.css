@@ -704,11 +704,6 @@ p {
     font-weight: 800;
 }
 
-.note-live {
-    top: 100px;
-    right: -4px;
-}
-
 .note-edit {
     top: 244px;
     left: -8px;
@@ -717,62 +712,6 @@ p {
 .note-edit i {
     color: var(--blue-deep);
     font-size: 1rem;
-}
-
-.live-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #1bb879;
-    box-shadow: 0 0 0 5px rgba(27, 184, 121, 0.13);
-}
-
-.qr-float {
-    position: absolute;
-    z-index: 5;
-    right: -12px;
-    bottom: 52px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border: 1px solid rgba(17, 19, 24, 0.08);
-    border-radius: 14px;
-    background: #ffffff;
-    box-shadow: var(--shadow-small);
-}
-
-.qr-float strong,
-.qr-float small {
-    display: block;
-}
-
-.qr-float strong {
-    font-size: 0.72rem;
-}
-
-.qr-float small {
-    color: var(--muted);
-    font-size: 0.58rem;
-}
-
-.mini-qr {
-    display: grid;
-    width: 42px;
-    height: 42px;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 3px;
-    padding: 4px;
-    background: #f4f8fa;
-}
-
-.mini-qr span {
-    background: #111318;
-}
-
-.mini-qr span:nth-child(2),
-.mini-qr span:nth-child(4) {
-    background: transparent;
 }
 
 .hero-orbit {
@@ -1561,16 +1500,8 @@ p {
         transform: none;
     }
 
-    .note-live {
-        right: 9%;
-    }
-
     .note-edit {
         left: 7%;
-    }
-
-    .qr-float {
-        right: 8%;
     }
 
     .signal-grid {
