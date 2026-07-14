@@ -557,10 +557,11 @@ function getTutorialTargets() {
 }
 
 function clearTutorialHighlights() {
-    document.querySelectorAll('.tutorial-highlight').forEach((element) => {
-        element.classList.remove('tutorial-highlight');
+    document.querySelectorAll('[aria-describedby="tutorialActiveCard"]').forEach((element) => {
         element.removeAttribute('aria-describedby');
     });
+    const highlight = qs('tutorialTargetHighlight');
+    if (highlight) highlight.hidden = true;
 }
 
 function getTutorialDots(total) {
@@ -577,6 +578,18 @@ function positionTutorialCard() {
     if (!target) return;
 
     const rect = target.getBoundingClientRect();
+    const highlight = qs('tutorialTargetHighlight');
+    if (highlight) {
+        const highlightGap = 5;
+        const targetRadius = Number.parseFloat(window.getComputedStyle(target).borderRadius) || 8;
+        highlight.style.left = `${rect.left - highlightGap}px`;
+        highlight.style.top = `${rect.top - highlightGap}px`;
+        highlight.style.width = `${rect.width + (highlightGap * 2)}px`;
+        highlight.style.height = `${rect.height + (highlightGap * 2)}px`;
+        highlight.style.borderRadius = `${targetRadius + highlightGap}px`;
+        highlight.hidden = false;
+    }
+
     const margin = 14;
     const edge = 14;
     const cardWidth = card.offsetWidth;
@@ -648,7 +661,6 @@ function renderTutorialStep(index = tutorialStepIndex) {
         </article>
     `;
 
-    step.element.classList.add('tutorial-highlight');
     step.element.setAttribute('aria-describedby', 'tutorialActiveCard');
     overlay.hidden = false;
     tutorialOpen = true;
@@ -656,6 +668,7 @@ function renderTutorialStep(index = tutorialStepIndex) {
     window.requestAnimationFrame(() => {
         positionTutorialCard();
         window.setTimeout(positionTutorialCard, 260);
+        window.setTimeout(positionTutorialCard, 520);
     });
 }
 

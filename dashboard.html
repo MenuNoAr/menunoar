@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/brand.css?v=1.0">
     <link rel="stylesheet" href="css/menu.css?v=3.3">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.35">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.36">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
@@ -164,6 +164,7 @@
     <div id="saveStatus" class="save-status" role="status" aria-live="polite" hidden></div>
 
     <div id="tutorialOverlay" class="tutorial-overlay" hidden>
+        <div id="tutorialTargetHighlight" class="tutorial-target-highlight" aria-hidden="true" hidden></div>
         <div id="tutorialCards" class="tutorial-cards" aria-label="Tutorial passo a passo do dashboard"
             aria-live="polite"></div>
         <button id="closeTutorialBtn" class="tutorial-close" type="button" aria-label="Fechar tutorial">
@@ -489,7 +490,7 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=10.4"></script>
+    <script type="module" src="js/dashboard.js?v=10.5"></script>
 </body>
 
 </html>

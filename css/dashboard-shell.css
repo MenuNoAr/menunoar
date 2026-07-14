@@ -1209,6 +1209,7 @@ a {
     --tutorial-arrow-top: 50%;
     --tutorial-arrow-left: 50%;
     position: fixed;
+    z-index: 1;
     width: min(276px, calc(100vw - 28px));
     display: grid;
     gap: 9px;
@@ -1346,37 +1347,21 @@ a {
     background: #000;
 }
 
-.tutorial-highlight {
-    position: relative;
-    z-index: 1051;
-    background: #fff !important;
-    color: var(--editor-ink) !important;
-    box-shadow: 0 0 0 3px var(--editor-accent-soft), 0 10px 30px rgba(0, 0, 0, 0.14) !important;
-    transform: scale(1.04);
-    animation: tutorial-target-lift 260ms ease both;
-}
-
-.tutorial-highlight::after {
-    content: '';
-    position: absolute;
-    inset: -5px;
+.tutorial-target-highlight {
+    position: fixed;
+    z-index: 0;
     border: 1px solid color-mix(in srgb, var(--editor-accent), transparent 78%);
-    border-radius: 11px;
+    background: color-mix(in srgb, var(--editor-accent), transparent 92%);
+    box-shadow: 0 0 0 3px var(--editor-accent-soft), 0 10px 30px rgba(0, 0, 0, 0.14);
     pointer-events: none;
-    animation: tutorial-target-pulse 1300ms ease-out infinite;
-}
-
-.tutorial-highlight img,
-.tutorial-highlight i {
-    opacity: 1;
-    animation: tutorial-icon-pop 520ms ease;
+    animation: tutorial-target-pulse 1300ms ease-in-out infinite;
 }
 
 .tutorial-close {
     position: fixed;
     top: 16px;
     right: 16px;
-    z-index: 902;
+    z-index: 2;
     width: 38px;
     height: 38px;
     display: inline-grid;
@@ -1406,39 +1391,16 @@ a {
     }
 }
 
-@keyframes tutorial-target-lift {
-    from {
-        transform: scale(1);
-    }
-
-    to {
-        transform: scale(1.04);
-    }
-}
-
 @keyframes tutorial-target-pulse {
-    0% {
-        opacity: 0.75;
-        transform: scale(0.92);
-    }
-
+    0%,
     100% {
-        opacity: 0;
-        transform: scale(1.38);
-    }
-}
-
-@keyframes tutorial-icon-pop {
-    0% {
-        transform: scale(0.86);
+        opacity: 0.72;
+        transform: scale(0.96);
     }
 
-    55% {
-        transform: scale(1.12);
-    }
-
-    100% {
-        transform: scale(1);
+    50% {
+        opacity: 1;
+        transform: scale(1.04);
     }
 }
 
