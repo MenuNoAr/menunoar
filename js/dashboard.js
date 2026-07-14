@@ -692,6 +692,33 @@ function toggleTutorial() {
     }
 }
 
+function openLogoutModal() {
+    if (tutorialOpen) closeTutorial();
+    const modal = qs('logoutModal');
+    const confirmButton = qs('confirmLogoutBtn');
+    if (!modal || !confirmButton) return;
+    confirmButton.disabled = false;
+    confirmButton.textContent = 'Sair';
+    modal.hidden = false;
+    window.setTimeout(() => confirmButton.focus(), 40);
+}
+
+async function confirmLogout() {
+    const confirmButton = qs('confirmLogoutBtn');
+    if (!confirmButton || confirmButton.disabled) return;
+    confirmButton.disabled = true;
+    confirmButton.textContent = 'A sair...';
+
+    try {
+        await signOut();
+    } catch (error) {
+        console.error('Logout error:', error);
+        confirmButton.disabled = false;
+        confirmButton.textContent = 'Sair';
+        setSaveStatus('Não foi possível terminar a sessão');
+    }
+}
+
 function moveTutorialStep(direction) {
     const steps = getTutorialTargets();
     const nextIndex = tutorialStepIndex + direction;
@@ -1820,6 +1847,8 @@ function bindEvents() {
     });
     qs('editCategoriesBtn').addEventListener('click', openCategoriesModal);
     qs('deleteRestaurantBtn').addEventListener('click', openDeleteRestaurantModal);
+    qs('logoutBtn').addEventListener('click', openLogoutModal);
+    qs('confirmLogoutBtn').addEventListener('click', confirmLogout);
     qs('deleteRestaurantConfirmInput').addEventListener('input', syncDeleteRestaurantButton);
     qs('deleteRestaurantForm').addEventListener('submit', deleteRestaurant);
     qs('categoryEditor').addEventListener('click', handleEditorClick);
@@ -1928,6 +1957,9 @@ function bindEvents() {
     qs('imageCropModal').addEventListener('click', (event) => {
         if (event.target === qs('imageCropModal')) closeImageCropper(null);
     });
+    qs('logoutModal').addEventListener('click', (event) => {
+        if (event.target === qs('logoutModal')) qs('logoutModal').hidden = true;
+    });
     window.addEventListener('resize', () => {
         if (tutorialOpen) positionTutorialCard();
         if (!qs('imageCropModal').hidden) initCropGeometry(true);
@@ -1935,6 +1967,11 @@ function bindEvents() {
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && !qs('imageCropModal').hidden) {
             closeImageCropper(null);
+            return;
+        }
+        if (event.key === 'Escape' && !qs('logoutModal').hidden) {
+            qs('logoutModal').hidden = true;
+            qs('logoutBtn').focus();
             return;
         }
         if (event.key === 'Escape' && tutorialOpen) closeTutorial();
@@ -1969,5 +2006,4 @@ async function init() {
     }
 }
 
-window.signOut = () => signOut();
 init();
