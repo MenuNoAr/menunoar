@@ -9,11 +9,17 @@ const ESCAPES = {
 };
 
 const THEME_DEFAULTS = {
-    primary: '#00b2ff',
     text: '#1a1a1a',
     background: '#ffffff',
     textSecondary: '#666666',
 };
+
+export function getBrandPrimary() {
+    return getComputedStyle(document.documentElement)
+        .getPropertyValue('--brand-primary')
+        .trim()
+        .toLowerCase();
+}
 
 export function escapeHTML(value) {
     if (value === null || value === undefined) return '';
@@ -75,7 +81,7 @@ export function applyMenuTheme(root, restaurant, options = {}) {
     const fontFamily = `'${font}', ${getFontFallback(font)}`;
     const background = normalizeHex(restaurant.color_background, THEME_DEFAULTS.background);
     const dark = isDarkColor(background);
-    const primary = normalizeHex(restaurant.color_primary, THEME_DEFAULTS.primary);
+    const primary = normalizeHex(restaurant.color_primary, getBrandPrimary());
     const text = normalizeHex(restaurant.color_text, dark ? '#ffffff' : THEME_DEFAULTS.text);
     const textSecondary = normalizeHex(
         restaurant.color_text_secondary,

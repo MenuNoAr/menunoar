@@ -6,6 +6,8 @@
     --editor-ink: #1d1d1f;
     --editor-muted: #6e6e73;
     --editor-danger: #d70015;
+    --editor-accent: var(--brand-primary);
+    --editor-accent-soft: var(--brand-primary-soft);
     --rail-width: 58px;
 }
 
@@ -870,8 +872,8 @@ a {
 .form-field input:focus,
 .form-field textarea:focus,
 .form-field select:focus {
-    border-color: #0071e3;
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.13);
+    border-color: var(--editor-accent);
+    box-shadow: 0 0 0 3px var(--editor-accent-soft);
 }
 
 .availability-field {
@@ -938,7 +940,7 @@ a {
 }
 
 .availability-field input:focus-visible {
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.14);
+    box-shadow: 0 0 0 3px var(--editor-accent-soft);
 }
 
 .form-note {
@@ -1261,7 +1263,7 @@ a {
     z-index: 1051;
     background: #fff !important;
     color: var(--editor-ink) !important;
-    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.14), 0 10px 30px rgba(0, 0, 0, 0.14) !important;
+    box-shadow: 0 0 0 3px var(--editor-accent-soft), 0 10px 30px rgba(0, 0, 0, 0.14) !important;
     transform: scale(1.04);
     animation: tutorial-target-lift 260ms ease both;
 }
@@ -1270,7 +1272,7 @@ a {
     content: '';
     position: absolute;
     inset: -5px;
-    border: 1px solid rgba(0, 113, 227, 0.22);
+    border: 1px solid color-mix(in srgb, var(--editor-accent), transparent 78%);
     border-radius: 11px;
     pointer-events: none;
     animation: tutorial-target-pulse 1300ms ease-out infinite;

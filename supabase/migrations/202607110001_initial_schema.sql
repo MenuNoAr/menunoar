@@ -13,7 +13,7 @@ create table if not exists public.restaurants (
     menu_type text not null default 'digital' check (menu_type in ('digital', 'pdf')),
     pdf_url text,
     font text not null default 'Outfit',
-    color_primary text not null default '#00b2ff' check (color_primary ~ '^#[0-9A-Fa-f]{6}$'),
+    color_primary text not null default '#0cc0df' check (color_primary ~ '^#[0-9A-Fa-f]{6}$'),
     color_text text not null default '#1a1a1a' check (color_text ~ '^#[0-9A-Fa-f]{6}$'),
     color_text_secondary text not null default '#666666' check (color_text_secondary ~ '^#[0-9A-Fa-f]{6}$'),
     color_background text not null default '#ffffff' check (color_background ~ '^#[0-9A-Fa-f]{6}$'),

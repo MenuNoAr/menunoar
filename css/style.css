@@ -7,9 +7,9 @@
 
 :root {
     /* Refined SaaS Colors - Matching Logo Blue */
-    --primary: #1fa8ff;
-    --primary-hover: #0091ea;
-    --primary-soft: #f0f9ff;
+    --primary: var(--brand-primary);
+    --primary-hover: var(--brand-primary-hover);
+    --primary-soft: var(--brand-primary-soft);
 
     --success: #10b981;
     --warning: #f59e0b;
@@ -42,7 +42,7 @@
     --text-main: #ffffff;
     --text-muted: #a1a1aa;
     --border-color: #2a2a2a;
-    --primary-soft: rgba(31, 168, 255, 0.1);
+    --primary-soft: var(--brand-primary-soft);
 }
 
 * {
@@ -95,7 +95,7 @@ h4 {
 .btn-primary:hover {
     background-color: var(--primary-hover);
     transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(31, 168, 255, 0.3);
+    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--brand-primary), transparent 70%);
 }
 
 .btn-secondary {

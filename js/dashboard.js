@@ -4,6 +4,7 @@ import {
     applyMenuTheme,
     bindHorizontalTabDrag,
     escapeHTML,
+    getBrandPrimary,
     getItemsForCategory,
     getOrderedCategories,
     ITEM_PLACEHOLDER_IMAGE,
@@ -701,7 +702,7 @@ function openAppearanceModal() {
     qs('colorBackgroundInput').value = normalizeHex(app.restaurant.color_background, '#ffffff');
     qs('colorTextInput').value = normalizeHex(app.restaurant.color_text, '#1d1d1f');
     qs('colorTextSecondaryInput').value = normalizeHex(app.restaurant.color_text_secondary, '#666666');
-    qs('colorPrimaryInput').value = normalizeHex(app.restaurant.color_primary, '#0a84ff');
+    qs('colorPrimaryInput').value = normalizeHex(app.restaurant.color_primary, getBrandPrimary());
     qs('appearanceModal').hidden = false;
 }
 
@@ -1393,6 +1394,7 @@ async function createRestaurant(event) {
             description: 'Bem-vindo ao nosso menu.',
             cover_url: STARTER_COVER_IMAGE,
             category_order: STARTER_CATEGORIES,
+            color_primary: getBrandPrimary(),
         }])
         .select('*')
         .single();

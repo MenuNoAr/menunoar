@@ -5,18 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Criar Conta - Menu no Ar</title>
-    <link rel="icon" type="image/svg+xml" href="assets/images/logominimal.svg">
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo-minimal.svg?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/brand.css?v=1.0">
+    <link rel="stylesheet" href="css/style.css?v=2.0">
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --primary: #1fa8ff;
             --text-dark: #1e293b;
             --text-gray: #64748b;
             --bg-light: #f1f5f9;
@@ -90,7 +90,7 @@
         input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(31, 168, 255, 0.1);
+            box-shadow: 0 0 0 3px var(--brand-primary-soft);
         }
 
         .password-wrapper {
@@ -217,7 +217,7 @@
 
     <div class="auth-card">
         <a href="index.html">
-            <img src="assets/images/logominimal.svg" alt="Menu no Ar" class="logo">
+            <img src="assets/images/logo-minimal.svg?v=2" alt="Menu no Ar" class="logo">
         </a>
         <h1>Começa Grátis</h1>
         <p>Digitaliza o teu menu em 2 minutos.</p>

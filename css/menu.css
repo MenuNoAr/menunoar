@@ -3,7 +3,7 @@
 
 :root {
     /* Default to Light Mode */
-    --primary: #00B2FF;
+    --primary: var(--brand-primary);
     --text: #1a1a1a;
     --text-muted: #666666;
     --bg-page: #EAEAEA;
@@ -148,6 +148,8 @@ h1#restName {
     margin-bottom: 20px;
     line-height: 1.4;
     padding: 0 10px;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
 }
 
 /* --- SIMPLE INFO BADGES (Clean Look) --- */

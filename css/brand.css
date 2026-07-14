@@ -1,0 +1,5 @@
+:root {
+    --brand-primary: #0cc0df;
+    --brand-primary-hover: color-mix(in srgb, var(--brand-primary), #000 18%);
+    --brand-primary-soft: color-mix(in srgb, var(--brand-primary), transparent 90%);
+}
