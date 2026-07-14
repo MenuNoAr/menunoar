@@ -13,8 +13,8 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/brand.css?v=1.0">
-    <link rel="stylesheet" href="css/menu.css?v=3.2">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.34">
+    <link rel="stylesheet" href="css/menu.css?v=3.3">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.35">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
@@ -111,6 +111,9 @@
             <div id="mobile-view" class="menu-editor">
                 <header id="heroHeader">
                     <div id="coverEditor" class="cover-image editable-media">
+                        <div class="restaurant-logo" data-restaurant-logo hidden>
+                            <img data-restaurant-logo-image alt="">
+                        </div>
                         <div class="media-actions">
                             <button class="floating-icon" id="editCoverBtn" type="button" aria-label="Alterar capa"
                                 title="Alterar capa">
@@ -249,6 +252,35 @@
                         </button>
                     </div>
                     <input id="heroCoverInput" type="file" accept="image/*" hidden>
+                </div>
+
+                <div class="form-field hero-logo-field hero-form-span-2">
+                    <span>Logótipo</span>
+                    <div class="hero-logo-control">
+                        <button id="heroLogoPreview" class="hero-logo-preview" type="button"
+                            aria-label="Adicionar logótipo" title="Adicionar logótipo">
+                            <img id="heroLogoPreviewImage" alt="" hidden>
+                            <span id="heroLogoPlaceholder" class="hero-logo-placeholder">
+                                <i class="fa-regular fa-image"></i>
+                                <small>Adicionar logótipo</small>
+                            </span>
+                        </button>
+                        <div class="hero-logo-options">
+                            <label class="availability-field hero-logo-visibility">
+                                <span>
+                                    <strong>Mostrar no menu</strong>
+                                    <small>Apresenta o logótipo no centro da capa.</small>
+                                </span>
+                                <input id="heroLogoVisibleInput" type="checkbox" checked>
+                            </label>
+                            <button id="heroLogoRemoveBtn" class="button-secondary hero-logo-remove-btn"
+                                type="button" hidden>
+                                <i class="fa-solid fa-trash"></i>
+                                Remover logótipo
+                            </button>
+                        </div>
+                    </div>
+                    <input id="heroLogoInput" type="file" accept="image/*" hidden>
                 </div>
 
                 <div class="hero-form-grid">
@@ -457,7 +489,7 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=10.3"></script>
+    <script type="module" src="js/dashboard.js?v=10.4"></script>
 </body>
 
 </html>

@@ -676,6 +676,77 @@ a {
     color: var(--editor-danger);
 }
 
+.hero-logo-field {
+    display: grid;
+    gap: 10px;
+}
+
+.hero-logo-control {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+}
+
+.hero-logo-preview {
+    width: 112px;
+    aspect-ratio: 1;
+    display: grid;
+    overflow: hidden;
+    place-items: center;
+    padding: 9px;
+    border: 1px solid var(--editor-line-strong);
+    border-radius: 50%;
+    background: #f4f4f5;
+    color: var(--editor-muted);
+    cursor: pointer;
+}
+
+.hero-logo-preview:hover,
+.hero-logo-preview:focus-visible {
+    border-color: var(--editor-accent);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--editor-accent-soft);
+}
+
+.hero-logo-preview img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 50%;
+    background: #fff;
+    object-fit: contain;
+}
+
+.hero-logo-placeholder {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    font-size: 1.2rem;
+}
+
+.hero-logo-placeholder small {
+    color: var(--editor-muted);
+    font-size: 0.65rem;
+    font-weight: 600;
+}
+
+.hero-logo-options {
+    min-width: 0;
+    display: grid;
+    gap: 9px;
+}
+
+.hero-logo-visibility:has(input:disabled) {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.hero-logo-remove-btn {
+    width: fit-content;
+    color: var(--editor-danger);
+}
+
 .categories-list {
     display: grid;
     gap: 10px;
@@ -794,10 +865,19 @@ a {
     touch-action: none;
 }
 
-.crop-frame[data-mode="item"] {
+.crop-frame[data-mode="item"],
+.crop-frame[data-mode="logo"] {
     width: min(100%, 420px);
     aspect-ratio: 1 / 1;
     margin: 0 auto;
+}
+
+.crop-frame[data-mode="logo"] {
+    border-radius: 50%;
+}
+
+.crop-frame[data-mode="logo"]::after {
+    border-radius: inherit;
 }
 
 .crop-frame:active {
@@ -1427,6 +1507,14 @@ a {
 
     .hero-cover-preview {
         aspect-ratio: 12 / 5;
+    }
+
+    .hero-logo-control {
+        grid-template-columns: 94px minmax(0, 1fr);
+    }
+
+    .hero-logo-preview {
+        width: 94px;
     }
 
     .form-row {

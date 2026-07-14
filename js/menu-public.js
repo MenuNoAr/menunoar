@@ -5,6 +5,7 @@ import {
     getOrderedCategories,
     renderInfoBadgesMarkup,
     renderItemsGrid,
+    renderRestaurantLogo,
 } from './menu-view.js';
 
 let currentRestaurant = null;
@@ -28,9 +29,10 @@ function renderHeader(restaurant) {
 
     const cover = qs('coverContainer');
     const hero = qs('heroHeader');
-    if (restaurant.cover_url) {
+    const hasVisibleLogo = renderRestaurantLogo(cover, restaurant);
+    if (restaurant.cover_url || hasVisibleLogo) {
         cover.style.display = 'block';
-        cover.style.backgroundImage = `url('${restaurant.cover_url}')`;
+        cover.style.backgroundImage = restaurant.cover_url ? `url('${restaurant.cover_url}')` : '';
         hero.style.paddingTop = '';
     } else {
         cover.style.display = 'none';
@@ -234,7 +236,7 @@ async function init() {
             .from('restaurants')
             .select(`
                 id, name, slug, description, phone, wifi_ssid, wifi_password,
-                cover_url, menu_type, pdf_url, font, color_primary, color_text,
+                cover_url, logo_url, logo_visible, menu_type, pdf_url, font, color_primary, color_text,
                 color_text_secondary, color_background, category_order, category_images
             `)
             .eq('slug', slug)

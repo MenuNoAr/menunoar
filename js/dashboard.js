@@ -11,6 +11,7 @@ import {
     normalizeHex,
     renderInfoBadgesMarkup,
     renderItemsGrid,
+    renderRestaurantLogo,
 } from './menu-view.js';
 
 const app = {
@@ -40,6 +41,14 @@ const IMAGE_CROP_CONFIG = {
         kicker: 'Prato',
         title: 'Recortar imagem do prato',
         fileName: 'item-crop.jpg',
+    },
+    logo: {
+        aspect: 1,
+        width: 1000,
+        height: 1000,
+        kicker: 'Logótipo',
+        title: 'Recortar logótipo',
+        fileName: 'logo-crop.jpg',
     },
 };
 const FONT_OPTIONS = [
@@ -93,7 +102,7 @@ const TUTORIAL_STEPS = [
     {
         targets: ['[data-action="open-hero-modal"]'],
         title: 'Editar restaurante',
-        text: 'Usa este lapis para alterar nome, descricao, Wi-Fi e telefone do menu.',
+        text: 'Usa este lapis para alterar nome, descricao, logotipo, Wi-Fi e telefone do menu.',
     },
     {
         targets: ['#editCoverBtn', '[data-action="open-hero-modal"]'],
@@ -920,14 +929,15 @@ function renderCover() {
     const hero = qs('heroHeader');
     if (!cover || !app.restaurant) return;
 
-    if (app.restaurant.cover_url) {
+    const hasVisibleLogo = renderRestaurantLogo(cover, app.restaurant);
+    if (app.restaurant.cover_url || hasVisibleLogo) {
         cover.style.display = 'block';
-        cover.style.backgroundImage = `url('${app.restaurant.cover_url}')`;
+        cover.style.backgroundImage = app.restaurant.cover_url ? `url('${app.restaurant.cover_url}')` : '';
         cover.style.backgroundSize = 'cover';
         cover.style.backgroundPosition = 'center';
         if (hero) hero.style.paddingTop = '';
         if (placeholder) placeholder.hidden = true;
-        if (removeButton) removeButton.hidden = false;
+        if (removeButton) removeButton.hidden = !app.restaurant.cover_url;
     } else {
         cover.style.backgroundImage = '';
         cover.style.display = 'none';
@@ -970,6 +980,7 @@ function readRestaurantForm() {
         wifi_ssid: qs('heroWifiInput').value.trim(),
         wifi_password: qs('heroWifiPasswordInput').value.trim(),
         phone: qs('heroPhoneInput').value.trim(),
+        logo_visible: qs('heroLogoVisibleInput').checked,
     };
 }
 
@@ -1012,6 +1023,7 @@ function openHeroModal() {
     qs('heroWifiPasswordInput').value = app.restaurant.wifi_password || '';
     qs('heroPhoneInput').value = app.restaurant.phone || '';
     setHeroModalCoverPreview();
+    setHeroModalLogoPreview();
     qs('heroModal').hidden = false;
     window.setTimeout(() => qs('heroNameInput').focus(), 40);
 }
@@ -1036,6 +1048,34 @@ function setHeroModalCoverPreview() {
             : '<i class="fa-solid fa-pencil"></i>';
         actionBtn.setAttribute('aria-label', app.restaurant?.cover_url ? 'Remover capa' : 'Alterar capa');
         actionBtn.title = app.restaurant?.cover_url ? 'Remover capa' : 'Alterar capa';
+    }
+}
+
+function setHeroModalLogoPreview() {
+    const previewButton = qs('heroLogoPreview');
+    const previewImage = qs('heroLogoPreviewImage');
+    const placeholder = qs('heroLogoPlaceholder');
+    const visibleInput = qs('heroLogoVisibleInput');
+    const removeButton = qs('heroLogoRemoveBtn');
+    if (!previewButton || !previewImage || !placeholder || !visibleInput || !removeButton) return;
+
+    const logoUrl = String(app.restaurant?.logo_url || '').trim();
+    const hasLogo = Boolean(logoUrl);
+    previewButton.dataset.hasLogo = hasLogo ? 'true' : 'false';
+    previewButton.setAttribute('aria-label', hasLogo ? 'Alterar logótipo' : 'Adicionar logótipo');
+    previewButton.title = hasLogo ? 'Alterar logótipo' : 'Adicionar logótipo';
+    previewImage.hidden = !hasLogo;
+    placeholder.hidden = hasLogo;
+    removeButton.hidden = !hasLogo;
+    visibleInput.disabled = !hasLogo;
+    visibleInput.checked = app.restaurant?.logo_visible !== false;
+
+    if (hasLogo) {
+        previewImage.src = logoUrl;
+        previewImage.alt = `Logótipo de ${app.restaurant?.name || 'restaurante'}`;
+    } else {
+        previewImage.removeAttribute('src');
+        previewImage.alt = '';
     }
 }
 
@@ -1672,6 +1712,49 @@ async function uploadCover(input) {
     setSaveStatus('Capa guardada', true);
 }
 
+async function uploadLogo(input) {
+    if (!input.files?.[0]) return;
+    const file = await openImageCropper(input.files[0], 'logo');
+    input.value = '';
+    if (!file) return;
+
+    setSaveStatus('A carregar logótipo...');
+    const { data, error } = await uploadFile(file, 'logo');
+    if (error || !data) {
+        console.error(error);
+        setSaveStatus('Não foi possível carregar o logótipo');
+        return;
+    }
+
+    const { error: updateError } = await updateRestaurant({
+        logo_url: data.publicUrl,
+        logo_visible: true,
+    });
+    if (updateError) {
+        console.error(updateError);
+        setSaveStatus('Não foi possível guardar o logótipo');
+        return;
+    }
+
+    await loadDashboardData();
+    if (!qs('heroModal').hidden) setHeroModalLogoPreview();
+    setSaveStatus('Logótipo guardado', true);
+}
+
+async function removeLogo() {
+    if (!app.restaurant?.logo_url || !window.confirm('Remover o logótipo do menu?')) return;
+    const { error } = await updateRestaurant({ logo_url: null, logo_visible: false });
+    if (error) {
+        console.error(error);
+        setSaveStatus('Não foi possível remover o logótipo');
+        return;
+    }
+
+    await loadDashboardData();
+    if (!qs('heroModal').hidden) setHeroModalLogoPreview();
+    setSaveStatus('Logótipo removido', true);
+}
+
 async function removeCover() {
     if (!app.restaurant.cover_url || !window.confirm('Remover a capa do menu?')) return;
     const { error } = await updateRestaurant({ cover_url: null });
@@ -1777,6 +1860,9 @@ function bindEvents() {
         }
     });
     qs('heroCoverInput').addEventListener('change', (event) => uploadCover(event.target));
+    qs('heroLogoPreview').addEventListener('click', () => qs('heroLogoInput').click());
+    qs('heroLogoInput').addEventListener('change', (event) => uploadLogo(event.target));
+    qs('heroLogoRemoveBtn').addEventListener('click', removeLogo);
     qs('categoriesModal').addEventListener('click', (event) => {
         const actionElement = event.target.closest('[data-action]');
         if (!actionElement) return;

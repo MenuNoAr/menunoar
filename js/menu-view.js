@@ -135,6 +135,32 @@ export function renderInfoBadgesMarkup(restaurant, options = {}) {
     return badges.join('');
 }
 
+export function renderRestaurantLogo(container, restaurant) {
+    const logo = container?.querySelector('[data-restaurant-logo]');
+    const image = logo?.querySelector('[data-restaurant-logo-image]');
+    if (!logo || !image) return false;
+
+    const logoUrl = String(restaurant?.logo_url || '').trim();
+    const visible = Boolean(logoUrl && restaurant?.logo_visible !== false);
+    logo.hidden = !visible;
+    container.classList.toggle('has-restaurant-logo', visible);
+
+    if (!visible) {
+        image.removeAttribute('src');
+        image.alt = '';
+        image.onerror = null;
+        return false;
+    }
+
+    image.alt = `Logótipo de ${restaurant?.name || 'restaurante'}`;
+    image.onerror = () => {
+        logo.hidden = true;
+        container.classList.remove('has-restaurant-logo');
+    };
+    image.src = logoUrl;
+    return true;
+}
+
 function formatPrice(value) {
     const number = Number(value);
     return `${Number.isFinite(number) ? number.toFixed(2) : '0.00'}€`;
