@@ -276,7 +276,13 @@ a:active {
     color: var(--editor-muted);
     cursor: pointer;
     text-decoration: none;
-    transition: background 150ms ease, color 150ms ease, opacity 150ms ease;
+    transition:
+        transform var(--motion-fast) var(--motion-ease),
+        background-color var(--motion-fast) ease,
+        background-position var(--motion-slow) var(--motion-ease),
+        color var(--motion-fast) ease,
+        box-shadow var(--motion-fast) ease,
+        opacity var(--motion-fast) ease;
 }
 
 .nav-icon img {
@@ -284,7 +290,7 @@ a:active {
     height: 19px;
     display: block;
     opacity: 0.76;
-    transition: opacity 150ms ease;
+    transition: opacity var(--motion-fast) ease, filter var(--motion-fast) ease;
 }
 
 .nav-icon:hover img {
@@ -302,6 +308,88 @@ a:active {
 .floating-icon-danger:hover {
     background: #fff1f2;
     color: var(--editor-danger);
+}
+
+#openAppearanceBtn {
+    background: linear-gradient(135deg, #ff626f 0%, #ffbc42 28%, #38c976 52%, var(--brand-primary) 76%, #3984ff 100%);
+    background-size: 150% 150%;
+    box-shadow: 0 5px 14px rgba(12, 192, 223, 0.2);
+}
+
+#openAppearanceBtn img,
+#openQrBtn img {
+    opacity: 1;
+    filter: brightness(0) invert(1);
+}
+
+#openAppearanceBtn:hover {
+    background-position: 100% 100%;
+    box-shadow: 0 7px 18px rgba(12, 192, 223, 0.28);
+}
+
+#openFontBtn {
+    background: #fff4d6;
+    color: #805a00;
+}
+
+#openFontBtn:hover {
+    background: #ffeab0;
+    color: #604300;
+}
+
+#openQrBtn {
+    background: var(--brand-primary);
+    box-shadow: 0 5px 14px rgba(12, 192, 223, 0.24);
+}
+
+#openQrBtn:hover {
+    background: #09aeca;
+    box-shadow: 0 7px 18px rgba(12, 192, 223, 0.3);
+}
+
+#openLiveBtn {
+    background: #ecf8f0;
+    color: #16834a;
+}
+
+#openLiveBtn:hover {
+    background: #d9f2e2;
+    color: #0d6738;
+}
+
+#openTutorialBtn {
+    background: #edf8fb;
+    color: #087f99;
+}
+
+#openTutorialBtn:hover {
+    background: #d9f1f6;
+    color: #056579;
+}
+
+#deleteRestaurantBtn {
+    background: #fff0f1;
+    color: #c51e32;
+}
+
+#deleteRestaurantBtn:hover {
+    background: #ffdce0;
+    color: #a70f22;
+}
+
+#logoutBtn {
+    background: #fff3ef;
+    color: #d3483a;
+}
+
+#logoutBtn:hover {
+    background: #ffe0d9;
+    color: #b72e22;
+}
+
+.nav-icon:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px #fff, 0 0 0 5px color-mix(in srgb, currentColor, transparent 55%);
 }
 
 .editor-stage {
