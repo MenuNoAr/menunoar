@@ -161,6 +161,9 @@ const TUTORIAL_STEPS = [
     },
 ];
 let qrCode = null;
+let qrSvg = null;
+let qrRenderedUrl = '';
+let qrGeneratedColor = '#111111';
 let qrColor = '#111111';
 let appearanceSaveTimer = null;
 let fontSaveTimer = null;
@@ -885,7 +888,7 @@ function getQrOptions() {
     return {
         width: QR_ICON_SIZE,
         height: QR_ICON_SIZE,
-        type: 'canvas',
+        type: 'svg',
         data: getLiveMenuUrl(),
         margin: 0,
         qrOptions: {
@@ -911,48 +914,172 @@ function getQrOptions() {
 function renderQrCode() {
     const box = qs('qrCodeBox');
     if (!box) return;
-    box.innerHTML = '';
 
     if (typeof window.QRCodeStyling === 'undefined') {
         box.textContent = 'QR indisponivel';
         return;
     }
 
+    const liveUrl = getLiveMenuUrl();
+    if (qrCode && qrRenderedUrl === liveUrl && box.querySelector('svg')) {
+        qrSvg = box.querySelector('svg');
+        applyQrSvgColor();
+        return;
+    }
+
+    box.innerHTML = '';
+    qrGeneratedColor = qrColor;
     qrCode = new window.QRCodeStyling(getQrOptions());
     qrCode.append(box);
+    qrRenderedUrl = liveUrl;
+
+    let captureAttempts = 0;
+    const captureSvg = () => {
+        captureAttempts += 1;
+        qrSvg = box.querySelector('svg');
+        const inkReady = qrSvg ? prepareQrSvgInk(qrSvg) : false;
+        if (qrSvg) applyQrSvgColor();
+        if (!inkReady && captureAttempts < 12) window.requestAnimationFrame(captureSvg);
+    };
+
+    captureSvg();
 }
 
 function getQrFileName() {
     return `menu-${slugify(app.restaurant?.slug || app.restaurant?.name || 'qrcode')}-qr`;
 }
 
-function downloadQrPng() {
-    if (!qrCode) renderQrCode();
-    qrCode?.download({ name: getQrFileName(), extension: 'png' });
+function getSvgColorKey(value) {
+    const color = String(value || '').trim().toLowerCase();
+    const shortHex = color.match(/^#([0-9a-f])([0-9a-f])([0-9a-f])$/i);
+    if (shortHex) return shortHex.slice(1).map((part) => `${part}${part}`).join('');
+    const hex = color.match(/^#([0-9a-f]{6})$/i);
+    if (hex) return hex[1];
+    const rgb = color.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+    if (!rgb) return color;
+    return rgb.slice(1, 4)
+        .map((part) => Number(part).toString(16).padStart(2, '0'))
+        .join('');
+}
+
+function prepareQrSvgInk(svg) {
+    const inkColor = getSvgColorKey(qrGeneratedColor);
+    svg.querySelectorAll('[fill]').forEach((element) => {
+        if (getSvgColorKey(element.getAttribute('fill')) !== inkColor) return;
+        element.setAttribute('fill', 'currentColor');
+        element.dataset.qrInk = 'true';
+    });
+    return Boolean(svg.querySelector('[data-qr-ink="true"]'));
+}
+
+function applyQrSvgColor() {
+    if (!qrSvg) return;
+    qrSvg.style.color = qrColor;
+    const colorButton = qs('qrColorBtn');
+    if (colorButton) colorButton.style.setProperty('--qr-selected-color', qrColor);
 }
 
 function updateQrColor(value) {
     qrColor = normalizeHex(value, '#111111');
     if (qs('qrColorInput')) qs('qrColorInput').value = qrColor;
+    applyQrSvgColor();
+}
+
+async function getQrSvg() {
     renderQrCode();
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+        qrSvg = qs('qrCodeBox')?.querySelector('svg') || null;
+        if (qrSvg && prepareQrSvgInk(qrSvg)) {
+            applyQrSvgColor();
+            return qrSvg;
+        }
+        await new Promise((resolve) => window.requestAnimationFrame(resolve));
+    }
+    return null;
+}
+
+function serializeQrSvg(svg) {
+    const clone = svg.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.querySelectorAll('[data-qr-ink="true"]').forEach((element) => {
+        element.setAttribute('fill', qrColor);
+        element.removeAttribute('data-qr-ink');
+    });
+    clone.style.color = qrColor;
+    return new XMLSerializer().serializeToString(clone);
+}
+
+async function createQrPngBlob(size = 1200) {
+    const svg = await getQrSvg();
+    if (!svg) throw new Error('QR SVG unavailable');
+
+    const source = serializeQrSvg(svg);
+    const svgBlob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
+
+    try {
+        const image = new Image();
+        image.src = svgUrl;
+        await image.decode();
+
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, size, size);
+        context.drawImage(image, 0, 0, size, size);
+
+        return await new Promise((resolve, reject) => {
+            canvas.toBlob((blob) => {
+                if (blob) resolve(blob);
+                else reject(new Error('PNG export failed'));
+            }, 'image/png');
+        });
+    } finally {
+        URL.revokeObjectURL(svgUrl);
+    }
+}
+
+function downloadBlob(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function downloadQrPng() {
+    try {
+        const blob = await createQrPngBlob();
+        downloadBlob(blob, `${getQrFileName()}.png`);
+    } catch (error) {
+        console.error('QR PNG export error:', error);
+        setSaveStatus('Não foi possível descarregar o QR');
+    }
 }
 
 async function downloadQrPdf() {
-    if (!qrCode) renderQrCode();
-    if (!qrCode || !window.jspdf?.jsPDF) return;
-    const blob = await qrCode.getRawData('png');
-    const dataUrl = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
-    });
-    const pdf = new window.jspdf.jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: [90, 90],
-    });
-    pdf.addImage(dataUrl, 'PNG', 12, 12, 66, 66);
-    pdf.save(`${getQrFileName()}.pdf`);
+    if (!window.jspdf?.jsPDF) return;
+
+    try {
+        const blob = await createQrPngBlob();
+        const dataUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+        const pdf = new window.jspdf.jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: [90, 90],
+        });
+        pdf.addImage(dataUrl, 'PNG', 12, 12, 66, 66);
+        pdf.save(`${getQrFileName()}.pdf`);
+    } catch (error) {
+        console.error('QR PDF export error:', error);
+        setSaveStatus('Não foi possível descarregar o QR');
+    }
 }
 
 function renderInfoBadges() {
@@ -1876,6 +2003,7 @@ function bindEvents() {
     qs('fontSelect').addEventListener('change', scheduleFontSave);
     qs('qrColorBtn').addEventListener('click', () => qs('qrColorInput').click());
     qs('qrColorInput').addEventListener('input', (event) => updateQrColor(event.target.value));
+    qs('qrColorInput').addEventListener('change', (event) => updateQrColor(event.target.value));
     qs('downloadQrPngBtn').addEventListener('click', downloadQrPng);
     qs('downloadQrPdfBtn').addEventListener('click', downloadQrPdf);
     qs('cropZoomInput').addEventListener('input', updateCropZoom);
