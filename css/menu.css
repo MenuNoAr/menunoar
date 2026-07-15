@@ -296,9 +296,8 @@ h1#restName {
     font-family: inherit;
     padding: 10px 16px;
     margin: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+    line-height: 1.2;
     font-size: 0.95rem;
     font-weight: 500;
     color: var(--text-muted);
