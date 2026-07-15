@@ -176,7 +176,7 @@ h1#restName {
     padding: 0 10px;
     white-space: pre-line;
     overflow-wrap: anywhere;
-    text-align: justify;
+    text-align: center;
     text-wrap: pretty;
 }
 
@@ -296,13 +296,25 @@ h1#restName {
     font-family: inherit;
     padding: 10px 16px;
     margin: 0;
+    overflow: hidden;
     white-space: nowrap;
+    text-overflow: ellipsis;
     font-size: 0.95rem;
     font-weight: 500;
     color: var(--text-muted);
     cursor: pointer;
     position: relative;
     transition: color 0.2s;
+}
+
+.category-tabs:not(:has(.tab-btn:nth-child(4))) .tab-btn {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.category-tabs:has(.tab-btn:nth-child(4)) .tab-btn {
+    flex: 0 0 calc((100% - 45px) / 3.5);
+    min-width: 0;
 }
 
 .tab-btn.active {
