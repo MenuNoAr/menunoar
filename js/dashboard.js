@@ -787,6 +787,10 @@ function renderTutorialStep(index = tutorialStepIndex) {
             <strong>${escapeHTML(step.title)}</strong>
             <p>${escapeHTML(step.text)}</p>
             <div class="tutorial-actions">
+                <button id="closeTutorialBtn" class="tutorial-btn tutorial-close" type="button"
+                    data-tutorial-action="close" aria-label="Fechar tutorial" title="Fechar tutorial">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
                 <button class="tutorial-btn tutorial-btn-ghost" type="button" data-tutorial-action="prev"
                     ${tutorialStepIndex === 0 ? 'disabled' : ''}>Anterior</button>
                 <button class="tutorial-btn tutorial-btn-primary" type="button" data-tutorial-action="next">
@@ -2230,10 +2234,13 @@ function bindEvents() {
     qs('openFontBtn').addEventListener('click', openFontModal);
     qs('openQrBtn').addEventListener('click', openQrModal);
     qs('openTutorialBtn').addEventListener('click', toggleTutorial);
-    qs('closeTutorialBtn').addEventListener('click', closeTutorial);
     qs('tutorialCards').addEventListener('click', (event) => {
         const actionElement = event.target.closest('[data-tutorial-action]');
         if (!actionElement) return;
+        if (actionElement.dataset.tutorialAction === 'close') {
+            closeTutorial();
+            return;
+        }
         moveTutorialStep(actionElement.dataset.tutorialAction === 'prev' ? -1 : 1);
     });
     qs('tutorialOverlay').addEventListener('click', (event) => {
