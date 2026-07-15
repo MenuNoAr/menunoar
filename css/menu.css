@@ -296,7 +296,7 @@ h1#restName {
     font-family: inherit;
     padding: 10px 16px;
     margin: 0;
-    overflow-wrap: anywhere;
+    white-space: nowrap;
     line-height: 1.2;
     font-size: 0.95rem;
     font-weight: 500;
@@ -314,6 +314,8 @@ h1#restName {
 .category-tabs:has(.tab-btn:nth-child(4)) .tab-btn {
     flex: 0 0 calc((100% - 45px) / 3.5);
     min-width: 0;
+    padding-inline: clamp(4px, 1vw, 10px);
+    font-size: clamp(0.64rem, 2.65vw, 0.9rem);
 }
 
 .tab-btn.active {
