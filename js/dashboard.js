@@ -1272,17 +1272,80 @@ function renderCategoryTabs(categories) {
 }
 
 function renderItemActions(item) {
+    const available = item.available !== false;
+    const visibilityLabel = available ? 'Ocultar prato do menu' : 'Mostrar prato no menu';
     return `
         <div class="item-actions">
             <button class="item-edit-btn" type="button" data-action="edit-item" data-item-id="${escapeHTML(item.id)}"
                 aria-label="Editar prato" title="Editar prato">
                 <i class="fa-solid fa-pencil"></i>
             </button>
+            <button class="item-visibility-btn${available ? '' : ' is-unavailable'}" type="button"
+                data-action="toggle-item-availability" data-item-id="${escapeHTML(item.id)}"
+                data-available="${available}" aria-pressed="${available}"
+                aria-label="${visibilityLabel}" title="${visibilityLabel}">
+                <i class="fa-solid ${available ? 'fa-eye' : 'fa-eye-slash'}"></i>
+            </button>
             <button class="item-delete-btn" type="button" data-action="delete-item" data-item-id="${escapeHTML(item.id)}"
                 aria-label="Apagar prato" title="Apagar prato">
                 <i class="fa-solid fa-trash"></i>
             </button>
         </div>`;
+}
+
+function syncItemVisibilityButton(button, available) {
+    if (!button) return;
+    const label = available ? 'Ocultar prato do menu' : 'Mostrar prato no menu';
+    button.dataset.available = available ? 'true' : 'false';
+    button.classList.toggle('is-unavailable', !available);
+    button.setAttribute('aria-pressed', available ? 'true' : 'false');
+    button.setAttribute('aria-label', label);
+    button.title = label;
+    const icon = button.querySelector('i');
+    if (icon) icon.className = `fa-solid ${available ? 'fa-eye' : 'fa-eye-slash'}`;
+}
+
+function toggleModalItemAvailability() {
+    const button = qs('itemAvailabilityBtn');
+    if (!button) return;
+    syncItemVisibilityButton(button, button.dataset.available === 'false');
+}
+
+async function toggleItemAvailability(itemId, button) {
+    if (!app.supabase || !app.restaurant || button?.disabled) return;
+    const item = app.items.find((candidate) => String(candidate.id) === String(itemId));
+    if (!item) return;
+
+    const wasAvailable = item.available !== false;
+    const available = !wasAvailable;
+    const itemElement = getMenuItemElement(itemId);
+    item.available = available;
+    syncItemVisibilityButton(button, available);
+    itemElement?.classList.toggle('unavailable', !available);
+    button.disabled = true;
+    setSaveStatus(available ? 'A mostrar prato...' : 'A ocultar prato...');
+
+    const result = await app.supabase
+        .from('menu_items')
+        .update({ available })
+        .eq('id', itemId)
+        .eq('restaurant_id', app.restaurant.id)
+        .select('id')
+        .maybeSingle();
+    const error = result.error || (result.data ? null : new Error('O prato não foi atualizado.'));
+
+    button.disabled = false;
+    if (error) {
+        console.error(error);
+        item.available = wasAvailable;
+        syncItemVisibilityButton(button, wasAvailable);
+        itemElement?.classList.toggle('unavailable', !wasAvailable);
+        setSaveStatus('Não foi possível alterar a visibilidade');
+        return;
+    }
+
+    replayMotion(itemElement, 'is-item-updated');
+    setSaveStatus(available ? 'Prato visível no menu' : 'Prato ocultado do menu', true);
 }
 
 function readRestaurantForm() {
@@ -1887,7 +1950,7 @@ function openItemModal(item = null, category = app.activeCategory) {
     qs('itemNameInput').value = item?.name || '';
     qs('itemPriceInput').value = item ? Number(item.price || 0).toFixed(2) : '';
     qs('itemDescInput').value = item?.description || '';
-    qs('itemAvailableInput').checked = item?.available !== false;
+    syncItemVisibilityButton(qs('itemAvailabilityBtn'), item?.available !== false);
     populateCategorySelect(item?.category || category);
     setModalItemImage(item);
     showModal('itemModal');
@@ -1909,7 +1972,7 @@ async function saveItem(event) {
         description: qs('itemDescInput').value.trim(),
         category: qs('itemCategoryInput').value,
         price: Number.isNaN(price) ? 0 : price,
-        available: qs('itemAvailableInput').checked,
+        available: qs('itemAvailabilityBtn').dataset.available !== 'false',
     };
 
     if (!payload.name) return;
@@ -2133,6 +2196,8 @@ function handleEditorClick(event) {
         openItemModal(null, category);
     } else if (action === 'edit-item') {
         openItemModal(app.items.find((item) => String(item.id) === String(itemId)));
+    } else if (action === 'toggle-item-availability') {
+        toggleItemAvailability(itemId, actionElement);
     } else if (action === 'delete-item') {
         deleteItem(itemId);
     }
@@ -2227,6 +2292,7 @@ function bindEvents() {
     qs('coverInput').addEventListener('change', (event) => uploadCover(event.target));
     qs('removeCoverBtn').addEventListener('click', removeCover);
     qs('itemModalImageBtn').addEventListener('click', handleItemModalImageClick);
+    qs('itemAvailabilityBtn').addEventListener('click', toggleModalItemAvailability);
     qs('itemDeleteBtn').addEventListener('click', () => {
         const itemId = qs('itemIdInput').value;
         if (itemId) deleteItem(itemId);

@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/brand.css?v=1.0">
     <link rel="stylesheet" href="css/menu.css?v=3.4">
-    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.40">
+    <link rel="stylesheet" href="css/dashboard-shell.css?v=5.41">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
@@ -187,6 +187,10 @@
                     aria-label="Apagar prato" title="Apagar prato">
                     <i class="fa-solid fa-trash"></i>
                 </button>
+                <button id="itemAvailabilityBtn" class="modal-visibility-btn modal-head-visibility-btn" type="button"
+                    aria-label="Ocultar prato do menu" title="Ocultar prato do menu" aria-pressed="true">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
                 <button class="modal-close" type="button" data-close-modal aria-label="Fechar">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
@@ -211,13 +215,6 @@
                 <label class="form-field">
                     <span>Descrição</span>
                     <textarea id="itemDescInput" rows="4"></textarea>
-                </label>
-                <label class="availability-field">
-                    <span>
-                        <strong>Disponível no menu</strong>
-                        <small>Desativa para ocultar o prato sem o apagar.</small>
-                    </span>
-                    <input id="itemAvailableInput" type="checkbox" checked>
                 </label>
                 <div class="modal-actions">
                     <button class="button-secondary" type="button" data-close-modal>Cancelar</button>
@@ -514,7 +511,7 @@
         </section>
     </div>
 
-    <script type="module" src="js/dashboard.js?v=10.8"></script>
+    <script type="module" src="js/dashboard.js?v=10.9"></script>
 </body>
 
 </html>

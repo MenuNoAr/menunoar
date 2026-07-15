@@ -469,7 +469,8 @@ a:active {
         color var(--motion-base) ease,
         background-color var(--motion-base) ease,
         border-color var(--motion-base) ease,
-        box-shadow var(--motion-base) ease;
+        box-shadow var(--motion-base) ease,
+        opacity var(--motion-base) ease;
 }
 
 .cover-image {
@@ -594,7 +595,7 @@ a:active {
     right: 8px;
     z-index: 10;
     display: flex;
-    gap: 4px;
+    gap: 2px;
     padding: 3px;
     border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 9px;
@@ -604,10 +605,11 @@ a:active {
 }
 
 .item-actions .item-edit-btn,
+.item-visibility-btn,
 .item-delete-btn {
     position: static;
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     display: inline-grid;
     place-items: center;
     border: 0;
@@ -621,6 +623,25 @@ a:active {
 
 .item-actions .item-edit-btn:hover {
     background: #f0f0f2;
+}
+
+.item-visibility-btn {
+    color: #087f99;
+}
+
+.item-visibility-btn:hover {
+    background: #edf8fb;
+    color: #056579;
+}
+
+.item-visibility-btn.is-unavailable {
+    background: #fff8e8;
+    color: #a56600;
+}
+
+.item-visibility-btn:disabled {
+    cursor: wait;
+    opacity: 0.48;
 }
 
 .item-delete-btn {
@@ -1381,7 +1402,8 @@ a:active {
     filter: invert(1);
 }
 
-.modal-delete-btn {
+.modal-delete-btn,
+.modal-visibility-btn {
     width: 40px;
     height: 40px;
     display: inline-grid;
@@ -1391,6 +1413,7 @@ a:active {
     background: transparent;
     color: var(--editor-muted);
     cursor: pointer;
+    transition: background var(--motion-fast) ease, color var(--motion-fast) ease;
 }
 
 .modal-delete-btn:hover {
@@ -1398,7 +1421,22 @@ a:active {
     color: var(--editor-danger);
 }
 
-.modal-head-delete-btn {
+.modal-visibility-btn {
+    color: #087f99;
+}
+
+.modal-visibility-btn:hover {
+    background: #edf8fb;
+    color: #056579;
+}
+
+.modal-visibility-btn.is-unavailable {
+    background: #fff8e8;
+    color: #a56600;
+}
+
+.modal-head-delete-btn,
+.modal-head-visibility-btn {
     width: 36px;
     height: 36px;
     flex: 0 0 auto;
