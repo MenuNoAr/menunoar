@@ -4,6 +4,7 @@ import {
     applyMenuTheme,
     bindHorizontalTabDrag,
     escapeHTML,
+    fitCategoryTabLabels,
     getBrandPrimary,
     getItemsForCategory,
     getOrderedCategories,
@@ -1270,9 +1271,10 @@ function renderCategoryTabs(categories) {
     tabs.innerHTML = categories.map((category) => `
         <button class="tab-btn ${category === app.activeCategory ? 'active' : ''}" type="button"
             data-action="select-category" data-category="${escapeHTML(category)}">
-            ${escapeHTML(category)}
+            <span class="tab-label">${escapeHTML(category)}</span>
         </button>
     `).join('');
+    fitCategoryTabLabels(tabs);
 }
 
 function renderItemActions(item) {

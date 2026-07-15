@@ -202,6 +202,30 @@ export function renderItemsGrid(items, options = {}) {
     return `<div class="items-grid">${itemsMarkup}${afterItems}${footer}</div>`;
 }
 
+export function fitCategoryTabLabels(tabs) {
+    if (!tabs) return;
+
+    const fitLabels = () => {
+        tabs.querySelectorAll('.tab-btn').forEach((button) => {
+            const label = button.querySelector('.tab-label');
+            if (!label) return;
+
+            label.style.setProperty('--tab-label-scale', '1');
+            const styles = window.getComputedStyle(button);
+            const horizontalPadding = Number.parseFloat(styles.paddingLeft)
+                + Number.parseFloat(styles.paddingRight);
+            const availableWidth = Math.max(1, button.clientWidth - horizontalPadding);
+            const naturalWidth = Math.max(1, label.scrollWidth);
+            const scale = Math.min(1, availableWidth / naturalWidth);
+            label.style.setProperty('--tab-label-scale', scale.toFixed(4));
+        });
+    };
+
+    fitLabels();
+    window.requestAnimationFrame(fitLabels);
+    if (document.fonts?.status !== 'loaded') document.fonts.ready.then(fitLabels);
+}
+
 export function bindHorizontalTabDrag(tabs) {
     if (!tabs || tabs.dataset.dragBound === 'true') return;
 
@@ -255,5 +279,10 @@ export function bindHorizontalTabDrag(tabs) {
         event.preventDefault();
         event.stopImmediatePropagation();
     }, true);
+    if ('ResizeObserver' in window) {
+        const resizeObserver = new ResizeObserver(() => fitCategoryTabLabels(tabs));
+        resizeObserver.observe(tabs);
+        tabs.categoryTabResizeObserver = resizeObserver;
+    }
     tabs.dataset.dragBound = 'true';
 }

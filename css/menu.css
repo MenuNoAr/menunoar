@@ -290,12 +290,16 @@ h1#restName {
 .tab-btn {
     flex: 0 0 auto;
     min-width: fit-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     border: none;
     background: transparent;
     font-family: inherit;
     padding: 10px 16px;
     margin: 0;
+    overflow: hidden;
     white-space: nowrap;
     line-height: 1.2;
     font-size: 0.95rem;
@@ -318,17 +322,30 @@ h1#restName {
     font-size: clamp(0.64rem, 2.65vw, 0.9rem);
 }
 
+.category-tabs:has(.tab-btn:nth-child(4)) .tab-btn:last-child {
+    margin-right: 8px;
+}
+
+.tab-label {
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+    transform: scaleX(var(--tab-label-scale, 1));
+    transform-origin: center;
+    transition: transform 160ms ease;
+}
+
 .tab-btn.active {
     color: var(--primary);
     font-weight: 700;
 }
 
-.tab-btn.active::after {
+.tab-btn.active .tab-label::after {
     content: '';
     position: absolute;
-    left: 8px;
-    right: 8px;
-    bottom: 0;
+    left: 0;
+    right: 0;
+    bottom: -10px;
     height: 2px;
     border-radius: 999px;
     background: var(--primary);

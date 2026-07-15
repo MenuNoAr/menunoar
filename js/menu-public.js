@@ -1,6 +1,7 @@
 import {
     applyMenuTheme,
     bindHorizontalTabDrag,
+    fitCategoryTabLabels,
     getItemsForCategory,
     getOrderedCategories,
     renderInfoBadgesMarkup,
@@ -64,6 +65,7 @@ function switchToCategory(index, options = {}) {
             tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
     });
+    fitCategoryTabLabels(qs('categoryTabs'));
 
     const windowElement = qs('menuSliderWindow');
     const currentSlide = track.children[currentCategoryIndex];
@@ -108,7 +110,10 @@ function renderMenu(restaurant, items) {
         const tab = document.createElement('button');
         tab.className = `tab-btn${index === 0 ? ' active' : ''}`;
         tab.type = 'button';
-        tab.textContent = category;
+        const label = document.createElement('span');
+        label.className = 'tab-label';
+        label.textContent = category;
+        tab.appendChild(label);
         tab.addEventListener('click', () => switchToCategory(index));
         tabs.appendChild(tab);
 
@@ -122,6 +127,7 @@ function renderMenu(restaurant, items) {
         track.appendChild(slide);
     });
 
+    fitCategoryTabLabels(tabs);
     requestAnimationFrame(() => switchToCategory(0, { instant: true }));
 }
 

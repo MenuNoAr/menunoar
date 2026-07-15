@@ -458,7 +458,7 @@ a:active {
 #mobile-view .category-tabs-editor,
 #mobile-view .category-tabs,
 #mobile-view .tab-btn,
-#mobile-view .tab-btn::after,
+#mobile-view .tab-label::after,
 #mobile-view .menu-item,
 #mobile-view .item-text h3,
 #mobile-view .item-desc,
@@ -1649,7 +1649,7 @@ a:active {
     animation-delay: var(--motion-delay, 0ms);
 }
 
-#mobile-view .tab-btn.active::after {
+#mobile-view .tab-btn.active .tab-label::after {
     transform-origin: center;
     animation: active-tab-line-in var(--motion-base) var(--motion-ease) both;
 }
