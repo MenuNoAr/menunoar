@@ -286,104 +286,128 @@ a:active {
 }
 
 .nav-icon img {
-    width: 19px;
-    height: 19px;
+    width: 20px;
+    height: 20px;
     display: block;
-    opacity: 0.76;
-    transition: opacity var(--motion-fast) ease, filter var(--motion-fast) ease;
+    opacity: 0;
+    pointer-events: none;
 }
 
-.nav-icon:hover img {
-    opacity: 1;
+.nav-icon > i {
+    width: 20px;
+    height: 20px;
+    display: inline-grid;
+    place-items: center;
+    margin: 0;
+    font-size: 18px;
+    line-height: 1;
+    transition: transform var(--motion-fast) var(--motion-ease), opacity var(--motion-fast) ease;
 }
 
-.nav-icon:hover,
+.nav-icon-svg {
+    position: relative;
+}
+
+.nav-icon-svg::before {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    content: '';
+    background: currentColor;
+    -webkit-mask: var(--nav-icon-mask) center / contain no-repeat;
+    mask: var(--nav-icon-mask) center / contain no-repeat;
+    transition:
+        transform var(--motion-fast) var(--motion-ease),
+        filter var(--motion-fast) ease,
+        opacity var(--motion-fast) ease;
+}
+
 .floating-icon:hover,
 .modal-close:hover {
     background: #f0f0f2;
     color: var(--editor-ink);
 }
 
-.nav-icon-danger:hover,
 .floating-icon-danger:hover {
     background: #fff1f2;
     color: var(--editor-danger);
 }
 
-#openAppearanceBtn {
-    background: linear-gradient(135deg, #ff626f 0%, #ffbc42 28%, #38c976 52%, var(--brand-primary) 76%, #3984ff 100%);
-    background-size: 150% 150%;
-    box-shadow: 0 5px 14px rgba(12, 192, 223, 0.2);
+.nav-icon:hover {
+    background: transparent;
+    transform: translateY(-1px);
 }
 
-#openAppearanceBtn img,
-#openQrBtn img {
-    opacity: 1;
-    filter: brightness(0) invert(1);
+.nav-icon:hover > i,
+.nav-icon-svg:hover::before {
+    transform: scale(1.06);
+}
+
+#openAppearanceBtn {
+    --nav-icon-mask: url('../assets/images/icon-palette.svg?v=2');
+}
+
+#openAppearanceBtn::before {
+    background: linear-gradient(135deg, #ff5364 0%, #eea900 27%, #24ad62 52%, var(--brand-primary) 76%, #3478f6 100%);
 }
 
 #openAppearanceBtn:hover {
-    background-position: 100% 100%;
-    box-shadow: 0 7px 18px rgba(12, 192, 223, 0.28);
+    background: transparent;
 }
 
 #openFontBtn {
-    background: #fff4d6;
-    color: #805a00;
+    --nav-icon-mask: url('../assets/images/icon-font.svg?v=3');
+    color: #a56f00;
 }
 
 #openFontBtn:hover {
-    background: #ffeab0;
-    color: #604300;
+    background: transparent;
+    color: #765000;
 }
 
 #openQrBtn {
-    background: var(--brand-primary);
-    box-shadow: 0 5px 14px rgba(12, 192, 223, 0.24);
+    --nav-icon-mask: url('../assets/images/icon-qr.svg?v=2');
+    color: var(--brand-primary);
 }
 
 #openQrBtn:hover {
-    background: #09aeca;
-    box-shadow: 0 7px 18px rgba(12, 192, 223, 0.3);
+    background: transparent;
+    color: #079cb7;
 }
 
 #openLiveBtn {
-    background: #ecf8f0;
     color: #16834a;
 }
 
 #openLiveBtn:hover {
-    background: #d9f2e2;
+    background: transparent;
     color: #0d6738;
 }
 
 #openTutorialBtn {
-    background: #edf8fb;
     color: #087f99;
 }
 
 #openTutorialBtn:hover {
-    background: #d9f1f6;
+    background: transparent;
     color: #056579;
 }
 
 #deleteRestaurantBtn {
-    background: #fff0f1;
     color: #c51e32;
 }
 
 #deleteRestaurantBtn:hover {
-    background: #ffdce0;
+    background: transparent;
     color: #a70f22;
 }
 
 #logoutBtn {
-    background: #fff3ef;
     color: #d3483a;
 }
 
 #logoutBtn:hover {
-    background: #ffe0d9;
+    background: transparent;
     color: #b72e22;
 }
 

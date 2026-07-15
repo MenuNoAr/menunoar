@@ -687,33 +687,6 @@ p {
     text-align: center;
 }
 
-.floating-note {
-    position: absolute;
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 12px 15px;
-    border: 1px solid rgba(17, 19, 24, 0.08);
-    border-radius: 12px;
-    color: #333b44;
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: var(--shadow-small);
-    backdrop-filter: blur(12px);
-    font-size: 0.7rem;
-    font-weight: 800;
-}
-
-.note-edit {
-    top: 244px;
-    left: -8px;
-}
-
-.note-edit i {
-    color: var(--blue-deep);
-    font-size: 1rem;
-}
-
 .hero-orbit {
     position: absolute;
     z-index: -1;
@@ -1498,10 +1471,6 @@ p {
     .hero-product {
         min-height: 690px;
         transform: none;
-    }
-
-    .note-edit {
-        left: 7%;
     }
 
     .signal-grid {

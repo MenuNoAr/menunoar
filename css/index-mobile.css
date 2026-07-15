@@ -121,16 +121,6 @@
         transform-origin: center;
     }
 
-    .floating-note {
-        padding: 9px 11px;
-        font-size: 0.61rem;
-    }
-
-    .note-edit {
-        top: 174px;
-        left: 0;
-    }
-
     .signal-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
